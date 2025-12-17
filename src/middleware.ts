@@ -24,8 +24,9 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Protect admin routes (require authentication)
-  const isAdminRoute = pathname.startsWith('/admin/') || (hostname.startsWith('admin.') && pathname !== '/' && pathname !== '/admin')
+  // Protect admin routes (require authentication) - but NOT API routes
+  const isApiRoute = pathname.startsWith('/api/')
+  const isAdminRoute = pathname.startsWith('/admin/') || (hostname.startsWith('admin.') && pathname !== '/' && pathname !== '/admin' && !isApiRoute)
   const isLoginPage = pathname === '/admin' || (hostname.startsWith('admin.') && pathname === '/')
 
   if (isAdminRoute && !isLoginPage) {
