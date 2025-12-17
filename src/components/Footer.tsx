@@ -73,7 +73,7 @@ export default function Footer() {
                 </div>
                 <div className="space-y-1">
                   <a href="tel:5145891946" className="text-gray-400 hover:text-sar-green transition-colors text-sm block">
-                    <strong className="text-gray-300">Analyse/Suivi:</strong> 514 589-1946
+                    <strong className="text-gray-300">Analyse/Suivi 24/7:</strong> 514 589-1946
                   </a>
                   <a href="tel:4509991107" className="text-gray-400 hover:text-sar-green transition-colors text-sm block">
                     <strong className="text-gray-300">Comptabilite:</strong> 450 999-1107

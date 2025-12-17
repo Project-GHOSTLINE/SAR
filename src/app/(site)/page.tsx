@@ -607,7 +607,7 @@ export default function Home() {
             <div className="flex flex-col gap-3 justify-center max-w-md mx-auto">
               <a href="tel:5145891946" className="btn-primary flex items-center justify-center gap-2">
                 <Phone size={18} />
-                <span><strong>Analyse/Suivi:</strong> 514 589-1946</span>
+                <span><strong>Analyse/Suivi 24/7:</strong> 514 589-1946</span>
               </a>
               <a href="tel:4509991107" className="btn-secondary flex items-center justify-center gap-2">
                 <Phone size={18} />

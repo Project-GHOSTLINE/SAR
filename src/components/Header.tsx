@@ -43,7 +43,7 @@ export default function Header() {
           <div className="flex items-center gap-2 md:gap-6">
             <a href="tel:5145891946" className="flex items-center gap-1.5 hover:text-sar-gold transition-colors">
               <Phone size={14} />
-              <span><strong>Analyse/Suivi:</strong> 514 589-1946</span>
+              <span><strong>Analyse/Suivi 24/7:</strong> 514 589-1946</span>
             </a>
             <span className="hidden md:inline text-white/40">|</span>
             <a href="tel:4509991107" className="hidden md:flex items-center gap-1.5 hover:text-sar-gold transition-colors">
