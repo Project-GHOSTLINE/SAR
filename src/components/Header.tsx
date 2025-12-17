@@ -11,7 +11,6 @@ export default function Header() {
     { href: '/', label: 'Accueil' },
     { href: '/demandez-votre-credit', label: 'Demandez votre credit' },
     { href: '/faq', label: 'FAQ' },
-    { href: '/blog', label: 'Blog' },
     { href: '/nous-joindre', label: 'Nous joindre' },
     { href: '/ibv', label: 'Problemes de verification bancaire (IBV)' },
   ]
