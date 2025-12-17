@@ -165,32 +165,7 @@ https://solutionargentrapide.ca
       return NextResponse.json({ success: true, method: 'resend' })
     }
 
-    // Option 2: Utiliser SMTP avec Nodemailer
-    if (process.env.SMTP_HOST) {
-      const nodemailer = require('nodemailer')
-
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: process.env.SMTP_SECURE === 'true',
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS
-        }
-      })
-
-      await transporter.sendMail({
-        from: process.env.SMTP_FROM || 'noreply@solutionargentrapide.ca',
-        to: 'mrosa@solutionargentrapide.ca',
-        replyTo: email,
-        subject: `[Analyse] ${question} - ${nom}`,
-        text: emailContent
-      })
-
-      return NextResponse.json({ success: true, method: 'smtp' })
-    }
-
-    // Option 3: Stocker dans Supabase si pas de config email
+    // Option 2: Stocker dans Supabase si pas de config email
     if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
       const { createClient } = require('@supabase/supabase-js')
       const supabase = createClient(
@@ -205,7 +180,7 @@ https://solutionargentrapide.ca
           email,
           telephone,
           question: questionComplete,
-          destinataire: 'mrosa@solutionargentrapide.ca',
+          destinataire: destinataire,
           created_at: new Date().toISOString()
         })
 
@@ -219,8 +194,8 @@ https://solutionargentrapide.ca
 
     // Mode dev: log seulement
     console.log('=== CONTACT ANALYSE (DEV MODE) ===')
-    console.log('To: mrosa@solutionargentrapide.ca')
-    console.log(emailContent)
+    console.log('To:', destinataire)
+    console.log(emailText)
     console.log('==================================')
 
     return NextResponse.json({
