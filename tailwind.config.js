@@ -11,7 +11,7 @@ module.exports = {
         'sar-green': '#00874e',
         'sar-green-dark': '#006341',
         'sar-green-light': '#00a65a',
-        'sar-gold': '#c5a028',
+        'sar-gold': '#0ea5e9', // Modern cyan accent
         'sar-grey': '#f5f5f5',
         'sar-grey-dark': '#333333',
       },

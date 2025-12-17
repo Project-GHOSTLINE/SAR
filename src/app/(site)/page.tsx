@@ -1,149 +1,57 @@
 import Link from 'next/link'
-import { CheckCircle, Clock, Shield, FileText, DollarSign, Users, Star, Sparkles } from 'lucide-react'
+import { CheckCircle, Clock, Shield, Lock, Phone, Zap, BadgeCheck, Star } from 'lucide-react'
 
 export default function Home() {
   return (
     <>
-      {/* Hero Section with Liquid Glass */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-        {/* Animated background orbs */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="orb orb-green w-96 h-96 -top-20 -left-20" style={{ animationDelay: '0s' }}></div>
-          <div className="orb orb-gold w-80 h-80 top-1/3 right-10" style={{ animationDelay: '-5s' }}></div>
-          <div className="orb orb-green w-64 h-64 bottom-10 left-1/4" style={{ animationDelay: '-10s' }}></div>
-          <div className="orb orb-gold w-72 h-72 -bottom-20 right-1/3" style={{ animationDelay: '-15s' }}></div>
+      {/* Hero Section - Mobile first */}
+      <section className="relative min-h-[80vh] md:min-h-[85vh] flex items-center py-8 md:py-0 overflow-hidden">
+        {/* Background orbs - hidden on mobile for performance */}
+        <div className="hidden md:block absolute inset-0 overflow-hidden">
+          <div className="orb orb-green w-96 h-96 -top-20 -left-20"></div>
+          <div className="orb orb-gold w-80 h-80 top-1/3 right-10"></div>
         </div>
 
-        {/* Glass hero card */}
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto">
-            <div className="glass-dark rounded-[3rem] p-12 md:p-16 text-center text-white">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                <Sparkles size={16} className="text-sar-gold" />
-                <span className="text-sm font-medium">Sans enquete de credit</span>
+            <div className="glass-dark rounded-2xl md:rounded-[2.5rem] p-6 md:p-12 text-white">
+
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 bg-white/15 rounded-full px-3 py-1.5 mb-4 md:mb-6">
+                <span className="w-2 h-2 bg-sar-gold rounded-full animate-pulse"></span>
+                <span className="text-xs md:text-sm">On est la pour vous aider</span>
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Pret rapide entre <span className="text-sar-gold">100$</span> et <span className="text-sar-gold">5 000$</span>
+              {/* Title */}
+              <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 leading-tight">
+                Besoin d&apos;argent?{' '}
+                <span className="text-sar-gold block md:inline">On vous comprend.</span>
               </h1>
 
-              <p className="text-xl md:text-2xl mb-4 text-sar-gold font-semibold">
-                Sans enquete de credit
+              {/* Subtitle */}
+              <p className="text-base md:text-lg mb-6 opacity-90 leading-relaxed max-w-xl">
+                Obtenez entre <strong className="text-sar-gold">300$</strong> et <strong className="text-sar-gold">5 000$</strong> en 24h.
+                Pas de jugement, pas de stress.
               </p>
 
-              <p className="text-lg md:text-xl mb-10 opacity-90">
-                Obtenez un credit en 24 heures 300 $ a 5000 $ | Financement sans enquete de credit
-              </p>
-
-              <Link href="/demandez-votre-credit" className="btn-gold inline-block text-lg">
-                Demandez votre credit
+              {/* CTA */}
+              <Link href="/demandez-votre-credit" className="btn-gold inline-block mb-4">
+                Faire ma demande
               </Link>
 
-              <p className="mt-8 text-sm opacity-70 max-w-lg mx-auto">
-                TOUS LES DOSSIERS DE CREDIT SONT ACCEPTES, SOUS RESERVE DE CERTAINES CONDITIONS.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Process Steps */}
-      <section className="py-20 relative">
-        <div className="container mx-auto px-4">
-          <h2 className="section-title text-center">Comment ca fonctionne</h2>
-          <p className="section-subtitle text-center">Un processus simple en 3 etapes</p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="card text-center group">
-              <div className="icon-glass w-20 h-20 mx-auto mb-6">
-                <FileText size={40} className="text-white" />
-              </div>
-              <div className="step-number mb-3">1</div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-800">Appliquez en ligne</h3>
-              <p className="text-gray-600">Remplissez le formulaire etape par etape</p>
-            </div>
-
-            <div className="card text-center group">
-              <div className="icon-glass w-20 h-20 mx-auto mb-6">
-                <Shield size={40} className="text-white" />
-              </div>
-              <div className="step-number mb-3">2</div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-800">Verification bancaire (IBV)</h3>
-              <p className="text-gray-600">Credit approuve rapidement</p>
-            </div>
-
-            <div className="card text-center group">
-              <div className="icon-glass w-20 h-20 mx-auto mb-6">
-                <DollarSign size={40} className="text-white" />
-              </div>
-              <div className="step-number mb-3">3</div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-800">Profitez de votre argent!</h3>
-              <p className="text-gray-600">En seulement 24 h.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-20 relative">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="card text-center group cursor-pointer">
-              <div className="icon-glass w-16 h-16 mx-auto mb-4">
-                <Clock size={32} className="text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-800">Appliquez en moins de 2 minutes</h3>
-            </div>
-            <div className="card text-center group cursor-pointer">
-              <div className="icon-glass w-16 h-16 mx-auto mb-4">
-                <DollarSign size={32} className="text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-800">Obtenez votre argent en 24 heures</h3>
-            </div>
-            <div className="card text-center group cursor-pointer">
-              <div className="icon-glass w-16 h-16 mx-auto mb-4">
-                <Shield size={32} className="text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-800">Aucun impact sur votre pointage de credit</h3>
-            </div>
-            <div className="card text-center group cursor-pointer">
-              <div className="icon-glass w-16 h-16 mx-auto mb-4">
-                <FileText size={32} className="text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-800">Moins de documents a fournir</h3>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Eligibility Criteria */}
-      <section className="py-20 relative">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="section-title text-center">Criteres d&apos;admissibilite</h2>
-            <p className="section-subtitle text-center">Verifiez si vous etes eligible</p>
-
-            <div className="glass rounded-3xl p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="criteria-item">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Residence au Quebec, 18 ans ou plus</span>
+              {/* Trust badges - stacked on mobile */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6 md:mt-8">
+                <div className="flex items-center gap-3 bg-white/10 rounded-xl p-3">
+                  <Shield size={20} className="text-sar-gold flex-shrink-0" />
+                  <span className="text-sm">Sans enquete de credit</span>
                 </div>
-                <div className="criteria-item">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Meme emploi depuis 3 mois minimum</span>
+                <div className="flex items-center gap-3 bg-white/10 rounded-xl p-3">
+                  <Zap size={20} className="text-sar-gold flex-shrink-0" />
+                  <span className="text-sm">Argent en 24h</span>
                 </div>
-                <div className="criteria-item">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Revenus de 300$ ou plus par semaine</span>
-                </div>
-                <div className="criteria-item">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Numero de telephone en service</span>
-                </div>
-                <div className="criteria-item md:col-span-2">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Ne pas etre failli non libere de dettes</span>
+                <div className="flex items-center gap-3 bg-white/10 rounded-xl p-3">
+                  <Lock size={20} className="text-sar-gold flex-shrink-0" />
+                  <span className="text-sm">100% securise</span>
                 </div>
               </div>
             </div>
@@ -151,194 +59,291 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Risk Warning */}
-      <section className="py-12 relative">
+      {/* Stats - Social proof */}
+      <section className="py-6 md:py-8 bg-white/60 border-y border-gray-100">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="glass-warning rounded-3xl p-8 text-center">
-              <h3 className="text-xl font-semibold text-yellow-800 mb-4">Emprunter de maniere responsable</h3>
-              <p className="text-yellow-700 mb-4">
-                Les taux d&apos;interet que nous proposons sont plus eleves que ceux des institutions bancaires conventionnelles.
-                Nos solutions de credit urgents doivent etre consideres comme une solution de dernier recours.
-              </p>
-              <p className="text-yellow-700 mb-4">
-                Veuillez noter que le fait de contracter de nombreux prets a court terme ou sur salaire peut remettre
-                en question votre situation financiere.
-              </p>
-              <p className="text-yellow-700">
-                Nous vous encourageons a evaluer attentivement votre capacite de remboursement avant de soumettre une demande.
-              </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
+            <div>
+              <p className="text-2xl md:text-3xl font-bold text-sar-green">15 000+</p>
+              <p className="text-xs md:text-sm text-gray-600">Clients aides</p>
+            </div>
+            <div>
+              <p className="text-2xl md:text-3xl font-bold text-sar-green">24h</p>
+              <p className="text-xs md:text-sm text-gray-600">Delai moyen</p>
+            </div>
+            <div>
+              <p className="text-2xl md:text-3xl font-bold text-sar-green">98%</p>
+              <p className="text-xs md:text-sm text-gray-600">Satisfaits</p>
+            </div>
+            <div>
+              <p className="text-2xl md:text-3xl font-bold text-sar-green">4.8/5</p>
+              <p className="text-xs md:text-sm text-gray-600">Note moyenne</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Why Choose Us */}
-      <section className="py-20 relative">
+      {/* Why us - Empathy section */}
+      <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="section-title text-center">Pourquoi nous choisir</h2>
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="section-title">On comprend votre situation</h2>
+            <p className="text-gray-600 max-w-xl mx-auto">
+              Une urgence peut arriver a n&apos;importe qui. On est la pour vous aider.
+            </p>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto mt-12">
-            <div className="card text-center group">
-              <div className="icon-glass w-16 h-16 mx-auto mb-4">
-                <DollarSign size={32} className="text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-800">Solutions de credit simples et rapides</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto">
+            <div className="card text-center">
+              <div className="text-3xl mb-3">🚗</div>
+              <h3 className="font-semibold text-gray-800 mb-1">Reparation urgente</h3>
+              <p className="text-gray-600 text-sm">Auto, maison, electromenager</p>
             </div>
-            <div className="card text-center group">
-              <div className="icon-glass w-16 h-16 mx-auto mb-4">
-                <CheckCircle size={32} className="text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-800">Acceptation du mauvais credit</h3>
+            <div className="card text-center">
+              <div className="text-3xl mb-3">💊</div>
+              <h3 className="font-semibold text-gray-800 mb-1">Depenses medicales</h3>
+              <p className="text-gray-600 text-sm">Soins non couverts</p>
             </div>
-            <div className="card text-center group">
-              <div className="icon-glass w-16 h-16 mx-auto mb-4">
-                <Shield size={32} className="text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-800">Aucune verification de credit</h3>
-            </div>
-            <div className="card text-center group">
-              <div className="icon-glass w-16 h-16 mx-auto mb-4">
-                <Users size={32} className="text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-800">Service base sur la confiance</h3>
+            <div className="card text-center">
+              <div className="text-3xl mb-3">📅</div>
+              <h3 className="font-semibold text-gray-800 mb-1">Fin de mois</h3>
+              <p className="text-gray-600 text-sm">Loyer, factures, epicerie</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ Preview */}
-      <section className="py-20 relative">
+      {/* Process - Simple 1-2-3 */}
+      <section className="py-12 md:py-20 bg-gradient-to-b from-transparent to-sar-green/5">
         <div className="container mx-auto px-4">
-          <h2 className="section-title text-center">Questions frequentes</h2>
-
-          <div className="max-w-3xl mx-auto space-y-4 mt-12">
-            <div className="card">
-              <h3 className="font-semibold text-lg mb-2 text-gray-800">Quand vais-je obtenir mon credit?</h3>
-              <p className="text-gray-600">Generalement, les fonds sont transferes par virement Interac la journee meme.</p>
-            </div>
-            <div className="card">
-              <h3 className="font-semibold text-lg mb-2 text-gray-800">Comment puis-je faire une demande?</h3>
-              <p className="text-gray-600">1. Remplir et envoyer le formulaire. 2. Completer la verification bancaire (IBV). 3. Signer le contrat si approuve. 4. Recevoir les fonds.</p>
-            </div>
-            <div className="card">
-              <h3 className="font-semibold text-lg mb-2 text-gray-800">Comment savoir si le processus est securitaire?</h3>
-              <p className="text-gray-600">Le systeme IBV offre un niveau de securite comparable a celui des banques en ligne et n&apos;aura jamais acces a votre identifiant ni mot de passe.</p>
-            </div>
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="section-title">Simple comme 1-2-3</h2>
+            <p className="text-gray-600">Pas de paperasse. Pas d&apos;attente.</p>
           </div>
 
-          <div className="text-center mt-10">
-            <Link href="/faq" className="btn-secondary">
-              Voir toutes les questions
-            </Link>
+          <div className="max-w-3xl mx-auto">
+            <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-6">
+
+              <div className="glass p-5 md:p-6 text-center">
+                <div className="w-12 h-12 bg-sar-green rounded-xl flex items-center justify-center mx-auto mb-3 text-white font-bold text-lg">
+                  1
+                </div>
+                <h3 className="font-semibold text-gray-800 mb-1">Formulaire</h3>
+                <p className="text-gray-600 text-sm">2 minutes en ligne</p>
+              </div>
+
+              <div className="glass p-5 md:p-6 text-center">
+                <div className="w-12 h-12 bg-sar-green rounded-xl flex items-center justify-center mx-auto mb-3 text-white font-bold text-lg">
+                  2
+                </div>
+                <h3 className="font-semibold text-gray-800 mb-1">Verification</h3>
+                <p className="text-gray-600 text-sm">Connexion bancaire securisee</p>
+              </div>
+
+              <div className="glass p-5 md:p-6 text-center">
+                <div className="w-12 h-12 bg-sar-gold rounded-xl flex items-center justify-center mx-auto mb-3 text-white font-bold text-lg">
+                  3
+                </div>
+                <h3 className="font-semibold text-gray-800 mb-1">Argent recu</h3>
+                <p className="text-gray-600 text-sm">Virement Interac meme jour</p>
+              </div>
+            </div>
+
+            <div className="text-center mt-8">
+              <Link href="/demandez-votre-credit" className="btn-primary">
+                Commencer maintenant
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Security section */}
+      <section className="py-12 md:py-16">
+        <div className="container mx-auto px-4">
+          <div className="glass rounded-2xl md:rounded-3xl p-6 md:p-10 max-w-4xl mx-auto">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-12 h-12 bg-sar-green/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <BadgeCheck size={24} className="text-sar-green" />
+              </div>
+              <div>
+                <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">Vos donnees sont protegees</h2>
+                <p className="text-gray-600 text-sm md:text-base">Securite bancaire. Donnees jamais partagees.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                <CheckCircle size={18} className="text-sar-green flex-shrink-0" />
+                <span className="text-sm text-gray-700">Chiffrement SSL 256-bit</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                <CheckCircle size={18} className="text-sar-green flex-shrink-0" />
+                <span className="text-sm text-gray-700">Aucun acces a vos identifiants</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                <CheckCircle size={18} className="text-sar-green flex-shrink-0" />
+                <span className="text-sm text-gray-700">Conforme lois quebecoises</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                <CheckCircle size={18} className="text-sar-green flex-shrink-0" />
+                <span className="text-sm text-gray-700">Aucun impact sur votre credit</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Eligibility */}
+      <section className="py-12 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="section-title">Etes-vous eligible?</h2>
+              <p className="text-gray-600">4 criteres simples</p>
+            </div>
+
+            <div className="glass rounded-2xl p-5 md:p-8">
+              <div className="space-y-3 md:space-y-4">
+                <div className="flex items-center gap-4 p-3 md:p-4 bg-white/60 rounded-xl">
+                  <CheckCircle size={22} className="text-sar-green flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-gray-800">Resident du Quebec, 18+</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 p-3 md:p-4 bg-white/60 rounded-xl">
+                  <CheckCircle size={22} className="text-sar-green flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-gray-800">Emploi stable (3 mois min)</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 p-3 md:p-4 bg-white/60 rounded-xl">
+                  <CheckCircle size={22} className="text-sar-green flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-gray-800">Revenu 300$/semaine minimum</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 p-3 md:p-4 bg-white/60 rounded-xl">
+                  <CheckCircle size={22} className="text-sar-green flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-gray-800">Compte bancaire actif</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-sar-green/5 rounded-xl text-center">
+                <p className="text-gray-700 text-sm md:text-base">
+                  <strong className="text-sar-green">Mauvais credit?</strong> Pas de probleme! On ne fait pas d&apos;enquete traditionnelle.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 relative overflow-hidden">
-        {/* Background orbs */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="orb orb-green w-64 h-64 top-0 right-0 opacity-30" style={{ animationDelay: '-3s' }}></div>
-          <div className="orb orb-gold w-48 h-48 bottom-0 left-10 opacity-30" style={{ animationDelay: '-8s' }}></div>
-        </div>
+      <section className="py-12 md:py-20 bg-gradient-to-b from-sar-green/5 to-transparent">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="section-title">Ils nous font confiance</h2>
+          </div>
 
-        <div className="container mx-auto px-4 relative z-10">
-          <h2 className="section-title text-center">Temoignages clients</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto">
             <div className="testimonial-card">
-              <div className="flex mb-4">
+              <div className="flex gap-0.5 mb-3">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={20} className="text-sar-gold fill-current" />
+                  <Star key={i} size={16} className="text-sar-gold fill-current" />
                 ))}
               </div>
-              <p className="text-gray-600 mb-4 italic">
-                &quot;Ce que j&apos;ai particulierement apprecie chez Solution argent rapide, c&apos;est leur flexibilite... lorsque mon salaire a augmente, j&apos;ai pu rembourser plus rapidement.&quot;
+              <p className="text-gray-600 text-sm mb-4 italic">
+                &quot;Reparation urgente sur ma voiture. En moins de 24h, j&apos;avais l&apos;argent. Merci!&quot;
               </p>
-              <p className="font-semibold text-gray-800">Eric Lavoie</p>
-              <p className="text-sm text-gray-500">Montreal</p>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-sar-green/10 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-sar-green">EL</span>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800 text-sm">Eric L.</p>
+                  <p className="text-xs text-gray-500">Montreal</p>
+                </div>
+              </div>
             </div>
 
             <div className="testimonial-card">
-              <div className="flex mb-4">
+              <div className="flex gap-0.5 mb-3">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={20} className="text-sar-gold fill-current" />
+                  <Star key={i} size={16} className="text-sar-gold fill-current" />
                 ))}
               </div>
-              <p className="text-gray-600 mb-4 italic">
-                &quot;Le service est sans egal! L&apos;argent a ete transfere dans mon compte bancaire la journee meme.&quot;
+              <p className="text-gray-600 text-sm mb-4 italic">
+                &quot;Service incroyable! L&apos;argent etait dans mon compte le jour meme.&quot;
               </p>
-              <p className="font-semibold text-gray-800">Cynthia Bouchard</p>
-              <p className="text-sm text-gray-500">Longueuil</p>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-sar-green/10 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-sar-green">CB</span>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800 text-sm">Cynthia B.</p>
+                  <p className="text-xs text-gray-500">Longueuil</p>
+                </div>
+              </div>
             </div>
 
             <div className="testimonial-card">
-              <div className="flex mb-4">
+              <div className="flex gap-0.5 mb-3">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={20} className="text-sar-gold fill-current" />
+                  <Star key={i} size={16} className="text-sar-gold fill-current" />
                 ))}
               </div>
-              <p className="text-gray-600 mb-4 italic">
-                &quot;La rapidite et la gentillesse du representant ont ete exceptionnelles.&quot;
+              <p className="text-gray-600 text-sm mb-4 italic">
+                &quot;Tout etait clair et bien explique. Pas de surprises!&quot;
               </p>
-              <p className="font-semibold text-gray-800">Kathy Beaulieu</p>
-              <p className="text-sm text-gray-500">Quebec</p>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-sar-green/10 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-sar-green">KB</span>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800 text-sm">Kathy B.</p>
+                  <p className="text-xs text-gray-500">Quebec</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Payment Terms */}
-      <section className="py-20 relative">
+      {/* Transparency - Rates */}
+      <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="section-title text-center">Modalites de remboursement</h2>
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="section-title">Transparence totale</h2>
+              <p className="text-gray-600">Pas de frais caches</p>
+            </div>
 
-          <div className="max-w-3xl mx-auto mt-12">
-            <div className="glass rounded-3xl p-8">
-              <p className="text-gray-700 mb-6">
-                Nous proposons un taux d&apos;interet annuel (TAEG) de 18,99 %.
-              </p>
-              <p className="text-gray-700 mb-6">
-                Chez Solution Argent Rapide, nous etablissons vos paiements minimums en fonction de votre capacite
-                de paiement et de la duree de remboursement que vous preferez.
-              </p>
-
-              <div className="bg-yellow-50/80 backdrop-blur-sm border border-yellow-200/50 rounded-2xl p-4 mb-6">
-                <p className="text-yellow-800">
-                  <strong>Remarque :</strong> Les frais d&apos;adhesion sont applicables tant qu&apos;il reste un solde
-                  a rembourser sur votre credit.
-                </p>
+            <div className="glass rounded-2xl p-5 md:p-8">
+              <div className="space-y-4 mb-6">
+                <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                  <span className="text-gray-600">Taux annuel (TAEG)</span>
+                  <span className="font-bold text-gray-800">18,99%</span>
+                </div>
+                <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                  <span className="text-gray-600">Duree remboursement</span>
+                  <span className="font-bold text-gray-800">3 a 6 mois</span>
+                </div>
+                <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                  <span className="text-gray-600">Paiement minimum</span>
+                  <span className="font-bold text-gray-800">5% du solde</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Penalite remboursement anticipe</span>
+                  <span className="font-bold text-sar-green">Aucune</span>
+                </div>
               </div>
 
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Taux d&apos;interet annuel (TAEG) de 18,99%</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Paiements minimums ajustes a votre capacite</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Frais d&apos;adhesion applicables tant qu&apos;un solde existe</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Remboursement minimum: 5% du montant utilise</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Periode typique: 3 a 6 mois</span>
-                </li>
-              </ul>
-
-              <div className="mt-6 p-4 bg-white/50 backdrop-blur-sm rounded-2xl border border-white/50">
+              <div className="bg-gray-50 rounded-xl p-4">
                 <p className="text-sm text-gray-600">
-                  <strong>Exemple:</strong> Un retrait de 750$ avec des versements bihebdomadaires de 110,75$
-                  sur 10 versements, incluant des frais d&apos;adhesion hebdomadaires de 22,50$.
-                  Un remboursement anticipe complet ou partiel est permis en tout temps.
+                  <strong>Exemple:</strong> Pret de 750$ = 10 versements de 110,75$ aux 2 semaines
                 </p>
               </div>
             </div>
@@ -346,112 +351,93 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Financial Support & Credit Score */}
-      <section className="py-20 relative">
+      {/* Warning */}
+      <section className="py-8 md:py-12">
         <div className="container mx-auto px-4">
-          <h2 className="section-title text-center">Soutien financier et cote de credit</h2>
-
-          <div className="max-w-3xl mx-auto mt-12">
-            <div className="glass rounded-3xl p-8">
-              <p className="text-gray-700 mb-6">
-                Solution Argent Rapide respecte strictement les normes legales canadiennes. Notre service a la
-                clientele vous assiste pour les reports de paiement ou toute autre demande pendant la duree
-                de votre credit.
-              </p>
-
-              <div className="bg-sar-green/10 backdrop-blur-sm border border-sar-green/20 rounded-2xl p-6 mb-6">
-                <h3 className="font-semibold text-sar-green mb-3">Impact sur votre cote de credit</h3>
-                <p className="text-gray-700">
-                  Les transactions effectuees avec notre option de credit n&apos;ont aucun impact sur votre cote de credit,
-                  car nous ne transmettons pas d&apos;informations aux bureaux de credit.
-                </p>
+          <div className="max-w-3xl mx-auto">
+            <div className="glass-warning rounded-2xl p-5 md:p-6">
+              <div className="flex gap-4">
+                <span className="text-2xl flex-shrink-0">⚠️</span>
+                <div>
+                  <h3 className="font-semibold text-yellow-800 mb-2">Empruntez responsablement</h3>
+                  <p className="text-yellow-700 text-sm leading-relaxed">
+                    Nos solutions sont pour les urgences ponctuelles. Les taux sont plus eleves que les banques traditionnelles.
+                    Assurez-vous de pouvoir rembourser avant de faire une demande.
+                  </p>
+                </div>
               </div>
-
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Aucune verification de credit traditionnelle</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Pas de transmission aux bureaux de credit</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Service clientele disponible pour vous aider</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Reports de paiement possibles sur demande</span>
-                </li>
-              </ul>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Repayment Policy */}
-      <section className="py-20 relative">
+      {/* FAQ */}
+      <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="section-title text-center">Politique de remboursement</h2>
+          <div className="text-center mb-8">
+            <h2 className="section-title">Questions frequentes</h2>
+          </div>
 
-          <div className="max-w-3xl mx-auto mt-12">
-            <div className="glass rounded-3xl p-8">
-              <p className="text-gray-700 mb-6">
-                Les options de credit variable sont generalement remboursees sur une periode de 3 a 6 mois.
-                Nos produits sont concus pour une utilisation occasionnelle avec un remboursement complet
-                dans les semaines suivantes.
-              </p>
-
-              <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-4 mb-6">
-                <p className="text-blue-800">
-                  <strong>Important :</strong> Le montant rembourse ne peut etre inferieur a 5% du montant
-                  utilise sur votre credit.
-                </p>
-              </div>
-
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Duree de remboursement typique: 3 a 6 mois</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Remboursement minimum: 5% du montant utilise</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Remboursement anticipe permis en tout temps</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Aucune penalite pour remboursement anticipe</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">Flexibilite des versements selon votre situation</span>
-                </li>
-              </ul>
+          <div className="max-w-2xl mx-auto space-y-3 md:space-y-4">
+            <div className="card">
+              <h3 className="font-semibold text-gray-800 mb-2">Quand vais-je recevoir l&apos;argent?</h3>
+              <p className="text-gray-600 text-sm">Virement Interac le jour meme dans la plupart des cas.</p>
+            </div>
+            <div className="card">
+              <h3 className="font-semibold text-gray-800 mb-2">Est-ce que ca affecte mon credit?</h3>
+              <p className="text-gray-600 text-sm">Non. Pas d&apos;enquete traditionnelle, pas de rapport aux bureaux de credit.</p>
+            </div>
+            <div className="card">
+              <h3 className="font-semibold text-gray-800 mb-2">La verification est-elle securitaire?</h3>
+              <p className="text-gray-600 text-sm">Oui. Chiffrement SSL 256-bit. On n&apos;a jamais acces a vos identifiants.</p>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* CTA Section */}
-      <section className="py-20 relative overflow-hidden">
-        {/* Background orbs */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="orb orb-gold w-96 h-96 -top-20 -right-20 opacity-40" style={{ animationDelay: '-2s' }}></div>
-          <div className="orb orb-green w-80 h-80 bottom-0 -left-20 opacity-40" style={{ animationDelay: '-7s' }}></div>
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="glass-dark rounded-[3rem] p-12 md:p-16 text-center text-white max-w-4xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Pret a obtenir votre credit?</h2>
-            <p className="text-xl mb-10 opacity-90">Les transactions n&apos;ont aucun impact sur votre cote de credit</p>
-            <Link href="/demandez-votre-credit" className="btn-gold inline-block text-lg">
-              Demandez votre credit maintenant
+          <div className="text-center mt-8">
+            <Link href="/faq" className="btn-secondary">
+              Toutes les questions
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section className="py-12 md:py-16">
+        <div className="container mx-auto px-4">
+          <div className="glass rounded-2xl p-6 md:p-10 max-w-3xl mx-auto text-center">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-3">Des questions?</h2>
+            <p className="text-gray-600 mb-6">On est disponible 24h/24, 7j/7</p>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <a href="tel:5145891946" className="btn-primary flex items-center justify-center gap-2">
+                <Phone size={18} />
+                514 589 1946
+              </a>
+              <Link href="/nous-joindre" className="btn-secondary">
+                Nous ecrire
+              </Link>
+            </div>
+
+            <div className="mt-6 inline-flex items-center gap-2 text-sm text-sar-green">
+              <span className="w-2 h-2 bg-sar-green rounded-full animate-pulse"></span>
+              Service actif maintenant
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-12 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="glass-dark rounded-2xl md:rounded-3xl p-8 md:p-12 text-center text-white max-w-3xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Pret a commencer?</h2>
+            <p className="text-base md:text-lg mb-6 opacity-90">Rapide, simple, sans engagement.</p>
+            <Link href="/demandez-votre-credit" className="btn-gold inline-block">
+              Faire ma demande
+            </Link>
+            <p className="mt-4 text-xs md:text-sm opacity-70">
+              Aucun impact sur votre cote de credit
+            </p>
           </div>
         </div>
       </section>
