@@ -27,11 +27,30 @@ export default function Home() {
     "Autre question"
   ]
 
-  const handleContactSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Envoyer a Supabase ou email
-    console.log('Contact form:', contactForm)
-    setFormSubmitted(true)
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch('/api/contact-analyse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contactForm)
+      })
+
+      if (!response.ok) {
+        throw new Error('Erreur envoi')
+      }
+
+      setFormSubmitted(true)
+    } catch (error) {
+      console.error('Erreur:', error)
+      alert('Erreur lors de l\'envoi. Veuillez appeler le 514 589-1946')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -793,10 +812,10 @@ export default function Home() {
 
                 <button
                   type="submit"
-                  disabled={!contactForm.question || !contactForm.nom || !contactForm.email || !contactForm.telephone}
+                  disabled={!contactForm.question || !contactForm.nom || !contactForm.email || !contactForm.telephone || isSubmitting}
                   className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Envoyer ma question
+                  {isSubmitting ? 'Envoi en cours...' : 'Envoyer ma question'}
                 </button>
 
                 <p className="text-xs text-gray-500 text-center">
