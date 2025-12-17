@@ -55,8 +55,8 @@ export default function Header() {
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center group">
-            <span className="text-2xl font-bold text-sar-green transition-all duration-300 group-hover:text-sar-green-dark">Solution</span>
-            <span className="text-2xl font-bold text-sar-gold ml-1 transition-all duration-300">Argent Rapide</span>
+            <span className={`text-2xl font-bold transition-all duration-300 ${isScrolled ? 'text-sar-green' : 'text-white'}`}>Solution</span>
+            <span className={`text-2xl font-bold ml-1 transition-all duration-300 ${isScrolled ? 'text-sar-gold' : 'text-white'}`}>Argent Rapide</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -65,7 +65,11 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="relative px-4 py-2 text-gray-700 hover:text-sar-green transition-all duration-300 font-medium text-sm rounded-xl hover:bg-sar-green/5"
+                className={`relative px-4 py-2 transition-all duration-300 font-medium text-sm rounded-xl ${
+                  isScrolled
+                    ? 'text-gray-700 hover:text-sar-green hover:bg-sar-green/5'
+                    : 'text-white/90 hover:text-white hover:bg-white/10'
+                }`}
               >
                 {link.label}
               </Link>
@@ -75,14 +79,22 @@ export default function Header() {
           {/* CTA Button */}
           <Link
             href="/demandez-votre-credit"
-            className="hidden lg:block btn-primary text-sm"
+            className={`hidden lg:block text-sm font-semibold py-2.5 px-5 rounded-xl transition-all duration-300 ${
+              isScrolled
+                ? 'bg-sar-green text-white hover:bg-sar-green-dark'
+                : 'bg-white text-sar-green hover:bg-white/90'
+            }`}
           >
             Demandez votre credit
           </Link>
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden text-gray-700 p-2 rounded-xl hover:bg-sar-green/10 transition-colors"
+            className={`lg:hidden p-2 rounded-xl transition-colors ${
+              isScrolled
+                ? 'text-gray-700 hover:bg-sar-green/10'
+                : 'text-white hover:bg-white/10'
+            }`}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
