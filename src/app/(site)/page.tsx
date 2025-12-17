@@ -1,7 +1,11 @@
+'use client'
+
 import Link from 'next/link'
-import { CheckCircle, Clock, Shield, Lock, Phone, Zap, BadgeCheck, Star } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle, Shield, Lock, Phone, Zap, BadgeCheck, Star } from 'lucide-react'
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState(0)
   return (
     <>
       {/* Hero Section - Mobile first */}
@@ -289,40 +293,121 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Transparency - Rates */}
+      {/* Tabs - Modalites, Soutien, Politique */}
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
-              <h2 className="section-title">Transparence totale</h2>
-              <p className="text-gray-600">Pas de frais caches</p>
+              <h2 className="section-title">Nos conditions</h2>
+              <p className="text-gray-600">Transparence et clarte</p>
             </div>
 
-            <div className="glass rounded-2xl p-5 md:p-8">
-              <div className="space-y-4 mb-6">
-                <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-                  <span className="text-gray-600">Taux annuel (TAEG)</span>
-                  <span className="font-bold text-gray-800">18,99%</span>
-                </div>
-                <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-                  <span className="text-gray-600">Duree remboursement</span>
-                  <span className="font-bold text-gray-800">3 a 6 mois</span>
-                </div>
-                <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-                  <span className="text-gray-600">Paiement minimum</span>
-                  <span className="font-bold text-gray-800">5% du solde</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Penalite remboursement anticipe</span>
-                  <span className="font-bold text-sar-green">Aucune</span>
-                </div>
-              </div>
+            {/* Tabs navigation */}
+            <div className="flex flex-col sm:flex-row gap-2 mb-6">
+              <button
+                onClick={() => setActiveTab(0)}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all ${
+                  activeTab === 0
+                    ? 'bg-sar-green text-white shadow-lg'
+                    : 'bg-white/80 text-gray-600 hover:bg-white'
+                }`}
+              >
+                Modalites de remboursement
+              </button>
+              <button
+                onClick={() => setActiveTab(1)}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all ${
+                  activeTab === 1
+                    ? 'bg-sar-green text-white shadow-lg'
+                    : 'bg-white/80 text-gray-600 hover:bg-white'
+                }`}
+              >
+                Soutien et cote de credit
+              </button>
+              <button
+                onClick={() => setActiveTab(2)}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all ${
+                  activeTab === 2
+                    ? 'bg-sar-green text-white shadow-lg'
+                    : 'bg-white/80 text-gray-600 hover:bg-white'
+                }`}
+              >
+                Politique de remboursement
+              </button>
+            </div>
 
-              <div className="bg-gray-50 rounded-xl p-4">
-                <p className="text-sm text-gray-600">
-                  <strong>Exemple:</strong> Pret de 750$ = 10 versements de 110,75$ aux 2 semaines
-                </p>
-              </div>
+            {/* Tab content */}
+            <div className="glass rounded-2xl p-5 md:p-8">
+              {/* Tab 0 - Modalites de remboursement */}
+              {activeTab === 0 && (
+                <div className="space-y-4">
+                  <p className="text-gray-700 leading-relaxed">
+                    Nous proposons un taux d&apos;interet annuel (TAEG) de <strong>18,99 %</strong>.
+                  </p>
+                  <p className="text-gray-700 leading-relaxed">
+                    Chez Solution Argent Rapide, nous etablissons vos paiements minimums en fonction de votre
+                    capacite de paiement et de la duree de remboursement que vous preferez.
+                  </p>
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                    <p className="text-yellow-800 text-sm">
+                      <strong>Remarque :</strong> Les frais d&apos;adhesion sont applicables tant qu&apos;il reste
+                      un solde a rembourser sur votre credit.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 1 - Soutien financier et cote de credit */}
+              {activeTab === 1 && (
+                <div className="space-y-4">
+                  <p className="text-gray-700 leading-relaxed">
+                    Chez Solution Argent Rapide, nous adherons strictement aux normes legales canadiennes.
+                    Si une situation particuliere se presente pendant votre periode d&apos;utilisation de notre
+                    option de credit, notre service a la clientele est a votre disposition pour vous assister
+                    dans vos demarches, qu&apos;il s&apos;agisse d&apos;un report de paiement ou de toute autre demande.
+                  </p>
+                  <div className="bg-sar-green/10 border border-sar-green/20 rounded-xl p-4">
+                    <p className="text-gray-700">
+                      <strong className="text-sar-green">Bonne nouvelle :</strong> Les transactions effectuees avec
+                      notre option de credit n&apos;ont <strong>aucun impact sur votre cote de credit</strong>,
+                      car nous ne transmettons pas d&apos;informations aux bureaux de credit.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2 - Politique de remboursement */}
+              {activeTab === 2 && (
+                <div className="space-y-4">
+                  <p className="text-gray-700 leading-relaxed">
+                    <strong>Points importants :</strong>
+                  </p>
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle size={18} className="text-sar-green flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-700 text-sm">Le montant rembourse ne peut etre inferieur a 5 % du montant utilise sur votre credit.</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle size={18} className="text-sar-green flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-700 text-sm">Notre produit est concu pour une utilisation ponctuelle et un remboursement complet en quelques semaines.</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle size={18} className="text-sar-green flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-700 text-sm">Les options de credit sont generalement remboursees sur une periode de 3 a 6 mois.</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle size={18} className="text-sar-green flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-700 text-sm">Vous pouvez rembourser le montant du en totalite ou en partie a tout moment.</span>
+                    </li>
+                  </ul>
+                  <div className="bg-gray-50 rounded-xl p-4 mt-4">
+                    <p className="text-sm text-gray-600">
+                      <strong>Exemple :</strong> Un retrait de 750 $ avec des remboursements bihebdomadaires de 110,75 $ sur 10 versements.
+                      Les frais hebdomadaires d&apos;adhesion de 22,50 $ sont inclus dans les montants de remboursement indiques.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
