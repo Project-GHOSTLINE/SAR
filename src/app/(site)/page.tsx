@@ -5,64 +5,203 @@ import { useState } from 'react'
 import { CheckCircle, Shield, Lock, Phone, Zap, BadgeCheck, Star } from 'lucide-react'
 
 export default function Home() {
+  const [amount, setAmount] = useState(2000)
   const [activeTab, setActiveTab] = useState(0)
+
   return (
     <>
-      {/* Hero Section - Mobile first */}
-      <section className="relative min-h-[80vh] md:min-h-[85vh] flex items-center py-8 md:py-0 overflow-hidden">
-        {/* Background orbs - hidden on mobile for performance */}
-        <div className="hidden md:block absolute inset-0 overflow-hidden">
-          <div className="orb orb-green w-96 h-96 -top-20 -left-20"></div>
-          <div className="orb orb-gold w-80 h-80 top-1/3 right-10"></div>
-        </div>
+      {/* Hero Section - Liquid Glass */}
+      <section
+        className="min-h-screen relative pt-8 pb-16 -mt-[104px]"
+        style={{ background: 'linear-gradient(135deg, #00874e 0%, #059669 50%, #10b981 100%)' }}
+      >
+        {/* Decorative circles */}
+        <div className="absolute top-10 left-10 w-64 h-64 rounded-full opacity-30" style={{ background: 'radial-gradient(circle, #22c55e 0%, transparent 70%)' }}></div>
+        <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #ffffff 0%, transparent 70%)' }}></div>
+        <div className="absolute top-1/2 left-1/4 w-48 h-48 rounded-full opacity-20 hidden md:block" style={{ background: 'radial-gradient(circle, #10b981 0%, transparent 70%)' }}></div>
 
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto">
-            <div className="glass-dark rounded-2xl md:rounded-[2.5rem] p-6 md:p-12 text-white">
+        {/* Content */}
+        <div className="relative z-10 pt-28 md:pt-32 px-4">
+          <div className="max-w-5xl mx-auto">
 
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-white/15 rounded-full px-3 py-1.5 mb-4 md:mb-6">
-                <span className="w-2 h-2 bg-sar-gold rounded-full animate-pulse"></span>
-                <span className="text-xs md:text-sm">On est la pour vous aider</span>
-              </div>
+            {/* Badge */}
+            <div className="text-center mb-6 md:mb-8">
+              <span
+                className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-full text-sm md:text-base"
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  border: '1px solid rgba(255,255,255,0.4)'
+                }}
+              >
+                <span className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full animate-pulse"></span>
+                <span className="text-white font-medium">On est la pour vous aider</span>
+              </span>
+            </div>
 
-              {/* Title */}
-              <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 leading-tight">
-                Besoin d&apos;argent?{' '}
-                <span className="text-sar-gold block md:inline">On vous comprend.</span>
+            {/* Heading */}
+            <div className="text-center mb-8 md:mb-12">
+              <h1
+                className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight"
+                style={{ textShadow: '0 2px 20px rgba(0,0,0,0.2)' }}
+              >
+                L&apos;argent qu&apos;il te faut,
+                <br />
+                quand tu en as besoin.
               </h1>
-
-              {/* Subtitle */}
-              <p className="text-base md:text-lg mb-6 opacity-90 leading-relaxed max-w-xl">
-                Obtenez entre <strong className="text-sar-gold">300$</strong> et <strong className="text-sar-gold">5 000$</strong> en 24h.
-                Pas de jugement, pas de stress.
+              <p className="text-base md:text-xl text-white opacity-90 max-w-2xl mx-auto px-4">
+                De <span className="font-bold">300$</span> a <span className="font-bold">5 000$</span> sans enquete de credit.
+                Demande en ligne, reponse rapide, argent en 24h.
               </p>
+            </div>
 
-              {/* CTA */}
-              <Link href="/demandez-votre-credit" className="btn-gold inline-block mb-4">
-                Faire ma demande
-              </Link>
+            {/* Glass Card with Amount Selector */}
+            <div className="max-w-md mx-auto">
+              <div
+                className="rounded-3xl overflow-hidden"
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  border: '2px solid rgba(255,255,255,0.4)',
+                  boxShadow: '0 25px 50px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255,255,255,0.4)'
+                }}
+              >
+                {/* Top shine line */}
+                <div style={{ height: '2px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)' }}></div>
 
-              {/* Trust badges - stacked on mobile */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6 md:mt-8">
-                <div className="flex items-center gap-3 bg-white/10 rounded-xl p-3">
-                  <Shield size={20} className="text-sar-gold flex-shrink-0" />
-                  <span className="text-sm">Sans enquete de credit</span>
+                <div className="p-6 md:p-8">
+                  <div className="flex items-center justify-between mb-4 md:mb-6">
+                    <span className="text-white font-medium text-sm md:text-base">Montant souhaite</span>
+                    <span
+                      className="text-xs md:text-sm text-white font-bold px-3 md:px-4 py-1 md:py-1.5 rounded-full"
+                      style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)' }}
+                    >
+                      Max: 5 000$
+                    </span>
+                  </div>
+
+                  {/* Amount Display */}
+                  <div
+                    className="text-center py-8 md:py-10 rounded-2xl mb-6 md:mb-8"
+                    style={{
+                      background: 'rgba(255,255,255,0.15)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    <span className="text-5xl md:text-7xl font-bold text-white" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
+                      {amount.toLocaleString()}
+                    </span>
+                    <span className="text-3xl md:text-5xl font-bold text-white opacity-80">$</span>
+                    <p className="text-white opacity-60 text-xs md:text-sm mt-2">Depot en 24h</p>
+                  </div>
+
+                  {/* Slider */}
+                  <div className="mb-6 md:mb-8 relative">
+                    <div className="relative h-3 md:h-4 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.3)' }}>
+                      <div
+                        className="absolute top-0 left-0 h-full rounded-full transition-all"
+                        style={{
+                          width: `${((amount - 300) / 4700) * 100}%`,
+                          background: 'linear-gradient(90deg, #ffffff, #e0e0e0)',
+                          boxShadow: '0 0 10px rgba(255,255,255,0.5)'
+                        }}
+                      ></div>
+                    </div>
+                    <input
+                      type="range"
+                      min="300"
+                      max="5000"
+                      step="100"
+                      value={amount}
+                      onChange={(e) => setAmount(parseInt(e.target.value))}
+                      className="w-full h-3 md:h-4 opacity-0 cursor-pointer absolute top-0 left-0"
+                    />
+                    <div className="flex justify-between mt-2 md:mt-3 text-xs md:text-sm text-white opacity-70 font-medium">
+                      <span>300$</span>
+                      <span>5 000$</span>
+                    </div>
+                  </div>
+
+                  {/* Quick Amounts */}
+                  <div className="flex flex-wrap gap-2 mb-6 md:mb-8 justify-center">
+                    {[500, 1000, 2000, 3000, 5000].map((val) => (
+                      <button
+                        key={val}
+                        onClick={() => setAmount(val)}
+                        className="px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all"
+                        style={amount === val ? {
+                          background: '#ffffff',
+                          color: '#00874e',
+                          boxShadow: '0 4px 15px rgba(255,255,255,0.4)'
+                        } : {
+                          background: 'rgba(255,255,255,0.15)',
+                          color: '#ffffff',
+                          border: '1px solid rgba(255,255,255,0.3)'
+                        }}
+                      >
+                        {val.toLocaleString()}$
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* CTA Button */}
+                  <Link
+                    href="/demandez-votre-credit"
+                    className="block w-full py-4 md:py-5 rounded-2xl font-bold text-base md:text-lg transition-all hover:scale-105 text-center"
+                    style={{
+                      background: 'linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%)',
+                      color: '#00874e',
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,1)'
+                    }}
+                  >
+                    Commencer ma demande →
+                  </Link>
                 </div>
-                <div className="flex items-center gap-3 bg-white/10 rounded-xl p-3">
-                  <Zap size={20} className="text-sar-gold flex-shrink-0" />
-                  <span className="text-sm">Argent en 24h</span>
-                </div>
-                <div className="flex items-center gap-3 bg-white/10 rounded-xl p-3">
-                  <Lock size={20} className="text-sar-gold flex-shrink-0" />
-                  <span className="text-sm">100% securise</span>
+
+                {/* Bottom Bar */}
+                <div style={{ background: 'rgba(255,255,255,0.1)', borderTop: '1px solid rgba(255,255,255,0.2)' }} className="px-4 md:px-8 py-4 md:py-5">
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-8 text-xs md:text-sm">
+                    {['Sans enquete', '100% en ligne', 'Argent en 24h'].map((text, i) => (
+                      <span key={i} className="flex items-center gap-2 text-white">
+                        <span
+                          className="w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-xs"
+                          style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)' }}
+                        >✓</span>
+                        <span className="font-medium">{text}</span>
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Features Cards */}
+            <div className="flex flex-wrap justify-center gap-3 md:gap-4 mt-10 md:mt-14 px-2">
+              {[
+                { icon: '⚡', title: 'Rapide', desc: 'Reponse rapide' },
+                { icon: '🔒', title: 'Securise', desc: 'SSL 256-bit' },
+                { icon: '💳', title: 'Flexible', desc: 'Paiements adaptes' },
+                { icon: '🎯', title: 'Simple', desc: '2 min en ligne' }
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 md:gap-4 px-4 md:px-6 py-3 md:py-4 rounded-2xl transition-all hover:scale-105"
+                  style={{
+                    background: 'rgba(255,255,255,0.15)',
+                    border: '1px solid rgba(255,255,255,0.3)'
+                  }}
+                >
+                  <span className="text-2xl md:text-3xl">{item.icon}</span>
+                  <div>
+                    <p className="font-bold text-white text-sm md:text-base">{item.title}</p>
+                    <p className="text-xs md:text-sm text-white opacity-70">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
           </div>
         </div>
       </section>
-
 
       {/* Why us - Empathy section */}
       <section className="py-12 md:py-20">
@@ -104,7 +243,6 @@ export default function Home() {
 
           <div className="max-w-3xl mx-auto">
             <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-6">
-
               <div className="glass p-5 md:p-6 text-center">
                 <div className="w-12 h-12 bg-sar-green rounded-xl flex items-center justify-center mx-auto mb-3 text-white font-bold text-lg">
                   1
@@ -188,27 +326,19 @@ export default function Home() {
               <div className="space-y-3 md:space-y-4">
                 <div className="flex items-center gap-4 p-3 md:p-4 bg-white/60 rounded-xl">
                   <CheckCircle size={22} className="text-sar-green flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-gray-800">Resident du Quebec, 18+</p>
-                  </div>
+                  <p className="font-medium text-gray-800">Resident du Quebec, 18+</p>
                 </div>
                 <div className="flex items-center gap-4 p-3 md:p-4 bg-white/60 rounded-xl">
                   <CheckCircle size={22} className="text-sar-green flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-gray-800">Emploi stable (3 mois min)</p>
-                  </div>
+                  <p className="font-medium text-gray-800">Emploi stable (3 mois min)</p>
                 </div>
                 <div className="flex items-center gap-4 p-3 md:p-4 bg-white/60 rounded-xl">
                   <CheckCircle size={22} className="text-sar-green flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-gray-800">Revenu 300$/semaine minimum</p>
-                  </div>
+                  <p className="font-medium text-gray-800">Revenu 300$/semaine minimum</p>
                 </div>
                 <div className="flex items-center gap-4 p-3 md:p-4 bg-white/60 rounded-xl">
                   <CheckCircle size={22} className="text-sar-green flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-gray-800">Compte bancaire actif</p>
-                  </div>
+                  <p className="font-medium text-gray-800">Compte bancaire actif</p>
                 </div>
               </div>
 
@@ -338,7 +468,6 @@ export default function Home() {
 
             {/* Tab content */}
             <div className="glass rounded-2xl p-5 md:p-8">
-              {/* Tab 0 - Modalites de remboursement */}
               {activeTab === 0 && (
                 <div className="space-y-4">
                   <p className="text-gray-700 leading-relaxed">
@@ -357,7 +486,6 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Tab 1 - Soutien financier et cote de credit */}
               {activeTab === 1 && (
                 <div className="space-y-4">
                   <p className="text-gray-700 leading-relaxed">
@@ -376,7 +504,6 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Tab 2 - Politique de remboursement */}
               {activeTab === 2 && (
                 <div className="space-y-4">
                   <p className="text-gray-700 leading-relaxed">
@@ -484,22 +611,6 @@ export default function Home() {
               <span className="w-2 h-2 bg-sar-green rounded-full animate-pulse"></span>
               Service actif maintenant
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="py-12 md:py-20">
-        <div className="container mx-auto px-4">
-          <div className="glass-dark rounded-2xl md:rounded-3xl p-8 md:p-12 text-center text-white max-w-3xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">Pret a commencer?</h2>
-            <p className="text-base md:text-lg mb-6 opacity-90">Rapide, simple, sans engagement.</p>
-            <Link href="/demandez-votre-credit" className="btn-gold inline-block">
-              Faire ma demande
-            </Link>
-            <p className="mt-4 text-xs md:text-sm opacity-70">
-              Aucun impact sur votre cote de credit
-            </p>
           </div>
         </div>
       </section>
