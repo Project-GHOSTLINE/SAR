@@ -309,7 +309,7 @@ export default function Home() {
               </div>
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                 <CheckCircle size={18} className="text-sar-green flex-shrink-0" />
-                <span className="text-sm text-gray-700">Conforme lois quebecoises</span>
+                <span className="text-sm text-gray-700">Entreprise basee au Quebec</span>
               </div>
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                 <CheckCircle size={18} className="text-sar-green flex-shrink-0" />
