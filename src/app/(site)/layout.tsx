@@ -11,7 +11,7 @@ export default function SiteLayout({
     <>
       <Axeptio />
       <Header />
-      <main>{children}</main>
+      <main className="pt-[104px]">{children}</main>
       <Footer />
     </>
   )
