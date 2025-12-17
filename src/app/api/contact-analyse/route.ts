@@ -135,8 +135,7 @@ https://solutionargentrapide.ca
     `.trim()
 
     // Destinataire - Michel Rosa (Analyste)
-    // Pour tester: changer temporairement a info@
-    const destinataire = 'info@solutionargentrapide.ca' // TEST - remettre mrosa@ apres
+    const destinataire = 'mrosa@solutionargentrapide.ca'
 
     // Option 1: Utiliser Resend (recommande)
     if (process.env.RESEND_API_KEY) {
