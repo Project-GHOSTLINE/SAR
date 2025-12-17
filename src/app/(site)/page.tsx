@@ -125,12 +125,17 @@ export default function Home() {
       <section className="py-12 bg-yellow-50 border-y border-yellow-200">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h3 className="text-xl font-semibold text-yellow-800 mb-4">Les risques</h3>
-            <p className="text-yellow-700 mb-2">
-              Veuillez noter que le fait de contracter de nombreux prets a court terme ou sur salaire peut remettre en question votre situation financiere.
+            <h3 className="text-xl font-semibold text-yellow-800 mb-4">Emprunter de maniere responsable</h3>
+            <p className="text-yellow-700 mb-4">
+              Les taux d&apos;interet que nous proposons sont plus eleves que ceux des institutions bancaires conventionnelles.
+              Nos solutions de credit urgents doivent etre consideres comme une solution de dernier recours.
+            </p>
+            <p className="text-yellow-700 mb-4">
+              Veuillez noter que le fait de contracter de nombreux prets a court terme ou sur salaire peut remettre
+              en question votre situation financiere.
             </p>
             <p className="text-yellow-700">
-              Les taux d&apos;interet que nous proposons sont plus eleves que ceux des institutions bancaires conventionnelles.
+              Nous vous encourageons a evaluer attentivement votre capacite de remboursement avant de soumettre une demande.
             </p>
           </div>
         </div>
@@ -253,6 +258,21 @@ export default function Home() {
 
           <div className="max-w-3xl mx-auto">
             <div className="card">
+              <p className="text-gray-700 mb-6">
+                Nous proposons un taux d&apos;interet annuel (TAEG) de 18,99 %.
+              </p>
+              <p className="text-gray-700 mb-6">
+                Chez Solution Argent Rapide, nous etablissons vos paiements minimums en fonction de votre capacite
+                de paiement et de la duree de remboursement que vous preferez.
+              </p>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <p className="text-yellow-800">
+                  <strong>Remarque :</strong> Les frais d&apos;adhesion sont applicables tant qu&apos;il reste un solde
+                  a rembourser sur votre credit.
+                </p>
+              </div>
+
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
@@ -278,9 +298,102 @@ export default function Home() {
 
               <div className="mt-6 p-4 bg-sar-grey rounded-lg">
                 <p className="text-sm text-gray-600">
-                  <strong>Exemple:</strong> 750$ avec remboursements bihebdomadaires de 110,75$ sur 10 versements
+                  <strong>Exemple:</strong> Un retrait de 750$ avec des versements bihebdomadaires de 110,75$
+                  sur 10 versements, incluant des frais d&apos;adhesion hebdomadaires de 22,50$.
+                  Un remboursement anticipe complet ou partiel est permis en tout temps.
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Financial Support & Credit Score */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="section-title text-center">Soutien financier et cote de credit</h2>
+
+          <div className="max-w-3xl mx-auto">
+            <div className="card">
+              <p className="text-gray-700 mb-6">
+                Solution Argent Rapide respecte strictement les normes legales canadiennes. Notre service a la
+                clientele vous assiste pour les reports de paiement ou toute autre demande pendant la duree
+                de votre credit.
+              </p>
+
+              <div className="bg-sar-green/10 border border-sar-green/30 rounded-lg p-6 mb-6">
+                <h3 className="font-semibold text-sar-green mb-3">Impact sur votre cote de credit</h3>
+                <p className="text-gray-700">
+                  Les transactions effectuees avec notre option de credit n&apos;ont aucun impact sur votre cote de credit,
+                  car nous ne transmettons pas d&apos;informations aux bureaux de credit.
+                </p>
+              </div>
+
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
+                  <span>Aucune verification de credit traditionnelle</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
+                  <span>Pas de transmission aux bureaux de credit</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
+                  <span>Service clientele disponible pour vous aider</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
+                  <span>Reports de paiement possibles sur demande</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Repayment Policy */}
+      <section className="py-16 bg-sar-grey">
+        <div className="container mx-auto px-4">
+          <h2 className="section-title text-center">Politique de remboursement</h2>
+
+          <div className="max-w-3xl mx-auto">
+            <div className="card">
+              <p className="text-gray-700 mb-6">
+                Les options de credit variable sont generalement remboursees sur une periode de 3 a 6 mois.
+                Nos produits sont concus pour une utilisation occasionnelle avec un remboursement complet
+                dans les semaines suivantes.
+              </p>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-blue-800">
+                  <strong>Important :</strong> Le montant rembourse ne peut etre inferieur a 5% du montant
+                  utilise sur votre credit.
+                </p>
+              </div>
+
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
+                  <span>Duree de remboursement typique: 3 a 6 mois</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
+                  <span>Remboursement minimum: 5% du montant utilise</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
+                  <span>Remboursement anticipe permis en tout temps</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
+                  <span>Aucune penalite pour remboursement anticipe</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="text-sar-green flex-shrink-0 mt-1" />
+                  <span>Flexibilite des versements selon votre situation</span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
