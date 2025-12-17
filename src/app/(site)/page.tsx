@@ -271,7 +271,7 @@ export default function Home() {
                   3
                 </div>
                 <h3 className="font-semibold text-gray-800 mb-1">Argent recu</h3>
-                <p className="text-gray-600 text-sm">Virement Interac meme jour</p>
+                <p className="text-gray-600 text-sm">Depot direct en 24h</p>
               </div>
             </div>
 
@@ -577,7 +577,7 @@ export default function Home() {
           <div className="max-w-2xl mx-auto space-y-3 md:space-y-4">
             <div className="card">
               <h3 className="font-semibold text-gray-800 mb-2">Quand vais-je recevoir l&apos;argent?</h3>
-              <p className="text-gray-600 text-sm">Virement Interac le jour meme dans la plupart des cas.</p>
+              <p className="text-gray-600 text-sm">Depot direct dans les 24h suivant l&apos;approbation.</p>
             </div>
             <div className="card">
               <h3 className="font-semibold text-gray-800 mb-2">Est-ce que ca affecte mon credit?</h3>

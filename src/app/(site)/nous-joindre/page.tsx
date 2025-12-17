@@ -47,11 +47,25 @@ export default function ContactPage() {
                   <Phone className="text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1">Telephone</h3>
-                  <a href="tel:5145891946" className="text-sar-green hover:underline">
+                  <h3 className="font-semibold mb-1">Analyse de dossier</h3>
+                  <a href="tel:5145891946" className="text-sar-green hover:underline text-lg font-semibold">
                     514 589 1946
                   </a>
-                  <p className="text-gray-600 text-sm">450-999-1107 poste 104</p>
+                  <p className="text-gray-600 text-sm">Disponible 24h/24, 7j/7</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-sar-gold rounded-full flex items-center justify-center flex-shrink-0">
+                  <Phone className="text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Administration et comptabilite</h3>
+                  <a href="tel:4509991107" className="text-sar-green hover:underline">
+                    450 999-1107 poste 104
+                  </a>
+                  <p className="text-gray-600 text-sm">Lundi au jeudi: 8h - 16h</p>
+                  <p className="text-gray-600 text-sm">Vendredi: 8h - midi</p>
                 </div>
               </div>
 
@@ -62,18 +76,6 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold mb-1">Adresse</h3>
                   <p className="text-gray-600">1148 aime petit<br />Chambly, Qc, J3L 6K1</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-sar-green rounded-full flex items-center justify-center flex-shrink-0">
-                  <Clock className="text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Heures d&apos;ouverture</h3>
-                  <p className="text-gray-600">Lundi - Jeudi: 9h - 16h</p>
-                  <p className="text-gray-600">Vendredi: 9h - 12h</p>
-                  <p className="text-gray-600">Samedi - Dimanche: Ferme</p>
                 </div>
               </div>
             </div>
