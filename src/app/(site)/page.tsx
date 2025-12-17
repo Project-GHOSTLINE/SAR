@@ -779,35 +779,51 @@ export default function Home() {
                 )}
 
                 {/* Coordonnees */}
-                <div className="pt-2 border-t border-gray-100">
-                  <p className="text-sm font-semibold text-gray-700 mb-3">Vos coordonnees</p>
+                <div className="pt-4 border-t border-gray-100">
+                  <p className="text-sm font-semibold text-gray-700 mb-3">Vos coordonnees <span className="text-red-500">*</span></p>
 
                   <div className="space-y-3">
-                    <input
-                      type="text"
-                      required
-                      placeholder="Votre nom complet"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-sar-green focus:ring-0 outline-none transition-colors"
-                      value={contactForm.nom}
-                      onChange={(e) => setContactForm({ ...contactForm, nom: e.target.value })}
-                    />
-                    <input
-                      type="email"
-                      required
-                      placeholder="Votre courriel"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-sar-green focus:ring-0 outline-none transition-colors"
-                      value={contactForm.email}
-                      onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                    />
-                    <input
-                      type="tel"
-                      required
-                      placeholder="Votre telephone"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-sar-green focus:ring-0 outline-none transition-colors"
-                      value={contactForm.telephone}
-                      onChange={(e) => setContactForm({ ...contactForm, telephone: e.target.value })}
-                    />
+                    <div>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Votre nom complet *"
+                        className={`w-full px-4 py-3 border-2 rounded-xl focus:border-sar-green focus:ring-0 outline-none transition-colors ${
+                          contactForm.nom ? 'border-sar-green/50 bg-sar-green/5' : 'border-gray-200'
+                        }`}
+                        value={contactForm.nom}
+                        onChange={(e) => setContactForm({ ...contactForm, nom: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="email"
+                        required
+                        placeholder="Votre courriel *"
+                        className={`w-full px-4 py-3 border-2 rounded-xl focus:border-sar-green focus:ring-0 outline-none transition-colors ${
+                          contactForm.email ? 'border-sar-green/50 bg-sar-green/5' : 'border-gray-200'
+                        }`}
+                        value={contactForm.email}
+                        onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="Votre telephone *"
+                        className={`w-full px-4 py-3 border-2 rounded-xl focus:border-sar-green focus:ring-0 outline-none transition-colors ${
+                          contactForm.telephone ? 'border-sar-green/50 bg-sar-green/5' : 'border-gray-200'
+                        }`}
+                        value={contactForm.telephone}
+                        onChange={(e) => setContactForm({ ...contactForm, telephone: e.target.value })}
+                      />
+                    </div>
                   </div>
+
+                  {(!contactForm.nom || !contactForm.email || !contactForm.telephone) && (
+                    <p className="text-xs text-red-500 mt-2">* Tous les champs sont obligatoires</p>
+                  )}
                 </div>
 
                 <button
