@@ -2,11 +2,37 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { CheckCircle, Shield, Lock, Phone, Zap, BadgeCheck, Star } from 'lucide-react'
+import { CheckCircle, Shield, Lock, Phone, Zap, BadgeCheck, Star, X, MessageCircle } from 'lucide-react'
 
 export default function Home() {
   const [amount, setAmount] = useState(2000)
   const [activeTab, setActiveTab] = useState(0)
+  const [showContactModal, setShowContactModal] = useState(false)
+  const [contactForm, setContactForm] = useState({
+    nom: '',
+    email: '',
+    telephone: '',
+    question: '',
+    questionAutre: ''
+  })
+  const [formSubmitted, setFormSubmitted] = useState(false)
+
+  const questionsPreetablies = [
+    "Ou en est ma demande de credit?",
+    "Je veux modifier le montant demande",
+    "J'ai un probleme avec la verification bancaire",
+    "Quand vais-je recevoir mon argent?",
+    "Je veux annuler ma demande",
+    "Question sur mon remboursement",
+    "Autre question"
+  ]
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // TODO: Envoyer a Supabase ou email
+    console.log('Contact form:', contactForm)
+    setFormSubmitted(true)
+  }
 
   return (
     <>
@@ -605,10 +631,20 @@ export default function Home() {
 
             <div className="flex flex-col gap-4 justify-center max-w-md mx-auto">
               <div className="bg-sar-green/5 rounded-xl p-4 border-2 border-sar-green/20">
-                <a href="tel:5145891946" className="btn-primary flex items-center justify-center gap-2 mb-2">
-                  <Phone size={18} />
-                  <span><strong>Analyse/Suivi:</strong> 514 589-1946</span>
-                </a>
+                <div className="flex flex-col sm:flex-row gap-2 mb-2">
+                  <a href="tel:5145891946" className="btn-primary flex-1 flex items-center justify-center gap-2">
+                    <Phone size={18} />
+                    <span>514 589-1946</span>
+                  </a>
+                  <button
+                    onClick={() => setShowContactModal(true)}
+                    className="flex-1 bg-white border-2 border-sar-green text-sar-green font-semibold py-3 px-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-sar-green hover:text-white transition-all"
+                  >
+                    <MessageCircle size={18} />
+                    <span>Ecrivez-nous</span>
+                  </button>
+                </div>
+                <p className="text-xs text-gray-600 font-medium mb-1">Analyse et suivi de dossier</p>
                 <div className="flex items-center justify-center gap-2 text-sm text-sar-green">
                   <span className="w-2 h-2 bg-sar-green rounded-full animate-pulse"></span>
                   Disponible 24h/24, 7j/7
@@ -626,6 +662,151 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Modal Contact Analyse */}
+      {showContactModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => {
+              setShowContactModal(false)
+              setFormSubmitted(false)
+            }}
+          ></div>
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-sar-green text-white p-5 rounded-t-3xl flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold">Analyse et suivi</h3>
+                <p className="text-white/80 text-sm">Reponse rapide 24/7</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowContactModal(false)
+                  setFormSubmitted(false)
+                }}
+                className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {formSubmitted ? (
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 bg-sar-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="text-sar-green" size={32} />
+                </div>
+                <h4 className="text-xl font-bold text-gray-800 mb-2">Message envoye!</h4>
+                <p className="text-gray-600 mb-6">Nous vous repondrons dans les plus brefs delais.</p>
+                <button
+                  onClick={() => {
+                    setShowContactModal(false)
+                    setFormSubmitted(false)
+                    setContactForm({ nom: '', email: '', telephone: '', question: '', questionAutre: '' })
+                  }}
+                  className="btn-primary"
+                >
+                  Fermer
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleContactSubmit} className="p-5 md:p-6 space-y-4">
+                {/* Questions pre-etablies */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Quelle est votre question?
+                  </label>
+                  <div className="space-y-2">
+                    {questionsPreetablies.map((q, i) => (
+                      <label
+                        key={i}
+                        className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
+                          contactForm.question === q
+                            ? 'bg-sar-green/10 border-2 border-sar-green'
+                            : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="question"
+                          value={q}
+                          checked={contactForm.question === q}
+                          onChange={(e) => setContactForm({ ...contactForm, question: e.target.value })}
+                          className="w-4 h-4 text-sar-green"
+                        />
+                        <span className="text-sm text-gray-700">{q}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Champ pour autre question */}
+                {contactForm.question === "Autre question" && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Precisez votre question
+                    </label>
+                    <textarea
+                      rows={3}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-sar-green focus:ring-0 outline-none transition-colors"
+                      placeholder="Decrivez votre question..."
+                      value={contactForm.questionAutre}
+                      onChange={(e) => setContactForm({ ...contactForm, questionAutre: e.target.value })}
+                    />
+                  </div>
+                )}
+
+                {/* Coordonnees */}
+                <div className="pt-2 border-t border-gray-100">
+                  <p className="text-sm font-semibold text-gray-700 mb-3">Vos coordonnees</p>
+
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Votre nom complet"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-sar-green focus:ring-0 outline-none transition-colors"
+                      value={contactForm.nom}
+                      onChange={(e) => setContactForm({ ...contactForm, nom: e.target.value })}
+                    />
+                    <input
+                      type="email"
+                      required
+                      placeholder="Votre courriel"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-sar-green focus:ring-0 outline-none transition-colors"
+                      value={contactForm.email}
+                      onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                    />
+                    <input
+                      type="tel"
+                      required
+                      placeholder="Votre telephone"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-sar-green focus:ring-0 outline-none transition-colors"
+                      value={contactForm.telephone}
+                      onChange={(e) => setContactForm({ ...contactForm, telephone: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={!contactForm.question || !contactForm.nom || !contactForm.email || !contactForm.telephone}
+                  className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Envoyer ma question
+                </button>
+
+                <p className="text-xs text-gray-500 text-center">
+                  Ou appelez directement: <a href="tel:5145891946" className="text-sar-green font-semibold">514 589-1946</a>
+                </p>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </>
   )
 }
