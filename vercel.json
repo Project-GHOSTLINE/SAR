@@ -1,0 +1,24 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.solutionargentrapide.ca"
+        }
+      ],
+      "destination": "/admin"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.solutionargentrapide.ca"
+        }
+      ],
+      "destination": "/admin/:path*"
+    }
+  ]
+}
