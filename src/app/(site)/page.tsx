@@ -59,29 +59,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats - Social proof */}
-      <section className="py-6 md:py-8 bg-white/60 border-y border-gray-100">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
-            <div>
-              <p className="text-2xl md:text-3xl font-bold text-sar-green">15 000+</p>
-              <p className="text-xs md:text-sm text-gray-600">Clients aides</p>
-            </div>
-            <div>
-              <p className="text-2xl md:text-3xl font-bold text-sar-green">24h</p>
-              <p className="text-xs md:text-sm text-gray-600">Delai moyen</p>
-            </div>
-            <div>
-              <p className="text-2xl md:text-3xl font-bold text-sar-green">98%</p>
-              <p className="text-xs md:text-sm text-gray-600">Satisfaits</p>
-            </div>
-            <div>
-              <p className="text-2xl md:text-3xl font-bold text-sar-green">4.8/5</p>
-              <p className="text-xs md:text-sm text-gray-600">Note moyenne</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Why us - Empathy section */}
       <section className="py-12 md:py-20">
