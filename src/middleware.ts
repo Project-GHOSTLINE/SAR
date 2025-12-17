@@ -61,29 +61,6 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Protect client routes (require authentication) - but NOT API routes
-  const isClientRoute = pathname.startsWith('/client/') || (hostname.startsWith('client.') && pathname !== '/' && pathname !== '/client' && !isApiRoute)
-  const isClientLoginPage = pathname === '/client' || (hostname.startsWith('client.') && pathname === '/')
-
-  if (isClientRoute && !isClientLoginPage) {
-    const token = request.cookies.get('client_token')?.value
-
-    if (!token) {
-      const loginUrl = hostname.startsWith('client.') ? '/' : '/client'
-      return NextResponse.redirect(new URL(loginUrl, request.url))
-    }
-
-    try {
-      const secret = new TextEncoder().encode(JWT_SECRET)
-      await jwtVerify(token, secret)
-      return NextResponse.next()
-    } catch {
-      const response = NextResponse.redirect(new URL(hostname.startsWith('client.') ? '/' : '/client', request.url))
-      response.cookies.delete('client_token')
-      return response
-    }
-  }
-
   return NextResponse.next()
 }
 
