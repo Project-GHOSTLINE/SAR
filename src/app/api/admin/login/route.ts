@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { SignJWT } from 'jose'
 
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '$2b$10$Ddx05yJ05gRgjaM4Ha1zqOdgsQFFoF1nlh4LQKR2HkXkM901aPiUG'
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '$2b$10$5Y/1FXHhAencFVYwV1PIceWOWIiykdJhzsicLnerxIfumnBDyEoPy'
 const JWT_SECRET = process.env.JWT_SECRET || '56K2TFqsBtHQjzihmTS8palyJeA3KZHI1yYsvGEkxWQ='
 
 export async function POST(request: NextRequest) {
