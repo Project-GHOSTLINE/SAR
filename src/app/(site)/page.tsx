@@ -601,23 +601,27 @@ export default function Home() {
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
           <div className="glass rounded-2xl p-6 md:p-10 max-w-3xl mx-auto text-center">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-3">Des questions?</h2>
-            <p className="text-gray-600 mb-6">On est disponible 24h/24, 7j/7</p>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">Des questions?</h2>
 
-            <div className="flex flex-col gap-3 justify-center max-w-md mx-auto">
-              <a href="tel:5145891946" className="btn-primary flex items-center justify-center gap-2">
-                <Phone size={18} />
-                <span><strong>Analyse/Suivi 24/7:</strong> 514 589-1946</span>
-              </a>
-              <a href="tel:4509991107" className="btn-secondary flex items-center justify-center gap-2">
-                <Phone size={18} />
-                <span><strong>Comptabilite:</strong> 450 999-1107</span>
-              </a>
-            </div>
+            <div className="flex flex-col gap-4 justify-center max-w-md mx-auto">
+              <div className="bg-sar-green/5 rounded-xl p-4 border-2 border-sar-green/20">
+                <a href="tel:5145891946" className="btn-primary flex items-center justify-center gap-2 mb-2">
+                  <Phone size={18} />
+                  <span><strong>Analyse/Suivi:</strong> 514 589-1946</span>
+                </a>
+                <div className="flex items-center justify-center gap-2 text-sm text-sar-green">
+                  <span className="w-2 h-2 bg-sar-green rounded-full animate-pulse"></span>
+                  Disponible 24h/24, 7j/7
+                </div>
+              </div>
 
-            <div className="mt-6 inline-flex items-center gap-2 text-sm text-sar-green">
-              <span className="w-2 h-2 bg-sar-green rounded-full animate-pulse"></span>
-              Service actif maintenant
+              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <a href="tel:4509991107" className="btn-secondary flex items-center justify-center gap-2 mb-2">
+                  <Phone size={18} />
+                  <span><strong>Comptabilite:</strong> 450 999-1107</span>
+                </a>
+                <p className="text-xs text-gray-500">Lun-Jeu: 8h-16h | Ven: 8h-12h</p>
+              </div>
             </div>
           </div>
         </div>
