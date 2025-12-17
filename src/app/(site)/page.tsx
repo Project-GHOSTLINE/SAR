@@ -604,14 +604,15 @@ export default function Home() {
             <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-3">Des questions?</h2>
             <p className="text-gray-600 mb-6">On est disponible 24h/24, 7j/7</p>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="flex flex-col gap-3 justify-center max-w-md mx-auto">
               <a href="tel:5145891946" className="btn-primary flex items-center justify-center gap-2">
                 <Phone size={18} />
-                514 589 1946
+                <span><strong>Analyse/Suivi:</strong> 514 589-1946</span>
               </a>
-              <Link href="/nous-joindre" className="btn-secondary">
-                Nous ecrire
-              </Link>
+              <a href="tel:4509991107" className="btn-secondary flex items-center justify-center gap-2">
+                <Phone size={18} />
+                <span><strong>Comptabilite:</strong> 450 999-1107</span>
+              </a>
             </div>
 
             <div className="mt-6 inline-flex items-center gap-2 text-sm text-sar-green">

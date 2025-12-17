@@ -40,14 +40,15 @@ export default function Header() {
           : 'bg-sar-green'
       } text-white py-2`}>
         <div className="container mx-auto px-4 flex justify-between items-center text-sm">
-          <div className="flex items-center gap-4">
-            <a href="mailto:info@solutionargentrapide.ca" className="flex items-center gap-1 hover:text-sar-gold transition-colors">
-              <Mail size={14} />
-              <span className="hidden sm:inline">info@solutionargentrapide.ca</span>
-            </a>
-            <a href="tel:5145891946" className="flex items-center gap-1 hover:text-sar-gold transition-colors">
+          <div className="flex items-center gap-2 md:gap-6">
+            <a href="tel:5145891946" className="flex items-center gap-1.5 hover:text-sar-gold transition-colors">
               <Phone size={14} />
-              514 589 1946
+              <span><strong>Analyse/Suivi:</strong> 514 589-1946</span>
+            </a>
+            <span className="hidden md:inline text-white/40">|</span>
+            <a href="tel:4509991107" className="hidden md:flex items-center gap-1.5 hover:text-sar-gold transition-colors">
+              <Phone size={14} />
+              <span><strong>Comptabilite:</strong> 450 999-1107</span>
             </a>
           </div>
         </div>

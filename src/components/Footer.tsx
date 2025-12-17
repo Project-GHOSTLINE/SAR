@@ -67,13 +67,18 @@ export default function Footer() {
                 </div>
                 <span className="text-gray-400 text-sm">1148 aime petit, Chambly, Qc, J3L 6K1</span>
               </li>
-              <li className="flex items-center gap-3 group">
-                <div className="w-8 h-8 rounded-lg bg-sar-green/10 flex items-center justify-center flex-shrink-0 group-hover:bg-sar-green/20 transition-colors">
+              <li className="flex items-start gap-3 group">
+                <div className="w-8 h-8 rounded-lg bg-sar-green/10 flex items-center justify-center flex-shrink-0 group-hover:bg-sar-green/20 transition-colors mt-0.5">
                   <Phone size={16} className="text-sar-green" />
                 </div>
-                <a href="tel:5145891946" className="text-gray-400 hover:text-sar-green transition-colors text-sm">
-                  514 589 1946
-                </a>
+                <div className="space-y-1">
+                  <a href="tel:5145891946" className="text-gray-400 hover:text-sar-green transition-colors text-sm block">
+                    <strong className="text-gray-300">Analyse/Suivi:</strong> 514 589-1946
+                  </a>
+                  <a href="tel:4509991107" className="text-gray-400 hover:text-sar-green transition-colors text-sm block">
+                    <strong className="text-gray-300">Comptabilite:</strong> 450 999-1107
+                  </a>
+                </div>
               </li>
               <li className="flex items-center gap-3 group">
                 <div className="w-8 h-8 rounded-lg bg-sar-green/10 flex items-center justify-center flex-shrink-0 group-hover:bg-sar-green/20 transition-colors">

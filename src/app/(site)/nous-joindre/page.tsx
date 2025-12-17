@@ -42,30 +42,31 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-4 p-4 bg-sar-green/5 rounded-xl border-2 border-sar-green/20">
                 <div className="w-12 h-12 bg-sar-green rounded-full flex items-center justify-center flex-shrink-0">
                   <Phone className="text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1">Analyse de dossier</h3>
-                  <a href="tel:5145891946" className="text-sar-green hover:underline text-lg font-semibold">
-                    514 589 1946
+                  <h3 className="font-bold text-sar-green mb-1">Analyse et suivi de dossier</h3>
+                  <a href="tel:5145891946" className="text-sar-green hover:underline text-xl font-bold">
+                    514 589-1946
                   </a>
-                  <p className="text-gray-600 text-sm">Disponible 24h/24, 7j/7</p>
+                  <p className="text-gray-600 text-sm mt-1">Disponible 24h/24, 7j/7</p>
+                  <p className="text-gray-500 text-xs mt-2">Pour toute question sur votre demande de credit</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
                 <div className="w-12 h-12 bg-sar-gold rounded-full flex items-center justify-center flex-shrink-0">
                   <Phone className="text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1">Administration et comptabilite</h3>
-                  <a href="tel:4509991107" className="text-sar-green hover:underline">
+                  <h3 className="font-bold text-gray-700 mb-1">Comptabilite seulement</h3>
+                  <a href="tel:4509991107" className="text-gray-700 hover:text-sar-green hover:underline text-lg font-semibold">
                     450 999-1107 poste 104
                   </a>
-                  <p className="text-gray-600 text-sm">Lundi au jeudi: 8h - 16h</p>
-                  <p className="text-gray-600 text-sm">Vendredi: 8h - midi</p>
+                  <p className="text-gray-600 text-sm mt-1">Lundi au jeudi: 8h - 16h | Vendredi: 8h - midi</p>
+                  <p className="text-red-600 text-xs mt-2 font-medium">⚠️ Questions de facturation et paiements uniquement</p>
                 </div>
               </div>
 
