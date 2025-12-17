@@ -27,29 +27,34 @@ export default function Home() {
             {/* Badge */}
             <div className="text-center mb-6 md:mb-8">
               <span
-                className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-full text-sm md:text-base"
+                className="inline-flex items-center gap-2 md:gap-3 px-5 md:px-8 py-2.5 md:py-3.5 rounded-full text-base md:text-lg"
                 style={{
-                  background: 'rgba(255,255,255,0.2)',
-                  border: '1px solid rgba(255,255,255,0.4)'
+                  background: 'rgba(255,255,255,0.25)',
+                  border: '2px solid rgba(255,255,255,0.5)',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
                 }}
               >
-                <span className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full animate-pulse"></span>
-                <span className="text-white font-medium">On est la pour vous aider</span>
+                <span className="w-3 h-3 bg-white rounded-full animate-pulse"></span>
+                <span className="text-white font-semibold" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>On est la pour vous aider</span>
               </span>
             </div>
 
             {/* Heading */}
             <div className="text-center mb-8 md:mb-12">
               <h1
-                className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight"
-                style={{ textShadow: '0 2px 20px rgba(0,0,0,0.2)' }}
+                className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 md:mb-8 leading-tight tracking-tight"
+                style={{ textShadow: '0 4px 30px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2)' }}
               >
                 L&apos;argent qu&apos;il te faut,
                 <br />
                 quand tu en as besoin.
               </h1>
-              <p className="text-base md:text-xl text-white opacity-90 max-w-2xl mx-auto px-4">
+              <p
+                className="text-lg md:text-2xl text-white max-w-2xl mx-auto px-4 font-medium"
+                style={{ textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}
+              >
                 De <span className="font-bold">300$</span> a <span className="font-bold">5 000$</span> sans enquete de credit.
+                <br className="hidden md:block" />
                 Demande en ligne, reponse rapide, argent en 24h.
               </p>
             </div>
@@ -67,12 +72,12 @@ export default function Home() {
                 {/* Top shine line */}
                 <div style={{ height: '2px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)' }}></div>
 
-                <div className="p-6 md:p-8">
-                  <div className="flex items-center justify-between mb-4 md:mb-6">
-                    <span className="text-white font-medium text-sm md:text-base">Montant souhaite</span>
+                <div className="p-6 md:p-10">
+                  <div className="flex items-center justify-between mb-5 md:mb-6">
+                    <span className="text-white font-semibold text-base md:text-lg" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>Montant souhaite</span>
                     <span
-                      className="text-xs md:text-sm text-white font-bold px-3 md:px-4 py-1 md:py-1.5 rounded-full"
-                      style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)' }}
+                      className="text-sm md:text-base text-white font-bold px-4 md:px-5 py-1.5 md:py-2 rounded-full"
+                      style={{ background: 'rgba(255,255,255,0.25)', border: '2px solid rgba(255,255,255,0.5)' }}
                     >
                       Max: 5 000$
                     </span>
@@ -80,18 +85,18 @@ export default function Home() {
 
                   {/* Amount Display */}
                   <div
-                    className="text-center py-8 md:py-10 rounded-2xl mb-6 md:mb-8"
+                    className="text-center py-10 md:py-12 rounded-2xl mb-6 md:mb-8"
                     style={{
-                      background: 'rgba(255,255,255,0.15)',
-                      border: '1px solid rgba(255,255,255,0.3)',
+                      background: 'rgba(255,255,255,0.2)',
+                      border: '2px solid rgba(255,255,255,0.4)',
                       boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
                     }}
                   >
-                    <span className="text-5xl md:text-7xl font-bold text-white" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
+                    <span className="text-6xl md:text-8xl font-extrabold text-white" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
                       {amount.toLocaleString()}
                     </span>
-                    <span className="text-3xl md:text-5xl font-bold text-white opacity-80">$</span>
-                    <p className="text-white opacity-60 text-xs md:text-sm mt-2">Depot en 24h</p>
+                    <span className="text-4xl md:text-6xl font-extrabold text-white">$</span>
+                    <p className="text-white text-sm md:text-base mt-3 font-semibold" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>Depot en 24h</p>
                   </div>
 
                   {/* Slider */}
@@ -115,27 +120,28 @@ export default function Home() {
                       onChange={(e) => setAmount(parseInt(e.target.value))}
                       className="w-full h-3 md:h-4 opacity-0 cursor-pointer absolute top-0 left-0"
                     />
-                    <div className="flex justify-between mt-2 md:mt-3 text-xs md:text-sm text-white opacity-70 font-medium">
+                    <div className="flex justify-between mt-3 md:mt-4 text-sm md:text-base text-white font-semibold" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>
                       <span>300$</span>
                       <span>5 000$</span>
                     </div>
                   </div>
 
                   {/* Quick Amounts */}
-                  <div className="flex flex-wrap gap-2 mb-6 md:mb-8 justify-center">
+                  <div className="flex flex-wrap gap-2 md:gap-3 mb-6 md:mb-8 justify-center">
                     {[500, 1000, 2000, 3000, 5000].map((val) => (
                       <button
                         key={val}
                         onClick={() => setAmount(val)}
-                        className="px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all"
+                        className="px-4 md:px-6 py-2.5 md:py-3 rounded-xl text-sm md:text-base font-bold transition-all"
                         style={amount === val ? {
                           background: '#ffffff',
                           color: '#00874e',
-                          boxShadow: '0 4px 15px rgba(255,255,255,0.4)'
+                          boxShadow: '0 4px 20px rgba(255,255,255,0.5)'
                         } : {
-                          background: 'rgba(255,255,255,0.15)',
+                          background: 'rgba(255,255,255,0.2)',
                           color: '#ffffff',
-                          border: '1px solid rgba(255,255,255,0.3)'
+                          border: '2px solid rgba(255,255,255,0.4)',
+                          textShadow: '0 1px 3px rgba(0,0,0,0.3)'
                         }}
                       >
                         {val.toLocaleString()}$
@@ -146,11 +152,11 @@ export default function Home() {
                   {/* CTA Button */}
                   <Link
                     href="/demandez-votre-credit"
-                    className="block w-full py-4 md:py-5 rounded-2xl font-bold text-base md:text-lg transition-all hover:scale-105 text-center"
+                    className="block w-full py-5 md:py-6 rounded-2xl font-extrabold text-lg md:text-xl transition-all hover:scale-105 text-center"
                     style={{
                       background: 'linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%)',
                       color: '#00874e',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,1)'
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.25), inset 0 1px 1px rgba(255,255,255,1)'
                     }}
                   >
                     Commencer ma demande →
@@ -158,15 +164,15 @@ export default function Home() {
                 </div>
 
                 {/* Bottom Bar */}
-                <div style={{ background: 'rgba(255,255,255,0.1)', borderTop: '1px solid rgba(255,255,255,0.2)' }} className="px-4 md:px-8 py-4 md:py-5">
-                  <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-8 text-xs md:text-sm">
+                <div style={{ background: 'rgba(255,255,255,0.15)', borderTop: '2px solid rgba(255,255,255,0.3)' }} className="px-4 md:px-8 py-5 md:py-6">
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-10 text-sm md:text-base">
                     {['Sans enquete', '100% en ligne', 'Argent en 24h'].map((text, i) => (
-                      <span key={i} className="flex items-center gap-2 text-white">
+                      <span key={i} className="flex items-center gap-2.5 text-white">
                         <span
-                          className="w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-xs"
-                          style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)' }}
+                          className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-sm font-bold"
+                          style={{ background: 'rgba(255,255,255,0.25)', border: '2px solid rgba(255,255,255,0.5)' }}
                         >✓</span>
-                        <span className="font-medium">{text}</span>
+                        <span className="font-semibold" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>{text}</span>
                       </span>
                     ))}
                   </div>
@@ -175,7 +181,7 @@ export default function Home() {
             </div>
 
             {/* Features Cards */}
-            <div className="flex flex-wrap justify-center gap-3 md:gap-4 mt-10 md:mt-14 px-2">
+            <div className="flex flex-wrap justify-center gap-3 md:gap-5 mt-10 md:mt-14 px-2">
               {[
                 { icon: '⚡', title: 'Rapide', desc: 'Reponse rapide' },
                 { icon: '🔒', title: 'Securise', desc: 'SSL 256-bit' },
@@ -184,16 +190,17 @@ export default function Home() {
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-3 md:gap-4 px-4 md:px-6 py-3 md:py-4 rounded-2xl transition-all hover:scale-105"
+                  className="flex items-center gap-3 md:gap-4 px-5 md:px-7 py-4 md:py-5 rounded-2xl transition-all hover:scale-105"
                   style={{
-                    background: 'rgba(255,255,255,0.15)',
-                    border: '1px solid rgba(255,255,255,0.3)'
+                    background: 'rgba(255,255,255,0.2)',
+                    border: '2px solid rgba(255,255,255,0.4)',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
                   }}
                 >
-                  <span className="text-2xl md:text-3xl">{item.icon}</span>
+                  <span className="text-3xl md:text-4xl">{item.icon}</span>
                   <div>
-                    <p className="font-bold text-white text-sm md:text-base">{item.title}</p>
-                    <p className="text-xs md:text-sm text-white opacity-70">{item.desc}</p>
+                    <p className="font-bold text-white text-base md:text-lg" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>{item.title}</p>
+                    <p className="text-sm md:text-base text-white font-medium" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>{item.desc}</p>
                   </div>
                 </div>
               ))}

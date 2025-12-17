@@ -16,7 +16,7 @@ module.exports = {
         'sar-grey-dark': '#333333',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
       },
     },
   },

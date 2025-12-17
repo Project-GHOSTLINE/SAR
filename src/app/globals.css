@@ -19,10 +19,13 @@ html {
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-poppins), 'Poppins', system-ui, -apple-system, sans-serif;
+  font-weight: 400;
   background: linear-gradient(135deg, #f8faf9 0%, #ecfdf5 50%, #f0fdf4 100%);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* Liquid Glass Effects */
