@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import { SignJWT } from 'jose'
 
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '$2b$10$5Y/1FXHhAencFVYwV1PIceWOWIiykdJhzsicLnerxIfumnBDyEoPy'
-const JWT_SECRET = process.env.JWT_SECRET || '56K2TFqsBtHQjzihmTS8palyJeA3KZHI1yYsvGEkxWQ='
+const JWT_SECRET = process.env.JWT_SECRET!
 
 export async function POST(request: NextRequest) {
   try {

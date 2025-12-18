@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { createClient } from '@supabase/supabase-js'
 import { jwtVerify } from 'jose'
 
-const JWT_SECRET = process.env.JWT_SECRET || '56K2TFqsBtHQjzihmTS8palyJeA3KZHI1yYsvGEkxWQ='
+const JWT_SECRET = process.env.JWT_SECRET!
 
 // Verifier le token JWT
 async function verifyAuth() {

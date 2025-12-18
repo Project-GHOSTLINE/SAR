@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 
-const JWT_SECRET = process.env.JWT_SECRET || '56K2TFqsBtHQjzihmTS8palyJeA3KZHI1yYsvGEkxWQ='
+const JWT_SECRET = process.env.JWT_SECRET!
 
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || ''
