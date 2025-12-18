@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 const faqs = [
@@ -21,6 +21,7 @@ const faqs = [
     answer: "La demande est envoyee aux analystes pour etude du dossier. Une reponse par courriel informera le demandeur de la decision."
   },
   {
+    id: "delai-argent",
     question: "Dans combien de temps vais-je recevoir l'argent ?",
     answer: "Generalement, les fonds sont transferes par virement Interac la journee meme."
   },
@@ -77,8 +78,9 @@ const faqs = [
     answer: "Permet d'acceder aux informations necessaires pour analyser la capacite de remboursement (depots de paies, factures, autres prets, etc.)."
   },
   {
+    id: "verification-bancaire",
     question: "Je n'arrive pas a envoyer mes releves bancaires (IBV). Pourquoi ?",
-    answer: "L'adresse courriel doit correspondre exactement a celle du dossier de l'institution financiere, sinon le systeme bloque la demande."
+    answer: "L'adresse courriel doit correspondre exactement a celle du dossier de l'institution financiere, sinon le systeme bloque la demande. Si vous avez des problemes avec la verification bancaire, consultez notre page dediee ou contactez-nous directement."
   },
   {
     question: "J'ai des problemes avec la signature electronique.",
@@ -97,6 +99,25 @@ const faqs = [
 export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
+  useEffect(() => {
+    // Vérifier s'il y a un hash dans l'URL
+    const hash = window.location.hash.replace('#', '')
+    if (hash) {
+      // Trouver l'index de la FAQ avec cet ID
+      const index = faqs.findIndex(faq => (faq as any).id === hash)
+      if (index !== -1) {
+        setOpenIndex(index)
+        // Scroll vers l'élément après un court délai
+        setTimeout(() => {
+          const element = document.getElementById(hash)
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        }, 100)
+      }
+    }
+  }, [])
+
   return (
     <div className="py-16">
       <div className="container mx-auto px-4">
@@ -104,21 +125,29 @@ export default function FAQPage() {
         <p className="section-subtitle text-center">Trouvez les reponses a vos questions</p>
 
         <div className="max-w-3xl mx-auto space-y-4">
-          {faqs.map((faq, index) => (
-            <div key={index} className="card cursor-pointer" onClick={() => setOpenIndex(openIndex === index ? null : index)}>
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-lg pr-4">{faq.question}</h3>
-                {openIndex === index ? (
-                  <ChevronUp className="text-sar-green flex-shrink-0" />
-                ) : (
-                  <ChevronDown className="text-sar-green flex-shrink-0" />
+          {faqs.map((faq, index) => {
+            const faqId = (faq as any).id
+            return (
+              <div
+                key={index}
+                id={faqId}
+                className={`card cursor-pointer transition-all ${faqId && openIndex === index ? 'ring-2 ring-sar-green' : ''}`}
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-lg pr-4">{faq.question}</h3>
+                  {openIndex === index ? (
+                    <ChevronUp className="text-sar-green flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="text-sar-green flex-shrink-0" />
+                  )}
+                </div>
+                {openIndex === index && (
+                  <p className="text-gray-600 mt-4 pt-4 border-t">{faq.answer}</p>
                 )}
               </div>
-              {openIndex === index && (
-                <p className="text-gray-600 mt-4 pt-4 border-t">{faq.answer}</p>
-              )}
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>

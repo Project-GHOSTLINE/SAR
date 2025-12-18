@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { CheckCircle, Shield, Lock, Phone, Zap, BadgeCheck, Star, X, MessageCircle } from 'lucide-react'
 
 export default function Home() {
-  const [amount, setAmount] = useState(2000)
+  const [amount, setAmount] = useState(4700)
   const [activeTab, setActiveTab] = useState(0)
   const [showContactModal, setShowContactModal] = useState(false)
   const [contactForm, setContactForm] = useState({
@@ -164,6 +164,7 @@ export default function Home() {
                       value={amount}
                       onChange={(e) => setAmount(parseInt(e.target.value))}
                       className="w-full h-3 md:h-4 opacity-0 cursor-pointer absolute top-0 left-0"
+                      aria-label="Montant du pret"
                     />
                     <div className="flex justify-between mt-3 md:mt-4 text-sm md:text-base text-white font-semibold" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>
                       <span>300$</span>
@@ -196,7 +197,7 @@ export default function Home() {
 
                   {/* CTA Button */}
                   <Link
-                    href="/demandez-votre-credit"
+                    href="https://solutionargentrapide.ca/demande-de-pret-en-ligne-formulaire"
                     className="block w-full py-5 md:py-6 rounded-2xl font-extrabold text-lg md:text-xl transition-all hover:scale-105 text-center"
                     style={{
                       background: 'linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%)',
@@ -321,7 +322,7 @@ export default function Home() {
             </div>
 
             <div className="text-center mt-8">
-              <Link href="/demandez-votre-credit" className="btn-primary">
+              <Link href="https://solutionargentrapide.ca/demande-de-pret-en-ligne-formulaire" className="btn-primary">
                 Commencer maintenant
               </Link>
             </div>

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, Mail, MapPin, Clock, Send } from 'lucide-react'
+import { Phone, Mail, MapPin, Clock, Send, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
+import ContactModal from '@/components/ContactModal'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -11,11 +12,31 @@ export default function ContactPage() {
     contact: ''
   })
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Integrate with Supabase
-    setSubmitted(true)
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      if (response.ok) {
+        setSubmitted(true)
+      } else {
+        alert('Erreur lors de l\'envoi. Veuillez reessayer.')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('Erreur lors de l\'envoi. Veuillez reessayer.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -42,31 +63,34 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4 p-4 bg-sar-green/5 rounded-xl border-2 border-sar-green/20">
+              <button
+                onClick={() => setIsContactModalOpen(true)}
+                className="flex items-start gap-4 p-4 bg-sar-green/5 rounded-xl border-2 border-sar-green/20 hover:bg-sar-green/10 transition-colors w-full text-left"
+              >
                 <div className="w-12 h-12 bg-sar-green rounded-full flex items-center justify-center flex-shrink-0">
-                  <Phone className="text-white" />
+                  <MessageCircle className="text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sar-green mb-1">Analyse et suivi de dossier</h3>
-                  <a href="tel:5145891946" className="text-sar-green hover:underline text-xl font-bold">
-                    514 589-1946
-                  </a>
-                  <p className="text-gray-600 text-sm mt-1">Disponible 24h/24, 7j/7</p>
-                  <p className="text-gray-500 text-xs mt-2">Pour toute question sur votre demande de credit</p>
+                  <h3 className="font-bold text-sar-green mb-1">Analyse et suivi de votre demande</h3>
+                  <span className="inline-block bg-sar-green text-white px-4 py-2 rounded-lg font-bold">
+                    Discuter avec nous
+                  </span>
+                  <p className="text-gray-600 text-sm mt-2">Disponible 24h/24, 7j/7</p>
+                  <p className="text-gray-500 text-xs mt-1">Nouvelle demande, suivi de dossier, questions</p>
                 </div>
-              </div>
+              </button>
 
               <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
                 <div className="w-12 h-12 bg-sar-gold rounded-full flex items-center justify-center flex-shrink-0">
                   <Phone className="text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-700 mb-1">Comptabilite seulement</h3>
+                  <h3 className="font-bold text-gray-700 mb-1">Administration / Comptabilite</h3>
                   <a href="tel:4509991107" className="text-gray-700 hover:text-sar-green hover:underline text-lg font-semibold">
-                    450 999-1107 poste 104
+                    450 999-1107
                   </a>
-                  <p className="text-gray-600 text-sm mt-1">Lundi au jeudi: 8h - 16h | Vendredi: 8h - midi</p>
-                  <p className="text-red-600 text-xs mt-2 font-medium">⚠️ Questions de facturation et paiements uniquement</p>
+                  <p className="text-gray-600 text-sm mt-1">Lundi au vendredi: 8h - 16h</p>
+                  <p className="text-orange-600 text-xs mt-2 font-medium">Questions de facturation et paiements uniquement</p>
                 </div>
               </div>
 
@@ -145,9 +169,22 @@ export default function ContactPage() {
                     />
                   </div>
 
-                  <button type="submit" className="btn-primary w-full flex items-center justify-center gap-2">
-                    <Send size={18} />
-                    Envoyer le message
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        Envoi en cours...
+                      </>
+                    ) : (
+                      <>
+                        <Send size={18} />
+                        Envoyer le message
+                      </>
+                    )}
                   </button>
                 </form>
               )}
@@ -155,6 +192,12 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
+
+      {/* Contact Modal */}
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+      />
     </div>
   )
 }

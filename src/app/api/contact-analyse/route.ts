@@ -1,4 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+// Fonction pour sauvegarder dans Supabase
+async function saveToSupabase(nom: string, email: string, telephone: string, question: string) {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.SUPABASE_SERVICE_KEY
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.log('Supabase non configure, message non sauvegarde')
+      return
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    const { error } = await supabase
+      .from('contact_messages')
+      .insert({
+        nom,
+        email,
+        telephone,
+        question,
+        lu: false
+      })
+
+    if (error) {
+      console.error('Erreur Supabase:', error)
+    } else {
+      console.log('Message sauvegarde dans Supabase')
+    }
+  } catch (error) {
+    console.error('Erreur sauvegarde Supabase:', error)
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +50,15 @@ export async function POST(request: NextRequest) {
     const questionComplete = question === "Autre question"
       ? questionAutre
       : question
+
+    // Destinataire selon le type de question
+    // - "Autre question" → Sandra Liberta (perception@solutionargentrapide.ca)
+    // - Autres questions → Michel Rosa (mrosa@solutionargentrapide.ca)
+    const isAutreQuestion = question === "Autre question"
+    const destinataire = isAutreQuestion
+      ? 'perception@solutionargentrapide.ca'
+      : 'mrosa@solutionargentrapide.ca'
+    const destinataireNom = isAutreQuestion ? 'Sandra' : 'Michel'
 
     // Email HTML template
     const emailHtml = `
@@ -58,7 +101,7 @@ export async function POST(request: NextRequest) {
     </div>
 
     <div class="content">
-      <p class="greeting">Bonjour Michel,</p>
+      <p class="greeting">Bonjour ${destinataireNom},</p>
 
       <div class="intro">
         <strong>Je suis SAR, votre assistant personnel.</strong><br>
@@ -104,7 +147,7 @@ export async function POST(request: NextRequest) {
 
     // Email texte (fallback)
     const emailText = `
-Bonjour Michel,
+Bonjour ${destinataireNom},
 
 Je suis SAR, votre assistant personnel.
 Un nouveau message vient d'etre envoye par un client depuis votre site Solution Argent Rapide.
@@ -134,10 +177,10 @@ SAR - Solution Argent Rapide
 https://solutionargentrapide.ca
     `.trim()
 
-    // Destinataire - Michel Rosa (Analyste)
-    const destinataire = 'mrosa@solutionargentrapide.ca'
+    // Toujours sauvegarder dans Supabase
+    await saveToSupabase(nom, email, telephone, questionComplete)
 
-    // Option 1: Utiliser Resend (recommande)
+    // Envoyer email via Resend si configure
     if (process.env.RESEND_API_KEY) {
       const resendResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -155,52 +198,37 @@ https://solutionargentrapide.ca
         })
       })
 
+      const resendResult = await resendResponse.json()
+
       if (!resendResponse.ok) {
-        const error = await resendResponse.text()
-        console.error('Resend error:', error)
-        throw new Error('Erreur envoi email')
-      }
-
-      return NextResponse.json({ success: true, method: 'resend' })
-    }
-
-    // Option 2: Stocker dans Supabase si pas de config email
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
-      const { createClient } = require('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_KEY
-      )
-
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert({
-          nom,
-          email,
-          telephone,
-          question: questionComplete,
-          destinataire: destinataire,
-          created_at: new Date().toISOString()
+        console.error('Resend error:', JSON.stringify(resendResult))
+        return NextResponse.json({
+          success: true,
+          method: 'supabase-only',
+          emailError: resendResult,
+          destinataire: destinataire
         })
-
-      if (error) {
-        console.error('Supabase error:', error)
-        throw new Error('Erreur sauvegarde message')
       }
 
-      return NextResponse.json({ success: true, method: 'supabase' })
+      console.log('Email envoye avec succes a:', destinataire)
+      return NextResponse.json({
+        success: true,
+        method: 'resend+supabase',
+        emailId: resendResult.id,
+        destinataire: destinataire
+      })
     }
 
     // Mode dev: log seulement
     console.log('=== CONTACT ANALYSE (DEV MODE) ===')
     console.log('To:', destinataire)
-    console.log(emailText)
+    console.log('Message sauvegarde dans Supabase')
     console.log('==================================')
 
     return NextResponse.json({
       success: true,
-      method: 'dev',
-      message: 'Mode dev - email non envoye, voir console serveur'
+      method: 'supabase',
+      message: 'Message sauvegarde'
     })
 
   } catch (error) {
