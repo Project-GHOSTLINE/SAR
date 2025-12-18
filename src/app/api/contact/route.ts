@@ -1,6 +1,61 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+// Rate limiting pour le formulaire de contact
+const contactAttempts = new Map<string, { count: number; lastAttempt: number }>()
+const MAX_CONTACT_ATTEMPTS = 5
+const CONTACT_WINDOW = 60 * 60 * 1000 // 1 heure
+
+function getClientIP(request: NextRequest): string {
+  return request.headers.get('x-forwarded-for')?.split(',')[0] ||
+         request.headers.get('x-real-ip') ||
+         'unknown'
+}
+
+function isContactRateLimited(ip: string): boolean {
+  const now = Date.now()
+  const attempt = contactAttempts.get(ip)
+  if (!attempt) return false
+  if (now - attempt.lastAttempt > CONTACT_WINDOW) {
+    contactAttempts.delete(ip)
+    return false
+  }
+  return attempt.count >= MAX_CONTACT_ATTEMPTS
+}
+
+function recordContactAttempt(ip: string): void {
+  const now = Date.now()
+  const attempt = contactAttempts.get(ip)
+  if (!attempt || now - attempt.lastAttempt > CONTACT_WINDOW) {
+    contactAttempts.set(ip, { count: 1, lastAttempt: now })
+  } else {
+    contactAttempts.set(ip, { count: attempt.count + 1, lastAttempt: now })
+  }
+}
+
+// Sanitization pour prevenir XSS
+function sanitizeInput(input: string): string {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .trim()
+}
+
+// Validation email
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email) && email.length <= 254
+}
+
+// Validation telephone
+function isValidPhone(phone: string): boolean {
+  const phoneRegex = /^[\d\s\-\+\(\)]{10,20}$/
+  return phoneRegex.test(phone)
+}
+
 // Generer reference unique
 function generateReference(id: number) {
   return `SAR-${id.toString().padStart(6, '0')}`
@@ -18,16 +73,57 @@ function getSupabase() {
 }
 
 export async function POST(request: NextRequest) {
+  const clientIP = getClientIP(request)
+
+  // Rate limiting
+  if (isContactRateLimited(clientIP)) {
+    return NextResponse.json(
+      { error: 'Trop de messages envoyes. Reessayez plus tard.' },
+      { status: 429 }
+    )
+  }
+
   try {
     const body = await request.json()
-    const { message, contactMethod, contact } = body
+    let { message, contactMethod, contact } = body
 
+    // Validation des inputs
     if (!message || !contact) {
       return NextResponse.json(
         { error: 'Message et contact sont requis' },
         { status: 400 }
       )
     }
+
+    // Limites de taille
+    if (message.length > 5000 || contact.length > 254) {
+      return NextResponse.json(
+        { error: 'Message trop long' },
+        { status: 400 }
+      )
+    }
+
+    // Validation du format de contact
+    if (contactMethod === 'email' && !isValidEmail(contact)) {
+      return NextResponse.json(
+        { error: 'Adresse email invalide' },
+        { status: 400 }
+      )
+    }
+
+    if (contactMethod === 'phone' && !isValidPhone(contact)) {
+      return NextResponse.json(
+        { error: 'Numero de telephone invalide' },
+        { status: 400 }
+      )
+    }
+
+    // Sanitize les inputs
+    message = sanitizeInput(message)
+    contact = sanitizeInput(contact)
+
+    // Enregistrer la tentative
+    recordContactAttempt(clientIP)
 
     const supabase = getSupabase()
     const contactLabel = contactMethod === 'email' ? 'Courriel' : 'Telephone'
