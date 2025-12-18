@@ -170,10 +170,12 @@ export default function AdminDashboard() {
             </linearGradient>
           </defs>
 
-          {/* Candlesticks */}
+          {/* Candlesticks - valeurs deterministes pour eviter hydration mismatch */}
           {[...Array(40)].map((_, i) => {
             const x = 50 + i * 50
-            const height = 80 + Math.sin(i * 0.5) * 60 + Math.random() * 40
+            // Pseudo-random deterministe base sur l'index
+            const pseudoRandom = ((i * 7919) % 100) / 100
+            const height = 80 + Math.sin(i * 0.5) * 60 + pseudoRandom * 40
             const y = 200 + Math.cos(i * 0.3) * 100
             const isGreen = Math.sin(i * 0.7) > 0
             return (
