@@ -72,7 +72,8 @@ export async function POST(request: NextRequest) {
       .setExpirationTime('15m')
       .sign(secret)
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://solutionargentrapide.ca'
+    // Utiliser le sous-domaine admin pour le magic link
+    const baseUrl = 'https://admin.solutionargentrapide.ca'
     const magicLink = `${baseUrl}/api/admin/magic-link?token=${token}`
 
     // Envoyer l'email
@@ -137,12 +138,15 @@ export async function POST(request: NextRequest) {
 
 // GET - Verifier le magic link et connecter
 export async function GET(request: NextRequest) {
+  const hostname = request.headers.get('host') || ''
+  const loginPath = hostname.startsWith('admin.') ? '/' : '/admin'
+
   try {
     const { searchParams } = new URL(request.url)
     const token = searchParams.get('token')
 
     if (!token) {
-      return NextResponse.redirect(new URL('/admin?error=invalid', request.url))
+      return NextResponse.redirect(new URL(`${loginPath}?error=invalid`, request.url))
     }
 
     // Verifier le token
@@ -152,7 +156,7 @@ export async function GET(request: NextRequest) {
       const { payload } = await jwtVerify(token, secret)
 
       if (payload.type !== 'magic-link' || !payload.email) {
-        return NextResponse.redirect(new URL('/admin?error=invalid', request.url))
+        return NextResponse.redirect(new URL(`${loginPath}?error=invalid`, request.url))
       }
 
       // Creer le token de session
@@ -162,8 +166,10 @@ export async function GET(request: NextRequest) {
         .setExpirationTime('7d')
         .sign(secret)
 
-      // Redirect vers dashboard avec cookie
-      const response = NextResponse.redirect(new URL('/admin/dashboard', request.url))
+      // Redirect vers dashboard - detecter si on est sur le sous-domaine
+      const hostname = request.headers.get('host') || ''
+      const dashboardPath = hostname.startsWith('admin.') ? '/dashboard' : '/admin/dashboard'
+      const response = NextResponse.redirect(new URL(dashboardPath, request.url))
 
       response.cookies.set('admin_token', sessionToken, {
         httpOnly: true,
@@ -175,10 +181,10 @@ export async function GET(request: NextRequest) {
 
       return response
     } catch {
-      return NextResponse.redirect(new URL('/admin?error=expired', request.url))
+      return NextResponse.redirect(new URL(`${loginPath}?error=expired`, request.url))
     }
   } catch (error) {
     console.error('Magic link verify error:', error)
-    return NextResponse.redirect(new URL('/admin?error=server', request.url))
+    return NextResponse.redirect(new URL(`${loginPath}?error=server`, request.url))
   }
 }
