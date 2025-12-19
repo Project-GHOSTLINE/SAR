@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    let { message, contactMethod, contact } = body
+    let { message, contactMethod, contact, source = 'site' } = body
 
     // Validation des inputs
     if (!message || !contact) {
@@ -131,6 +131,19 @@ export async function POST(request: NextRequest) {
     const clientPhone = contactMethod === 'phone' ? contact : ''
     const clientName = contact // On utilise le contact comme nom par defaut
 
+    // Determiner la source et le departement
+    let sourceLabel = 'Formulaire Contact'
+    let departement = 'Analyse et suivi'
+    let departementEmail = 'mrosa@solutionargentrapide.ca'
+    let responsable = 'Michel'
+
+    if (source === 'nous-joindre') {
+      sourceLabel = 'Page Nous Joindre'
+      departement = 'Administration'
+      departementEmail = 'perception@solutionargentrapide.ca'
+      responsable = 'Sandra'
+    }
+
     let messageId: number | null = null
     let reference = ''
 
@@ -142,7 +155,7 @@ export async function POST(request: NextRequest) {
           nom: clientName,
           email: clientEmail,
           telephone: clientPhone,
-          question: `[Formulaire Contact] ${message}`,
+          question: `[${sourceLabel}] ${message}`,
           lu: false,
           status: 'nouveau'
         })
@@ -179,44 +192,22 @@ L'equipe Solution Argent Rapide`,
           })
         }
 
-        // 2. Notification a Sandra (perception)
+        // 2. Notification au responsable du departement
         await supabase.from('emails_envoyes').insert({
           message_id: messageId,
           type: 'system',
-          destinataire: 'perception@solutionargentrapide.ca',
-          sujet: `[NOUVELLE DEMANDE] #${reference}`,
-          contenu: `Bonjour Sandra,
+          destinataire: departementEmail,
+          sujet: `[${sourceLabel.toUpperCase()}] #${reference} - Nouveau message`,
+          contenu: `Bonjour ${responsable},
 
-Nouvelle demande recue depuis le formulaire de contact.
-
-Reference: #${reference}
-Date: ${new Date().toLocaleString('fr-CA')}
-
-CONTACT:
-${contactLabel}: ${contact}
-
-MESSAGE:
-${message}
-
----
-Connectez-vous a l'admin pour repondre: /admin/dashboard`,
-          envoye_par: 'system'
-        })
-
-        // 3. Notification a Michel (mrosa)
-        await supabase.from('emails_envoyes').insert({
-          message_id: messageId,
-          type: 'system',
-          destinataire: 'mrosa@solutionargentrapide.ca',
-          sujet: `[NOUVELLE DEMANDE] #${reference}`,
-          contenu: `Bonjour Michel,
-
-Nouvelle demande recue depuis le formulaire de contact.
+NOUVELLE DEMANDE - ${sourceLabel}
+=====================================
 
 Reference: #${reference}
 Date: ${new Date().toLocaleString('fr-CA')}
+Source: ${sourceLabel}
 
-CONTACT:
+CONTACT CLIENT:
 ${contactLabel}: ${contact}
 
 MESSAGE:
@@ -239,38 +230,55 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
     .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-    .header { background: linear-gradient(135deg, #00874e 0%, #006341 100%); color: white; padding: 30px; text-align: center; }
+    .header { background: linear-gradient(135deg, #00874e 0%, #005a34 100%); color: white; padding: 30px; text-align: center; }
     .header h1 { margin: 0; font-size: 24px; }
     .content { padding: 30px; }
+    .source-banner { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; }
+    .source-banner h2 { margin: 0; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+    .source-banner p { margin: 8px 0 0; opacity: 0.9; font-size: 14px; }
     .reference { background: #00874e; color: white; display: inline-block; padding: 8px 16px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; }
+    .greeting { font-size: 18px; color: #333; margin-bottom: 15px; }
     .client-info { background: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 25px; }
     .client-info h3 { margin: 0 0 15px; color: #00874e; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
     .info-row { display: flex; padding: 12px 0; border-bottom: 1px solid #e5e7eb; }
     .info-row:last-child { border-bottom: none; }
     .info-label { font-weight: 600; color: #666; width: 150px; }
     .info-value { color: #111; flex: 1; }
-    .info-value a { color: #00874e; text-decoration: none; }
+    .info-value a { color: #00874e; text-decoration: none; font-weight: 600; }
     .message-box { background: #fffbeb; border: 2px solid #fbbf24; border-radius: 12px; padding: 20px; margin-bottom: 25px; }
     .message-box h3 { margin: 0 0 10px; color: #92400e; font-size: 14px; text-transform: uppercase; }
     .message-box p { margin: 0; color: #333; font-size: 16px; line-height: 1.6; white-space: pre-wrap; }
+    .quick-actions { margin-top: 25px; }
+    .quick-actions h3 { color: #666; font-size: 14px; margin-bottom: 15px; }
+    .action-btn { display: inline-block; background: #00874e; color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; margin: 5px 5px 5px 0; font-size: 14px; font-weight: 600; }
+    .action-btn.secondary { background: white; color: #00874e; border: 2px solid #00874e; }
     .footer { background: #f9fafb; padding: 20px; text-align: center; color: #666; font-size: 12px; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>📬 Nouveau message du site web</h1>
+      <h1>📬 Un client attend votre reponse</h1>
       <p>Solution Argent Rapide</p>
     </div>
 
     <div class="content">
+      <!-- SOURCE EN GROS -->
+      <div class="source-banner">
+        <h2>📍 ${sourceLabel}</h2>
+        <p>Message recu depuis le site web</p>
+      </div>
+
       ${reference ? `<div class="reference">Reference: #${reference}</div>` : ''}
 
+      <p class="greeting">Bonjour ${responsable},</p>
+      <p style="color: #666; margin-bottom: 25px;">Un visiteur vous a contacte depuis <strong>${sourceLabel}</strong>.</p>
+
       <div class="client-info">
-        <h3>📋 Contact</h3>
+        <h3>📋 Contact du client</h3>
         <div class="info-row">
           <span class="info-label">Methode preferee</span>
-          <span class="info-value">${contactLabel}</span>
+          <span class="info-value"><strong>${contactLabel}</strong></span>
         </div>
         <div class="info-row">
           <span class="info-label">${contactLabel}</span>
@@ -283,13 +291,21 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
       </div>
 
       <div class="message-box">
-        <h3>💬 Message</h3>
+        <h3>💬 Message du client</h3>
         <p>${message}</p>
+      </div>
+
+      <div class="quick-actions">
+        <h3>⚡ Actions rapides</h3>
+        ${contactMethod === 'phone'
+          ? `<a href="tel:${contact.replace(/\D/g, '')}" class="action-btn">📞 Appeler le client</a>`
+          : `<a href="mailto:${contact}?subject=Re: Votre message ${reference ? '%23' + reference : ''} - Solution Argent Rapide" class="action-btn">✉️ Repondre par courriel</a>`}
+        <a href="https://solutionargentrapide.ca/admin/dashboard" class="action-btn secondary">🔗 Voir dans l'admin</a>
       </div>
     </div>
 
     <div class="footer">
-      <p>Ce message a ete envoye depuis le formulaire de contact<br>
+      <p>Ce message a ete envoye automatiquement depuis ${sourceLabel}<br>
       <a href="https://solutionargentrapide.ca">solutionargentrapide.ca</a></p>
     </div>
   </div>
@@ -297,12 +313,7 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
 </html>
       `.trim()
 
-      // Envoyer a Sandra ET Michel
-      const recipients = [
-        'perception@solutionargentrapide.ca',
-        'mrosa@solutionargentrapide.ca'
-      ]
-
+      // Envoyer au departement responsable uniquement
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -311,9 +322,9 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
         },
         body: JSON.stringify({
           from: 'SAR Contact <noreply@solutionargentrapide.ca>',
-          to: recipients,
+          to: departementEmail,
           reply_to: contactMethod === 'email' ? contact : undefined,
-          subject: `📬 Nouveau message - ${reference ? '#' + reference : 'Site web'}`,
+          subject: `📬 [${sourceLabel.toUpperCase()}] ${reference ? '#' + reference : ''} - Nouveau message`,
           html: emailHtml
         })
       })
@@ -388,10 +399,29 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
                       Bonjour,
                     </p>
                     <p style="margin: 0 0 20px; color: #374151; font-size: 16px; line-height: 1.7;">
-                      Nous avons bien recu votre demande et nous vous remercions de votre confiance.
-                      <strong>Un membre de notre equipe vous contactera dans les plus brefs delais</strong>,
-                      generalement dans les <strong>24 a 48 heures ouvrables</strong>.
+                      Nous avons bien recu votre message et nous vous remercions de votre confiance.
                     </p>
+
+                    <!-- Departement Box -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                      <tr>
+                        <td style="background: #f0f9ff; border: 2px solid #3b82f6; border-radius: 12px; padding: 20px;">
+                          <p style="margin: 0 0 8px; color: #1e40af; font-size: 13px; font-weight: 600; text-transform: uppercase;">Votre message a ete transmis a:</p>
+                          <p style="margin: 0; color: #1d4ed8; font-size: 20px; font-weight: 700;">📋 Departement ${departement}</p>
+                          <p style="margin: 10px 0 0; color: #3b82f6; font-size: 14px;">${responsable} traitera votre demande</p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Delai 24h -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                      <tr>
+                        <td style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 12px; padding: 20px; text-align: center;">
+                          <p style="margin: 0; color: #92400e; font-size: 18px; font-weight: 700;">⏱️ Delai de reponse: 24 heures ouvrables</p>
+                          <p style="margin: 8px 0 0; color: #a16207; font-size: 14px;">Un membre de notre equipe vous contactera bientot</p>
+                        </td>
+                      </tr>
+                    </table>
 
                     <!-- What happens next -->
                     <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0; background: #fafafa; border-radius: 12px;">
@@ -402,19 +432,19 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
                             <tr>
                               <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
                                 <span style="color: #00874e; font-weight: 700; margin-right: 10px;">1.</span>
-                                Notre equipe analyse votre demande
+                                Notre equipe analyse votre message
                               </td>
                             </tr>
                             <tr>
                               <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
                                 <span style="color: #00874e; font-weight: 700; margin-right: 10px;">2.</span>
-                                Nous vous contactons par telephone ou courriel
+                                ${responsable} vous contacte sous 24h
                               </td>
                             </tr>
                             <tr>
                               <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
                                 <span style="color: #00874e; font-weight: 700; margin-right: 10px;">3.</span>
-                                Nous trouvons ensemble la meilleure solution
+                                Nous repondons a votre demande
                               </td>
                             </tr>
                           </table>
@@ -435,12 +465,34 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
                       </tr>
                     </table>
 
-                    <!-- Contact Info -->
+                    <!-- Contact Info Urgent -->
                     <table role="presentation" style="width: 100%; border-collapse: collapse; margin-top: 30px;">
                       <tr>
-                        <td style="border-top: 1px solid #e5e7eb; padding-top: 25px;">
-                          <p style="margin: 0 0 15px; color: #6b7280; font-size: 14px;">
-                            <strong style="color: #374151;">Une question urgente?</strong> Contactez-nous directement:
+                        <td style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 20px;">
+                          <p style="margin: 0 0 12px; color: #b91c1c; font-size: 15px; font-weight: 700;">
+                            🚨 Demande URGENTE? Appelez directement:
+                          </p>
+                          <table role="presentation" style="border-collapse: collapse; width: 100%;">
+                            <tr>
+                              <td style="padding: 10px; background: white; border-radius: 8px; margin-bottom: 8px;">
+                                <a href="tel:4509991107" style="color: #dc2626; text-decoration: none; font-size: 18px; font-weight: 700;">
+                                  📞 450 999-1107
+                                </a>
+                                <p style="margin: 5px 0 0; color: #666; font-size: 12px;">Administration / Comptabilite</p>
+                              </td>
+                            </tr>
+                          </table>
+                          <p style="margin: 12px 0 0; color: #b91c1c; font-size: 12px;">Lundi-Vendredi 8h-16h</p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Contact Info Normal -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                      <tr>
+                        <td style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                          <p style="margin: 0 0 12px; color: #6b7280; font-size: 14px;">
+                            <strong style="color: #374151;">Autres contacts:</strong>
                           </p>
                           <table role="presentation" style="border-collapse: collapse;">
                             <tr>
@@ -448,6 +500,7 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
                                 <a href="tel:+18889001516" style="color: #00874e; text-decoration: none; font-size: 15px; font-weight: 600;">
                                   📞 1-888-900-1516
                                 </a>
+                                <span style="color: #9ca3af; font-size: 12px; margin-left: 8px;">(Ligne generale)</span>
                               </td>
                             </tr>
                             <tr>

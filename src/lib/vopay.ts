@@ -27,12 +27,20 @@ interface VoPayBalance {
 }
 
 interface VoPayTransaction {
-  transaction_id: string
-  transaction_type: string
-  amount: number
-  status: string
-  created_at: string
-  reference: string
+  TransactionID?: string
+  TransactionType?: string
+  Amount?: string
+  Status?: string
+  TransactionDateTime?: string
+  ClientReferenceNumber?: string
+  Notes?: string
+  // Fields from account/transactions
+  transaction_id?: string
+  transaction_type?: string
+  amount?: number
+  status?: string
+  created_at?: string
+  reference?: string
   description?: string
 }
 
@@ -116,16 +124,14 @@ class VoPayClient {
    */
   async getTransactions(params?: {
     limit?: number
-    start_date?: string
-    end_date?: string
-    status?: string
-  }): Promise<{ transactions: VoPayTransaction[] }> {
+    StartDateTime?: string
+    EndDateTime?: string
+  }): Promise<VoPayTransaction[]> {
     const authParams = this.getAuthParams()
 
-    if (params?.limit) authParams.set('limit', params.limit.toString())
-    if (params?.start_date) authParams.set('start_date', params.start_date)
-    if (params?.end_date) authParams.set('end_date', params.end_date)
-    if (params?.status) authParams.set('status', params.status)
+    if (params?.limit) authParams.set('NumberOfTransactions', params.limit.toString())
+    if (params?.StartDateTime) authParams.set('StartDateTime', params.StartDateTime)
+    if (params?.EndDateTime) authParams.set('EndDateTime', params.EndDateTime)
 
     const url = `${this.config.apiUrl}account/transactions?${authParams.toString()}`
 
@@ -141,21 +147,23 @@ class VoPayClient {
 
     const data = await response.json()
 
-    // VoPay renvoie { Success: true/false, ... }
+    // VoPay renvoie { Success: true/false, Transactions: {...} }
     if (data.Success === false) {
       throw new Error(data.ErrorMessage || 'VoPay API Error')
     }
 
-    return data
+    // Les transactions sont retournées comme un objet avec des clés numériques
+    // Convertir en array
+    const transactions = data.Transactions || {}
+    return Object.values(transactions) as VoPayTransaction[]
   }
 
   /**
-   * Récupère les statistiques complètes
+   * Récupère les statistiques complètes avec transactions
    */
   async getStats(): Promise<VoPayStats> {
     try {
-      // Pour l'instant, on récupère juste le solde
-      // Les transactions nécessitent un endpoint différent que nous testerons plus tard
+      // Récupération du solde
       const balanceData = await this.getBalance()
 
       const accountBalance = parseFloat(balanceData.AccountBalance)
@@ -163,15 +171,72 @@ class VoPayClient {
       const pendingFunds = parseFloat(balanceData.PendingFunds)
       const frozen = accountBalance - availableFunds
 
+      // Récupération des transactions (30 derniers jours)
+      const endDate = new Date()
+      const startDate = new Date()
+      startDate.setDate(startDate.getDate() - 30)
+
+      let transactions: VoPayTransaction[] = []
+      try {
+        transactions = await this.getTransactions({
+          limit: 100,
+          StartDateTime: startDate.toISOString().split('T')[0],
+          EndDateTime: endDate.toISOString().split('T')[0]
+        })
+      } catch (txError) {
+        console.error('Error fetching transactions:', txError)
+        // Continue sans transactions si erreur
+      }
+
+      // Calcul des stats
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      const weekAgo = new Date()
+      weekAgo.setDate(weekAgo.getDate() - 7)
+
+      const todayTransactions = transactions.filter(t => {
+        const txDate = new Date(t.TransactionDateTime || t.created_at || '')
+        return txDate >= today
+      })
+
+      const weekTransactions = transactions.filter(t => {
+        const txDate = new Date(t.TransactionDateTime || t.created_at || '')
+        return txDate >= weekAgo
+      })
+
+      const pendingCount = transactions.filter(t =>
+        (t.Status || t.status || '').toLowerCase().includes('pending')
+      ).length
+
+      const completedCount = transactions.filter(t => {
+        const status = (t.Status || t.status || '').toLowerCase()
+        return status === 'completed' || status === 'success'
+      }).length
+
+      const todayInterac = todayTransactions.reduce((sum, t) => {
+        const amount = parseFloat(t.Amount || t.amount?.toString() || '0')
+        return sum + amount
+      }, 0)
+
+      const weeklyVolume = weekTransactions.reduce((sum, t) => {
+        const amount = parseFloat(t.Amount || t.amount?.toString() || '0')
+        return sum + amount
+      }, 0)
+
+      const successRate = transactions.length > 0
+        ? (completedCount / transactions.length) * 100
+        : 100
+
       return {
         balance: accountBalance,
         available: availableFunds,
         frozen: frozen,
-        pendingInterac: 0, // Nécessite l'endpoint transactions
-        todayInterac: pendingFunds, // On utilise pending funds comme approximation
-        weeklyVolume: 0, // Nécessite l'endpoint transactions
-        successRate: 100, // Valeur par défaut
-        recentTransactions: []
+        pendingInterac: pendingCount,
+        todayInterac,
+        weeklyVolume,
+        successRate: Math.round(successRate * 10) / 10,
+        recentTransactions: transactions.slice(0, 10)
       }
     } catch (error) {
       console.error('VoPay Stats Error:', error)

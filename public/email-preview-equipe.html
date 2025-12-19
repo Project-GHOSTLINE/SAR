@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview Email Équipe - Solution Argent Rapide</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #00874e 0%, #006341 100%); color: white; padding: 30px; text-align: center; }
+    .header h1 { margin: 0; font-size: 24px; }
+    .header p { margin: 10px 0 0; opacity: 0.9; }
+    .content { padding: 30px; }
+    .reference { background: #00874e; color: white; display: inline-block; padding: 8px 16px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; }
+    .source-tag { background: #3b82f6; color: white; display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 12px; margin-left: 10px; }
+    .greeting { font-size: 18px; color: #333; margin-bottom: 20px; }
+    .intro { background: #f0fdf4; border-left: 4px solid #00874e; padding: 15px; margin-bottom: 25px; border-radius: 0 8px 8px 0; }
+    .client-info { background: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 25px; }
+    .client-info h3 { margin: 0 0 15px; color: #00874e; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
+    .info-row { display: flex; padding: 12px 0; border-bottom: 1px solid #e5e7eb; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-weight: 600; color: #666; width: 120px; }
+    .info-value { color: #111; flex: 1; }
+    .info-value a { color: #00874e; text-decoration: none; }
+    .question-tag { background: #dbeafe; color: #1e40af; padding: 8px 16px; border-radius: 8px; font-weight: 600; display: inline-block; margin-bottom: 15px; }
+    .message-box { background: #fffbeb; border: 2px solid #fbbf24; border-radius: 12px; padding: 20px; margin-bottom: 25px; }
+    .message-box h3 { margin: 0 0 10px; color: #92400e; font-size: 14px; text-transform: uppercase; }
+    .message-box p { margin: 0; color: #333; font-size: 16px; line-height: 1.6; }
+    .quick-responses { margin-top: 25px; }
+    .quick-responses h3 { color: #666; font-size: 14px; margin-bottom: 15px; }
+    .response-btn { display: inline-block; background: #00874e; color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; margin: 5px 5px 5px 0; font-size: 14px; }
+    .response-btn:hover { background: #006341; }
+    .response-btn.secondary { background: white; color: #00874e; border: 2px solid #00874e; }
+    .footer { background: #f9fafb; padding: 20px; text-align: center; color: #666; font-size: 12px; }
+
+    /* Preview header */
+    .preview-header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .preview-header h2 { margin: 0 0 10px; }
+    .preview-header p { margin: 0; opacity: 0.9; font-size: 14px; }
+    .preview-meta {
+      background: #f0f9ff;
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .preview-meta table { width: 100%; border-collapse: collapse; }
+    .preview-meta td { padding: 8px 0; }
+    .preview-meta td:first-child { font-weight: 600; color: #1e40af; width: 120px; }
+  </style>
+</head>
+<body>
+  <!-- PREVIEW HEADER -->
+  <div class="preview-header">
+    <h2>📧 Preview Email Équipe (Sandra/Michel)</h2>
+    <p>Voici exactement ce que Sandra ou Michel reçoit quand un client envoie un message</p>
+  </div>
+
+  <!-- META INFO -->
+  <div class="preview-meta">
+    <table>
+      <tr>
+        <td>De:</td>
+        <td>SAR Assistant &lt;noreply@solutionargentrapide.ca&gt;</td>
+      </tr>
+      <tr>
+        <td>À:</td>
+        <td>perception@solutionargentrapide.ca (Sandra) ou mrosa@solutionargentrapide.ca (Michel)</td>
+      </tr>
+      <tr>
+        <td>Sujet:</td>
+        <td>💬 Où en est ma demande de crédit? - Jean-Pierre Tremblay #SAR-000045</td>
+      </tr>
+      <tr>
+        <td>Reply-To:</td>
+        <td>client@example.com (email du client)</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ACTUAL EMAIL -->
+  <div class="container">
+    <div class="header">
+      <h1>💬 Un client attend votre réponse</h1>
+      <p>Solution Argent Rapide</p>
+    </div>
+
+    <div class="content">
+      <div style="margin-bottom: 20px;">
+        <span class="reference">#SAR-000045</span>
+        <span class="source-tag">Analyse Demande</span>
+      </div>
+
+      <p class="greeting">Bonjour Sandra,</p>
+
+      <div class="intro">
+        <strong>Nouvelle demande reçue!</strong><br>
+        Un client vous a contacté depuis le formulaire "Analyse Demande".
+      </div>
+
+      <div class="client-info">
+        <h3>📋 Informations du client</h3>
+        <div class="info-row">
+          <span class="info-label">👤 Nom</span>
+          <span class="info-value"><strong>Jean-Pierre Tremblay</strong></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">📞 Téléphone</span>
+          <span class="info-value"><a href="tel:5141234567">514-123-4567</a></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">✉️ Courriel</span>
+          <span class="info-value"><a href="mailto:client@example.com">client@example.com</a></span>
+        </div>
+      </div>
+
+      <div class="question-tag">❓ Où en est ma demande de crédit?</div>
+
+      <div class="quick-responses">
+        <h3>⚡ Réponses rapides</h3>
+        <a href="tel:5141234567" class="response-btn">📞 Appeler le client</a>
+        <a href="mailto:client@example.com?subject=Re: Votre demande %23SAR-000045 - Solution Argent Rapide&body=Bonjour Jean-Pierre,%0D%0A%0D%0AMerci de nous avoir contacté.%0D%0A%0D%0A" class="response-btn secondary">✉️ Répondre par courriel</a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Ce message a été envoyé automatiquement<br>
+      <a href="https://solutionargentrapide.ca/admin/dashboard">Voir dans l'admin</a></p>
+    </div>
+  </div>
+
+  <br><br>
+
+  <!-- PREVIEW ESPACE CLIENT -->
+  <div class="preview-header" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);">
+    <h2>📧 Preview Email Espace Client</h2>
+    <p>Quand un client utilise l'Espace Client pour reporter un paiement, etc.</p>
+  </div>
+
+  <div class="preview-meta">
+    <table>
+      <tr>
+        <td>De:</td>
+        <td>SAR Assistant &lt;noreply@solutionargentrapide.ca&gt;</td>
+      </tr>
+      <tr>
+        <td>À:</td>
+        <td>perception@solutionargentrapide.ca (Sandra)</td>
+      </tr>
+      <tr>
+        <td>Sujet:</td>
+        <td>💬 Espace Client - Reporter un paiement - Marie Lavoie #SAR-000046</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <h1>💬 Un client attend votre réponse</h1>
+      <p>Solution Argent Rapide</p>
+    </div>
+
+    <div class="content">
+      <div style="margin-bottom: 20px;">
+        <span class="reference">#SAR-000046</span>
+        <span class="source-tag" style="background: #7c3aed;">Espace Client</span>
+      </div>
+
+      <p class="greeting">Bonjour Sandra,</p>
+
+      <div class="intro">
+        <strong>Nouvelle demande reçue!</strong><br>
+        Un client vous a contacté depuis le formulaire "Espace Client".
+      </div>
+
+      <div class="client-info">
+        <h3>📋 Informations du client</h3>
+        <div class="info-row">
+          <span class="info-label">👤 Nom</span>
+          <span class="info-value"><strong>Marie Lavoie</strong></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">📞 Téléphone</span>
+          <span class="info-value"><a href="tel:4501234567">450-123-4567</a></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">✉️ Courriel</span>
+          <span class="info-value"><a href="mailto:marie.lavoie@email.com">marie.lavoie@email.com</a></span>
+        </div>
+      </div>
+
+      <div class="question-tag" style="background: #f3e8ff; color: #7c3aed;">📅 Reporter un paiement</div>
+
+      <div class="message-box">
+        <h3>💬 Détails de la demande</h3>
+        <p>Je voudrais reporter mon paiement du 20 décembre au 3 janvier car je n'aurai pas ma paie avant le 2 janvier. Merci de votre compréhension.</p>
+      </div>
+
+      <div class="quick-responses">
+        <h3>⚡ Réponses rapides</h3>
+        <a href="tel:4501234567" class="response-btn">📞 Appeler le client</a>
+        <a href="mailto:marie.lavoie@email.com?subject=Re: Votre demande %23SAR-000046 - Solution Argent Rapide" class="response-btn secondary">✉️ Répondre par courriel</a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Ce message a été envoyé automatiquement<br>
+      <a href="https://solutionargentrapide.ca/admin/dashboard">Voir dans l'admin</a></p>
+    </div>
+  </div>
+
+  <br><br>
+
+  <!-- INFO BOX -->
+  <div style="background: #f0fdf4; border: 2px solid #00874e; border-radius: 12px; padding: 20px; margin-top: 30px;">
+    <h3 style="color: #00874e; margin: 0 0 15px;">📋 Informations importantes</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 8px 0; border-bottom: 1px solid #dcfce7;"><strong>Téléphone principal:</strong></td>
+        <td style="padding: 8px 0; border-bottom: 1px solid #dcfce7;">1-888-900-1516</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; border-bottom: 1px solid #dcfce7;"><strong>Email info:</strong></td>
+        <td style="padding: 8px 0; border-bottom: 1px solid #dcfce7;">info@solutionargentrapide.ca</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; border-bottom: 1px solid #dcfce7;"><strong>Sandra (Perception):</strong></td>
+        <td style="padding: 8px 0; border-bottom: 1px solid #dcfce7;">perception@solutionargentrapide.ca</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; border-bottom: 1px solid #dcfce7;"><strong>Michel (Admin):</strong></td>
+        <td style="padding: 8px 0; border-bottom: 1px solid #dcfce7;">mrosa@solutionargentrapide.ca</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0;"><strong>Heures d'ouverture:</strong></td>
+        <td style="padding: 8px 0;">Lundi-Vendredi 8h00-16h00</td>
+      </tr>
+    </table>
+  </div>
+
+  <p style="text-align: center; color: #9ca3af; font-size: 12px; margin-top: 30px;">
+    © 2025 Solution Argent Rapide Inc. - Tous droits réservés<br>
+    Couleurs: Vert SAR #00874e | Or #c9a227
+  </p>
+</body>
+</html>

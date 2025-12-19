@@ -52,7 +52,7 @@ export default function Home() {
       setFormSubmitted(true)
     } catch (error) {
       console.error('Erreur:', error)
-      alert('Erreur lors de l\'envoi. Veuillez appeler le 514 589-1946')
+      alert('Erreur lors de l\'envoi. Veuillez appeler le 1-888-900-1516')
     } finally {
       setIsSubmitting(false)
     }
@@ -622,7 +622,7 @@ export default function Home() {
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
-            <h2 className="section-title">Questions frequentes</h2>
+            <h2 className="section-title">Questions fréquentes</h2>
           </div>
 
           <div className="max-w-2xl mx-auto space-y-3 md:space-y-4">
@@ -657,9 +657,9 @@ export default function Home() {
             <div className="flex flex-col gap-4 justify-center max-w-md mx-auto">
               <div className="bg-sar-green/5 rounded-xl p-4 border-2 border-sar-green/20">
                 <div className="flex flex-col sm:flex-row gap-2 mb-2">
-                  <a href="tel:5145891946" className="btn-primary flex-1 flex items-center justify-center gap-2">
+                  <a href="tel:18889001516" className="btn-primary flex-1 flex items-center justify-center gap-2">
                     <Phone size={18} />
-                    <span>514 589-1946</span>
+                    <span>1-888-900-1516</span>
                   </a>
                   <button
                     onClick={() => setShowContactModal(true)}
@@ -841,7 +841,7 @@ export default function Home() {
                 </button>
 
                 <p className="text-xs text-gray-500 text-center">
-                  Ou appelez directement: <a href="tel:5145891946" className="text-sar-green font-semibold">514 589-1946</a>
+                  Ou appelez directement: <a href="tel:18889001516" className="text-sar-green font-semibold">1-888-900-1516</a>
                 </p>
               </form>
             )}

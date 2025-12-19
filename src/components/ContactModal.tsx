@@ -55,7 +55,10 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
       const response = await fetch('/api/contact-analyse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(contactForm)
+        body: JSON.stringify({
+          ...contactForm,
+          source: 'analyse-suivi'
+        })
       })
 
       if (response.ok) {

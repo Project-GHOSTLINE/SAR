@@ -35,15 +35,45 @@ export async function POST(request: NextRequest) {
       : question
 
     // Determiner le tag source et le destinataire
-    const sourceLabel = source === 'accueil' ? 'Formulaire Accueil' : 'Analyse Demande'
-    const questionWithTag = `[${sourceLabel}] [${question}] ${question === "Autre question" ? questionAutre : ''}`
+    let sourceLabel = 'Analyse Demande'
+    let departement = 'Analyse et suivi'
+    if (source === 'accueil') {
+      sourceLabel = 'Formulaire Accueil'
+      departement = 'Analyse et suivi'
+    } else if (source === 'espace-client') {
+      sourceLabel = 'Espace Client'
+      departement = 'Comptabilite et administration'
+    } else if (source === 'analyse-suivi') {
+      sourceLabel = 'Analyse et Suivi'
+      departement = 'Analyse et suivi'
+    }
 
-    // Destinataire selon le type de question
-    const isAutreQuestion = question === "Autre question"
-    const destinataire = isAutreQuestion
-      ? 'perception@solutionargentrapide.ca'
-      : 'mrosa@solutionargentrapide.ca'
-    const destinataireNom = isAutreQuestion ? 'Sandra' : 'Michel'
+    const isEspaceClient = source === 'espace-client'
+    const questionWithTag = isEspaceClient
+      ? `[${sourceLabel}] [${question}] ${questionAutre || ''}`
+      : `[${sourceLabel}] [${question}] ${question === "Autre question" ? questionAutre : ''}`
+
+    // Destinataire selon le type de question et source
+    const isAutreQuestion = question === "Autre question" || question.includes("Autre question")
+    const isEspaceClientSource = source === 'espace-client'
+
+    // Espace Client va a Sandra (perception), autres questions vont selon le type
+    let destinataire: string
+    let destinataireNom: string
+
+    if (isEspaceClientSource) {
+      destinataire = 'perception@solutionargentrapide.ca'
+      destinataireNom = 'Sandra'
+      departement = 'Comptabilite et administration'
+    } else if (isAutreQuestion) {
+      destinataire = 'perception@solutionargentrapide.ca'
+      destinataireNom = 'Sandra'
+      departement = 'Comptabilite et administration'
+    } else {
+      destinataire = 'mrosa@solutionargentrapide.ca'
+      destinataireNom = 'Michel'
+      departement = 'Analyse et suivi'
+    }
 
     const supabase = getSupabase()
     let messageId: number | null = null

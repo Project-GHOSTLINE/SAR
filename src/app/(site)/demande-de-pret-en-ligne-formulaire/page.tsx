@@ -5,10 +5,10 @@ import { useEffect } from 'react'
 export default function CreditRequestPage() {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      console.log("Message recu du domaine :", event.origin, event.data)
+      console.log("Message reçu du domaine :", event.origin, event.data)
       if (event.origin === "https://argentrapide.margill.com") {
         if (event.data && event.data.type === "redirect" && event.data.url) {
-          console.log("Redirection demandee :", event.data.url)
+          console.log("Redirection demandée :", event.data.url)
           window.location.href = event.data.url
         }
       }
@@ -21,7 +21,7 @@ export default function CreditRequestPage() {
   return (
     <div className="py-8 bg-sar-grey min-h-screen">
       <div className="container mx-auto px-4">
-        <h1 className="section-title text-center">Demandez votre credit</h1>
+        <h1 className="section-title text-center">Demandez votre crédit</h1>
         <p className="section-subtitle text-center">Remplissez le formulaire ci-dessous pour soumettre votre demande</p>
 
         <div className="flex justify-center">
@@ -35,7 +35,7 @@ export default function CreditRequestPage() {
               overflow: 'hidden'
             }}
             allow="camera; microphone"
-            title="Formulaire de demande de credit"
+            title="Formulaire de demande de crédit"
           />
         </div>
       </div>

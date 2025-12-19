@@ -72,13 +72,16 @@ export default function ClientPortal() {
     try {
       const actionLabel = actions.find(a => a.id === selectedAction)?.title || selectedAction
 
-      const response = await fetch('/api/contact', {
+      const response = await fetch('/api/contact-analyse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: `[Espace Client - ${actionLabel}]\n\n${formData.message || 'Aucun message additionnel'}`,
-          contactMethod: 'email',
-          contact: formData.email
+          nom: formData.nom,
+          email: formData.email,
+          telephone: formData.telephone,
+          question: `Espace Client - ${actionLabel}`,
+          questionAutre: formData.message || '',
+          source: 'espace-client'
         })
       })
 
