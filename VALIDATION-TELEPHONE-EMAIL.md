@@ -365,8 +365,8 @@ validateEmail('user@@example.com')           // ❌ Double @
 - [x] Empêche soumission si invalide
 - [x] Déployé en production
 - [x] Testé et fonctionnel
-- [ ] ContactModal à migrer
-- [ ] Page client à migrer
+- [x] ContactModal migré et validé
+- [x] Page client migrée et validée
 
 ---
 
