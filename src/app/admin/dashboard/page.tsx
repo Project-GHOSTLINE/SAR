@@ -492,66 +492,243 @@ export default function AdminDashboard() {
 
         {/* Messages View */}
         {selectedView === 'messages' && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-2xl font-semibold text-[#003d2c]">Messages</h1>
-                <p className="text-gray-500 mt-1">{stats.total} message(s) au total</p>
+          <div className="flex gap-6">
+            {/* Liste des messages */}
+            <div className={`${selectedMessage ? 'w-1/2' : 'w-full'} transition-all duration-300`}>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h1 className="text-2xl font-semibold text-[#003d2c]">Messages</h1>
+                  <p className="text-gray-500 mt-1">{stats.total} message(s) au total</p>
+                </div>
+                <button
+                  onClick={fetchMessages}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  <RefreshCw size={16} />
+                  Actualiser
+                </button>
               </div>
-              <button
-                onClick={fetchMessages}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
-              >
-                <RefreshCw size={16} />
-                Actualiser
-              </button>
+
+              <div className="bg-white rounded-lg border border-gray-200">
+                <div className="divide-y divide-gray-100">
+                  {messages.map((msg) => {
+                    const { option, message: cleanMsg } = extractOptionFromMessage(msg.question)
+                    return (
+                      <div
+                        key={msg.id}
+                        onClick={() => fetchMessageDetails(msg)}
+                        className={`px-6 py-5 hover:bg-gray-50 transition-colors cursor-pointer ${!msg.lu ? 'bg-blue-50/50' : ''} ${selectedMessage?.id === msg.id ? 'ring-2 ring-[#00874e] ring-inset' : ''}`}
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 rounded-full bg-[#e8f5e9] flex items-center justify-center text-sm font-bold text-[#00874e]">
+                            {msg.nom.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <p className="font-semibold text-gray-900">{msg.nom}</p>
+                              <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-500 font-mono">#{msg.reference}</span>
+                              {!msg.lu && (
+                                <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-600 font-medium">Nouveau</span>
+                              )}
+                            </div>
+                            {/* Option Badge */}
+                            {option && (
+                              <div className="mb-2">
+                                <span className={`text-xs px-3 py-1 rounded-full font-medium ${getOptionColor(option)}`}>
+                                  {option}
+                                </span>
+                              </div>
+                            )}
+                            <p className="text-gray-700 mb-3 truncate">{cleanMsg}</p>
+                            <div className="flex items-center gap-4 text-sm text-gray-500 flex-wrap">
+                              <span className="flex items-center gap-1">
+                                <Mail size={14} />
+                                {msg.email || 'N/A'}
+                              </span>
+                              {msg.telephone && (
+                                <span className="flex items-center gap-1">
+                                  <Phone size={14} />
+                                  {msg.telephone}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1">
+                                <Clock size={14} />
+                                {new Date(msg.date).toLocaleString('fr-CA')}
+                              </span>
+                            </div>
+                          </div>
+                          <ChevronRight size={20} className="text-gray-400 flex-shrink-0" />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200">
-              <div className="divide-y divide-gray-100">
-                {messages.map((msg) => (
-                  <div key={msg.id} className={`px-6 py-5 hover:bg-gray-50 transition-colors ${!msg.lu ? 'bg-blue-50/50' : ''}`}>
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[#e8f5e9] flex items-center justify-center text-sm font-bold text-[#00874e]">
-                        {msg.nom.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <p className="font-semibold text-gray-900">{msg.nom}</p>
-                          <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-500 font-mono">#{msg.reference}</span>
-                          {!msg.lu && (
-                            <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-600 font-medium">Nouveau</span>
-                          )}
+            {/* Panneau de details */}
+            {selectedMessage && (
+              <div className="w-1/2 bg-white rounded-lg border border-gray-200 sticky top-24 h-fit max-h-[calc(100vh-120px)] overflow-auto">
+                {/* Header */}
+                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+                  <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                    <MessageSquare size={18} className="text-[#00874e]" />
+                    Details du message
+                  </h2>
+                  <button
+                    onClick={closeDetail}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <X size={18} className="text-gray-500" />
+                  </button>
+                </div>
+
+                {detailLoading ? (
+                  <div className="p-8 flex items-center justify-center">
+                    <Loader2 size={24} className="animate-spin text-[#00874e]" />
+                  </div>
+                ) : (
+                  <div className="p-6 space-y-6">
+                    {/* Info Client */}
+                    <div className="bg-gray-50 rounded-xl p-5">
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <User size={14} />
+                        Information Client
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-14 h-14 rounded-full bg-[#00874e] flex items-center justify-center text-lg font-bold text-white">
+                            {selectedMessage.nom.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900 text-lg">{selectedMessage.nom}</p>
+                            <p className="text-sm text-gray-500 font-mono">#{selectedMessage.reference}</p>
+                          </div>
                         </div>
-                        <p className="text-gray-700 mb-3">{msg.question}</p>
-                        <div className="flex items-center gap-6 text-sm text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <Mail size={14} />
-                            {msg.email}
-                          </span>
-                          {msg.telephone && (
-                            <span className="flex items-center gap-1">
-                              <Phone size={14} />
-                              {msg.telephone}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1">
-                            <Clock size={14} />
-                            {new Date(msg.date).toLocaleString('fr-CA')}
-                          </span>
+                        <div className="grid grid-cols-1 gap-3 mt-4">
+                          <div className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                            <Mail size={18} className="text-[#00874e]" />
+                            <div>
+                              <p className="text-xs text-gray-500">Courriel</p>
+                              <a href={`mailto:${selectedMessage.email}`} className="text-gray-900 font-medium hover:text-[#00874e]">
+                                {selectedMessage.email || 'Non fourni'}
+                              </a>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                            <Phone size={18} className="text-[#00874e]" />
+                            <div>
+                              <p className="text-xs text-gray-500">Telephone</p>
+                              <a href={`tel:${selectedMessage.telephone}`} className="text-gray-900 font-medium hover:text-[#00874e]">
+                                {selectedMessage.telephone || 'Non fourni'}
+                              </a>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                            <Clock size={18} className="text-[#00874e]" />
+                            <div>
+                              <p className="text-xs text-gray-500">Date de reception</p>
+                              <p className="text-gray-900 font-medium">{new Date(selectedMessage.date).toLocaleString('fr-CA')}</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Option Selectionnee */}
+                    {(() => {
+                      const { option } = extractOptionFromMessage(selectedMessage.question)
+                      return option ? (
+                        <div className="bg-gray-50 rounded-xl p-5">
+                          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <Tag size={14} />
+                            Option Selectionnee
+                          </h3>
+                          <span className={`inline-block text-sm px-4 py-2 rounded-full font-semibold ${getOptionColor(option)}`}>
+                            {option}
+                          </span>
+                        </div>
+                      ) : null
+                    })()}
+
+                    {/* Message */}
+                    <div className="bg-gray-50 rounded-xl p-5">
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <MessageSquare size={14} />
+                        Message du Client
+                      </h3>
+                      <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
+                        {extractOptionFromMessage(selectedMessage.question).message}
+                      </p>
+                    </div>
+
+                    {/* Emails Envoyes */}
+                    <div className="bg-gray-50 rounded-xl p-5">
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <Send size={14} />
+                        Emails Envoyes ({messageEmails.length})
+                      </h3>
+                      {messageEmails.length === 0 ? (
+                        <p className="text-gray-500 text-sm italic">Aucun email enregistre</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {messageEmails.map((email) => (
+                            <div key={email.id} className="bg-white rounded-lg p-4 border border-gray-100">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                  email.type === 'system' ? 'bg-purple-100 text-purple-700' :
+                                  email.type === 'manual' ? 'bg-blue-100 text-blue-700' :
+                                  'bg-gray-100 text-gray-700'
+                                }`}>
+                                  {email.type === 'system' ? 'Auto' : 'Manuel'}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                  {new Date(email.date).toLocaleString('fr-CA')}
+                                </span>
+                              </div>
+                              <p className="text-sm font-medium text-gray-900 mb-1">
+                                A: {email.to}
+                              </p>
+                              <p className="text-sm text-gray-700 font-medium mb-2">
+                                {email.subject}
+                              </p>
+                              <details className="text-sm">
+                                <summary className="text-[#00874e] cursor-pointer hover:underline">
+                                  Voir le contenu
+                                </summary>
+                                <pre className="mt-2 p-3 bg-gray-50 rounded text-xs text-gray-600 whitespace-pre-wrap overflow-auto max-h-40">
+                                  {email.content}
+                                </pre>
+                              </details>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-3">
                       <a
-                        href={`mailto:${msg.email}`}
-                        className="px-4 py-2 bg-[#00874e] text-white rounded-lg text-sm font-medium hover:bg-[#006d3f] transition-colors"
+                        href={`mailto:${selectedMessage.email}`}
+                        className="flex-1 py-3 bg-[#00874e] text-white rounded-lg text-sm font-semibold hover:bg-[#006d3f] transition-colors flex items-center justify-center gap-2"
                       >
-                        Repondre
+                        <Mail size={16} />
+                        Repondre par email
                       </a>
+                      {selectedMessage.telephone && (
+                        <a
+                          href={`tel:${selectedMessage.telephone}`}
+                          className="flex-1 py-3 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Phone size={16} />
+                          Appeler
+                        </a>
+                      )}
                     </div>
                   </div>
-                ))}
+                )}
               </div>
-            </div>
+            )}
           </div>
         )}
 
