@@ -146,6 +146,7 @@ export default function AdminDashboard() {
   const [messageEmails, setMessageEmails] = useState<EmailLog[]>([])
   const [messageNotes, setMessageNotes] = useState<NoteLog[]>([])
   const [detailLoading, setDetailLoading] = useState(false)
+  const [previewEmail, setPreviewEmail] = useState<EmailLog | null>(null)
 
   const [vopayData, setVopayData] = useState({
     balance: 0,
@@ -811,33 +812,49 @@ export default function AdminDashboard() {
                       ) : (
                         <div className="space-y-3">
                           {messageEmails.map((email) => (
-                            <div key={email.id} className="bg-white rounded-lg p-4 border border-gray-100">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                  email.type === 'system' ? 'bg-purple-100 text-purple-700' :
-                                  email.type === 'manual' ? 'bg-blue-100 text-blue-700' :
-                                  'bg-gray-100 text-gray-700'
-                                }`}>
-                                  {email.type === 'system' ? 'Auto' : 'Manuel'}
-                                </span>
-                                <span className="text-xs text-gray-400">
-                                  {new Date(email.date).toLocaleString('fr-CA')}
-                                </span>
+                            <div key={email.id} className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
+                                    email.type === 'system' ? 'bg-purple-100 text-purple-700' :
+                                    email.type === 'manual' ? 'bg-blue-100 text-blue-700' :
+                                    'bg-gray-100 text-gray-700'
+                                  }`}>
+                                    {email.type === 'system' ? '🤖 Auto' : '✍️ Manuel'}
+                                  </span>
+                                  <span className="text-xs text-gray-400">
+                                    {new Date(email.date).toLocaleString('fr-CA', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </span>
+                                </div>
+                                <button
+                                  onClick={() => setPreviewEmail(email)}
+                                  className="text-xs px-3 py-1.5 bg-[#00874e] text-white rounded-lg hover:bg-[#006d3f] transition-colors font-medium flex items-center gap-1"
+                                >
+                                  <ExternalLink size={12} />
+                                  Aperçu
+                                </button>
                               </div>
-                              <p className="text-sm font-medium text-gray-900 mb-1">
-                                A: {email.to}
-                              </p>
-                              <p className="text-sm text-gray-700 font-medium mb-2">
-                                {email.subject}
-                              </p>
-                              <details className="text-sm">
-                                <summary className="text-[#00874e] cursor-pointer hover:underline">
-                                  Voir le contenu
-                                </summary>
-                                <pre className="mt-2 p-3 bg-gray-50 rounded text-xs text-gray-600 whitespace-pre-wrap overflow-auto max-h-40">
-                                  {email.content}
-                                </pre>
-                              </details>
+                              <div className="space-y-2">
+                                <div className="flex items-start gap-2">
+                                  <Mail size={14} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs text-gray-500">Destinataire</p>
+                                    <p className="text-sm font-medium text-gray-900 truncate">{email.to}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-start gap-2">
+                                  <MessageSquare size={14} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs text-gray-500">Objet</p>
+                                    <p className="text-sm font-semibold text-gray-900">{email.subject}</p>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -1032,6 +1049,58 @@ export default function AdminDashboard() {
           </div>
         )}
       </main>
+
+      {/* Email Preview Modal */}
+      {previewEmail && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg font-semibold text-gray-900 truncate">{previewEmail.subject}</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  À: {previewEmail.to} • {new Date(previewEmail.date).toLocaleString('fr-CA')}
+                </p>
+              </div>
+              <button
+                onClick={() => setPreviewEmail(null)}
+                className="ml-4 p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+              >
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            {/* Email Content */}
+            <div className="flex-1 overflow-auto p-6 bg-gray-50">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <iframe
+                  srcDoc={previewEmail.content}
+                  sandbox="allow-same-origin"
+                  className="w-full h-[600px] border-0"
+                  title="Email Preview"
+                />
+              </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
+              <span className={`text-xs px-3 py-1.5 rounded-full font-semibold ${
+                previewEmail.type === 'system' ? 'bg-purple-100 text-purple-700' :
+                previewEmail.type === 'manual' ? 'bg-blue-100 text-blue-700' :
+                'bg-gray-100 text-gray-700'
+              }`}>
+                {previewEmail.type === 'system' ? '🤖 Email Automatique' : '✍️ Email Manuel'}
+              </span>
+              <button
+                onClick={() => setPreviewEmail(null)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors font-medium"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-4">
