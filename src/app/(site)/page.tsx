@@ -137,8 +137,8 @@ export default function Home() {
                       boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
                     }}
                   >
-                    <span className="text-6xl md:text-8xl font-extrabold text-white" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
-                      {amount.toLocaleString()}
+                    <span className="text-6xl md:text-8xl font-extrabold text-white" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.3)' }} suppressHydrationWarning>
+                      {amount.toLocaleString('fr-CA')}
                     </span>
                     <span className="text-4xl md:text-6xl font-extrabold text-white">$</span>
                     <p className="text-white text-sm md:text-base mt-3 font-semibold" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>Depot en 24h</p>
@@ -189,8 +189,9 @@ export default function Home() {
                           border: '2px solid rgba(255,255,255,0.4)',
                           textShadow: '0 1px 3px rgba(0,0,0,0.3)'
                         }}
+                        suppressHydrationWarning
                       >
-                        {val.toLocaleString()}$
+                        {val.toLocaleString('fr-CA')}$
                       </button>
                     ))}
                   </div>

@@ -6,7 +6,8 @@ import {
   LogOut, TrendingUp, TrendingDown, Users, FileText,
   AlertTriangle, RefreshCw, Activity, Bell, Mail,
   Phone, ChevronRight, MoreHorizontal, Search, Loader2,
-  DollarSign, Calendar, Clock, CheckCircle, XCircle
+  DollarSign, Calendar, Clock, CheckCircle, XCircle,
+  X, User, Send, MessageSquare, Tag, ExternalLink
 } from 'lucide-react'
 
 interface Message {
@@ -21,6 +22,57 @@ interface Message {
   reference: string
 }
 
+interface EmailLog {
+  id: string
+  messageId: string
+  type: string
+  to: string
+  subject: string
+  content: string
+  sentBy: string
+  date: string
+}
+
+interface NoteLog {
+  id: string
+  messageId: string
+  from: string
+  to: string
+  content: string
+  date: string
+}
+
+// Extraire l'option selectionnee du message
+function extractOptionFromMessage(question: string): { option: string | null; message: string } {
+  const match = question.match(/\[Espace Client - ([^\]]+)\]/)
+  if (match) {
+    const cleanMessage = question.replace(/\[Formulaire Contact\]\s*/g, '').replace(/\[Espace Client - [^\]]+\]\s*/g, '').trim()
+    return { option: match[1], message: cleanMessage || 'Aucun message additionnel' }
+  }
+
+  const formMatch = question.match(/\[Formulaire Contact\]/)
+  if (formMatch) {
+    return { option: 'Formulaire Contact', message: question.replace(/\[Formulaire Contact\]\s*/g, '').trim() }
+  }
+
+  return { option: null, message: question }
+}
+
+// Couleur selon l'option
+function getOptionColor(option: string | null): string {
+  if (!option) return 'bg-gray-100 text-gray-600'
+  const colors: Record<string, string> = {
+    'Reporter un paiement': 'bg-blue-100 text-blue-700',
+    'Reduire mes paiements': 'bg-emerald-100 text-emerald-700',
+    'Signaler un changement': 'bg-violet-100 text-violet-700',
+    'Releve ou solde de compte': 'bg-amber-100 text-amber-700',
+    'Arrangement de paiement': 'bg-rose-100 text-rose-700',
+    'Autre question': 'bg-gray-100 text-gray-700',
+    'Formulaire Contact': 'bg-cyan-100 text-cyan-700'
+  }
+  return colors[option] || 'bg-gray-100 text-gray-600'
+}
+
 export default function AdminDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -30,6 +82,12 @@ export default function AdminDashboard() {
   const [selectedView, setSelectedView] = useState<'dashboard' | 'messages' | 'vopay' | 'margill'>('dashboard')
   const [vopayLoading, setVopayLoading] = useState(false)
   const [vopayError, setVopayError] = useState<string | null>(null)
+
+  // Detail panel states
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null)
+  const [messageEmails, setMessageEmails] = useState<EmailLog[]>([])
+  const [messageNotes, setMessageNotes] = useState<NoteLog[]>([])
+  const [detailLoading, setDetailLoading] = useState(false)
 
   const [vopayData, setVopayData] = useState({
     balance: 0,
@@ -75,6 +133,44 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Erreur:', error)
     }
+  }
+
+  const fetchMessageDetails = async (message: Message) => {
+    setSelectedMessage(message)
+    setDetailLoading(true)
+    setMessageEmails([])
+    setMessageNotes([])
+
+    try {
+      // Marquer comme lu
+      await fetch('/api/admin/messages', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id: message.id })
+      })
+
+      // Charger emails et notes
+      const res = await fetch(`/api/admin/messages?messageId=${message.id}`, { credentials: 'include' })
+      if (res.ok) {
+        const data = await res.json()
+        setMessageEmails(data.emails || [])
+        setMessageNotes(data.notes || [])
+      }
+
+      // Rafraichir la liste
+      fetchMessages()
+    } catch (error) {
+      console.error('Erreur details:', error)
+    } finally {
+      setDetailLoading(false)
+    }
+  }
+
+  const closeDetail = () => {
+    setSelectedMessage(null)
+    setMessageEmails([])
+    setMessageNotes([])
   }
 
   const fetchVopayData = async () => {

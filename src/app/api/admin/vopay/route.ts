@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createVoPayClient } from '@/lib/vopay'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 /**
  * GET /api/admin/vopay
  * Récupère les statistiques VoPay en temps réel
