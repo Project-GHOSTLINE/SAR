@@ -1,48 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 
-const JWT_SECRET = process.env.JWT_SECRET!
+const JWT_SECRET = process.env.JWT_SECRET || 'sar-admin-secret-key-2024'
 
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || ''
   const { pathname } = request.nextUrl
   const isApiRoute = pathname.startsWith('/api/')
 
-  // Handle admin subdomain - rewrite all paths to /admin/*
+  // Handle admin subdomain
   if (hostname.startsWith('admin.')) {
     if (pathname === '/') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/admin'
-      return NextResponse.rewrite(url)
+      return NextResponse.rewrite(new URL('/admin', request.url))
     }
-
     if (!pathname.startsWith('/admin') && !isApiRoute && !pathname.startsWith('/_next')) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/admin' + pathname
-      return NextResponse.rewrite(url)
+      return NextResponse.rewrite(new URL('/admin' + pathname, request.url))
     }
   }
 
-  // Handle client subdomain - rewrite all paths to /client/*
+  // Handle client subdomain
   if (hostname.startsWith('client.')) {
     if (pathname === '/') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/client'
-      return NextResponse.rewrite(url)
+      return NextResponse.rewrite(new URL('/client', request.url))
     }
-
     if (!pathname.startsWith('/client') && !isApiRoute && !pathname.startsWith('/_next')) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/client' + pathname
-      return NextResponse.rewrite(url)
+      return NextResponse.rewrite(new URL('/client' + pathname, request.url))
     }
   }
 
-  // Protect admin routes (require authentication) - but NOT API routes
-  const isAdminRoute = pathname.startsWith('/admin/') || (hostname.startsWith('admin.') && pathname !== '/' && pathname !== '/admin' && !isApiRoute)
-  const isAdminLoginPage = pathname === '/admin' || (hostname.startsWith('admin.') && pathname === '/')
-
-  if (isAdminRoute && !isAdminLoginPage) {
+  // Protect admin dashboard
+  if (pathname.startsWith('/admin/dashboard') ||
+      (hostname.startsWith('admin.') && pathname.startsWith('/dashboard'))) {
     const token = request.cookies.get('admin_token')?.value
 
     if (!token) {
@@ -53,7 +41,6 @@ export async function middleware(request: NextRequest) {
     try {
       const secret = new TextEncoder().encode(JWT_SECRET)
       await jwtVerify(token, secret)
-      return NextResponse.next()
     } catch {
       const response = NextResponse.redirect(new URL(hostname.startsWith('admin.') ? '/' : '/admin', request.url))
       response.cookies.delete('admin_token')
@@ -65,5 +52,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)']
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon-|sw.js|manifest.json).*)']
 }
