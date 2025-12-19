@@ -8,7 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET!
 // Verifier le token JWT
 async function verifyAuth() {
   const cookieStore = await cookies()
-  const token = cookieStore.get('admin_token')
+  const token = cookieStore.get('admin-session')
 
   if (!token) return false
 

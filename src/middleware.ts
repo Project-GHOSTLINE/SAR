@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
       await jwtVerify(token, secret)
     } catch {
       const response = NextResponse.redirect(new URL(hostname.startsWith('admin.') ? '/' : '/admin', request.url))
-      response.cookies.delete('admin_token')
+      response.cookies.delete('admin-session')
       return response
     }
   }
