@@ -4,8 +4,9 @@ import React, { useState } from 'react'
 import {
   Calendar, CreditCard, MapPin, FileText, HeartHandshake,
   ArrowRight, ChevronLeft, Check, Shield,
-  Home, MessageCircle
+  Home, MessageCircle, AlertCircle
 } from 'lucide-react'
+import { validateEmail, validateCanadianPhone } from '@/lib/validators'
 
 export default function ClientPortal() {
   const [selectedAction, setSelectedAction] = useState<string | null>(null)
@@ -15,6 +16,16 @@ export default function ClientPortal() {
     telephone: '',
     message: ''
   })
+  const [errors, setErrors] = useState<{
+    nom?: string
+    email?: string
+    telephone?: string
+  }>({})
+  const [touched, setTouched] = useState<{
+    nom?: boolean
+    email?: boolean
+    telephone?: boolean
+  }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
@@ -63,9 +74,83 @@ export default function ClientPortal() {
     }
   ]
 
+  // Validation temps réel
+  const validateField = (field: 'nom' | 'email' | 'telephone') => {
+    const newErrors = { ...errors }
+
+    if (field === 'nom') {
+      if (!formData.nom || formData.nom.trim().length < 2) {
+        newErrors.nom = 'Le nom doit contenir au moins 2 caractères'
+      } else {
+        delete newErrors.nom
+      }
+    }
+
+    if (field === 'email') {
+      const emailValidation = validateEmail(formData.email)
+      if (!emailValidation.valid) {
+        newErrors.email = emailValidation.error
+      } else {
+        delete newErrors.email
+      }
+    }
+
+    if (field === 'telephone') {
+      const phoneValidation = validateCanadianPhone(formData.telephone)
+      if (!phoneValidation.valid) {
+        newErrors.telephone = phoneValidation.error
+      } else {
+        delete newErrors.telephone
+      }
+    }
+
+    setErrors(newErrors)
+  }
+
+  const handleBlur = (field: 'nom' | 'email' | 'telephone') => {
+    setTouched({ ...touched, [field]: true })
+    validateField(field)
+  }
+
+  const handleChange = (field: 'nom' | 'email' | 'telephone' | 'message', value: string) => {
+    setFormData({ ...formData, [field]: value })
+    if (field !== 'message' && touched[field as 'nom' | 'email' | 'telephone']) {
+      setTimeout(() => validateField(field as 'nom' | 'email' | 'telephone'), 0)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedAction || !formData.nom || !formData.email || !formData.telephone) return
+
+    // Marquer tous les champs comme touchés
+    setTouched({ nom: true, email: true, telephone: true })
+
+    // Valider tous les champs
+    validateField('nom')
+    validateField('email')
+    validateField('telephone')
+
+    // Vérifier s'il y a des erreurs
+    const tempErrors: typeof errors = {}
+
+    if (!formData.nom || formData.nom.trim().length < 2) {
+      tempErrors.nom = 'Le nom doit contenir au moins 2 caractères'
+    }
+
+    const emailValidation = validateEmail(formData.email)
+    if (!emailValidation.valid) {
+      tempErrors.email = emailValidation.error
+    }
+
+    const phoneValidation = validateCanadianPhone(formData.telephone)
+    if (!phoneValidation.valid) {
+      tempErrors.telephone = phoneValidation.error
+    }
+
+    if (Object.keys(tempErrors).length > 0 || !selectedAction) {
+      setErrors(tempErrors)
+      return
+    }
 
     setIsSubmitting(true)
 
@@ -81,15 +166,23 @@ export default function ClientPortal() {
           telephone: formData.telephone,
           question: `Espace Client - ${actionLabel}`,
           questionAutre: formData.message || '',
-          source: 'espace-client'
+          source: 'espace-client',
+          clientMetadata: {
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            screenResolution: `${window.screen.width}x${window.screen.height}`
+          }
         })
       })
 
       if (response.ok) {
         setIsSuccess(true)
+      } else {
+        const data = await response.json()
+        alert(data.error || 'Erreur lors de l\'envoi. Veuillez réessayer.')
       }
     } catch (error) {
       console.error('Error:', error)
+      alert('Erreur lors de l\'envoi. Veuillez réessayer.')
     } finally {
       setIsSubmitting(false)
     }
@@ -98,6 +191,8 @@ export default function ClientPortal() {
   const resetForm = () => {
     setSelectedAction(null)
     setFormData({ nom: '', email: '', telephone: '', message: '' })
+    setErrors({})
+    setTouched({})
     setIsSuccess(false)
   }
 

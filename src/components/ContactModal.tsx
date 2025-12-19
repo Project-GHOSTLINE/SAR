@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { X, Send, MessageCircle, CheckCircle, ExternalLink } from 'lucide-react'
+import { X, Send, MessageCircle, CheckCircle, ExternalLink, AlertCircle } from 'lucide-react'
+import { validateEmail, validateCanadianPhone } from '@/lib/validators'
 
 interface ContactModalProps {
   isOpen: boolean
@@ -27,6 +28,16 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
     question: '',
     questionAutre: ''
   })
+  const [errors, setErrors] = useState<{
+    nom?: string
+    email?: string
+    telephone?: string
+  }>({})
+  const [touched, setTouched] = useState<{
+    nom?: boolean
+    email?: boolean
+    telephone?: boolean
+  }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
@@ -45,8 +56,79 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
     setContactForm({ ...contactForm, question: q })
   }
 
+  // Validation temps réel
+  const validateField = (field: 'nom' | 'email' | 'telephone') => {
+    const newErrors = { ...errors }
+
+    if (field === 'nom') {
+      if (!contactForm.nom || contactForm.nom.trim().length < 2) {
+        newErrors.nom = 'Le nom doit contenir au moins 2 caractères'
+      } else {
+        delete newErrors.nom
+      }
+    }
+
+    if (field === 'email') {
+      const emailValidation = validateEmail(contactForm.email)
+      if (!emailValidation.valid) {
+        newErrors.email = emailValidation.error
+      } else {
+        delete newErrors.email
+      }
+    }
+
+    if (field === 'telephone') {
+      const phoneValidation = validateCanadianPhone(contactForm.telephone)
+      if (!phoneValidation.valid) {
+        newErrors.telephone = phoneValidation.error
+      } else {
+        delete newErrors.telephone
+      }
+    }
+
+    setErrors(newErrors)
+  }
+
+  const handleBlur = (field: 'nom' | 'email' | 'telephone') => {
+    setTouched({ ...touched, [field]: true })
+    validateField(field)
+  }
+
+  const handleChange = (field: 'nom' | 'email' | 'telephone', value: string) => {
+    setContactForm({ ...contactForm, [field]: value })
+    if (touched[field]) {
+      setTimeout(() => validateField(field), 0)
+    }
+  }
+
   const handleSubmitContact = async () => {
-    if (!contactForm.nom || !contactForm.email || !contactForm.telephone || !contactForm.question) {
+    // Marquer tous les champs comme touchés
+    setTouched({ nom: true, email: true, telephone: true })
+
+    // Valider tous les champs
+    validateField('nom')
+    validateField('email')
+    validateField('telephone')
+
+    // Vérifier s'il y a des erreurs
+    const tempErrors: typeof errors = {}
+
+    if (!contactForm.nom || contactForm.nom.trim().length < 2) {
+      tempErrors.nom = 'Le nom doit contenir au moins 2 caractères'
+    }
+
+    const emailValidation = validateEmail(contactForm.email)
+    if (!emailValidation.valid) {
+      tempErrors.email = emailValidation.error
+    }
+
+    const phoneValidation = validateCanadianPhone(contactForm.telephone)
+    if (!phoneValidation.valid) {
+      tempErrors.telephone = phoneValidation.error
+    }
+
+    if (Object.keys(tempErrors).length > 0 || !contactForm.question) {
+      setErrors(tempErrors)
       return
     }
 
@@ -57,7 +139,11 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...contactForm,
-          source: 'analyse-suivi'
+          source: 'analyse-suivi',
+          clientMetadata: {
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            screenResolution: `${window.screen.width}x${window.screen.height}`
+          }
         })
       })
 
@@ -67,10 +153,16 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
           onClose()
           setIsSuccess(false)
           setContactForm({ nom: '', email: '', telephone: '', question: '', questionAutre: '' })
+          setErrors({})
+          setTouched({})
         }, 2000)
+      } else {
+        const data = await response.json()
+        alert(data.error || 'Erreur lors de l\'envoi. Veuillez réessayer.')
       }
     } catch (error) {
       console.error('Error:', error)
+      alert('Erreur lors de l\'envoi. Veuillez réessayer.')
     } finally {
       setIsSubmitting(false)
     }
@@ -165,37 +257,78 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
               )}
 
               <div className="grid grid-cols-1 gap-3 pt-2">
-                <input
-                  type="text"
-                  className={`w-full px-4 py-3 border-2 rounded-xl focus:border-sar-green focus:outline-none transition-colors ${
-                    contactForm.nom ? 'border-sar-green/50 bg-sar-green/5' : 'border-gray-200'
-                  }`}
-                  placeholder="Votre nom complet *"
-                  value={contactForm.nom}
-                  onChange={(e) => setContactForm({ ...contactForm, nom: e.target.value })}
-                />
-                <input
-                  type="email"
-                  className={`w-full px-4 py-3 border-2 rounded-xl focus:border-sar-green focus:outline-none transition-colors ${
-                    contactForm.email ? 'border-sar-green/50 bg-sar-green/5' : 'border-gray-200'
-                  }`}
-                  placeholder="Votre courriel *"
-                  value={contactForm.email}
-                  onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                />
-                <input
-                  type="tel"
-                  className={`w-full px-4 py-3 border-2 rounded-xl focus:border-sar-green focus:outline-none transition-colors ${
-                    contactForm.telephone ? 'border-sar-green/50 bg-sar-green/5' : 'border-gray-200'
-                  }`}
-                  placeholder="Votre telephone *"
-                  value={contactForm.telephone}
-                  onChange={(e) => setContactForm({ ...contactForm, telephone: e.target.value })}
-                />
+                <div>
+                  <input
+                    type="text"
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:border-sar-green focus:outline-none transition-colors ${
+                      touched.nom && errors.nom
+                        ? 'border-red-500 bg-red-50'
+                        : contactForm.nom
+                          ? 'border-sar-green/50 bg-sar-green/5'
+                          : 'border-gray-200'
+                    }`}
+                    placeholder="Votre nom complet *"
+                    value={contactForm.nom}
+                    onChange={(e) => handleChange('nom', e.target.value)}
+                    onBlur={() => handleBlur('nom')}
+                  />
+                  {touched.nom && errors.nom && (
+                    <div className="mt-1 flex items-center gap-1 text-red-600 text-xs">
+                      <AlertCircle size={12} />
+                      <span>{errors.nom}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <input
+                    type="email"
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:border-sar-green focus:outline-none transition-colors ${
+                      touched.email && errors.email
+                        ? 'border-red-500 bg-red-50'
+                        : contactForm.email
+                          ? 'border-sar-green/50 bg-sar-green/5'
+                          : 'border-gray-200'
+                    }`}
+                    placeholder="Votre courriel *"
+                    value={contactForm.email}
+                    onChange={(e) => handleChange('email', e.target.value)}
+                    onBlur={() => handleBlur('email')}
+                  />
+                  {touched.email && errors.email && (
+                    <div className="mt-1 flex items-center gap-1 text-red-600 text-xs">
+                      <AlertCircle size={12} />
+                      <span>{errors.email}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <input
+                    type="tel"
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:border-sar-green focus:outline-none transition-colors ${
+                      touched.telephone && errors.telephone
+                        ? 'border-red-500 bg-red-50'
+                        : contactForm.telephone
+                          ? 'border-sar-green/50 bg-sar-green/5'
+                          : 'border-gray-200'
+                    }`}
+                    placeholder="Téléphone (Canada) *"
+                    value={contactForm.telephone}
+                    onChange={(e) => handleChange('telephone', e.target.value)}
+                    onBlur={() => handleBlur('telephone')}
+                  />
+                  {touched.telephone && errors.telephone && (
+                    <div className="mt-1 flex items-center gap-1 text-red-600 text-xs">
+                      <AlertCircle size={12} />
+                      <span>{errors.telephone}</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {(!contactForm.nom || !contactForm.email || !contactForm.telephone || !contactForm.question) && (
-                <p className="text-xs text-red-500">* Tous les champs sont obligatoires</p>
+              {(!contactForm.nom || !contactForm.email || !contactForm.telephone || !contactForm.question) && Object.keys(errors).length === 0 && (
+                <p className="text-xs text-gray-500">* Tous les champs sont obligatoires</p>
               )}
 
               <button
