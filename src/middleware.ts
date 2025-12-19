@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
   // Protect admin dashboard
   if (pathname.startsWith('/admin/dashboard') ||
       (hostname.startsWith('admin.') && pathname.startsWith('/dashboard'))) {
-    const token = request.cookies.get('admin_token')?.value
+    const token = request.cookies.get('admin-session')?.value
 
     if (!token) {
       const loginUrl = hostname.startsWith('admin.') ? '/' : '/admin'
