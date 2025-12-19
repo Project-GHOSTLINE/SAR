@@ -413,8 +413,8 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
               <table role="presentation" style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="background: linear-gradient(135deg, #00874e 0%, #005a34 100%); padding: 35px 40px; border-radius: 16px 16px 0 0; text-align: center;">
-                    <div style="width: 70px; height: 70px; background: rgba(255,255,255,0.2); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
-                      <span style="font-size: 36px;">✓</span>
+                    <div style="width: 70px; height: 70px; background: rgba(255,255,255,0.2); border-radius: 50%; margin: 0 auto 15px; line-height: 70px;">
+                      <span style="font-size: 36px; color: white;">✓</span>
                     </div>
                     <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 700;">Demande bien recue!</h1>
                     <p style="margin: 10px 0 0; color: rgba(255,255,255,0.9); font-size: 15px;">Nous traitons votre demande avec attention</p>
