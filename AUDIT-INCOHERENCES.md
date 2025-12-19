@@ -22,16 +22,19 @@ const token = request.cookies.get('admin-session')?.value  // Changer admin_toke
 
 ---
 
-### 2. Supabase URL Différente entre Envs
-**Conflit:**
-- `.env.local` → `https://ybqwpatvbtwzpwmmacvm.supabase.co`
-- `.env.production` (Vercel) → `https://dllyzfuqjzuhvshrlmuq.supabase.co`
+### 2. Supabase URL Différente entre Envs → ✅ RÉSOLU
+**Conflit trouvé:**
+- `.env.local` → `https://ybqwpatvbtwzpwmmacvm.supabase.co` (vide, pas de table)
+- Vercel production → `https://dllyzfuqjzuhvshrlmuq.supabase.co` (17 messages)
 
-**Impact:** Les données locales et production ne pointent pas vers la même base de données.
+**Problème:** L'ANON_KEY sur Vercel était pour la mauvaise BD!
 
-**Question:** Quelle est la VRAIE Supabase à utiliser?
-- Option A: `ybqwpatvbtwzpwmmacvm` (nouvelle?)
-- Option B: `dllyzfuqjzuhvshrlmuq` (ancienne?)
+**Solution appliquée (2025-12-19):**
+- ✅ Vérifié les deux BDs: `dllyzfuqjzuhvshrlmuq` a les données (17 messages)
+- ✅ Mis à jour `NEXT_PUBLIC_SUPABASE_ANON_KEY` sur Vercel
+- ✅ Mis à jour `.env.local` pour correspondre
+- ✅ Redéployé sur Vercel
+- ✅ Toutes les variables pointent maintenant vers `dllyzfuqjzuhvshrlmuq`
 
 ---
 
@@ -149,9 +152,9 @@ cat .gitignore | grep ".env.local"
 4. ✅ Ajouter `.env.production` à `.gitignore`
 
 ### Important (cette semaine)
-5. ⚠️ Mettre à jour VOPAY-INTEGRATION.md avec URLs production
-6. ⚠️ Compléter `.env.example` avec toutes les variables
-7. ⚠️ Supprimer `.env.production` du repo git
+5. ✅ Mettre à jour VOPAY-INTEGRATION.md avec URLs production
+6. ✅ Compléter `.env.example` avec toutes les variables
+7. ✅ Supprimer `.env.production` du repo git
 
 ### Nice to have (quand possible)
 8. 📝 Restructurer la documentation

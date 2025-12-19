@@ -93,11 +93,11 @@ npm run dev
 
 ### 2. Se connecter au dashboard admin
 ```
-http://localhost:3000/admin
+https://admin.solutionargentrapide.ca
 ```
 
 Credentials:
-- Password: `FredRosa%1978`
+- Password: (voir .env.local)
 
 ### 3. Cliquer sur l'onglet "VoPay"
 Les données réelles s'affichent automatiquement.
