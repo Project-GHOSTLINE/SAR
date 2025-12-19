@@ -11,8 +11,10 @@
 Exception: local seulement si demandé explicitement par l'utilisateur.
 
 ### URLs
-- **Production:** https://solutionargentrapide.ca (ou URL Vercel)
-- **Admin:** https://solutionargentrapide.ca/admin
+- **Production:** https://solutionargentrapide.ca
+- **Admin:** https://admin.solutionargentrapide.ca
+- **Client:** https://client.solutionargentrapide.ca
+- **Vercel Preview:** https://sar-nu.vercel.app
 
 ### Workflow
 ```
@@ -70,8 +72,14 @@ vercel env pull
 vercel env add VARIABLE_NAME
 ```
 
+## DOCUMENTATION
+
+- **URLS.md** - Liste complète des URLs, sous-domaines et API endpoints
+- **CLAUDE.md** - Workflow et configuration du projet
+
 ## NOTES
 
 - Toujours vérifier que `.env.local` est dans `.gitignore`
 - Ne jamais commiter de credentials
 - Tester sur Vercel après chaque push majeur
+- Production = solutionargentrapide.ca (pas Vercel URL)
