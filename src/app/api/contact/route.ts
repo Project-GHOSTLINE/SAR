@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { validateEmail, validateCanadianPhone } from '@/lib/validators'
 
 // Rate limiting pour le formulaire de contact
 const contactAttempts = new Map<string, { count: number; lastAttempt: number }>()
@@ -67,16 +68,14 @@ function sanitizeInput(input: string): string {
     .trim()
 }
 
-// Validation email
+// Validation email (utilise lib/validators)
 function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email) && email.length <= 254
+  return validateEmail(email).valid
 }
 
-// Validation telephone
+// Validation telephone canadien (utilise lib/validators)
 function isValidPhone(phone: string): boolean {
-  const phoneRegex = /^[\d\s\-\+\(\)]{10,20}$/
-  return phoneRegex.test(phone)
+  return validateCanadianPhone(phone).valid
 }
 
 // Generer reference unique

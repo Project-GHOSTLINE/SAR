@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, Mail, MapPin, Clock, Send, MessageCircle } from 'lucide-react'
+import { Phone, Mail, MapPin, Clock, Send, MessageCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import ContactModal from '@/components/ContactModal'
+import { validateEmail, validateCanadianPhone, formatCanadianPhone } from '@/lib/validators'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -11,12 +12,104 @@ export default function ContactPage() {
     contactMethod: 'email',
     contact: ''
   })
+  const [errors, setErrors] = useState<{
+    message?: string
+    contact?: string
+  }>({})
+  const [touched, setTouched] = useState<{
+    message?: boolean
+    contact?: boolean
+  }>({})
   const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
 
+  // Validation temps réel
+  const validateField = (field: 'message' | 'contact') => {
+    const newErrors = { ...errors }
+
+    if (field === 'message') {
+      if (!formData.message || formData.message.trim().length < 10) {
+        newErrors.message = 'Le message doit contenir au moins 10 caractères'
+      } else {
+        delete newErrors.message
+      }
+    }
+
+    if (field === 'contact') {
+      if (formData.contactMethod === 'email') {
+        const emailValidation = validateEmail(formData.contact)
+        if (!emailValidation.valid) {
+          newErrors.contact = emailValidation.error
+        } else {
+          delete newErrors.contact
+        }
+      } else {
+        const phoneValidation = validateCanadianPhone(formData.contact)
+        if (!phoneValidation.valid) {
+          newErrors.contact = phoneValidation.error
+        } else {
+          delete newErrors.contact
+        }
+      }
+    }
+
+    setErrors(newErrors)
+  }
+
+  const handleBlur = (field: 'message' | 'contact') => {
+    setTouched({ ...touched, [field]: true })
+    validateField(field)
+  }
+
+  const handleChange = (field: 'message' | 'contact', value: string) => {
+    setFormData({ ...formData, [field]: value })
+    if (touched[field]) {
+      // Re-valider immédiatement si le champ a déjà été touché
+      setTimeout(() => validateField(field), 0)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Marquer tous les champs comme touchés
+    setTouched({ message: true, contact: true })
+
+    // Valider tous les champs
+    validateField('message')
+    validateField('contact')
+
+    // Vérifier s'il y a des erreurs
+    const hasErrors = Object.keys(errors).length > 0 ||
+                      !formData.message ||
+                      formData.message.trim().length < 10 ||
+                      !formData.contact
+
+    if (hasErrors) {
+      // Forcer une nouvelle validation pour afficher toutes les erreurs
+      const tempErrors: typeof errors = {}
+
+      if (!formData.message || formData.message.trim().length < 10) {
+        tempErrors.message = 'Le message doit contenir au moins 10 caractères'
+      }
+
+      if (formData.contactMethod === 'email') {
+        const emailValidation = validateEmail(formData.contact)
+        if (!emailValidation.valid) {
+          tempErrors.contact = emailValidation.error
+        }
+      } else {
+        const phoneValidation = validateCanadianPhone(formData.contact)
+        if (!phoneValidation.valid) {
+          tempErrors.contact = phoneValidation.error
+        }
+      }
+
+      setErrors(tempErrors)
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -25,18 +118,23 @@ export default function ContactPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          source: 'nous-joindre'
+          source: 'nous-joindre',
+          clientMetadata: {
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            screenResolution: `${window.screen.width}x${window.screen.height}`
+          }
         })
       })
 
       if (response.ok) {
         setSubmitted(true)
       } else {
-        alert('Erreur lors de l\'envoi. Veuillez reessayer.')
+        const data = await response.json()
+        alert(data.error || 'Erreur lors de l\'envoi. Veuillez réessayer.')
       }
     } catch (error) {
       console.error('Error:', error)
-      alert('Erreur lors de l\'envoi. Veuillez reessayer.')
+      alert('Erreur lors de l\'envoi. Veuillez réessayer.')
     } finally {
       setIsSubmitting(false)
     }
@@ -139,37 +237,68 @@ export default function ContactPage() {
                     <textarea
                       required
                       rows={5}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sar-green focus:border-transparent"
-                      placeholder="Prenez votre temps pour nous ecrire..."
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-sar-green focus:border-transparent ${
+                        touched.message && errors.message
+                          ? 'border-red-500 bg-red-50'
+                          : 'border-gray-300'
+                      }`}
+                      placeholder="Prenez votre temps pour nous écrire..."
                       value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      onChange={(e) => handleChange('message', e.target.value)}
+                      onBlur={() => handleBlur('message')}
                     />
+                    {touched.message && errors.message && (
+                      <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
+                        <AlertCircle size={16} />
+                        <span>{errors.message}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">Methode de contact preferee</label>
+                    <label className="block text-sm font-medium mb-2">Méthode de contact préférée</label>
                     <select
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sar-green focus:border-transparent"
                       value={formData.contactMethod}
-                      onChange={(e) => setFormData({ ...formData, contactMethod: e.target.value })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, contactMethod: e.target.value, contact: '' })
+                        setErrors({})
+                        setTouched({ ...touched, contact: false })
+                      }}
                     >
                       <option value="email">Courriel</option>
-                      <option value="phone">Telephone</option>
+                      <option value="phone">Téléphone</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium mb-2">
-                      {formData.contactMethod === 'email' ? 'Adresse courriel' : 'Numero de telephone'} *
+                      {formData.contactMethod === 'email' ? 'Adresse courriel' : 'Numéro de téléphone (Canada)'} *
                     </label>
                     <input
                       type={formData.contactMethod === 'email' ? 'email' : 'tel'}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sar-green focus:border-transparent"
-                      placeholder={formData.contactMethod === 'email' ? 'votre@email.com' : '514-XXX-XXXX'}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-sar-green focus:border-transparent ${
+                        touched.contact && errors.contact
+                          ? 'border-red-500 bg-red-50'
+                          : 'border-gray-300'
+                      }`}
+                      placeholder={formData.contactMethod === 'email' ? 'votre@email.com' : '(514) 123-4567'}
                       value={formData.contact}
-                      onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
+                      onChange={(e) => handleChange('contact', e.target.value)}
+                      onBlur={() => handleBlur('contact')}
                     />
+                    {touched.contact && errors.contact && (
+                      <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
+                        <AlertCircle size={16} />
+                        <span>{errors.contact}</span>
+                      </div>
+                    )}
+                    {formData.contactMethod === 'phone' && !errors.contact && formData.contact && (
+                      <p className="mt-2 text-sm text-gray-500">
+                        📞 Formats acceptés: 514-123-4567, (514) 123-4567, +1 514 123 4567
+                      </p>
+                    )}
                   </div>
 
                   <button
