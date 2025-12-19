@@ -116,7 +116,20 @@ export async function GET(request: NextRequest) {
       date: m.created_at,
       lu: m.lu,
       status: m.status || (m.lu ? 'traite' : 'nouveau'),
-      reference: generateReference(m.id)
+      reference: generateReference(m.id),
+      // Métriques de connexion client
+      client_ip: m.client_ip,
+      client_user_agent: m.client_user_agent,
+      client_device: m.client_device,
+      client_browser: m.client_browser,
+      client_os: m.client_os,
+      client_timezone: m.client_timezone,
+      client_language: m.client_language,
+      client_screen_resolution: m.client_screen_resolution,
+      referrer: m.referrer,
+      utm_source: m.utm_source,
+      utm_medium: m.utm_medium,
+      utm_campaign: m.utm_campaign
     }))
 
     return NextResponse.json({
