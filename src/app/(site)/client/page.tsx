@@ -320,9 +320,20 @@ export default function ClientPortal() {
                     required
                     placeholder="Votre nom"
                     value={formData.nom}
-                    onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
-                    className="w-full px-5 py-4 bg-white/80 border-2 border-gray-100 rounded-xl text-gray-800 placeholder-gray-400 focus:border-sar-green focus:ring-4 focus:ring-sar-green/10 outline-none transition-all"
+                    onChange={(e) => handleChange('nom', e.target.value)}
+                    onBlur={() => handleBlur('nom')}
+                    className={`w-full px-5 py-4 bg-white/80 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:border-sar-green focus:ring-4 focus:ring-sar-green/10 outline-none transition-all ${
+                      touched.nom && errors.nom
+                        ? 'border-red-500 bg-red-50'
+                        : 'border-gray-100'
+                    }`}
                   />
+                  {touched.nom && errors.nom && (
+                    <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
+                      <AlertCircle size={14} />
+                      <span>{errors.nom}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -334,23 +345,45 @@ export default function ClientPortal() {
                     required
                     placeholder="votre@courriel.com"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-5 py-4 bg-white/80 border-2 border-gray-100 rounded-xl text-gray-800 placeholder-gray-400 focus:border-sar-green focus:ring-4 focus:ring-sar-green/10 outline-none transition-all"
+                    onChange={(e) => handleChange('email', e.target.value)}
+                    onBlur={() => handleBlur('email')}
+                    className={`w-full px-5 py-4 bg-white/80 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:border-sar-green focus:ring-4 focus:ring-sar-green/10 outline-none transition-all ${
+                      touched.email && errors.email
+                        ? 'border-red-500 bg-red-50'
+                        : 'border-gray-100'
+                    }`}
                   />
+                  {touched.email && errors.email && (
+                    <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
+                      <AlertCircle size={14} />
+                      <span>{errors.email}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Telephone *
+                    Téléphone (Canada) *
                   </label>
                   <input
                     type="tel"
                     required
-                    placeholder="514-555-1234"
+                    placeholder="(514) 123-4567"
                     value={formData.telephone}
-                    onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
-                    className="w-full px-5 py-4 bg-white/80 border-2 border-gray-100 rounded-xl text-gray-800 placeholder-gray-400 focus:border-sar-green focus:ring-4 focus:ring-sar-green/10 outline-none transition-all"
+                    onChange={(e) => handleChange('telephone', e.target.value)}
+                    onBlur={() => handleBlur('telephone')}
+                    className={`w-full px-5 py-4 bg-white/80 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:border-sar-green focus:ring-4 focus:ring-sar-green/10 outline-none transition-all ${
+                      touched.telephone && errors.telephone
+                        ? 'border-red-500 bg-red-50'
+                        : 'border-gray-100'
+                    }`}
                   />
+                  {touched.telephone && errors.telephone && (
+                    <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
+                      <AlertCircle size={14} />
+                      <span>{errors.telephone}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -361,7 +394,7 @@ export default function ClientPortal() {
                     rows={4}
                     placeholder="Decrivez votre situation ou ajoutez des details..."
                     value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    onChange={(e) => handleChange('message', e.target.value)}
                     className="w-full px-5 py-4 bg-white/80 border-2 border-gray-100 rounded-xl text-gray-800 placeholder-gray-400 focus:border-sar-green focus:ring-4 focus:ring-sar-green/10 outline-none transition-all resize-none"
                   />
                 </div>
