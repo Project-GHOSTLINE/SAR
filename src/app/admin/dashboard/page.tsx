@@ -20,6 +20,18 @@ interface Message {
   lu: boolean
   status: string
   reference: string
+  client_ip?: string
+  client_user_agent?: string
+  client_device?: string
+  client_browser?: string
+  client_os?: string
+  client_timezone?: string
+  client_language?: string
+  client_screen_resolution?: string
+  referrer?: string
+  utm_source?: string
+  utm_medium?: string
+  utm_campaign?: string
 }
 
 interface EmailLog {
@@ -707,6 +719,86 @@ export default function AdminDashboard() {
                         {extractOptionFromMessage(selectedMessage.question).message}
                       </p>
                     </div>
+
+                    {/* Métriques de Connexion */}
+                    {(selectedMessage.client_ip || selectedMessage.client_device) && (
+                      <div className="bg-gray-50 rounded-xl p-5">
+                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                          <Activity size={14} />
+                          Métriques de Connexion
+                        </h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          {selectedMessage.client_ip && (
+                            <div className="bg-white rounded-lg p-3 border border-gray-100">
+                              <p className="text-xs text-gray-500 mb-1">Adresse IP</p>
+                              <p className="text-gray-900 font-mono text-sm">{selectedMessage.client_ip}</p>
+                            </div>
+                          )}
+                          {selectedMessage.client_device && (
+                            <div className="bg-white rounded-lg p-3 border border-gray-100">
+                              <p className="text-xs text-gray-500 mb-1">Appareil</p>
+                              <p className="text-gray-900 font-medium text-sm">{selectedMessage.client_device}</p>
+                            </div>
+                          )}
+                          {selectedMessage.client_browser && (
+                            <div className="bg-white rounded-lg p-3 border border-gray-100">
+                              <p className="text-xs text-gray-500 mb-1">Navigateur</p>
+                              <p className="text-gray-900 font-medium text-sm">{selectedMessage.client_browser}</p>
+                            </div>
+                          )}
+                          {selectedMessage.client_os && (
+                            <div className="bg-white rounded-lg p-3 border border-gray-100">
+                              <p className="text-xs text-gray-500 mb-1">Système</p>
+                              <p className="text-gray-900 font-medium text-sm">{selectedMessage.client_os}</p>
+                            </div>
+                          )}
+                          {selectedMessage.client_timezone && (
+                            <div className="bg-white rounded-lg p-3 border border-gray-100">
+                              <p className="text-xs text-gray-500 mb-1">Fuseau horaire</p>
+                              <p className="text-gray-900 font-mono text-sm">{selectedMessage.client_timezone}</p>
+                            </div>
+                          )}
+                          {selectedMessage.client_language && (
+                            <div className="bg-white rounded-lg p-3 border border-gray-100">
+                              <p className="text-xs text-gray-500 mb-1">Langue</p>
+                              <p className="text-gray-900 font-mono text-sm">{selectedMessage.client_language}</p>
+                            </div>
+                          )}
+                          {selectedMessage.client_screen_resolution && (
+                            <div className="bg-white rounded-lg p-3 border border-gray-100">
+                              <p className="text-xs text-gray-500 mb-1">Résolution</p>
+                              <p className="text-gray-900 font-mono text-sm">{selectedMessage.client_screen_resolution}</p>
+                            </div>
+                          )}
+                          {selectedMessage.referrer && (
+                            <div className="bg-white rounded-lg p-3 border border-gray-100 col-span-2">
+                              <p className="text-xs text-gray-500 mb-1">Page de provenance</p>
+                              <p className="text-gray-900 font-mono text-xs truncate">{selectedMessage.referrer}</p>
+                            </div>
+                          )}
+                          {(selectedMessage.utm_source || selectedMessage.utm_medium || selectedMessage.utm_campaign) && (
+                            <div className="bg-white rounded-lg p-3 border border-gray-100 col-span-2">
+                              <p className="text-xs text-gray-500 mb-2">Tracking Campagne (UTM)</p>
+                              <div className="space-y-1 text-xs">
+                                {selectedMessage.utm_source && <p><span className="text-gray-500">Source:</span> <span className="text-gray-900 font-medium">{selectedMessage.utm_source}</span></p>}
+                                {selectedMessage.utm_medium && <p><span className="text-gray-500">Medium:</span> <span className="text-gray-900 font-medium">{selectedMessage.utm_medium}</span></p>}
+                                {selectedMessage.utm_campaign && <p><span className="text-gray-500">Campagne:</span> <span className="text-gray-900 font-medium">{selectedMessage.utm_campaign}</span></p>}
+                              </div>
+                            </div>
+                          )}
+                          {selectedMessage.client_user_agent && (
+                            <details className="col-span-2">
+                              <summary className="text-xs text-[#00874e] cursor-pointer hover:underline mb-2">
+                                Voir User-Agent complet
+                              </summary>
+                              <div className="bg-white rounded-lg p-3 border border-gray-100">
+                                <pre className="text-xs text-gray-600 whitespace-pre-wrap break-all">{selectedMessage.client_user_agent}</pre>
+                              </div>
+                            </details>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Emails Envoyes */}
                     <div className="bg-gray-50 rounded-xl p-5">

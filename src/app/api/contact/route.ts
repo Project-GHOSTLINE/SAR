@@ -12,6 +12,29 @@ function getClientIP(request: NextRequest): string {
          'unknown'
 }
 
+// Parser le User-Agent pour extraire device, browser, OS
+function parseUserAgent(ua: string): { device: string; browser: string; os: string } {
+  const device = /mobile|android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua)
+    ? (/tablet|ipad/i.test(ua) ? 'Tablet' : 'Mobile')
+    : 'Desktop'
+
+  let browser = 'Unknown'
+  if (/edg/i.test(ua)) browser = 'Edge'
+  else if (/chrome/i.test(ua) && !/edg/i.test(ua)) browser = 'Chrome'
+  else if (/firefox/i.test(ua)) browser = 'Firefox'
+  else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browser = 'Safari'
+  else if (/opera|opr/i.test(ua)) browser = 'Opera'
+
+  let os = 'Unknown'
+  if (/windows/i.test(ua)) os = 'Windows'
+  else if (/mac os x/i.test(ua)) os = 'macOS'
+  else if (/android/i.test(ua)) os = 'Android'
+  else if (/iphone|ipad|ipod/i.test(ua)) os = 'iOS'
+  else if (/linux/i.test(ua)) os = 'Linux'
+
+  return { device, browser, os }
+}
+
 function isContactRateLimited(ip: string): boolean {
   const now = Date.now()
   const attempt = contactAttempts.get(ip)
@@ -85,7 +108,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    let { message, contactMethod, contact, source = 'site' } = body
+    let { message, contactMethod, contact, source = 'site', clientMetadata } = body
 
     // Validation des inputs
     if (!message || !contact) {
@@ -125,6 +148,18 @@ export async function POST(request: NextRequest) {
     // Enregistrer la tentative
     recordContactAttempt(clientIP)
 
+    // Capturer métriques client
+    const userAgent = request.headers.get('user-agent') || ''
+    const { device, browser, os } = parseUserAgent(userAgent)
+    const referrer = request.headers.get('referer') || request.headers.get('referrer') || ''
+    const acceptLanguage = request.headers.get('accept-language')?.split(',')[0] || 'unknown'
+
+    // Extraire UTM params du referrer si présent
+    const referrerUrl = referrer ? new URL(referrer, 'https://solutionargentrapide.ca') : null
+    const utmSource = referrerUrl?.searchParams.get('utm_source') || clientMetadata?.utmSource || null
+    const utmMedium = referrerUrl?.searchParams.get('utm_medium') || clientMetadata?.utmMedium || null
+    const utmCampaign = referrerUrl?.searchParams.get('utm_campaign') || clientMetadata?.utmCampaign || null
+
     const supabase = getSupabase()
     const contactLabel = contactMethod === 'email' ? 'Courriel' : 'Telephone'
     const clientEmail = contactMethod === 'email' ? contact : ''
@@ -157,7 +192,19 @@ export async function POST(request: NextRequest) {
           telephone: clientPhone,
           question: `[${sourceLabel}] ${message}`,
           lu: false,
-          status: 'nouveau'
+          status: 'nouveau',
+          client_ip: clientIP,
+          client_user_agent: userAgent,
+          client_device: device,
+          client_browser: browser,
+          client_os: os,
+          client_timezone: clientMetadata?.timezone || null,
+          client_language: acceptLanguage,
+          client_screen_resolution: clientMetadata?.screenResolution || null,
+          referrer: referrer || null,
+          utm_source: utmSource,
+          utm_medium: utmMedium,
+          utm_campaign: utmCampaign
         })
         .select()
         .single()
