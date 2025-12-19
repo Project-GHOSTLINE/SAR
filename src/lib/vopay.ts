@@ -185,10 +185,10 @@ class VoPayClient {
  */
 export function createVoPayClient(): VoPayClient {
   const config: VoPayConfig = {
-    accountId: process.env.VOPAY_ACCOUNT_ID || '',
-    apiKey: process.env.VOPAY_API_KEY || '',
-    sharedSecret: process.env.VOPAY_SHARED_SECRET || '',
-    apiUrl: process.env.VOPAY_API_URL || 'https://earthnode.vopay.com/api/v2/',
+    accountId: (process.env.VOPAY_ACCOUNT_ID || '').trim(),
+    apiKey: (process.env.VOPAY_API_KEY || '').trim(),
+    sharedSecret: (process.env.VOPAY_SHARED_SECRET || '').trim(),
+    apiUrl: (process.env.VOPAY_API_URL || 'https://earthnode.vopay.com/api/v2/').trim(),
   }
 
   // Validation

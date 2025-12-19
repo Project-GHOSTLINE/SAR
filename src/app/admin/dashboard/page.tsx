@@ -42,33 +42,79 @@ interface NoteLog {
   date: string
 }
 
-// Extraire l'option selectionnee du message
-function extractOptionFromMessage(question: string): { option: string | null; message: string } {
-  const match = question.match(/\[Espace Client - ([^\]]+)\]/)
-  if (match) {
-    const cleanMessage = question.replace(/\[Formulaire Contact\]\s*/g, '').replace(/\[Espace Client - [^\]]+\]\s*/g, '').trim()
-    return { option: match[1], message: cleanMessage || 'Aucun message additionnel' }
+// Extraire l'option selectionnee et la source du message
+function extractOptionFromMessage(question: string): { source: string | null; option: string | null; message: string } {
+  // Format: [Source] [Option] Message
+  // Ex: [Espace Client - Reporter un paiement] message
+  // Ex: [Analyse Demande] [Ou en est ma demande de credit?] message
+  // Ex: [Formulaire Contact] [Espace Client - Releve ou solde de compte] message
+
+  let source: string | null = null
+  let option: string | null = null
+  let cleanMessage = question
+
+  // Detecter source Analyse Demande ou Formulaire Accueil
+  const analyseMatch = question.match(/\[(Analyse Demande|Formulaire Accueil)\]/)
+  if (analyseMatch) {
+    source = analyseMatch[1]
+    cleanMessage = cleanMessage.replace(/\[(Analyse Demande|Formulaire Accueil)\]\s*/g, '')
   }
 
-  const formMatch = question.match(/\[Formulaire Contact\]/)
-  if (formMatch) {
-    return { option: 'Formulaire Contact', message: question.replace(/\[Formulaire Contact\]\s*/g, '').trim() }
+  // Detecter option Analyse (entre crochets apres la source)
+  const analyseOptionMatch = cleanMessage.match(/\[([^\]]+)\]/)
+  if (analyseOptionMatch && source) {
+    option = analyseOptionMatch[1]
+    cleanMessage = cleanMessage.replace(/\[[^\]]+\]\s*/g, '').trim()
   }
 
-  return { option: null, message: question }
+  // Detecter format Espace Client
+  const espaceClientMatch = question.match(/\[Espace Client - ([^\]]+)\]/)
+  if (espaceClientMatch) {
+    source = 'Espace Client'
+    option = espaceClientMatch[1]
+    cleanMessage = question.replace(/\[Formulaire Contact\]\s*/g, '').replace(/\[Espace Client - [^\]]+\]\s*/g, '').trim()
+  }
+
+  // Detecter Formulaire Contact simple
+  if (!source && question.includes('[Formulaire Contact]')) {
+    source = 'Formulaire Contact'
+    cleanMessage = question.replace(/\[Formulaire Contact\]\s*/g, '').trim()
+  }
+
+  return {
+    source,
+    option,
+    message: cleanMessage || 'Aucun message additionnel'
+  }
+}
+
+// Couleur selon la source
+function getSourceColor(source: string | null): string {
+  if (!source) return 'bg-gray-100 text-gray-600'
+  const colors: Record<string, string> = {
+    'Espace Client': 'bg-purple-100 text-purple-700',
+    'Analyse Demande': 'bg-blue-100 text-blue-700',
+    'Formulaire Accueil': 'bg-indigo-100 text-indigo-700',
+    'Formulaire Contact': 'bg-cyan-100 text-cyan-700'
+  }
+  return colors[source] || 'bg-gray-100 text-gray-600'
 }
 
 // Couleur selon l'option
 function getOptionColor(option: string | null): string {
   if (!option) return 'bg-gray-100 text-gray-600'
   const colors: Record<string, string> = {
+    // Espace Client options
     'Reporter un paiement': 'bg-blue-100 text-blue-700',
     'Reduire mes paiements': 'bg-emerald-100 text-emerald-700',
     'Signaler un changement': 'bg-violet-100 text-violet-700',
     'Releve ou solde de compte': 'bg-amber-100 text-amber-700',
     'Arrangement de paiement': 'bg-rose-100 text-rose-700',
-    'Autre question': 'bg-gray-100 text-gray-700',
-    'Formulaire Contact': 'bg-cyan-100 text-cyan-700'
+    // Analyse Demande options
+    'Ou en est ma demande de credit?': 'bg-sky-100 text-sky-700',
+    'Je veux annuler ma demande': 'bg-red-100 text-red-700',
+    'Question sur mon remboursement': 'bg-orange-100 text-orange-700',
+    'Autre question': 'bg-gray-100 text-gray-700'
   }
   return colors[option] || 'bg-gray-100 text-gray-600'
 }

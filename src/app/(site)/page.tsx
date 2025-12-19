@@ -23,9 +23,9 @@ export default function Home() {
   const [formSubmitted, setFormSubmitted] = useState(false)
 
   const questionsPreetablies = [
-    "Ou en est ma demande de credit?",
-    "Je veux modifier le montant demande",
-    "J'ai un probleme avec la verification bancaire",
+    "Où en est ma demande de crédit?",
+    "Je veux modifier le montant demandé",
+    "J'ai un problème avec la vérification bancaire",
     "Quand vais-je recevoir mon argent?",
     "Je veux annuler ma demande",
     "Question sur mon remboursement",
@@ -85,7 +85,7 @@ export default function Home() {
                 }}
               >
                 <span className="w-3 h-3 bg-white rounded-full animate-pulse"></span>
-                <span className="text-white font-semibold" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>On est la pour vous aider</span>
+                <span className="text-white font-semibold" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>On est là pour vous aider</span>
               </span>
             </div>
 
@@ -103,9 +103,9 @@ export default function Home() {
                 className="text-lg md:text-2xl text-white max-w-2xl mx-auto px-4 font-medium"
                 style={{ textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}
               >
-                De <span className="font-bold">300$</span> a <span className="font-bold">5 000$</span> sans enquete de credit.
+                De <span className="font-bold">300$</span> à <span className="font-bold">5 000$</span> sans enquête de crédit.
                 <br className="hidden md:block" />
-                Demande en ligne, reponse rapide, argent en 24h.
+                Demande en ligne, réponse rapide, argent en 24h.
               </p>
             </div>
 
@@ -124,7 +124,7 @@ export default function Home() {
 
                 <div className="p-6 md:p-10">
                   <div className="flex items-center justify-between mb-5 md:mb-6">
-                    <span className="text-white font-semibold text-base md:text-lg" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>Montant souhaite</span>
+                    <span className="text-white font-semibold text-base md:text-lg" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>Montant souhaité</span>
                     <span
                       className="text-sm md:text-base text-white font-bold px-4 md:px-5 py-1.5 md:py-2 rounded-full"
                       style={{ background: 'rgba(255,255,255,0.25)', border: '2px solid rgba(255,255,255,0.5)' }}
@@ -146,7 +146,7 @@ export default function Home() {
                       {formatAmount(amount)}
                     </span>
                     <span className="text-4xl md:text-6xl font-extrabold text-white">$</span>
-                    <p className="text-white text-sm md:text-base mt-3 font-semibold" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>Depot en 24h</p>
+                    <p className="text-white text-sm md:text-base mt-3 font-semibold" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>Dépôt en 24h</p>
                   </div>
 
                   {/* Slider */}
@@ -217,7 +217,7 @@ export default function Home() {
                 {/* Bottom Bar */}
                 <div style={{ background: 'rgba(255,255,255,0.15)', borderTop: '2px solid rgba(255,255,255,0.3)' }} className="px-4 md:px-8 py-5 md:py-6">
                   <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-10 text-sm md:text-base">
-                    {['Sans enquete', '100% en ligne', 'Argent en 24h'].map((text, i) => (
+                    {['Sans enquête', '100% en ligne', 'Argent en 24h'].map((text, i) => (
                       <span key={i} className="flex items-center gap-2.5 text-white">
                         <span
                           className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-sm font-bold"
@@ -234,9 +234,9 @@ export default function Home() {
             {/* Features Cards */}
             <div className="flex flex-wrap justify-center gap-3 md:gap-5 mt-10 md:mt-14 px-2">
               {[
-                { icon: '⚡', title: 'Rapide', desc: 'Reponse rapide' },
-                { icon: '🔒', title: 'Securise', desc: 'SSL 256-bit' },
-                { icon: '💳', title: 'Flexible', desc: 'Paiements adaptes' },
+                { icon: '⚡', title: 'Rapide', desc: 'Réponse rapide' },
+                { icon: '🔒', title: 'Sécurisé', desc: 'SSL 256-bit' },
+                { icon: '💳', title: 'Flexible', desc: 'Paiements adaptés' },
                 { icon: '🎯', title: 'Simple', desc: '2 min en ligne' }
               ].map((item, i) => (
                 <div
@@ -267,25 +267,25 @@ export default function Home() {
           <div className="text-center mb-8 md:mb-12">
             <h2 className="section-title">On comprend votre situation</h2>
             <p className="text-gray-600 max-w-xl mx-auto">
-              Une urgence peut arriver a n&apos;importe qui. On est la pour vous aider.
+              Une urgence peut arriver à n&apos;importe qui. On est là pour vous aider.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto">
             <div className="card text-center">
               <div className="text-3xl mb-3">🚗</div>
-              <h3 className="font-semibold text-gray-800 mb-1">Reparation urgente</h3>
-              <p className="text-gray-600 text-sm">Auto, maison, electromenager</p>
+              <h3 className="font-semibold text-gray-800 mb-1">Réparation urgente</h3>
+              <p className="text-gray-600 text-sm">Auto, maison, électroménager</p>
             </div>
             <div className="card text-center">
               <div className="text-3xl mb-3">💊</div>
-              <h3 className="font-semibold text-gray-800 mb-1">Depenses medicales</h3>
+              <h3 className="font-semibold text-gray-800 mb-1">Dépenses médicales</h3>
               <p className="text-gray-600 text-sm">Soins non couverts</p>
             </div>
             <div className="card text-center">
               <div className="text-3xl mb-3">📅</div>
               <h3 className="font-semibold text-gray-800 mb-1">Fin de mois</h3>
-              <p className="text-gray-600 text-sm">Loyer, factures, epicerie</p>
+              <p className="text-gray-600 text-sm">Loyer, factures, épicerie</p>
             </div>
           </div>
         </div>
@@ -313,16 +313,16 @@ export default function Home() {
                 <div className="w-12 h-12 bg-sar-green rounded-xl flex items-center justify-center mx-auto mb-3 text-white font-bold text-lg">
                   2
                 </div>
-                <h3 className="font-semibold text-gray-800 mb-1">Verification</h3>
-                <p className="text-gray-600 text-sm">Connexion bancaire securisee</p>
+                <h3 className="font-semibold text-gray-800 mb-1">Vérification</h3>
+                <p className="text-gray-600 text-sm">Connexion bancaire sécurisée</p>
               </div>
 
               <div className="glass p-5 md:p-6 text-center">
                 <div className="w-12 h-12 bg-sar-gold rounded-xl flex items-center justify-center mx-auto mb-3 text-white font-bold text-lg">
                   3
                 </div>
-                <h3 className="font-semibold text-gray-800 mb-1">Argent recu</h3>
-                <p className="text-gray-600 text-sm">Depot direct en 24h</p>
+                <h3 className="font-semibold text-gray-800 mb-1">Argent reçu</h3>
+                <p className="text-gray-600 text-sm">Dépôt direct en 24h</p>
               </div>
             </div>
 
@@ -344,8 +344,8 @@ export default function Home() {
                 <BadgeCheck size={24} className="text-sar-green" />
               </div>
               <div>
-                <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">Vos donnees sont protegees</h2>
-                <p className="text-gray-600 text-sm md:text-base">Securite bancaire. Donnees jamais partagees.</p>
+                <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">Vos données sont protégées</h2>
+                <p className="text-gray-600 text-sm md:text-base">Sécurité bancaire. Données jamais partagées.</p>
               </div>
             </div>
 
@@ -356,11 +356,11 @@ export default function Home() {
               </div>
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                 <CheckCircle size={18} className="text-sar-green flex-shrink-0" />
-                <span className="text-sm text-gray-700">Aucun acces a vos identifiants</span>
+                <span className="text-sm text-gray-700">Aucun accès à vos identifiants</span>
               </div>
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                 <CheckCircle size={18} className="text-sar-green flex-shrink-0" />
-                <span className="text-sm text-gray-700">Entreprise basee au Quebec</span>
+                <span className="text-sm text-gray-700">Entreprise basée au Québec</span>
               </div>
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                 <CheckCircle size={18} className="text-sar-green flex-shrink-0" />
@@ -376,15 +376,15 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
-              <h2 className="section-title">Etes-vous eligible?</h2>
-              <p className="text-gray-600">4 criteres simples</p>
+              <h2 className="section-title">Êtes-vous éligible?</h2>
+              <p className="text-gray-600">4 critères simples</p>
             </div>
 
             <div className="glass rounded-2xl p-5 md:p-8">
               <div className="space-y-3 md:space-y-4">
                 <div className="flex items-center gap-4 p-3 md:p-4 bg-white/60 rounded-xl">
                   <CheckCircle size={22} className="text-sar-green flex-shrink-0" />
-                  <p className="font-medium text-gray-800">Resident du Quebec, 18+</p>
+                  <p className="font-medium text-gray-800">Résident du Québec, 18+</p>
                 </div>
                 <div className="flex items-center gap-4 p-3 md:p-4 bg-white/60 rounded-xl">
                   <CheckCircle size={22} className="text-sar-green flex-shrink-0" />
@@ -402,7 +402,7 @@ export default function Home() {
 
               <div className="mt-6 p-4 bg-sar-green/5 rounded-xl text-center">
                 <p className="text-gray-700 text-sm md:text-base">
-                  <strong className="text-sar-green">Mauvais credit?</strong> Pas de probleme! On ne fait pas d&apos;enquete traditionnelle.
+                  <strong className="text-sar-green">Mauvais crédit?</strong> Pas de problème! On ne fait pas d&apos;enquête traditionnelle.
                 </p>
               </div>
             </div>
@@ -425,7 +425,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 text-sm mb-4 italic">
-                &quot;Reparation urgente sur ma voiture. En moins de 24h, j&apos;avais l&apos;argent. Merci!&quot;
+                &quot;Réparation urgente sur ma voiture. En moins de 24h, j&apos;avais l&apos;argent. Merci!&quot;
               </p>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-sar-green/10 rounded-full flex items-center justify-center">
@@ -445,7 +445,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 text-sm mb-4 italic">
-                &quot;Service incroyable! L&apos;argent etait dans mon compte le jour meme.&quot;
+                &quot;Service incroyable! L&apos;argent était dans mon compte le jour même.&quot;
               </p>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-sar-green/10 rounded-full flex items-center justify-center">
@@ -465,7 +465,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 text-sm mb-4 italic">
-                &quot;Tout etait clair et bien explique. Pas de surprises!&quot;
+                &quot;Tout était clair et bien expliqué. Pas de surprises!&quot;
               </p>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-sar-green/10 rounded-full flex items-center justify-center">
@@ -487,7 +487,7 @@ export default function Home() {
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
               <h2 className="section-title">Nos conditions</h2>
-              <p className="text-gray-600">Transparence et clarte</p>
+              <p className="text-gray-600">Transparence et clarté</p>
             </div>
 
             {/* Tabs navigation */}
@@ -500,7 +500,7 @@ export default function Home() {
                     : 'bg-white/80 text-gray-600 hover:bg-white'
                 }`}
               >
-                Modalites de remboursement
+                Modalités de remboursement
               </button>
               <button
                 onClick={() => setActiveTab(1)}
@@ -510,7 +510,7 @@ export default function Home() {
                     : 'bg-white/80 text-gray-600 hover:bg-white'
                 }`}
               >
-                Soutien et cote de credit
+                Soutien et cote de crédit
               </button>
               <button
                 onClick={() => setActiveTab(2)}
@@ -529,16 +529,16 @@ export default function Home() {
               {activeTab === 0 && (
                 <div className="space-y-4">
                   <p className="text-gray-700 leading-relaxed">
-                    Nous proposons un taux d&apos;interet annuel (TAEG) de <strong>18,99 %</strong>.
+                    Nous proposons un taux d&apos;intérêt annuel (TAEG) de <strong>18,99 %</strong>.
                   </p>
                   <p className="text-gray-700 leading-relaxed">
-                    Chez Solution Argent Rapide, nous etablissons vos paiements minimums en fonction de votre
-                    capacite de paiement et de la duree de remboursement que vous preferez.
+                    Chez Solution Argent Rapide, nous établissons vos paiements minimums en fonction de votre
+                    capacité de paiement et de la durée de remboursement que vous préférez.
                   </p>
                   <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                     <p className="text-yellow-800 text-sm">
-                      <strong>Remarque :</strong> Les frais d&apos;adhesion sont applicables tant qu&apos;il reste
-                      un solde a rembourser sur votre credit.
+                      <strong>Remarque :</strong> Les frais d&apos;adhésion sont applicables tant qu&apos;il reste
+                      un solde à rembourser sur votre crédit.
                     </p>
                   </div>
                 </div>
@@ -547,16 +547,16 @@ export default function Home() {
               {activeTab === 1 && (
                 <div className="space-y-4">
                   <p className="text-gray-700 leading-relaxed">
-                    Chez Solution Argent Rapide, nous adherons strictement aux normes legales canadiennes.
-                    Si une situation particuliere se presente pendant votre periode d&apos;utilisation de notre
-                    option de credit, notre service a la clientele est a votre disposition pour vous assister
-                    dans vos demarches, qu&apos;il s&apos;agisse d&apos;un report de paiement ou de toute autre demande.
+                    Chez Solution Argent Rapide, nous adhérons strictement aux normes légales canadiennes.
+                    Si une situation particulière se présente pendant votre période d&apos;utilisation de notre
+                    option de crédit, notre service à la clientèle est à votre disposition pour vous assister
+                    dans vos démarches, qu&apos;il s&apos;agisse d&apos;un report de paiement ou de toute autre demande.
                   </p>
                   <div className="bg-sar-green/10 border border-sar-green/20 rounded-xl p-4">
                     <p className="text-gray-700">
-                      <strong className="text-sar-green">Bonne nouvelle :</strong> Les transactions effectuees avec
-                      notre option de credit n&apos;ont <strong>aucun impact sur votre cote de credit</strong>,
-                      car nous ne transmettons pas d&apos;informations aux bureaux de credit.
+                      <strong className="text-sar-green">Bonne nouvelle :</strong> Les transactions effectuées avec
+                      notre option de crédit n&apos;ont <strong>aucun impact sur votre cote de crédit</strong>,
+                      car nous ne transmettons pas d&apos;informations aux bureaux de crédit.
                     </p>
                   </div>
                 </div>
@@ -570,25 +570,25 @@ export default function Home() {
                   <ul className="space-y-3">
                     <li className="flex items-start gap-3">
                       <CheckCircle size={18} className="text-sar-green flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700 text-sm">Le montant rembourse ne peut etre inferieur a 5 % du montant utilise sur votre credit.</span>
+                      <span className="text-gray-700 text-sm">Le montant remboursé ne peut être inférieur à 5 % du montant utilisé sur votre crédit.</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <CheckCircle size={18} className="text-sar-green flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700 text-sm">Notre produit est concu pour une utilisation ponctuelle et un remboursement complet en quelques semaines.</span>
+                      <span className="text-gray-700 text-sm">Notre produit est conçu pour une utilisation ponctuelle et un remboursement complet en quelques semaines.</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <CheckCircle size={18} className="text-sar-green flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700 text-sm">Les options de credit sont generalement remboursees sur une periode de 3 a 6 mois.</span>
+                      <span className="text-gray-700 text-sm">Les options de crédit sont généralement remboursées sur une période de 3 à 6 mois.</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <CheckCircle size={18} className="text-sar-green flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700 text-sm">Vous pouvez rembourser le montant du en totalite ou en partie a tout moment.</span>
+                      <span className="text-gray-700 text-sm">Vous pouvez rembourser le montant dû en totalité ou en partie à tout moment.</span>
                     </li>
                   </ul>
                   <div className="bg-gray-50 rounded-xl p-4 mt-4">
                     <p className="text-sm text-gray-600">
                       <strong>Exemple :</strong> Un retrait de 750 $ avec des remboursements bihebdomadaires de 110,75 $ sur 10 versements.
-                      Les frais hebdomadaires d&apos;adhesion de 22,50 $ sont inclus dans les montants de remboursement indiques.
+                      Les frais hebdomadaires d&apos;adhésion de 22,50 $ sont inclus dans les montants de remboursement indiqués.
                     </p>
                   </div>
                 </div>
@@ -608,7 +608,7 @@ export default function Home() {
                 <div>
                   <h3 className="font-semibold text-yellow-800 mb-2">Empruntez responsablement</h3>
                   <p className="text-yellow-700 text-sm leading-relaxed">
-                    Nos solutions sont pour les urgences ponctuelles. Les taux sont plus eleves que les banques traditionnelles.
+                    Nos solutions sont pour les urgences ponctuelles. Les taux sont plus élevés que les banques traditionnelles.
                     Assurez-vous de pouvoir rembourser avant de faire une demande.
                   </p>
                 </div>
@@ -628,15 +628,15 @@ export default function Home() {
           <div className="max-w-2xl mx-auto space-y-3 md:space-y-4">
             <div className="card">
               <h3 className="font-semibold text-gray-800 mb-2">Quand vais-je recevoir l&apos;argent?</h3>
-              <p className="text-gray-600 text-sm">Depot direct dans les 24h suivant l&apos;approbation.</p>
+              <p className="text-gray-600 text-sm">Dépôt direct dans les 24h suivant l&apos;approbation.</p>
             </div>
             <div className="card">
-              <h3 className="font-semibold text-gray-800 mb-2">Est-ce que ca affecte mon credit?</h3>
-              <p className="text-gray-600 text-sm">Non. Pas d&apos;enquete traditionnelle, pas de rapport aux bureaux de credit.</p>
+              <h3 className="font-semibold text-gray-800 mb-2">Est-ce que ça affecte mon crédit?</h3>
+              <p className="text-gray-600 text-sm">Non. Pas d&apos;enquête traditionnelle, pas de rapport aux bureaux de crédit.</p>
             </div>
             <div className="card">
-              <h3 className="font-semibold text-gray-800 mb-2">La verification est-elle securitaire?</h3>
-              <p className="text-gray-600 text-sm">Oui. Chiffrement SSL 256-bit. On n&apos;a jamais acces a vos identifiants.</p>
+              <h3 className="font-semibold text-gray-800 mb-2">La vérification est-elle sécuritaire?</h3>
+              <p className="text-gray-600 text-sm">Oui. Chiffrement SSL 256-bit. On n&apos;a jamais accès à vos identifiants.</p>
             </div>
           </div>
 
@@ -666,7 +666,7 @@ export default function Home() {
                     className="flex-1 bg-white border-2 border-sar-green text-sar-green font-semibold py-3 px-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-sar-green hover:text-white transition-all"
                   >
                     <MessageCircle size={18} />
-                    <span>Ecrivez-nous</span>
+                    <span>Écrivez-nous</span>
                   </button>
                 </div>
                 <p className="text-xs text-gray-600 font-medium mb-1">Analyse et suivi de dossier</p>
@@ -679,7 +679,7 @@ export default function Home() {
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <a href="tel:4509991107" className="btn-secondary flex items-center justify-center gap-2 mb-2">
                   <Phone size={18} />
-                  <span><strong>Comptabilite:</strong> 450 999-1107</span>
+                  <span><strong>Comptabilité:</strong> 450 999-1107</span>
                 </a>
                 <p className="text-xs text-gray-500">Lun-Jeu: 8h-16h | Ven: 8h-12h</p>
               </div>
@@ -706,7 +706,7 @@ export default function Home() {
             <div className="sticky top-0 bg-sar-green text-white p-5 rounded-t-3xl flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-bold">Analyse et suivi</h3>
-                <p className="text-white/80 text-sm">Reponse rapide 24/7</p>
+                <p className="text-white/80 text-sm">Réponse rapide 24/7</p>
               </div>
               <button
                 onClick={() => {
@@ -724,8 +724,8 @@ export default function Home() {
                 <div className="w-16 h-16 bg-sar-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="text-sar-green" size={32} />
                 </div>
-                <h4 className="text-xl font-bold text-gray-800 mb-2">Message envoye!</h4>
-                <p className="text-gray-600 mb-6">Nous vous repondrons dans les plus brefs delais.</p>
+                <h4 className="text-xl font-bold text-gray-800 mb-2">Message envoyé!</h4>
+                <p className="text-gray-600 mb-6">Nous vous répondrons dans les plus brefs délais.</p>
                 <button
                   onClick={() => {
                     setShowContactModal(false)
@@ -772,12 +772,12 @@ export default function Home() {
                 {contactForm.question === "Autre question" && (
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Precisez votre question
+                      Précisez votre question
                     </label>
                     <textarea
                       rows={3}
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-sar-green focus:ring-0 outline-none transition-colors"
-                      placeholder="Decrivez votre question..."
+                      placeholder="Décrivez votre question..."
                       value={contactForm.questionAutre}
                       onChange={(e) => setContactForm({ ...contactForm, questionAutre: e.target.value })}
                     />
@@ -786,7 +786,7 @@ export default function Home() {
 
                 {/* Coordonnees */}
                 <div className="pt-4 border-t border-gray-100">
-                  <p className="text-sm font-semibold text-gray-700 mb-3">Vos coordonnees <span className="text-red-500">*</span></p>
+                  <p className="text-sm font-semibold text-gray-700 mb-3">Vos coordonnées <span className="text-red-500">*</span></p>
 
                   <div className="space-y-3">
                     <div>
@@ -817,7 +817,7 @@ export default function Home() {
                       <input
                         type="tel"
                         required
-                        placeholder="Votre telephone *"
+                        placeholder="Votre téléphone *"
                         className={`w-full px-4 py-3 border-2 rounded-xl focus:border-sar-green focus:ring-0 outline-none transition-colors ${
                           contactForm.telephone ? 'border-sar-green/50 bg-sar-green/5' : 'border-gray-200'
                         }`}

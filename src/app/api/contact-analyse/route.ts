@@ -1,43 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// Fonction pour sauvegarder dans Supabase
-async function saveToSupabase(nom: string, email: string, telephone: string, question: string) {
-  try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.SUPABASE_SERVICE_KEY
+// Generer reference unique
+function generateReference(id: number) {
+  return `SAR-${id.toString().padStart(6, '0')}`
+}
 
-    if (!supabaseUrl || !supabaseKey) {
-      console.log('Supabase non configure, message non sauvegarde')
-      return
-    }
+function getSupabase() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY
 
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    const { error } = await supabase
-      .from('contact_messages')
-      .insert({
-        nom,
-        email,
-        telephone,
-        question,
-        lu: false
-      })
-
-    if (error) {
-      console.error('Erreur Supabase:', error)
-    } else {
-      console.log('Message sauvegarde dans Supabase')
-    }
-  } catch (error) {
-    console.error('Erreur sauvegarde Supabase:', error)
+  if (!supabaseUrl || !supabaseKey) {
+    return null
   }
+
+  return createClient(supabaseUrl, supabaseKey)
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { nom, email, telephone, question, questionAutre } = body
+    const { nom, email, telephone, question, questionAutre, source = 'analyse' } = body
 
     // Validation
     if (!nom || !email || !telephone || !question) {
@@ -51,16 +34,97 @@ export async function POST(request: NextRequest) {
       ? questionAutre
       : question
 
+    // Determiner le tag source et le destinataire
+    const sourceLabel = source === 'accueil' ? 'Formulaire Accueil' : 'Analyse Demande'
+    const questionWithTag = `[${sourceLabel}] [${question}] ${question === "Autre question" ? questionAutre : ''}`
+
     // Destinataire selon le type de question
-    // - "Autre question" → Sandra Liberta (perception@solutionargentrapide.ca)
-    // - Autres questions → Michel Rosa (mrosa@solutionargentrapide.ca)
     const isAutreQuestion = question === "Autre question"
     const destinataire = isAutreQuestion
       ? 'perception@solutionargentrapide.ca'
       : 'mrosa@solutionargentrapide.ca'
     const destinataireNom = isAutreQuestion ? 'Sandra' : 'Michel'
 
-    // Email HTML template
+    const supabase = getSupabase()
+    let messageId: number | null = null
+    let reference = ''
+
+    // Sauvegarder dans Supabase
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .insert({
+          nom,
+          email,
+          telephone,
+          question: questionWithTag.trim(),
+          lu: false,
+          status: 'nouveau'
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erreur Supabase:', error)
+      } else {
+        messageId = data.id
+        reference = generateReference(data.id)
+        console.log('Message sauvegarde dans Supabase, ID:', messageId)
+
+        // Enregistrer l'email envoye a l'equipe
+        await supabase.from('emails_envoyes').insert({
+          message_id: messageId,
+          type: 'system',
+          destinataire: destinataire,
+          sujet: `[NOUVELLE DEMANDE] ${nom} - #${reference}`,
+          contenu: `Nouvelle demande depuis ${sourceLabel}
+
+Reference: #${reference}
+Date: ${new Date().toLocaleString('fr-CA')}
+
+CLIENT:
+Nom: ${nom}
+Email: ${email}
+Telephone: ${telephone}
+
+QUESTION: ${question}
+${question === "Autre question" ? `\nDETAILS:\n${questionAutre}` : ''}
+
+---
+Connectez-vous a l'admin pour repondre: /admin/dashboard`,
+          envoye_par: 'system'
+        })
+
+        // Enregistrer l'email de confirmation au client
+        if (email) {
+          await supabase.from('emails_envoyes').insert({
+            message_id: messageId,
+            type: 'system',
+            destinataire: email,
+            sujet: `Confirmation de votre demande #${reference}`,
+            contenu: `Bonjour ${nom.split(' ')[0]},
+
+Nous avons bien recu votre demande.
+
+Votre numero de reference: #${reference}
+Question: ${questionComplete}
+
+Notre equipe vous contactera dans les 24-48h ouvrables.
+
+Heures d'ouverture:
+Lundi au vendredi: 8h00 a 16h00
+
+Contact: 1-888-900-1516
+
+Cordialement,
+L'equipe Solution Argent Rapide`,
+            envoye_par: 'system'
+          })
+        }
+      }
+    }
+
+    // Email HTML template pour l'equipe
     const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -73,6 +137,8 @@ export async function POST(request: NextRequest) {
     .header h1 { margin: 0; font-size: 24px; }
     .header p { margin: 10px 0 0; opacity: 0.9; }
     .content { padding: 30px; }
+    .reference { background: #00874e; color: white; display: inline-block; padding: 8px 16px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; }
+    .source-tag { background: #3b82f6; color: white; display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 12px; margin-left: 10px; }
     .greeting { font-size: 18px; color: #333; margin-bottom: 20px; }
     .intro { background: #f0fdf4; border-left: 4px solid #00874e; padding: 15px; margin-bottom: 25px; border-radius: 0 8px 8px 0; }
     .client-info { background: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 25px; }
@@ -82,6 +148,7 @@ export async function POST(request: NextRequest) {
     .info-label { font-weight: 600; color: #666; width: 120px; }
     .info-value { color: #111; flex: 1; }
     .info-value a { color: #00874e; text-decoration: none; }
+    .question-tag { background: #dbeafe; color: #1e40af; padding: 8px 16px; border-radius: 8px; font-weight: 600; display: inline-block; margin-bottom: 15px; }
     .message-box { background: #fffbeb; border: 2px solid #fbbf24; border-radius: 12px; padding: 20px; margin-bottom: 25px; }
     .message-box h3 { margin: 0 0 10px; color: #92400e; font-size: 14px; text-transform: uppercase; }
     .message-box p { margin: 0; color: #333; font-size: 16px; line-height: 1.6; }
@@ -101,11 +168,16 @@ export async function POST(request: NextRequest) {
     </div>
 
     <div class="content">
+      <div style="margin-bottom: 20px;">
+        ${reference ? `<span class="reference">#${reference}</span>` : ''}
+        <span class="source-tag">${sourceLabel}</span>
+      </div>
+
       <p class="greeting">Bonjour ${destinataireNom},</p>
 
       <div class="intro">
-        <strong>Je suis SAR, votre assistant personnel.</strong><br>
-        Un nouveau message vient d'etre envoye par un client depuis votre site Solution Argent Rapide.
+        <strong>Nouvelle demande recue!</strong><br>
+        Un client vous a contacte depuis le formulaire "${sourceLabel}".
       </div>
 
       <div class="client-info">
@@ -124,65 +196,230 @@ export async function POST(request: NextRequest) {
         </div>
       </div>
 
+      <div class="question-tag">❓ ${question}</div>
+
+      ${question === "Autre question" && questionAutre ? `
       <div class="message-box">
-        <h3>💬 Question du client</h3>
-        <p>${questionComplete}</p>
+        <h3>💬 Details de la question</h3>
+        <p>${questionAutre}</p>
       </div>
+      ` : ''}
 
       <div class="quick-responses">
         <h3>⚡ Reponses rapides</h3>
         <a href="tel:${telephone.replace(/\D/g, '')}" class="response-btn">📞 Appeler le client</a>
-        <a href="mailto:${email}?subject=Re: Votre demande - Solution Argent Rapide&body=Bonjour ${nom.split(' ')[0]},%0D%0A%0D%0AMerci de nous avoir contacte.%0D%0A%0D%0A" class="response-btn secondary">✉️ Repondre par courriel</a>
+        <a href="mailto:${email}?subject=Re: Votre demande ${reference ? '#' + reference : ''} - Solution Argent Rapide&body=Bonjour ${nom.split(' ')[0]},%0D%0A%0D%0AMerci de nous avoir contacte.%0D%0A%0D%0A" class="response-btn secondary">✉️ Repondre par courriel</a>
       </div>
     </div>
 
     <div class="footer">
-      <p>Ce message a ete envoye automatiquement par SAR - Solution Argent Rapide<br>
-      <a href="https://solutionargentrapide.ca">solutionargentrapide.ca</a></p>
+      <p>Ce message a ete envoye automatiquement<br>
+      <a href="https://solutionargentrapide.ca/admin/dashboard">Voir dans l'admin</a></p>
     </div>
   </div>
 </body>
 </html>
     `.trim()
 
-    // Email texte (fallback)
-    const emailText = `
-Bonjour ${destinataireNom},
+    // Email de confirmation au client
+    const clientConfirmationHtml = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmation de votre demande</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse;">
 
-Je suis SAR, votre assistant personnel.
-Un nouveau message vient d'etre envoye par un client depuis votre site Solution Argent Rapide.
+          <!-- Logo Header -->
+          <tr>
+            <td align="center" style="padding-bottom: 30px;">
+              <table role="presentation" style="border-collapse: collapse;">
+                <tr>
+                  <td style="background: linear-gradient(135deg, #00874e 0%, #005a34 100%); padding: 20px 40px; border-radius: 12px;">
+                    <span style="font-size: 24px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">Solution</span>
+                    <span style="font-size: 24px; font-weight: 700; color: #c9a227; letter-spacing: -0.5px; margin-left: 8px;">Argent Rapide</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-═══════════════════════════════════════
-📋 INFORMATIONS DU CLIENT
-═══════════════════════════════════════
+          <!-- Main Card -->
+          <tr>
+            <td style="background: #ffffff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);">
 
-👤 Nom:        ${nom}
-📞 Telephone:  ${telephone}
-✉️ Courriel:   ${email}
+              <!-- Success Banner -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="background: linear-gradient(135deg, #00874e 0%, #005a34 100%); padding: 35px 40px; border-radius: 16px 16px 0 0; text-align: center;">
+                    <div style="width: 70px; height: 70px; background: rgba(255,255,255,0.2); border-radius: 50%; margin: 0 auto 15px; line-height: 70px;">
+                      <span style="font-size: 36px; color: white;">✓</span>
+                    </div>
+                    <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 700;">Demande bien recue!</h1>
+                    <p style="margin: 10px 0 0; color: rgba(255,255,255,0.9); font-size: 15px;">Nous traitons votre demande avec attention</p>
+                  </td>
+                </tr>
+              </table>
 
-═══════════════════════════════════════
-💬 QUESTION DU CLIENT
-═══════════════════════════════════════
+              <!-- Content -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 40px;">
 
-${questionComplete}
+                    <!-- Reference Box -->
+                    ${reference ? `
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                      <tr>
+                        <td style="background: #f0fdf4; border: 2px solid #00874e; border-radius: 12px; padding: 20px; text-align: center;">
+                          <p style="margin: 0 0 5px; color: #166534; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Votre numero de reference</p>
+                          <p style="margin: 0; color: #00874e; font-size: 28px; font-weight: 700; letter-spacing: 1px;">#${reference}</p>
+                          <p style="margin: 10px 0 0; color: #166534; font-size: 12px;">Conservez ce numero pour tout suivi</p>
+                        </td>
+                      </tr>
+                    </table>
+                    ` : ''}
 
-═══════════════════════════════════════
+                    <!-- Your question -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                      <tr>
+                        <td style="background: #f0f9ff; border-radius: 12px; padding: 20px;">
+                          <p style="margin: 0 0 8px; color: #0369a1; font-size: 13px; font-weight: 600;">VOTRE QUESTION:</p>
+                          <p style="margin: 0; color: #0c4a6e; font-size: 15px; font-weight: 500;">${questionComplete}</p>
+                        </td>
+                      </tr>
+                    </table>
 
-Pour repondre rapidement:
-• Appeler: ${telephone}
-• Courriel: ${email}
+                    <!-- Message -->
+                    <p style="margin: 0 0 20px; color: #374151; font-size: 16px; line-height: 1.7;">
+                      Bonjour ${nom.split(' ')[0]},
+                    </p>
+                    <p style="margin: 0 0 20px; color: #374151; font-size: 16px; line-height: 1.7;">
+                      Nous avons bien recu votre demande et nous vous remercions de votre confiance.
+                      <strong>Un membre de notre equipe vous contactera dans les plus brefs delais</strong>,
+                      generalement dans les <strong>24 a 48 heures ouvrables</strong>.
+                    </p>
 
----
-SAR - Solution Argent Rapide
-https://solutionargentrapide.ca
+                    <!-- What happens next -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0; background: #fafafa; border-radius: 12px;">
+                      <tr>
+                        <td style="padding: 25px;">
+                          <p style="margin: 0 0 15px; color: #111827; font-size: 15px; font-weight: 700;">📋 Prochaines etapes:</p>
+                          <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                              <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
+                                <span style="color: #00874e; font-weight: 700; margin-right: 10px;">1.</span>
+                                Notre equipe analyse votre demande
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
+                                <span style="color: #00874e; font-weight: 700; margin-right: 10px;">2.</span>
+                                Nous vous contactons par telephone ou courriel
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
+                                <span style="color: #00874e; font-weight: 700; margin-right: 10px;">3.</span>
+                                Nous trouvons ensemble la meilleure solution
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Hours Box -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 25px 0;">
+                      <tr>
+                        <td style="background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 20px;">
+                          <p style="margin: 0 0 8px; color: #92400e; font-size: 14px; font-weight: 700;">🕐 Heures d'ouverture</p>
+                          <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 1.6;">
+                            <strong>Lundi au vendredi:</strong> 8h00 a 16h00<br>
+                            <span style="color: #a16207; font-size: 13px;">Ferme les samedis, dimanches et jours feries</span>
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Contact Info -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin-top: 30px;">
+                      <tr>
+                        <td style="border-top: 1px solid #e5e7eb; padding-top: 25px;">
+                          <p style="margin: 0 0 15px; color: #6b7280; font-size: 14px;">
+                            <strong style="color: #374151;">Une question urgente?</strong> Contactez-nous directement:
+                          </p>
+                          <table role="presentation" style="border-collapse: collapse;">
+                            <tr>
+                              <td style="padding: 8px 0;">
+                                <a href="tel:+18889001516" style="color: #00874e; text-decoration: none; font-size: 15px; font-weight: 600;">
+                                  📞 1-888-900-1516
+                                </a>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0;">
+                                <a href="mailto:info@solutionargentrapide.ca" style="color: #00874e; text-decoration: none; font-size: 14px;">
+                                  ✉️ info@solutionargentrapide.ca
+                                </a>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Signature -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin-top: 30px;">
+                      <tr>
+                        <td>
+                          <p style="margin: 0; color: #374151; font-size: 15px; line-height: 1.7;">
+                            Cordialement,<br>
+                            <strong style="color: #00874e;">L'equipe Solution Argent Rapide</strong>
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px 20px; text-align: center;">
+              <p style="margin: 0 0 10px; color: #6b7280; font-size: 13px;">
+                <a href="https://solutionargentrapide.ca" style="color: #00874e; text-decoration: none; font-weight: 600;">solutionargentrapide.ca</a>
+              </p>
+              <p style="margin: 0; color: #9ca3af; font-size: 11px; line-height: 1.6;">
+                Cet email a ete envoye automatiquement suite a votre demande.<br>
+                © ${new Date().getFullYear()} Solution Argent Rapide Inc. Tous droits reserves.
+              </p>
+              <p style="margin: 15px 0 0; color: #9ca3af; font-size: 11px;">
+                Quebec, Canada
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
     `.trim()
 
-    // Toujours sauvegarder dans Supabase
-    await saveToSupabase(nom, email, telephone, questionComplete)
-
-    // Envoyer email via Resend si configure
+    // Envoyer emails via Resend si configure
     if (process.env.RESEND_API_KEY) {
-      const resendResponse = await fetch('https://api.resend.com/emails', {
+      // Email a l'equipe
+      await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
@@ -192,42 +429,48 @@ https://solutionargentrapide.ca
           from: 'SAR Assistant <noreply@solutionargentrapide.ca>',
           to: destinataire,
           reply_to: email,
-          subject: `💬 Un client attend votre reponse - ${nom}`,
-          html: emailHtml,
-          text: emailText
+          subject: `💬 ${question} - ${nom} ${reference ? '#' + reference : ''}`,
+          html: emailHtml
         })
       })
 
-      const resendResult = await resendResponse.json()
-
-      if (!resendResponse.ok) {
-        console.error('Resend error:', JSON.stringify(resendResult))
-        return NextResponse.json({
-          success: true,
-          method: 'supabase-only',
-          emailError: resendResult,
-          destinataire: destinataire
+      // Email de confirmation au client
+      if (email) {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            from: 'Solution Argent Rapide <noreply@solutionargentrapide.ca>',
+            to: email,
+            subject: `✅ Demande recue ${reference ? '#' + reference : ''} - Solution Argent Rapide`,
+            html: clientConfirmationHtml
+          })
         })
       }
 
-      console.log('Email envoye avec succes a:', destinataire)
+      console.log('Emails envoyes avec succes')
       return NextResponse.json({
         success: true,
         method: 'resend+supabase',
-        emailId: resendResult.id,
-        destinataire: destinataire
+        reference,
+        destinataire
       })
     }
 
     // Mode dev: log seulement
     console.log('=== CONTACT ANALYSE (DEV MODE) ===')
     console.log('To:', destinataire)
+    console.log('Reference:', reference)
     console.log('Message sauvegarde dans Supabase')
     console.log('==================================')
 
     return NextResponse.json({
       success: true,
       method: 'supabase',
+      reference,
       message: 'Message sauvegarde'
     })
 
