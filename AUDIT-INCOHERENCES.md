@@ -7,18 +7,17 @@
 
 ## ❌ PROBLÈMES CRITIQUES
 
-### 1. Cookie Name Mismatch (AUTH CASSÉE)
-**Fichiers concernés:**
-- `src/middleware.ts` (ligne 34) → Cherche `admin_token`
-- `src/app/api/admin/login/route.ts` (ligne 28) → Définit `admin-session`
+### 1. Cookie Name Mismatch (AUTH CASSÉE) → ✅ RÉSOLU
+**Fichiers corrigés:**
+- `src/middleware.ts` (ligne 34 et 46) → `admin-session`
+- `src/app/api/admin/login/route.ts` (ligne 28) → `admin-session`
+- `src/app/api/admin/messages/route.ts` (ligne 11) → `admin-session`
+- `src/app/api/admin/send/route.ts` (ligne 11) → `admin-session`
+- `src/app/api/admin/logout/route.ts` (ligne 5) → `admin-session`
 
-**Impact:** L'authentification admin ne fonctionne pas correctement car le cookie est créé avec un nom mais vérifié avec un autre.
+**Impact:** ✅ L'authentification admin fonctionne maintenant correctement. Testé avec curl.
 
-**Fix requis:**
-```typescript
-// middleware.ts ligne 34
-const token = request.cookies.get('admin-session')?.value  // Changer admin_token → admin-session
-```
+**Commit:** `bfdfb36` - Déployé en production
 
 ---
 
@@ -146,10 +145,12 @@ cat .gitignore | grep ".env.local"
 ## 📊 RÉSUMÉ DES ACTIONS REQUISES
 
 ### Urgent (à faire maintenant)
-1. ✅ Fix cookie name: `admin_token` → `admin-session` dans middleware
-2. ✅ Clarifier quelle Supabase URL utiliser
+1. ✅ Fix cookie name: `admin_token` → `admin-session` PARTOUT (5 fichiers)
+2. ✅ Clarifier quelle Supabase URL utiliser (`dllyzfuqjzuhvshrlmuq`)
 3. ✅ Supprimer `/api/admin/debug-env` de production
 4. ✅ Ajouter `.env.production` à `.gitignore`
+
+**Status:** TOUS LES ITEMS URGENTS COMPLÉTÉS ET TESTÉS ✅
 
 ### Important (cette semaine)
 5. ✅ Mettre à jour VOPAY-INTEGRATION.md avec URLs production
