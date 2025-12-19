@@ -144,7 +144,7 @@ Notre equipe vous contactera dans les 24-48h ouvrables.
 Heures d'ouverture:
 Lundi au vendredi: 8h00 a 16h00
 
-Contact: 1-888-900-1516
+Contact: 514-589-1946 (Analyse et suivi) ou 450-999-1107 (Administration)
 
 Cordialement,
 L'equipe Solution Argent Rapide`,
@@ -198,6 +198,13 @@ L'equipe Solution Argent Rapide`,
     </div>
 
     <div class="content">
+      <!-- RAISON/OPTION EN GROS -->
+      <div style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: white; padding: 25px; border-radius: 12px; text-align: center; margin-bottom: 25px;">
+        <p style="margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9;">Le client a choisi:</p>
+        <h2 style="margin: 0; font-size: 24px; font-weight: 800;">❓ ${question}</h2>
+        <p style="margin: 10px 0 0; font-size: 13px; opacity: 0.9;">Source: ${sourceLabel}</p>
+      </div>
+
       <div style="margin-bottom: 20px;">
         ${reference ? `<span class="reference">#${reference}</span>` : ''}
         <span class="source-tag">${sourceLabel}</span>
@@ -207,7 +214,7 @@ L'equipe Solution Argent Rapide`,
 
       <div class="intro">
         <strong>Nouvelle demande recue!</strong><br>
-        Un client vous a contacte depuis le formulaire "${sourceLabel}".
+        Un client vous a contacte depuis "${sourceLabel}" avec la question: <strong>${question}</strong>
       </div>
 
       <div class="client-info">
@@ -225,8 +232,6 @@ L'equipe Solution Argent Rapide`,
           <span class="info-value"><a href="mailto:${email}">${email}</a></span>
         </div>
       </div>
-
-      <div class="question-tag">❓ ${question}</div>
 
       ${question === "Autre question" && questionAutre ? `
       <div class="message-box">
@@ -330,10 +335,29 @@ L'equipe Solution Argent Rapide`,
                       Bonjour ${nom.split(' ')[0]},
                     </p>
                     <p style="margin: 0 0 20px; color: #374151; font-size: 16px; line-height: 1.7;">
-                      Nous avons bien recu votre demande et nous vous remercions de votre confiance.
-                      <strong>Un membre de notre equipe vous contactera dans les plus brefs delais</strong>,
-                      generalement dans les <strong>24 a 48 heures ouvrables</strong>.
+                      Nous avons bien recu votre message et nous vous remercions de votre confiance.
                     </p>
+
+                    <!-- Departement Box -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                      <tr>
+                        <td style="background: #f0f9ff; border: 2px solid #3b82f6; border-radius: 12px; padding: 20px;">
+                          <p style="margin: 0 0 8px; color: #1e40af; font-size: 13px; font-weight: 600; text-transform: uppercase;">Votre message a ete transmis a:</p>
+                          <p style="margin: 0; color: #1d4ed8; font-size: 20px; font-weight: 700;">📋 Departement ${departement}</p>
+                          <p style="margin: 10px 0 0; color: #3b82f6; font-size: 14px;">${destinataireNom} traitera votre demande</p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Delai 24h -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                      <tr>
+                        <td style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 12px; padding: 20px; text-align: center;">
+                          <p style="margin: 0; color: #92400e; font-size: 18px; font-weight: 700;">⏱️ Delai de reponse: 24 heures ouvrables</p>
+                          <p style="margin: 8px 0 0; color: #a16207; font-size: 14px;">${destinataireNom} vous contactera bientot</p>
+                        </td>
+                      </tr>
+                    </table>
 
                     <!-- What happens next -->
                     <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0; background: #fafafa; border-radius: 12px;">
@@ -350,13 +374,13 @@ L'equipe Solution Argent Rapide`,
                             <tr>
                               <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
                                 <span style="color: #00874e; font-weight: 700; margin-right: 10px;">2.</span>
-                                Nous vous contactons par telephone ou courriel
+                                ${destinataireNom} vous contacte sous 24h
                               </td>
                             </tr>
                             <tr>
                               <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
                                 <span style="color: #00874e; font-weight: 700; margin-right: 10px;">3.</span>
-                                Nous trouvons ensemble la meilleure solution
+                                Nous repondons a votre question
                               </td>
                             </tr>
                           </table>
@@ -377,19 +401,42 @@ L'equipe Solution Argent Rapide`,
                       </tr>
                     </table>
 
-                    <!-- Contact Info -->
+                    <!-- Contact Info Urgent -->
                     <table role="presentation" style="width: 100%; border-collapse: collapse; margin-top: 30px;">
                       <tr>
-                        <td style="border-top: 1px solid #e5e7eb; padding-top: 25px;">
-                          <p style="margin: 0 0 15px; color: #6b7280; font-size: 14px;">
-                            <strong style="color: #374151;">Une question urgente?</strong> Contactez-nous directement:
+                        <td style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 20px;">
+                          <p style="margin: 0 0 12px; color: #b91c1c; font-size: 15px; font-weight: 700;">
+                            🚨 Demande URGENTE? Appelez directement:
+                          </p>
+                          <table role="presentation" style="border-collapse: collapse; width: 100%;">
+                            <tr>
+                              <td style="padding: 10px; background: white; border-radius: 8px;">
+                                <a href="tel:4509991107" style="color: #dc2626; text-decoration: none; font-size: 18px; font-weight: 700;">
+                                  📞 450 999-1107
+                                </a>
+                                <p style="margin: 5px 0 0; color: #666; font-size: 12px;">Administration / Comptabilite</p>
+                              </td>
+                            </tr>
+                          </table>
+                          <p style="margin: 12px 0 0; color: #b91c1c; font-size: 12px;">Lundi-Vendredi 8h-16h</p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Contact Info Normal -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                      <tr>
+                        <td style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                          <p style="margin: 0 0 12px; color: #6b7280; font-size: 14px;">
+                            <strong style="color: #374151;">Autres contacts:</strong>
                           </p>
                           <table role="presentation" style="border-collapse: collapse;">
                             <tr>
                               <td style="padding: 8px 0;">
-                                <a href="tel:+18889001516" style="color: #00874e; text-decoration: none; font-size: 15px; font-weight: 600;">
-                                  📞 1-888-900-1516
+                                <a href="tel:5145891946" style="color: #00874e; text-decoration: none; font-size: 15px; font-weight: 600;">
+                                  📞 514-589-1946
                                 </a>
+                                <span style="color: #9ca3af; font-size: 12px; margin-left: 8px;">(Analyse et suivi)</span>
                               </td>
                             </tr>
                             <tr>

@@ -497,10 +497,10 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
                           <table role="presentation" style="border-collapse: collapse;">
                             <tr>
                               <td style="padding: 8px 0;">
-                                <a href="tel:+18889001516" style="color: #00874e; text-decoration: none; font-size: 15px; font-weight: 600;">
-                                  📞 1-888-900-1516
+                                <a href="tel:5145891946" style="color: #00874e; text-decoration: none; font-size: 15px; font-weight: 600;">
+                                  📞 514-589-1946
                                 </a>
-                                <span style="color: #9ca3af; font-size: 12px; margin-left: 8px;">(Ligne generale)</span>
+                                <span style="color: #9ca3af; font-size: 12px; margin-left: 8px;">(Analyse et suivi)</span>
                               </td>
                             </tr>
                             <tr>
