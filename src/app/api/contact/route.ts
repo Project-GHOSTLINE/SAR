@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    let { message, contactMethod, contact, source = 'site', clientMetadata } = body
+    let { sujet, message, contactMethod, contact, source = 'site', clientMetadata } = body
 
     // Validation des inputs
     if (!message || !contact) {
@@ -115,6 +115,11 @@ export async function POST(request: NextRequest) {
         { error: 'Message et contact sont requis' },
         { status: 400 }
       )
+    }
+
+    // Si un sujet est fourni, l'ajouter au message
+    if (sujet) {
+      message = `[${sujet}]\n\n${message}`
     }
 
     // Limites de taille
