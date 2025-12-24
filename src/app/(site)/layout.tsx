@@ -13,18 +13,6 @@ export default function SiteLayout({
 
   useEffect(() => {
     setMounted(true)
-
-    // Charger Axeptio après le montage
-    if (typeof window !== 'undefined') {
-      (window as any).axeptioSettings = {
-        clientId: "6942e2e1ed7f7412dd4a11f2",
-        cookiesVersion: "solutionargentrapide-fr"
-      }
-      const script = document.createElement('script')
-      script.src = "//static.axept.io/sdk.js"
-      script.async = true
-      document.body.appendChild(script)
-    }
   }, [])
 
   return (

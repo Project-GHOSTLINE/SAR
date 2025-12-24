@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Poppins } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 
 const poppins = Poppins({
@@ -21,6 +22,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
+      <head>
+        <Script
+          id="axeptio-settings"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.axeptioSettings = {
+                clientId: "6942e2e1ed7f7412dd4a11f2",
+                cookiesVersion: "1257bf70-6df8-4962-a0ba-272366be4584"
+              };
+            `
+          }}
+        />
+        <Script
+          src="https://static.axept.io/sdk.js"
+          strategy="beforeInteractive"
+        />
+      </head>
       <body className={poppins.className}>
         {children}
       </body>

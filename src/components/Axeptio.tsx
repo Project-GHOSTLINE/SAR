@@ -16,18 +16,18 @@ export default function Axeptio() {
     // Configuration Axeptio
     window.axeptioSettings = {
       clientId: "6942e2e1ed7f7412dd4a11f2",
-      cookiesVersion: "solutionargentrapide-fr"
+      cookiesVersion: "1257bf70-6df8-4962-a0ba-272366be4584"
     }
 
     // Chargement du script Axeptio
     const script = document.createElement('script')
-    script.src = "//static.axept.io/sdk.js"
+    script.src = "https://static.axept.io/sdk.js"
     script.async = true
     document.body.appendChild(script)
 
     return () => {
       // Cleanup si nécessaire
-      const existingScript = document.querySelector('script[src="//static.axept.io/sdk.js"]')
+      const existingScript = document.querySelector('script[src="https://static.axept.io/sdk.js"]')
       if (existingScript) {
         existingScript.remove()
       }
