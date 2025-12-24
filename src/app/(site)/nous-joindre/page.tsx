@@ -11,26 +11,25 @@ export default function ContactPage() {
     nom: '',
     prenom: '',
     telephone: '',
+    email: '',
     sujet: '',
-    message: '',
-    contactMethod: 'email',
-    contact: ''
+    message: ''
   })
   const [errors, setErrors] = useState<{
     nom?: string
     prenom?: string
     telephone?: string
+    email?: string
     sujet?: string
     message?: string
-    contact?: string
   }>({})
   const [touched, setTouched] = useState<{
     nom?: boolean
     prenom?: boolean
     telephone?: boolean
+    email?: boolean
     sujet?: boolean
     message?: boolean
-    contact?: boolean
   }>({})
   const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -47,7 +46,7 @@ export default function ContactPage() {
   ]
 
   // Validation temps réel
-  const validateField = (field: 'nom' | 'prenom' | 'telephone' | 'sujet' | 'message' | 'contact') => {
+  const validateField = (field: 'nom' | 'prenom' | 'telephone' | 'email' | 'sujet' | 'message') => {
     const newErrors = { ...errors }
 
     if (field === 'nom') {
@@ -75,6 +74,15 @@ export default function ContactPage() {
       }
     }
 
+    if (field === 'email') {
+      const emailValidation = validateEmail(formData.email)
+      if (!emailValidation.valid) {
+        newErrors.email = emailValidation.error
+      } else {
+        delete newErrors.email
+      }
+    }
+
     if (field === 'sujet') {
       if (!formData.sujet) {
         newErrors.sujet = 'Veuillez sélectionner un sujet'
@@ -91,33 +99,15 @@ export default function ContactPage() {
       }
     }
 
-    if (field === 'contact') {
-      if (formData.contactMethod === 'email') {
-        const emailValidation = validateEmail(formData.contact)
-        if (!emailValidation.valid) {
-          newErrors.contact = emailValidation.error
-        } else {
-          delete newErrors.contact
-        }
-      } else {
-        const phoneValidation = validateCanadianPhone(formData.contact)
-        if (!phoneValidation.valid) {
-          newErrors.contact = phoneValidation.error
-        } else {
-          delete newErrors.contact
-        }
-      }
-    }
-
     setErrors(newErrors)
   }
 
-  const handleBlur = (field: 'nom' | 'prenom' | 'telephone' | 'sujet' | 'message' | 'contact') => {
+  const handleBlur = (field: 'nom' | 'prenom' | 'telephone' | 'email' | 'sujet' | 'message') => {
     setTouched({ ...touched, [field]: true })
     validateField(field)
   }
 
-  const handleChange = (field: 'nom' | 'prenom' | 'telephone' | 'sujet' | 'message' | 'contact', value: string) => {
+  const handleChange = (field: 'nom' | 'prenom' | 'telephone' | 'email' | 'sujet' | 'message', value: string) => {
     setFormData({ ...formData, [field]: value })
     if (touched[field]) {
       setTimeout(() => validateField(field), 0)
@@ -128,15 +118,15 @@ export default function ContactPage() {
     e.preventDefault()
 
     // Marquer tous les champs comme touchés
-    setTouched({ nom: true, prenom: true, telephone: true, sujet: true, message: true, contact: true })
+    setTouched({ nom: true, prenom: true, telephone: true, email: true, sujet: true, message: true })
 
     // Valider tous les champs
     validateField('nom')
     validateField('prenom')
     validateField('telephone')
+    validateField('email')
     validateField('sujet')
     validateField('message')
-    validateField('contact')
 
     // Vérifier s'il y a des erreurs
     const tempErrors: typeof errors = {}
@@ -154,24 +144,17 @@ export default function ContactPage() {
       tempErrors.telephone = phoneValidation.error
     }
 
+    const emailValidation = validateEmail(formData.email)
+    if (!emailValidation.valid) {
+      tempErrors.email = emailValidation.error
+    }
+
     if (!formData.sujet) {
       tempErrors.sujet = 'Veuillez sélectionner un sujet'
     }
 
     if (!formData.message || formData.message.trim().length < 10) {
       tempErrors.message = 'Le message doit contenir au moins 10 caractères'
-    }
-
-    if (formData.contactMethod === 'email') {
-      const emailValidation = validateEmail(formData.contact)
-      if (!emailValidation.valid) {
-        tempErrors.contact = emailValidation.error
-      }
-    } else {
-      const phoneValidation2 = validateCanadianPhone(formData.contact)
-      if (!phoneValidation2.valid) {
-        tempErrors.contact = phoneValidation2.error
-      }
     }
 
     if (Object.keys(tempErrors).length > 0) {
@@ -191,10 +174,11 @@ export default function ContactPage() {
           nom: formData.nom,
           prenom: formData.prenom,
           telephone: formData.telephone,
+          email: formData.email,
           sujet: sujetLabel,
           message: formData.message,
-          contactMethod: formData.contactMethod,
-          contact: formData.contact,
+          contactMethod: 'email',
+          contact: formData.email,
           source: 'nous-joindre',
           clientMetadata: {
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -218,7 +202,7 @@ export default function ContactPage() {
   }
 
   const resetForm = () => {
-    setFormData({ nom: '', prenom: '', telephone: '', sujet: '', message: '', contactMethod: 'email', contact: '' })
+    setFormData({ nom: '', prenom: '', telephone: '', email: '', sujet: '', message: '' })
     setErrors({})
     setTouched({})
     setSubmitted(false)
@@ -463,48 +447,25 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">Méthode de contact préférée</label>
-                    <select
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sar-green focus:border-transparent"
-                      value={formData.contactMethod}
-                      onChange={(e) => {
-                        setFormData({ ...formData, contactMethod: e.target.value, contact: '' })
-                        setErrors({})
-                        setTouched({ ...touched, contact: false })
-                      }}
-                    >
-                      <option value="email">Courriel</option>
-                      <option value="phone">Téléphone</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      {formData.contactMethod === 'email' ? 'Adresse courriel' : 'Numéro de téléphone (Canada)'} *
-                    </label>
+                    <label className="block text-sm font-medium mb-2">Adresse courriel *</label>
                     <input
-                      type={formData.contactMethod === 'email' ? 'email' : 'tel'}
+                      type="email"
                       required
+                      placeholder="votre@email.com"
+                      value={formData.email}
+                      onChange={(e) => handleChange('email', e.target.value)}
+                      onBlur={() => handleBlur('email')}
                       className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-sar-green focus:border-transparent ${
-                        touched.contact && errors.contact
+                        touched.email && errors.email
                           ? 'border-red-500 bg-red-50'
                           : 'border-gray-300'
                       }`}
-                      placeholder={formData.contactMethod === 'email' ? 'votre@email.com' : '(514) 123-4567'}
-                      value={formData.contact}
-                      onChange={(e) => handleChange('contact', e.target.value)}
-                      onBlur={() => handleBlur('contact')}
                     />
-                    {touched.contact && errors.contact && (
+                    {touched.email && errors.email && (
                       <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
                         <AlertCircle size={16} />
-                        <span>{errors.contact}</span>
+                        <span>{errors.email}</span>
                       </div>
-                    )}
-                    {formData.contactMethod === 'phone' && !errors.contact && formData.contact && (
-                      <p className="mt-2 text-sm text-gray-500">
-                        📞 Formats acceptés: 514-123-4567, (514) 123-4567, +1 514 123 4567
-                      </p>
                     )}
                   </div>
 
