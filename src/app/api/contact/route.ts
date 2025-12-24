@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    let { sujet, message, contactMethod, contact, source = 'site', clientMetadata } = body
+    let { nom, prenom, telephone, sujet, message, contactMethod, contact, source = 'site', clientMetadata } = body
 
     // Validation des inputs
     if (!message || !contact) {
@@ -117,9 +117,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Si nom/prenom/telephone fournis, créer le nom complet
+    let clientName = contact
+    if (nom && prenom) {
+      clientName = `${prenom} ${nom}`
+    } else if (nom) {
+      clientName = nom
+    } else if (prenom) {
+      clientName = prenom
+    }
+
     // Si un sujet est fourni, l'ajouter au message
     if (sujet) {
       message = `[${sujet}]\n\n${message}`
+    }
+
+    // Si un téléphone est fourni, l'ajouter au message
+    if (telephone) {
+      message = `Téléphone: ${telephone}\n\n${message}`
     }
 
     // Limites de taille
@@ -167,8 +182,7 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabase()
     const contactLabel = contactMethod === 'email' ? 'Courriel' : 'Telephone'
     const clientEmail = contactMethod === 'email' ? contact : ''
-    const clientPhone = contactMethod === 'phone' ? contact : ''
-    const clientName = contact // On utilise le contact comme nom par defaut
+    const clientPhone = telephone || (contactMethod === 'phone' ? contact : '')
 
     // Determiner la source et le departement
     let sourceLabel = 'Formulaire Contact'

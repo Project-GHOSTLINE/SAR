@@ -8,17 +8,26 @@ import { validateEmail, validateCanadianPhone } from '@/lib/validators'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
+    nom: '',
+    prenom: '',
+    telephone: '',
     sujet: '',
     message: '',
     contactMethod: 'email',
     contact: ''
   })
   const [errors, setErrors] = useState<{
+    nom?: string
+    prenom?: string
+    telephone?: string
     sujet?: string
     message?: string
     contact?: string
   }>({})
   const [touched, setTouched] = useState<{
+    nom?: boolean
+    prenom?: boolean
+    telephone?: boolean
     sujet?: boolean
     message?: boolean
     contact?: boolean
@@ -38,8 +47,33 @@ export default function ContactPage() {
   ]
 
   // Validation temps réel
-  const validateField = (field: 'sujet' | 'message' | 'contact') => {
+  const validateField = (field: 'nom' | 'prenom' | 'telephone' | 'sujet' | 'message' | 'contact') => {
     const newErrors = { ...errors }
+
+    if (field === 'nom') {
+      if (!formData.nom || formData.nom.trim().length < 2) {
+        newErrors.nom = 'Le nom doit contenir au moins 2 caractères'
+      } else {
+        delete newErrors.nom
+      }
+    }
+
+    if (field === 'prenom') {
+      if (!formData.prenom || formData.prenom.trim().length < 2) {
+        newErrors.prenom = 'Le prénom doit contenir au moins 2 caractères'
+      } else {
+        delete newErrors.prenom
+      }
+    }
+
+    if (field === 'telephone') {
+      const phoneValidation = validateCanadianPhone(formData.telephone)
+      if (!phoneValidation.valid) {
+        newErrors.telephone = phoneValidation.error
+      } else {
+        delete newErrors.telephone
+      }
+    }
 
     if (field === 'sujet') {
       if (!formData.sujet) {
@@ -78,12 +112,12 @@ export default function ContactPage() {
     setErrors(newErrors)
   }
 
-  const handleBlur = (field: 'sujet' | 'message' | 'contact') => {
+  const handleBlur = (field: 'nom' | 'prenom' | 'telephone' | 'sujet' | 'message' | 'contact') => {
     setTouched({ ...touched, [field]: true })
     validateField(field)
   }
 
-  const handleChange = (field: 'sujet' | 'message' | 'contact', value: string) => {
+  const handleChange = (field: 'nom' | 'prenom' | 'telephone' | 'sujet' | 'message' | 'contact', value: string) => {
     setFormData({ ...formData, [field]: value })
     if (touched[field]) {
       setTimeout(() => validateField(field), 0)
@@ -94,15 +128,31 @@ export default function ContactPage() {
     e.preventDefault()
 
     // Marquer tous les champs comme touchés
-    setTouched({ sujet: true, message: true, contact: true })
+    setTouched({ nom: true, prenom: true, telephone: true, sujet: true, message: true, contact: true })
 
     // Valider tous les champs
+    validateField('nom')
+    validateField('prenom')
+    validateField('telephone')
     validateField('sujet')
     validateField('message')
     validateField('contact')
 
     // Vérifier s'il y a des erreurs
     const tempErrors: typeof errors = {}
+
+    if (!formData.nom || formData.nom.trim().length < 2) {
+      tempErrors.nom = 'Le nom doit contenir au moins 2 caractères'
+    }
+
+    if (!formData.prenom || formData.prenom.trim().length < 2) {
+      tempErrors.prenom = 'Le prénom doit contenir au moins 2 caractères'
+    }
+
+    const phoneValidation = validateCanadianPhone(formData.telephone)
+    if (!phoneValidation.valid) {
+      tempErrors.telephone = phoneValidation.error
+    }
 
     if (!formData.sujet) {
       tempErrors.sujet = 'Veuillez sélectionner un sujet'
@@ -118,9 +168,9 @@ export default function ContactPage() {
         tempErrors.contact = emailValidation.error
       }
     } else {
-      const phoneValidation = validateCanadianPhone(formData.contact)
-      if (!phoneValidation.valid) {
-        tempErrors.contact = phoneValidation.error
+      const phoneValidation2 = validateCanadianPhone(formData.contact)
+      if (!phoneValidation2.valid) {
+        tempErrors.contact = phoneValidation2.error
       }
     }
 
@@ -138,6 +188,9 @@ export default function ContactPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          nom: formData.nom,
+          prenom: formData.prenom,
+          telephone: formData.telephone,
           sujet: sujetLabel,
           message: formData.message,
           contactMethod: formData.contactMethod,
@@ -165,7 +218,7 @@ export default function ContactPage() {
   }
 
   const resetForm = () => {
-    setFormData({ sujet: '', message: '', contactMethod: 'email', contact: '' })
+    setFormData({ nom: '', prenom: '', telephone: '', sujet: '', message: '', contactMethod: 'email', contact: '' })
     setErrors({})
     setTouched({})
     setSubmitted(false)
@@ -309,6 +362,80 @@ export default function ContactPage() {
                         <AlertCircle size={16} />
                         <span>{errors.sujet}</span>
                       </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Nom *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Votre nom de famille"
+                      value={formData.nom}
+                      onChange={(e) => handleChange('nom', e.target.value)}
+                      onBlur={() => handleBlur('nom')}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-sar-green focus:border-transparent ${
+                        touched.nom && errors.nom
+                          ? 'border-red-500 bg-red-50'
+                          : 'border-gray-300'
+                      }`}
+                    />
+                    {touched.nom && errors.nom && (
+                      <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
+                        <AlertCircle size={16} />
+                        <span>{errors.nom}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Prénom *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Votre prénom"
+                      value={formData.prenom}
+                      onChange={(e) => handleChange('prenom', e.target.value)}
+                      onBlur={() => handleBlur('prenom')}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-sar-green focus:border-transparent ${
+                        touched.prenom && errors.prenom
+                          ? 'border-red-500 bg-red-50'
+                          : 'border-gray-300'
+                      }`}
+                    />
+                    {touched.prenom && errors.prenom && (
+                      <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
+                        <AlertCircle size={16} />
+                        <span>{errors.prenom}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Numéro de téléphone (Canada) *</label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="(514) 123-4567"
+                      value={formData.telephone}
+                      onChange={(e) => handleChange('telephone', e.target.value)}
+                      onBlur={() => handleBlur('telephone')}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-sar-green focus:border-transparent ${
+                        touched.telephone && errors.telephone
+                          ? 'border-red-500 bg-red-50'
+                          : 'border-gray-300'
+                      }`}
+                    />
+                    {touched.telephone && errors.telephone && (
+                      <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
+                        <AlertCircle size={16} />
+                        <span>{errors.telephone}</span>
+                      </div>
+                    )}
+                    {!errors.telephone && formData.telephone && (
+                      <p className="mt-2 text-sm text-gray-500">
+                        📞 Formats acceptés: 514-123-4567, (514) 123-4567, +1 514 123 4567
+                      </p>
                     )}
                   </div>
 
