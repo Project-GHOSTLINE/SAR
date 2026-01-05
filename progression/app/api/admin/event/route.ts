@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabase'
+import { getSupabase } from '@/lib/supabase'
 import { verifyAdminAuth } from '@/lib/auth'
 import { ApplicationStatus } from '@/types'
 
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabaseAdmin()
+    const supabase = getSupabase()
 
     // Upsert application if needed (create or update)
     if (status) {
