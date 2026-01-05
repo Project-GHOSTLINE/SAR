@@ -30,7 +30,7 @@ POST https://progression.solutionargentrapide.ca/api/admin/event
 ### Headers requis:
 ```
 Content-Type: application/json
-x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202
+x-api-key: FredRosa%1978
 ```
 
 ### Format du payload:
@@ -83,7 +83,7 @@ Voici comment mapper les statuts de Margill vers notre système:
 ```bash
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/event \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "application_id": "MARGILL-2026-001",
     "event_type": "status_change",
@@ -115,7 +115,7 @@ curl -X POST https://progression.solutionargentrapide.ca/api/admin/event \
 ```bash
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/event \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "application_id": "MARGILL-2026-001",
     "event_type": "status_change",
@@ -130,7 +130,7 @@ curl -X POST https://progression.solutionargentrapide.ca/api/admin/event \
 # 1. Mettre à jour le statut
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/event \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "application_id": "MARGILL-2026-001",
     "event_type": "status_change",
@@ -141,7 +141,7 @@ curl -X POST https://progression.solutionargentrapide.ca/api/admin/event \
 # 2. Générer le magic link et envoyer SMS
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/magic-link \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "application_id": "MARGILL-2026-001",
     "phone": "+15145551234"
@@ -150,7 +150,7 @@ curl -X POST https://progression.solutionargentrapide.ca/api/admin/magic-link \
 # 3. Ajouter une note client
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/note \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "application_id": "MARGILL-2026-001",
     "message": "Votre offre de financement de 7 500$ a été envoyée par courriel. Veuillez la consulter et nous faire part de votre décision."
@@ -169,7 +169,7 @@ curl -X POST https://progression.solutionargentrapide.ca/api/admin/note \
    - Méthode: `POST`
    - Headers:
      - `Content-Type: application/json`
-     - `x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202`
+     - `x-api-key: FredRosa%1978`
 3. **Événements à surveiller:**
    - Création de dossier
    - Changement de statut
@@ -245,7 +245,7 @@ sequenceDiagram
 ```bash
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/event \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "application_id": "TEST-MARGILL-001",
     "event_type": "test",
@@ -267,25 +267,25 @@ curl -X POST https://progression.solutionargentrapide.ca/api/admin/event \
 # Étape 1: RECEIVED
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/event \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{"application_id":"TEST-MARGILL-002","event_type":"status_change","status":"RECEIVED","payload":{"name":"Test Cycle","email":"test@test.com","phone":"+15140000001","amount_cents":500000,"origin":"Margill"}}'
 
 # Étape 2: IBV_COMPLETED
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/event \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{"application_id":"TEST-MARGILL-002","event_type":"status_change","status":"IBV_COMPLETED","payload":{}}'
 
 # Étape 3: OFFER_SENT
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/event \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{"application_id":"TEST-MARGILL-002","event_type":"status_change","status":"OFFER_SENT","payload":{}}'
 
 # Générer magic link
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/magic-link \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{"application_id":"TEST-MARGILL-002","phone":"+15140000001"}'
 ```
 

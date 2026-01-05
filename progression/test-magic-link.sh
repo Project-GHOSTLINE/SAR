@@ -7,7 +7,7 @@ echo "🔗 Génération d'un magic link pour TEST-2026-001..."
 
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/magic-link \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{"application_id":"TEST-2026-001","phone":"+15141234567"}' | jq .
 
 echo ""

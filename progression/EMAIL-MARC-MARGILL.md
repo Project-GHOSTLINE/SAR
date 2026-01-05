@@ -31,7 +31,7 @@ POST
 ### Headers requis:
 ```
 Content-Type: application/json
-x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202
+x-api-key: FredRosa%1978
 ```
 
 ---
@@ -109,7 +109,7 @@ Voici une commande de test que tu peux exécuter pour vérifier que tout fonctio
 ```bash
 curl -X POST https://progression.solutionargentrapide.ca/api/webhook/margill \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "dossier_id": "TEST-123",
     "statut_margill": "nouveau_dossier",
@@ -137,7 +137,7 @@ curl -X POST https://progression.solutionargentrapide.ca/api/webhook/margill \
 ```bash
 curl -X POST https://progression.solutionargentrapide.ca/api/webhook/margill \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "dossier_id": "TEST-123",
     "statut_margill": "offre_envoyee"
@@ -168,7 +168,7 @@ Si Margill permet de configurer des webhooks automatiques:
    - Méthode: `POST`
    - Headers:
      - `Content-Type: application/json`
-     - `x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202`
+     - `x-api-key: FredRosa%1978`
 
 2. **Événements à déclencher:**
    - Création d'un nouveau dossier

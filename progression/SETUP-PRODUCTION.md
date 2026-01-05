@@ -13,7 +13,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://dllyzfuqjzuhvshrlmuq.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsbHl6ZnVxanp1aHZzaHJsbXVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5OTU5ODEsImV4cCI6MjA4MTU3MTk4MX0.xskVblRlKdbTST1Mdgz76oR7N2rDq8ZOUgaN-f_TTM4
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsbHl6ZnVxanp1aHZzaHJsbXVxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTk5NTk4MSwiZXhwIjoyMDgxNTcxOTgxfQ.Qg5eQwDxeAtTDXplNkQZa4hOp_dSMBIu_DKbuquryFo
 NEXT_PUBLIC_APP_URL=https://progression.solutionargentrapide.ca
-ADMIN_API_KEY=44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202
+ADMIN_API_KEY=FredRosa%1978
 CRON_SECRET=cron-secret-progression-sar-2026
 ```
 
@@ -95,7 +95,7 @@ INSERT INTO applications (
 ```bash
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/magic-link \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "application_id": "APP-2026-001"
   }'
@@ -110,7 +110,7 @@ curl -X POST https://progression.solutionargentrapide.ca/api/admin/magic-link \
 ```bash
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/event \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "application_id": "APP-2026-001",
     "new_status": "OFFER_SENT",
@@ -125,7 +125,7 @@ curl -X POST https://progression.solutionargentrapide.ca/api/admin/event \
 ```bash
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/note \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "application_id": "APP-2026-001",
     "message": "Votre dossier est en cours de vérification."

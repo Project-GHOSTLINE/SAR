@@ -7,7 +7,7 @@ L'endpoint webhook Margill est **déjà déployé et fonctionnel**!
 ```
 URL: https://progression.solutionargentrapide.ca/api/webhook/margill
 Méthode: POST
-Header: x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202
+Header: x-api-key: FredRosa%1978
 ```
 
 ---
@@ -68,7 +68,7 @@ Header: x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3
 # Test 1: Créer un dossier
 curl -X POST https://progression.solutionargentrapide.ca/api/webhook/margill \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "dossier_id": "TEST-123",
     "statut_margill": "nouveau_dossier",
@@ -81,7 +81,7 @@ curl -X POST https://progression.solutionargentrapide.ca/api/webhook/margill \
 # Test 2: Mettre à jour le statut
 curl -X POST https://progression.solutionargentrapide.ca/api/webhook/margill \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "dossier_id": "TEST-123",
     "statut_margill": "offre_envoyee"
@@ -90,7 +90,7 @@ curl -X POST https://progression.solutionargentrapide.ca/api/webhook/margill \
 # Test 3: Générer magic link pour le client
 curl -X POST https://progression.solutionargentrapide.ca/api/admin/magic-link \
   -H "Content-Type: application/json" \
-  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -H "x-api-key: FredRosa%1978" \
   -d '{
     "application_id": "MARGILL-TEST-123",
     "phone": "+15141234567"
@@ -105,7 +105,7 @@ curl -X POST https://progression.solutionargentrapide.ca/api/admin/magic-link \
 
 1. **Dans Margill**, configure un webhook pour chaque changement de statut
 2. **URL**: `https://progression.solutionargentrapide.ca/api/webhook/margill`
-3. **Headers**: `x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202`
+3. **Headers**: `x-api-key: FredRosa%1978`
 4. Le portail se met à jour **automatiquement**
 5. Envoie SMS au client avec magic link quand nécessaire
 

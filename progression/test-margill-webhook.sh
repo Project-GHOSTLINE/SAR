@@ -4,7 +4,7 @@
 # Simule des webhooks envoyés par Margill
 
 API_URL="https://progression.solutionargentrapide.ca/api/webhook/margill"
-API_KEY="44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202"
+API_KEY="FredRosa%1978"
 
 echo "🔗 Test de l'intégration Margill"
 echo "================================"
