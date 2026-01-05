@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'Inter', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+  }
+}
+
+body {
+  @apply bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 text-slate-900;
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-xl sm:rounded-2xl shadow-lg shadow-indigo-100/50 p-4 sm:p-6 lg:p-8;
+  }
+
+  .btn-primary {
+    @apply bg-indigo-500 active:bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg transition-all touch-manipulation;
+  }
+
+  .btn-secondary {
+    @apply bg-white active:bg-slate-50 text-slate-700 font-semibold py-3 px-6 rounded-lg border border-slate-200 active:border-indigo-300 transition-all touch-manipulation;
+  }
+}
+
+@layer utilities {
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(99, 102, 241, 0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.6s ease-out both;
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 2s ease-in-out infinite;
+  }
+}
