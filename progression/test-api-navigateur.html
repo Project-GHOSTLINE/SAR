@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Portail Progression</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result pre {
+            margin-top: 10px;
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background: #f5f5f5;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Test API Portail Progression</h1>
+            <p>Simulateur d'intégration Margill</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <strong>📍 URL API:</strong> https://progression.solutionargentrapide.ca/api/webhook/margill<br>
+                <strong>🔑 Clé API:</strong> FredRosa%1978
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('create')">🆕 Créer</div>
+                <div class="tab" onclick="switchTab('update')">📝 Mettre à jour</div>
+                <div class="tab" onclick="switchTab('link')">🔗 Magic Link</div>
+                <div class="tab" onclick="switchTab('cycle')">🧪 Cycle complet</div>
+            </div>
+
+            <!-- Tab 1: Créer un dossier -->
+            <div id="create" class="tab-content active">
+                <div class="section">
+                    <h2>Créer un nouveau dossier</h2>
+                    <form id="formCreate">
+                        <div class="form-group">
+                            <label>ID Dossier Margill</label>
+                            <input type="text" id="createId" placeholder="12345" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nom du client</label>
+                            <input type="text" id="createNom" placeholder="Jean Tremblay" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="createEmail" placeholder="jean@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Téléphone</label>
+                            <input type="tel" id="createPhone" placeholder="+15141234567" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Montant ($)</label>
+                            <input type="number" step="0.01" id="createMontant" placeholder="7500.00" required>
+                        </div>
+                        <button type="submit" class="btn">🚀 Créer le dossier</button>
+                    </form>
+                    <div id="resultCreate" class="result"></div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Mettre à jour -->
+            <div id="update" class="tab-content">
+                <div class="section">
+                    <h2>Mettre à jour le statut</h2>
+                    <form id="formUpdate">
+                        <div class="form-group">
+                            <label>ID Dossier Margill</label>
+                            <input type="text" id="updateId" placeholder="12345" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nouveau statut</label>
+                            <select id="updateStatut" required>
+                                <option value="">-- Choisir un statut --</option>
+                                <option value="nouveau_dossier">Nouveau dossier (Étape 1)</option>
+                                <option value="en_attente_ibv">En attente IBV (interne)</option>
+                                <option value="ibv_completee">IBV complétée (Étape 2)</option>
+                                <option value="analyse_en_cours">Analyse en cours (Étape 3)</option>
+                                <option value="offre_en_preparation">Offre en préparation (interne)</option>
+                                <option value="offre_envoyee">Offre envoyée (Étape 4)</option>
+                                <option value="offre_acceptee">Offre acceptée (Étape 5)</option>
+                                <option value="contrat_en_preparation">Contrat en préparation (interne)</option>
+                                <option value="contrat_envoye">Contrat envoyé (interne)</option>
+                                <option value="en_attente_signature">En attente signature (Étape 6)</option>
+                                <option value="contrat_signe">Contrat signé (Étape 7)</option>
+                                <option value="transfert_de_fonds">Transfert de fonds (interne)</option>
+                                <option value="pret_actif">Prêt actif (Étape 8)</option>
+                                <option value="refuse">Refusé</option>
+                                <option value="sans_reponse">Sans réponse</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn">📝 Mettre à jour</button>
+                    </form>
+                    <div id="resultUpdate" class="result"></div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Magic Link -->
+            <div id="link" class="tab-content">
+                <div class="section">
+                    <h2>Générer un Magic Link</h2>
+                    <form id="formLink">
+                        <div class="form-group">
+                            <label>ID Dossier Margill</label>
+                            <input type="text" id="linkId" placeholder="12345" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Téléphone</label>
+                            <input type="tel" id="linkPhone" placeholder="+15141234567" required>
+                        </div>
+                        <button type="submit" class="btn">🔗 Générer le lien</button>
+                    </form>
+                    <div id="resultLink" class="result"></div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Cycle complet -->
+            <div id="cycle" class="tab-content">
+                <div class="section">
+                    <h2>Test Cycle Complet Automatique</h2>
+                    <div class="info-box">
+                        Ce test va automatiquement:<br>
+                        1️⃣ Créer un dossier test<br>
+                        2️⃣ Passer par les 8 étapes de progression<br>
+                        3️⃣ Générer un magic link<br>
+                        4️⃣ Afficher tous les résultats
+                    </div>
+                    <button onclick="testCycleComplet()" class="btn">🧪 Lancer le test complet</button>
+                    <div id="resultCycle" class="result"></div>
+                </div>
+            </div>
+
+            <div class="info-box" style="margin-top: 30px;">
+                <strong>📊 Dashboard:</strong> <a href="https://progression.solutionargentrapide.ca/debug" target="_blank">Ouvrir</a><br>
+                <strong>🔑 Mot de passe:</strong> FredRosa%1978
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://progression.solutionargentrapide.ca/api/webhook/margill';
+        const API_ADMIN_URL = 'https://progression.solutionargentrapide.ca/api/admin/magic-link';
+        const API_KEY = 'FredRosa%1978';
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function showResult(elementId, success, message, data = null) {
+            const result = document.getElementById(elementId);
+            result.className = 'result ' + (success ? 'success' : 'error');
+
+            let html = '<strong>' + (success ? '✅ Succès!' : '❌ Erreur') + '</strong><br>' + message;
+
+            if (data) {
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            }
+
+            result.innerHTML = html;
+            result.style.display = 'block';
+        }
+
+        // Form 1: Créer un dossier
+        document.getElementById('formCreate').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btn = e.target.querySelector('.btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loader"></span>Envoi en cours...';
+            btn.disabled = true;
+
+            const payload = {
+                dossier_id: document.getElementById('createId').value,
+                statut_margill: 'nouveau_dossier',
+                nom_client: document.getElementById('createNom').value,
+                email_client: document.getElementById('createEmail').value,
+                telephone_client: document.getElementById('createPhone').value,
+                montant: parseFloat(document.getElementById('createMontant').value)
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': API_KEY
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showResult('resultCreate', true,
+                        `Dossier créé: ${result.data.application_id}<br>Statut mappé: ${result.data.mapped_status}`,
+                        result);
+                } else {
+                    showResult('resultCreate', false, result.error || 'Erreur inconnue', result);
+                }
+            } catch (error) {
+                showResult('resultCreate', false, 'Erreur de connexion: ' + error.message);
+            }
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+
+        // Form 2: Mettre à jour
+        document.getElementById('formUpdate').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btn = e.target.querySelector('.btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loader"></span>Mise à jour...';
+            btn.disabled = true;
+
+            const payload = {
+                dossier_id: document.getElementById('updateId').value,
+                statut_margill: document.getElementById('updateStatut').value
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': API_KEY
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showResult('resultUpdate', true,
+                        `Statut mis à jour: ${result.data.mapped_status}`,
+                        result);
+                } else {
+                    showResult('resultUpdate', false, result.error || 'Erreur inconnue', result);
+                }
+            } catch (error) {
+                showResult('resultUpdate', false, 'Erreur de connexion: ' + error.message);
+            }
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+
+        // Form 3: Magic Link
+        document.getElementById('formLink').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btn = e.target.querySelector('.btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loader"></span>Génération...';
+            btn.disabled = true;
+
+            const payload = {
+                application_id: 'MARGILL-' + document.getElementById('linkId').value,
+                phone: document.getElementById('linkPhone').value
+            };
+
+            try {
+                const response = await fetch(API_ADMIN_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': API_KEY
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showResult('resultLink', true,
+                        `Magic Link généré!<br><a href="${result.data.url}" target="_blank">${result.data.url}</a><br>Expire: ${result.data.expires_at}`,
+                        result);
+                } else {
+                    showResult('resultLink', false, result.error || 'Erreur inconnue', result);
+                }
+            } catch (error) {
+                showResult('resultLink', false, 'Erreur de connexion: ' + error.message);
+            }
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+
+        // Test cycle complet
+        async function testCycleComplet() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loader"></span>Test en cours...';
+            btn.disabled = true;
+
+            const dossierId = 'TEST-CYCLE-' + Date.now();
+            const phone = '+15140000999';
+
+            let resultats = [];
+
+            // Étape 1: Créer le dossier
+            try {
+                const payload = {
+                    dossier_id: dossierId,
+                    statut_margill: 'nouveau_dossier',
+                    nom_client: 'Test Cycle Complet',
+                    email_client: 'cycle@test.com',
+                    telephone_client: phone,
+                    montant: 5000.00
+                };
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': API_KEY
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                resultats.push(`✅ Création: ${result.data.mapped_status}`);
+
+                // Passer par chaque statut
+                const statuts = [
+                    'ibv_completee',
+                    'analyse_en_cours',
+                    'offre_envoyee',
+                    'offre_acceptee',
+                    'en_attente_signature',
+                    'contrat_signe',
+                    'pret_actif'
+                ];
+
+                for (const statut of statuts) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': API_KEY
+                        },
+                        body: JSON.stringify({
+                            dossier_id: dossierId,
+                            statut_margill: statut
+                        })
+                    });
+
+                    const result = await response.json();
+                    resultats.push(`✅ ${statut}: ${result.data.mapped_status}`);
+                }
+
+                // Générer magic link
+                const linkResponse = await fetch(API_ADMIN_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': API_KEY
+                    },
+                    body: JSON.stringify({
+                        application_id: 'MARGILL-' + dossierId,
+                        phone: phone
+                    })
+                });
+
+                const linkResult = await linkResponse.json();
+                resultats.push(`✅ Magic Link: <a href="${linkResult.data.url}" target="_blank">Ouvrir</a>`);
+
+                showResult('resultCycle', true,
+                    `Test complet terminé!<br>Dossier: MARGILL-${dossierId}<br><br>` + resultats.join('<br>'));
+
+            } catch (error) {
+                showResult('resultCycle', false, 'Erreur: ' + error.message);
+            }
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    </script>
+</body>
+</html>

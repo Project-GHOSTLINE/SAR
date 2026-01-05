@@ -200,11 +200,24 @@ export async function POST(request: NextRequest) {
  * GET /api/webhooks/vopay
  * Endpoint de test pour vérifier que le webhook est accessible
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const sharedSecret = process.env.VOPAY_SHARED_SECRET || ''
+  const testTxId = 'TEST_123'
+  const testSig = crypto.createHmac('sha1', sharedSecret)
+    .update(testTxId)
+    .digest('hex')
+
   return NextResponse.json({
     status: 'online',
     endpoint: 'VoPay Webhook Receiver',
     methods: ['POST'],
     timestamp: new Date().toISOString(),
+    debug: {
+      hasSecret: !!sharedSecret,
+      secretLength: sharedSecret.length,
+      secretPrefix: sharedSecret.substring(0, 5),
+      testTransaction: testTxId,
+      testSignature: testSig
+    }
   })
 }
