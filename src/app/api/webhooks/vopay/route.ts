@@ -80,6 +80,15 @@ export async function POST(request: NextRequest) {
 
     // 3. Valider la signature
     const sharedSecret = process.env.VOPAY_SHARED_SECRET || ''
+
+    // Debug logs
+    console.log('[VoPay Webhook] Debug:', {
+      transactionId: payload.TransactionID,
+      receivedKey: payload.ValidationKey,
+      secretPrefix: sharedSecret.substring(0, 5) + '...',
+      hasSecret: !!sharedSecret
+    })
+
     const isValid = validateWebhookSignature(
       payload.TransactionID,
       payload.ValidationKey,
@@ -88,6 +97,13 @@ export async function POST(request: NextRequest) {
 
     if (!isValid) {
       console.error('[VoPay Webhook] Invalid signature')
+      // Log expected signature for debugging
+      const expectedSig = crypto.createHmac('sha1', sharedSecret)
+        .update(payload.TransactionID)
+        .digest('hex')
+      console.error('[VoPay Webhook] Expected:', expectedSig)
+      console.error('[VoPay Webhook] Received:', payload.ValidationKey)
+
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 401 }
