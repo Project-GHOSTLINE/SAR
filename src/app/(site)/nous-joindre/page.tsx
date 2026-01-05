@@ -214,31 +214,6 @@ export default function ContactPage() {
         <h1 className="section-title text-center">Nous joindre</h1>
         <p className="section-subtitle text-center">Nous sommes la pour vous ecouter sans jugement</p>
 
-        {/* Bannière période des Fêtes */}
-        <div className="max-w-5xl mx-auto mb-8">
-          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-6 shadow-lg">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-amber-400 rounded-full flex items-center justify-center">
-                  <span className="text-2xl">🎄</span>
-                </div>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-amber-900 mb-2">
-                  Période des Fêtes
-                </h3>
-                <p className="text-amber-800 mb-2">
-                  Jusqu'au 5 janvier, nos effectifs sont temporairement réduits en raison de la période des Fêtes.
-                </p>
-                <p className="text-amber-900 font-semibold flex items-center gap-2">
-                  <span className="text-xl">✨</span>
-                  Bonne nouvelle : nos services demeurent pleinement opérationnels.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Info */}
           <div>
