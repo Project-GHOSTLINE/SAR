@@ -1,0 +1,145 @@
+Objet: Configuration webhook - Portail de progression clients Solution Argent Rapide
+
+Bonjour Marc,
+
+Nous avons mis en place un nouveau portail de progression en temps réel pour nos clients. Ce portail leur permet de suivre l'avancement de leur demande de financement directement via un lien sécurisé envoyé par SMS.
+
+Pour que ce système fonctionne, nous avons besoin que Margill nous envoie les changements de statuts des dossiers automatiquement.
+
+Voici toutes les informations techniques nécessaires pour la configuration.
+
+═══════════════════════════════════════════════════════
+
+CONFIGURATION DU WEBHOOK
+
+URL du webhook:
+https://progression.solutionargentrapide.ca/api/webhook/margill
+
+Méthode: POST
+
+Headers requis:
+Content-Type: application/json
+x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202
+
+═══════════════════════════════════════════════════════
+
+FORMAT DU PAYLOAD JSON
+
+Payload complet (création d'un nouveau dossier):
+{
+  "dossier_id": "12345",
+  "statut_margill": "nouveau_dossier",
+  "nom_client": "Jean Tremblay",
+  "email_client": "jean.tremblay@example.com",
+  "telephone_client": "+15141234567",
+  "montant": 7500.00,
+  "date_premier_paiement": "2026-02-15"
+}
+
+Payload minimal (mise à jour de statut uniquement):
+{
+  "dossier_id": "12345",
+  "statut_margill": "offre_envoyee"
+}
+
+Description des champs:
+
+• dossier_id (String, REQUIS) - Identifiant unique du dossier dans Margill
+• statut_margill (String, REQUIS) - Statut actuel du dossier
+• nom_client (String, optionnel) - Nom complet du client
+• email_client (String, optionnel) - Adresse email
+• telephone_client (String, optionnel) - Téléphone au format +1XXXXXXXXXX
+• montant (Number, optionnel) - Montant du prêt en dollars
+• date_premier_paiement (String, optionnel) - Date au format YYYY-MM-DD
+
+Note: Les champs optionnels sont surtout utiles lors de la création initiale d'un dossier. Pour les mises à jour de statut, seuls dossier_id et statut_margill sont nécessaires.
+
+═══════════════════════════════════════════════════════
+
+STATUTS À ENVOYER
+
+Voici les statuts que vous pouvez nous envoyer:
+
+• nouveau_dossier → Client voit: Étape 1 - Demande reçue
+• en_attente_ibv → (interne, pas affiché au client)
+• ibv_completee → Client voit: Étape 2 - IBV reçu
+• analyse_en_cours → Client voit: Étape 3 - Analyse du dossier
+• offre_en_preparation → (interne, pas affiché au client)
+• offre_envoyee → Client voit: Étape 4 - Offre envoyée
+• offre_acceptee → Client voit: Étape 5 - Offre approuvée
+• contrat_en_preparation → (interne, pas affiché au client)
+• contrat_envoye → (interne, pas affiché au client)
+• en_attente_signature → Client voit: Étape 6 - Signature requise
+• contrat_signe → Client voit: Étape 7 - Contrat signé
+• transfert_de_fonds → (interne, pas affiché au client)
+• pret_actif → Client voit: Étape 8 - Prêt actif
+• refuse → (masqué au client)
+• sans_reponse → (masqué au client)
+
+IMPORTANT: Si vos statuts dans Margill ont des noms différents (ex: "Nouveau dossier" avec majuscule et espace), merci de nous envoyer la liste exacte pour qu'on ajuste le mapping.
+
+═══════════════════════════════════════════════════════
+
+TEST DE CONNEXION
+
+Voici une commande de test pour vérifier que tout fonctionne:
+
+curl -X POST https://progression.solutionargentrapide.ca/api/webhook/margill \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202" \
+  -d '{
+    "dossier_id": "TEST-123",
+    "statut_margill": "nouveau_dossier",
+    "nom_client": "Test Margill",
+    "email_client": "test@margill.com",
+    "telephone_client": "+15145551234",
+    "montant": 5000.00
+  }'
+
+Réponse attendue (succès):
+{"success":true,"data":{"application_id":"MARGILL-TEST-123","margill_status":"nouveau_dossier","mapped_status":"RECEIVED","message":"Dossier synchronisé avec succès"}}
+
+═══════════════════════════════════════════════════════
+
+CONFIGURATION DANS MARGILL
+
+Si Margill permet de configurer des webhooks automatiques:
+
+1. Ajoute un nouveau webhook avec ces paramètres:
+   - URL: https://progression.solutionargentrapide.ca/api/webhook/margill
+   - Méthode: POST
+   - Headers:
+     * Content-Type: application/json
+     * x-api-key: 44fc1f27922cc5e1e9c544eb8e0bbfeadf0d8c10c64c44fedcf3bd18f51e3202
+
+2. Événements à déclencher:
+   - Création d'un nouveau dossier
+   - Changement de statut d'un dossier
+
+3. Format du payload: Utilise le format JSON décrit ci-dessus
+
+═══════════════════════════════════════════════════════
+
+GESTION DES ERREURS
+
+• Erreur "Non autorisé" → Vérifier le header x-api-key
+• Erreur "dossier_id et statut_margill requis" → Vérifier le payload JSON
+• Erreur "Statut Margill inconnu" → Nous contacter pour ajouter ce statut
+
+═══════════════════════════════════════════════════════
+
+CHECKLIST DE DÉPLOIEMENT
+
+☐ Tester la connexion avec la commande de test ci-dessus
+☐ Vérifier que la réponse est bien "success": true
+☐ Configurer les webhooks dans Margill (si disponible)
+☐ Confirmer la liste des statuts Margill
+☐ Tester avec 2-3 vrais dossiers
+☐ Valider que les données apparaissent dans notre système
+
+═══════════════════════════════════════════════════════
+
+N'hésite pas si tu as des questions ou besoin d'ajustements!
+
+Cordialement,
+Solution Argent Rapide
