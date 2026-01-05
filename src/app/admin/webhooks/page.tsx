@@ -52,12 +52,19 @@ export default function WebhooksPage() {
   const fetchWebhooks = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin/webhooks/list')
-      if (!response.ok) throw new Error('Failed to fetch webhooks')
+      const response = await fetch('/api/admin/webhooks/list', {
+        cache: 'no-store'
+      })
+      if (!response.ok) {
+        console.error('Failed to fetch webhooks:', response.status)
+        setWebhooks([])
+        return
+      }
       const data = await response.json()
-      setWebhooks(data.webhooks || [])
+      setWebhooks(Array.isArray(data.webhooks) ? data.webhooks : [])
     } catch (error) {
       console.error('Error fetching webhooks:', error)
+      setWebhooks([])
     } finally {
       setLoading(false)
     }
