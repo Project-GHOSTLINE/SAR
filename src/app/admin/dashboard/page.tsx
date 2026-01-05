@@ -325,6 +325,12 @@ export default function AdminDashboard() {
                   )}
                 </button>
               ))}
+              <button
+                onClick={() => router.push('/admin/webhooks')}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100"
+              >
+                Webhooks
+              </button>
             </nav>
 
             {/* Right Side */}
