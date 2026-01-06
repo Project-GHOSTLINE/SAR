@@ -54,6 +54,41 @@ interface NoteLog {
   date: string
 }
 
+interface WebhookStats {
+  total: number
+  totalSuccessful: number
+  totalFailed: number
+  totalPending: number
+  totalCancelled: number
+  weekTotal: number
+  weekSuccessful: number
+  weekFailed: number
+  weekPending: number
+  weekSuccessRate: number
+  monthTotal: number
+  monthSuccessRate: number
+  todayVolume: number
+  yesterdayVolume: number
+  weekVolume: number
+  monthVolume: number
+  volumeChange: number
+  recentTransactions: any[]
+  failedTransactions: any[]
+  failedCount: number
+  dailyStats: any[]
+}
+
+interface RecentTransaction {
+  id: string
+  transaction_id: string
+  transaction_type: string
+  transaction_amount: number
+  status: string
+  failure_reason?: string
+  received_at: string
+  environment: string
+}
+
 // Extraire l'option selectionnee et la source du message
 function extractOptionFromMessage(question: string): { source: string | null; option: string | null; message: string } {
   // Format: [Source] [Option] Message
@@ -159,22 +194,8 @@ export default function AdminDashboard() {
     recentTransactions: [] as any[]
   })
 
-  const [margillData] = useState({
-    newFiles: 8,
-    paymentsSent: 23,
-    nsf: 2,
-    pendingPayments: 15600.00,
-    activeLoans: 156,
-    monthlyCollected: 234500.00
-  })
-
-  const [recentActivity] = useState([
-    { type: 'interac', amount: 500, name: 'Jean T.', time: '10:45', status: 'completed' },
-    { type: 'payment', amount: 1200, name: 'Marie L.', time: '10:42', status: 'completed' },
-    { type: 'interac', amount: 750, name: 'Pierre D.', time: '10:38', status: 'pending' },
-    { type: 'nsf', amount: 450, name: 'Sophie R.', time: '10:35', status: 'failed' },
-    { type: 'newfile', amount: 2500, name: 'Marc B.', time: '10:30', status: 'new' },
-  ])
+  const [webhookStats, setWebhookStats] = useState<WebhookStats | null>(null)
+  const [webhookStatsLoading, setWebhookStatsLoading] = useState(false)
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
@@ -254,10 +275,31 @@ export default function AdminDashboard() {
     }
   }
 
+  const fetchWebhookStats = async () => {
+    setWebhookStatsLoading(true)
+    try {
+      const res = await fetch('/api/admin/webhooks/stats', { credentials: 'include' })
+      if (res.ok) {
+        const result = await res.json()
+        if (result.success && result.stats) {
+          setWebhookStats(result.stats)
+        }
+      }
+    } catch (error) {
+      console.error('Erreur webhook stats:', error)
+    } finally {
+      setWebhookStatsLoading(false)
+    }
+  }
+
   useEffect(() => {
     fetchMessages()
     fetchVopayData()
-    const interval = setInterval(fetchMessages, 30000)
+    fetchWebhookStats()
+    const interval = setInterval(() => {
+      fetchMessages()
+      fetchWebhookStats()
+    }, 30000)
     return () => clearInterval(interval)
   }, [])
 
@@ -375,56 +417,77 @@ export default function AdminDashboard() {
                     <DollarSign size={20} className="text-[#00874e]" />
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(vopayData.balance)}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {vopayLoading ? '...' : formatCurrency(vopayData.balance)}
+                </p>
                 <div className="flex items-center gap-2 mt-2">
-                  <TrendingUp size={14} className="text-[#00874e]" />
-                  <span className="text-sm text-[#00874e]">+2.5% depuis hier</span>
+                  <span className="text-sm text-gray-500">Disponible: {formatCurrency(vopayData.available)}</span>
                 </div>
               </div>
 
-              {/* Prets Actifs */}
+              {/* Volume Aujourd'hui */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-500 text-sm">Prets actifs</span>
+                  <span className="text-gray-500 text-sm">Volume Aujourd'hui</span>
                   <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
-                    <FileText size={20} className="text-blue-600" />
+                    <TrendingUp size={20} className="text-blue-600" />
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-gray-900">{margillData.activeLoans}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {webhookStatsLoading ? '...' : formatCurrency(webhookStats?.todayVolume || 0)}
+                </p>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm text-gray-500">{margillData.newFiles} nouveaux aujourd'hui</span>
-                </div>
-              </div>
-
-              {/* Collecte du mois */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-500 text-sm">Collecte ce mois</span>
-                  <div className="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center">
-                    <Calendar size={20} className="text-purple-600" />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(margillData.monthlyCollected)}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <TrendingUp size={14} className="text-[#00874e]" />
-                  <span className="text-sm text-[#00874e]">+8.2% vs mois dernier</span>
-                </div>
-              </div>
-
-              {/* Messages */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-500 text-sm">Messages</span>
-                  <div className="w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center">
-                    <Mail size={20} className="text-amber-600" />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  {stats.nonLus > 0 ? (
-                    <span className="text-sm text-red-500 font-medium">{stats.nonLus} non lu(s)</span>
+                  {webhookStats && webhookStats.volumeChange !== 0 ? (
+                    <>
+                      {webhookStats.volumeChange > 0 ? (
+                        <TrendingUp size={14} className="text-[#00874e]" />
+                      ) : (
+                        <TrendingDown size={14} className="text-red-500" />
+                      )}
+                      <span className={`text-sm ${webhookStats.volumeChange > 0 ? 'text-[#00874e]' : 'text-red-500'}`}>
+                        {webhookStats.volumeChange > 0 ? '+' : ''}{webhookStats.volumeChange}% vs hier
+                      </span>
+                    </>
                   ) : (
-                    <span className="text-sm text-gray-500">Tous lus</span>
+                    <span className="text-sm text-gray-500">Pas de variation</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Transactions Actives */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-gray-500 text-sm">Transactions Actives</span>
+                  <div className="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center">
+                    <Activity size={20} className="text-purple-600" />
+                  </div>
+                </div>
+                <p className="text-2xl font-bold text-gray-900">
+                  {webhookStatsLoading ? '...' : webhookStats?.totalPending || 0}
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-sm text-gray-500">En cours de traitement</span>
+                </div>
+              </div>
+
+              {/* Taux de Succès */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-gray-500 text-sm">Taux de Succès 7j</span>
+                  <div className="w-10 h-10 bg-[#e8f5e9] rounded-full flex items-center justify-center">
+                    <CheckCircle size={20} className="text-[#00874e]" />
+                  </div>
+                </div>
+                <p className="text-2xl font-bold text-gray-900">
+                  {webhookStatsLoading ? '...' : `${webhookStats?.weekSuccessRate || 0}%`}
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  {webhookStats && webhookStats.weekSuccessRate >= 90 ? (
+                    <span className="text-sm text-[#00874e]">Excellent</span>
+                  ) : webhookStats && webhookStats.weekSuccessRate >= 75 ? (
+                    <span className="text-sm text-blue-600">Bon</span>
+                  ) : (
+                    <span className="text-sm text-amber-600">À surveiller</span>
                   )}
                 </div>
               </div>
@@ -432,54 +495,77 @@ export default function AdminDashboard() {
 
             {/* Two Column Layout */}
             <div className="grid grid-cols-3 gap-6">
-              {/* Activity Feed */}
+              {/* Activity Feed - Transactions Récentes */}
               <div className="col-span-2 bg-white rounded-lg border border-gray-200">
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                   <h2 className="font-semibold text-gray-900 flex items-center gap-2">
                     <Activity size={18} className="text-[#00874e]" />
-                    Activite recente
+                    Transactions recentes
                   </h2>
-                  <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                    <RefreshCw size={16} />
+                  <button
+                    onClick={fetchWebhookStats}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <RefreshCw size={16} className={webhookStatsLoading ? 'animate-spin' : ''} />
                   </button>
                 </div>
                 <div className="divide-y divide-gray-100">
-                  {recentActivity.map((item, i) => (
-                    <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          item.type === 'interac' ? 'bg-[#e8f5e9]' :
-                          item.type === 'payment' ? 'bg-blue-50' :
-                          item.type === 'nsf' ? 'bg-red-50' :
-                          'bg-purple-50'
-                        }`}>
-                          {item.type === 'interac' && <DollarSign size={18} className="text-[#00874e]" />}
-                          {item.type === 'payment' && <TrendingUp size={18} className="text-blue-600" />}
-                          {item.type === 'nsf' && <AlertTriangle size={18} className="text-red-500" />}
-                          {item.type === 'newfile' && <FileText size={18} className="text-purple-600" />}
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{item.name}</p>
-                          <p className="text-sm text-gray-500">
-                            {item.type === 'interac' && 'Interac recu'}
-                            {item.type === 'payment' && 'Paiement envoye'}
-                            {item.type === 'nsf' && 'NSF detecte'}
-                            {item.type === 'newfile' && 'Nouveau dossier'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className={`font-semibold ${
-                          item.type === 'nsf' ? 'text-red-500' :
-                          item.type === 'interac' ? 'text-[#00874e]' :
-                          'text-gray-900'
-                        }`}>
-                          {item.type === 'payment' ? '-' : '+'}{formatCurrency(item.amount)}
-                        </p>
-                        <p className="text-sm text-gray-400">{item.time}</p>
-                      </div>
+                  {webhookStatsLoading ? (
+                    <div className="px-6 py-8 text-center">
+                      <Loader2 size={24} className="animate-spin text-[#00874e] mx-auto" />
                     </div>
-                  ))}
+                  ) : webhookStats?.recentTransactions && webhookStats.recentTransactions.length > 0 ? (
+                    webhookStats.recentTransactions.slice(0, 10).map((tx: any, i: number) => {
+                      const status = tx.status.toLowerCase()
+                      const isSuccessful = status === 'successful'
+                      const isFailed = status === 'failed'
+                      const isPending = status === 'pending' || status === 'in progress'
+
+                      return (
+                        <div key={tx.id || i} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                              isSuccessful ? 'bg-[#e8f5e9]' :
+                              isFailed ? 'bg-red-50' :
+                              isPending ? 'bg-blue-50' :
+                              'bg-gray-50'
+                            }`}>
+                              {isSuccessful && <CheckCircle size={18} className="text-[#00874e]" />}
+                              {isFailed && <XCircle size={18} className="text-red-500" />}
+                              {isPending && <Clock size={18} className="text-blue-600" />}
+                              {status === 'cancelled' && <XCircle size={18} className="text-gray-400" />}
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{tx.transaction_id}</p>
+                              <p className="text-sm text-gray-500">
+                                {tx.transaction_type}
+                                {tx.failure_reason && ` - ${tx.failure_reason}`}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={`font-semibold ${
+                              isFailed ? 'text-red-500' :
+                              isSuccessful ? 'text-[#00874e]' :
+                              'text-gray-900'
+                            }`}>
+                              {formatCurrency(tx.transaction_amount)}
+                            </p>
+                            <p className="text-sm text-gray-400">
+                              {new Date(tx.received_at).toLocaleTimeString('fr-CA', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      )
+                    })
+                  ) : (
+                    <div className="px-6 py-8 text-center text-gray-500">
+                      Aucune transaction récente
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -490,29 +576,64 @@ export default function AdminDashboard() {
                   <h3 className="font-semibold text-gray-900 mb-4">Statistiques rapides</h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-500 text-sm">Taux de succes</span>
-                      <span className="font-semibold text-[#00874e]">{vopayData.successRate}%</span>
+                      <span className="text-gray-500 text-sm">Taux de succes 7j</span>
+                      <span className="font-semibold text-[#00874e]">
+                        {webhookStatsLoading ? '...' : `${webhookStats?.weekSuccessRate || 0}%`}
+                      </span>
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-[#00874e] rounded-full"
-                        style={{ width: `${vopayData.successRate}%` }}
+                        className="h-full bg-[#00874e] rounded-full transition-all"
+                        style={{ width: `${webhookStats?.weekSuccessRate || 0}%` }}
                       />
                     </div>
                     <div className="flex items-center justify-between pt-2">
-                      <span className="text-gray-500 text-sm">Interac en attente</span>
-                      <span className="font-semibold text-blue-600">{vopayData.pendingInterac}</span>
+                      <span className="text-gray-500 text-sm">Transactions en attente</span>
+                      <span className="font-semibold text-blue-600">
+                        {webhookStatsLoading ? '...' : webhookStats?.totalPending || 0}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-500 text-sm">NSF ce mois</span>
-                      <span className="font-semibold text-red-500">{margillData.nsf}</span>
+                      <span className="text-gray-500 text-sm">Transactions echouees</span>
+                      <span className="font-semibold text-red-500">
+                        {webhookStatsLoading ? '...' : webhookStats?.weekFailed || 0}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-500 text-sm">Montant gele</span>
-                      <span className="font-semibold text-amber-600">{formatCurrency(vopayData.frozen)}</span>
+                      <span className="font-semibold text-amber-600">
+                        {vopayLoading ? '...' : formatCurrency(vopayData.frozen)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500 text-sm">Volume 7 jours</span>
+                      <span className="font-semibold text-gray-900">
+                        {webhookStatsLoading ? '...' : formatCurrency(webhookStats?.weekVolume || 0)}
+                      </span>
                     </div>
                   </div>
                 </div>
+
+                {/* Alertes - Transactions Échouées */}
+                {webhookStats && webhookStats.failedCount > 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <AlertTriangle size={20} className="text-red-500" />
+                      <div>
+                        <h3 className="font-semibold text-red-900">Alertes</h3>
+                        <p className="text-sm text-red-600">
+                          {webhookStats.failedCount} transaction(s) échouée(s)
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setSelectedView('vopay')}
+                      className="w-full px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+                    >
+                      Voir les détails
+                    </button>
+                  </div>
+                )}
 
                 {/* Recent Messages */}
                 <div className="bg-white rounded-lg border border-gray-200">
@@ -979,29 +1100,33 @@ export default function AdminDashboard() {
                   <h2 className="font-semibold text-gray-900">Transactions récentes</h2>
                 </div>
                 <div className="divide-y divide-gray-100">
-                  {vopayData.recentTransactions.map((tx, i) => (
-                    <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          tx.status === 'completed' ? 'bg-[#e8f5e9]' :
-                          tx.status === 'pending' ? 'bg-blue-50' :
-                          'bg-red-50'
-                        }`}>
-                          {tx.status === 'completed' && <CheckCircle size={18} className="text-[#00874e]" />}
-                          {tx.status === 'pending' && <Clock size={18} className="text-blue-600" />}
-                          {(tx.status === 'failed' || tx.status === 'error') && <XCircle size={18} className="text-red-500" />}
+                  {vopayData.recentTransactions.map((tx, i) => {
+                    const status = (tx.TransactionStatus || '').toLowerCase()
+                    const amount = parseFloat(tx.CreditAmount || '0') - parseFloat(tx.DebitAmount || '0')
+                    return (
+                      <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                            status.includes('completed') || status.includes('success') ? 'bg-[#e8f5e9]' :
+                            status.includes('pending') ? 'bg-blue-50' :
+                            'bg-red-50'
+                          }`}>
+                            {(status.includes('completed') || status.includes('success')) && <CheckCircle size={18} className="text-[#00874e]" />}
+                            {status.includes('pending') && <Clock size={18} className="text-blue-600" />}
+                            {(status.includes('failed') || status.includes('error') || status.includes('cancelled')) && <XCircle size={18} className="text-red-500" />}
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">{tx.TransactionID}</p>
+                            <p className="text-sm text-gray-500">{tx.TransactionType} - {tx.FullName}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{tx.reference || tx.transaction_id}</p>
-                          <p className="text-sm text-gray-500">{tx.description || tx.transaction_type}</p>
+                        <div className="text-right">
+                          <p className="font-semibold text-gray-900">{formatCurrency(amount)}</p>
+                          <p className="text-sm text-gray-400">{new Date(tx.TransactionDateTime).toLocaleString('fr-CA')}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-gray-900">{formatCurrency(tx.amount)}</p>
-                        <p className="text-sm text-gray-400">{new Date(tx.created_at).toLocaleString('fr-CA')}</p>
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -1023,34 +1148,33 @@ export default function AdminDashboard() {
                 <h1 className="text-2xl font-semibold text-[#003d2c]">Margill</h1>
                 <p className="text-gray-500 mt-1">Gestion des prets et collections</p>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 bg-[#00874e] text-white rounded-lg text-sm font-medium hover:bg-[#006d3f] transition-colors">
-                <RefreshCw size={16} />
-                Rafraichir
-              </button>
             </div>
 
-            <div className="grid grid-cols-4 gap-6 mb-6">
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <span className="text-gray-500 text-sm">Prets actifs</span>
-                <p className="text-2xl font-bold text-gray-900 mt-2">{margillData.activeLoans}</p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
+              <FileText size={48} className="text-blue-600 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-blue-900 mb-2">Integration Margill à venir</h2>
+              <p className="text-blue-700 mb-6">
+                L'integration avec Margill n'est pas encore disponible.<br />
+                Cette section affichera les donnees de prets, collections et calendriers de paiements.
+              </p>
+              <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto">
+                <div className="bg-white rounded-lg p-4 border border-blue-200">
+                  <p className="text-sm text-gray-500 mb-1">À implémenter</p>
+                  <p className="font-semibold text-gray-900">API Margill</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-blue-200">
+                  <p className="text-sm text-gray-500 mb-1">À implémenter</p>
+                  <p className="font-semibold text-gray-900">Synchronisation automatique</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-blue-200">
+                  <p className="text-sm text-gray-500 mb-1">À implémenter</p>
+                  <p className="font-semibold text-gray-900">Gestion des NSF</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-blue-200">
+                  <p className="text-sm text-gray-500 mb-1">À implémenter</p>
+                  <p className="font-semibold text-gray-900">Rapports mensuels</p>
+                </div>
               </div>
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <span className="text-gray-500 text-sm">Nouveaux dossiers</span>
-                <p className="text-2xl font-bold text-[#00874e] mt-2">{margillData.newFiles}</p>
-              </div>
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <span className="text-gray-500 text-sm">Collecte ce mois</span>
-                <p className="text-2xl font-bold text-blue-600 mt-2">{formatCurrency(margillData.monthlyCollected)}</p>
-              </div>
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <span className="text-gray-500 text-sm">NSF</span>
-                <p className="text-2xl font-bold text-red-500 mt-2">{margillData.nsf}</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="font-semibold text-gray-900 mb-2">Connexion API requise</h2>
-              <p className="text-gray-500">Les donnees affichees sont des donnees de demonstration. Connectez l'API Margill pour voir les vraies donnees.</p>
             </div>
           </div>
         )}
