@@ -213,6 +213,9 @@ export default function AdminDashboard() {
   // Vue pour transactions récentes
   const [txView, setTxView] = useState<'all' | 'deposits' | 'withdrawals'>('all')
 
+  // Filtre pour messages stats
+  const [messageFilter, setMessageFilter] = useState<'all' | 'reponses' | 'sandra' | 'michel' | 'none'>('all')
+
   useEffect(() => {
     // Initialiser l'heure côté client seulement pour éviter hydration mismatch
     setCurrentTime(new Date())
@@ -853,7 +856,12 @@ export default function AdminDashboard() {
               {/* Statistiques Messages */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 {/* Total du Mois */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all">
+                <div
+                  onClick={() => setMessageFilter(messageFilter === 'all' ? 'all' : 'all')}
+                  className={`bg-white rounded-xl shadow-sm border p-4 hover:shadow-md transition-all cursor-pointer ${
+                    messageFilter === 'all' ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-100'
+                  }`}
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
                       <MessageSquare size={20} className="text-blue-600" />
@@ -866,7 +874,12 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Réponses Envoyées */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all">
+                <div
+                  onClick={() => setMessageFilter(messageFilter === 'reponses' ? 'all' : 'reponses')}
+                  className={`bg-white rounded-xl shadow-sm border p-4 hover:shadow-md transition-all cursor-pointer ${
+                    messageFilter === 'reponses' ? 'border-green-500 ring-2 ring-green-200' : 'border-gray-100'
+                  }`}
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
                       <CheckCircle size={20} className="text-green-600" />
@@ -879,7 +892,12 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Acheminés à Sandra */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all">
+                <div
+                  onClick={() => setMessageFilter(messageFilter === 'sandra' ? 'all' : 'sandra')}
+                  className={`bg-white rounded-xl shadow-sm border p-4 hover:shadow-md transition-all cursor-pointer ${
+                    messageFilter === 'sandra' ? 'border-pink-500 ring-2 ring-pink-200' : 'border-gray-100'
+                  }`}
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center">
                       <User size={20} className="text-pink-600" />
@@ -892,7 +910,12 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Acheminés à Michel */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all">
+                <div
+                  onClick={() => setMessageFilter(messageFilter === 'michel' ? 'all' : 'michel')}
+                  className={`bg-white rounded-xl shadow-sm border p-4 hover:shadow-md transition-all cursor-pointer ${
+                    messageFilter === 'michel' ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-gray-100'
+                  }`}
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center">
                       <User size={20} className="text-indigo-600" />
@@ -941,9 +964,80 @@ export default function AdminDashboard() {
                 </div>
               )}
 
+              {/* Boîte Filtre Actif */}
+              {messageFilter !== 'all' && (
+                <div className={`rounded-xl p-4 mb-6 flex items-center justify-between ${
+                  messageFilter === 'reponses' ? 'bg-gradient-to-br from-green-50 to-green-100 border border-green-200' :
+                  messageFilter === 'sandra' ? 'bg-gradient-to-br from-pink-50 to-pink-100 border border-pink-200' :
+                  messageFilter === 'michel' ? 'bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200' :
+                  'bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      messageFilter === 'reponses' ? 'bg-green-200' :
+                      messageFilter === 'sandra' ? 'bg-pink-200' :
+                      messageFilter === 'michel' ? 'bg-indigo-200' :
+                      'bg-gray-200'
+                    }`}>
+                      {messageFilter === 'reponses' && <CheckCircle size={20} className="text-green-700" />}
+                      {messageFilter === 'sandra' && <User size={20} className="text-pink-700" />}
+                      {messageFilter === 'michel' && <User size={20} className="text-indigo-700" />}
+                    </div>
+                    <div>
+                      <p className={`text-sm font-semibold ${
+                        messageFilter === 'reponses' ? 'text-green-900' :
+                        messageFilter === 'sandra' ? 'text-pink-900' :
+                        messageFilter === 'michel' ? 'text-indigo-900' :
+                        'text-gray-900'
+                      }`}>
+                        Filtre actif : {
+                          messageFilter === 'reponses' ? 'Réponses envoyées' :
+                          messageFilter === 'sandra' ? 'Acheminés à Sandra' :
+                          messageFilter === 'michel' ? 'Acheminés à Michel' :
+                          'Tous les messages'
+                        }
+                      </p>
+                      <p className={`text-xs ${
+                        messageFilter === 'reponses' ? 'text-green-700' :
+                        messageFilter === 'sandra' ? 'text-pink-700' :
+                        messageFilter === 'michel' ? 'text-indigo-700' :
+                        'text-gray-700'
+                      }`}>
+                        {
+                          messageFilter === 'reponses' ? `${messageStats.reponsesEnvoyees} message(s) avec réponse système` :
+                          messageFilter === 'sandra' ? `${messageStats.acheminesSandra} message(s) acheminés à Sandra` :
+                          messageFilter === 'michel' ? `${messageStats.acheminesMichel} message(s) acheminés à Michel` :
+                          'Tous les messages du mois'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setMessageFilter('all')}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                      messageFilter === 'reponses' ? 'bg-green-200 text-green-800 hover:bg-green-300' :
+                      messageFilter === 'sandra' ? 'bg-pink-200 text-pink-800 hover:bg-pink-300' :
+                      messageFilter === 'michel' ? 'bg-indigo-200 text-indigo-800 hover:bg-indigo-300' :
+                      'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                    }`}
+                  >
+                    Retirer le filtre
+                  </button>
+                </div>
+              )}
+
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="divide-y divide-gray-100">
-                  {messages.map((msg) => {
+                  {messages
+                    .filter((msg) => {
+                      // Filtrer selon le filtre actif
+                      if (messageFilter === 'all') return true
+                      if (messageFilter === 'reponses') return msg.system_responded === true
+                      if (messageFilter === 'sandra') return msg.assigned_to === 'Sandra'
+                      if (messageFilter === 'michel') return msg.assigned_to === 'Michel'
+                      return true
+                    })
+                    .map((msg) => {
                     const { option, message: cleanMsg } = extractOptionFromMessage(msg.question)
                     return (
                       <div
