@@ -171,7 +171,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [stats, setStats] = useState({ total: 0, nonLus: 0 })
-  const [currentTime, setCurrentTime] = useState(new Date())
+  const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [selectedView, setSelectedView] = useState<'dashboard' | 'messages' | 'vopay' | 'margill'>('dashboard')
   const [vopayLoading, setVopayLoading] = useState(false)
   const [vopayError, setVopayError] = useState<string | null>(null)
@@ -198,6 +198,8 @@ export default function AdminDashboard() {
   const [webhookStatsLoading, setWebhookStatsLoading] = useState(false)
 
   useEffect(() => {
+    // Initialiser l'heure côté client seulement pour éviter hydration mismatch
+    setCurrentTime(new Date())
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
@@ -379,8 +381,8 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-4">
               {/* Date/Time */}
               <div className="text-right">
-                <p className="text-gray-900 font-medium">{formatTime(currentTime)}</p>
-                <p className="text-gray-500 text-xs">{formatDate(currentTime)}</p>
+                <p className="text-gray-900 font-medium">{currentTime ? formatTime(currentTime) : '--:--'}</p>
+                <p className="text-gray-500 text-xs">{currentTime ? formatDate(currentTime) : 'Chargement...'}</p>
               </div>
 
               {/* Logout */}
