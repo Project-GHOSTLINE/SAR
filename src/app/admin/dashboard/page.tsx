@@ -597,220 +597,14 @@ export default function AdminDashboard() {
                   </button>
                 </div>
 
-                {/* Filter Tabs */}
+                {/* Filters Section */}
                 {webhookStats?.recentTransactions && webhookStats.recentTransactions.length > 0 && (
-                  <div className="bg-white border-b border-gray-100">
-                    {/* Primary Tabs - Type Filter */}
-                    <div className="px-6 pt-4 flex items-center gap-2 border-b border-gray-100">
-                      <button
-                        onClick={() => setTxFilterType('all')}
-                        className={`px-4 py-2 text-sm font-medium transition-all relative ${
-                          txFilterType === 'all'
-                            ? 'text-[#00874e] border-b-2 border-[#00874e] -mb-px'
-                            : 'text-gray-500 hover:text-gray-700'
-                        }`}
-                      >
-                        Toutes
-                        {txFilterType === 'all' && (
-                          <span className="ml-2 px-1.5 py-0.5 bg-[#00874e] text-white text-xs rounded-full">
-                            {getFilteredTransactions().length}
-                          </span>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => setTxFilterType('deposits')}
-                        className={`px-4 py-2 text-sm font-medium transition-all relative ${
-                          txFilterType === 'deposits'
-                            ? 'text-[#00874e] border-b-2 border-[#00874e] -mb-px'
-                            : 'text-gray-500 hover:text-gray-700'
-                        }`}
-                      >
-                        Dépôts
-                        {txFilterType === 'deposits' && (
-                          <span className="ml-2 px-1.5 py-0.5 bg-[#00874e] text-white text-xs rounded-full">
-                            {getFilteredTransactions().length}
-                          </span>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => setTxFilterType('withdrawals')}
-                        className={`px-4 py-2 text-sm font-medium transition-all relative ${
-                          txFilterType === 'withdrawals'
-                            ? 'text-[#00874e] border-b-2 border-[#00874e] -mb-px'
-                            : 'text-gray-500 hover:text-gray-700'
-                        }`}
-                      >
-                        Retraits
-                        {txFilterType === 'withdrawals' && (
-                          <span className="ml-2 px-1.5 py-0.5 bg-[#00874e] text-white text-xs rounded-full">
-                            {getFilteredTransactions().length}
-                          </span>
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Secondary Filters */}
-                    <div className="px-6 py-3 bg-gray-50 flex items-center gap-3 flex-wrap">
-                      {/* Status Pills */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 font-medium">Statut:</span>
-                        <button
-                          onClick={() => setTxFilterStatus('all')}
-                          className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
-                            txFilterStatus === 'all'
-                              ? 'bg-[#00874e] text-white'
-                              : 'bg-white text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          Tous
-                        </button>
-                        <button
-                          onClick={() => setTxFilterStatus('successful')}
-                          className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
-                            txFilterStatus === 'successful'
-                              ? 'bg-[#00874e] text-white'
-                              : 'bg-white text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          Succès
-                        </button>
-                        <button
-                          onClick={() => setTxFilterStatus('failed')}
-                          className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
-                            txFilterStatus === 'failed'
-                              ? 'bg-red-500 text-white'
-                              : 'bg-white text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          Échecs
-                        </button>
-                        <button
-                          onClick={() => setTxFilterStatus('pending')}
-                          className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
-                            txFilterStatus === 'pending'
-                              ? 'bg-blue-500 text-white'
-                              : 'bg-white text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          En attente
-                        </button>
-                      </div>
-
-                      <div className="w-px h-6 bg-gray-300"></div>
-
-                      {/* Period Pills */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 font-medium">Période:</span>
-                        <button
-                          onClick={() => setTxFilterPeriod('all')}
-                          className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
-                            txFilterPeriod === 'all'
-                              ? 'bg-[#00874e] text-white'
-                              : 'bg-white text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          Toutes
-                        </button>
-                        <button
-                          onClick={() => setTxFilterPeriod('today')}
-                          className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
-                            txFilterPeriod === 'today'
-                              ? 'bg-[#00874e] text-white'
-                              : 'bg-white text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          Aujourd&apos;hui
-                        </button>
-                        <button
-                          onClick={() => setTxFilterPeriod('7d')}
-                          className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
-                            txFilterPeriod === '7d'
-                              ? 'bg-[#00874e] text-white'
-                              : 'bg-white text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          7 jours
-                        </button>
-                        <button
-                          onClick={() => setTxFilterPeriod('30d')}
-                          className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
-                            txFilterPeriod === '30d'
-                              ? 'bg-[#00874e] text-white'
-                              : 'bg-white text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          30 jours
-                        </button>
-                      </div>
-
-                      <div className="w-px h-6 bg-gray-300"></div>
-
-                      {/* Amount Pills */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 font-medium">Montant:</span>
-                        <button
-                          onClick={() => setTxFilterAmount('all')}
-                          className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
-                            txFilterAmount === 'all'
-                              ? 'bg-[#00874e] text-white'
-                              : 'bg-white text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          Tous
-                        </button>
-                        <button
-                          onClick={() => setTxFilterAmount('small')}
-                          className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
-                            txFilterAmount === 'small'
-                              ? 'bg-[#00874e] text-white'
-                              : 'bg-white text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          &lt; 500$
-                        </button>
-                        <button
-                          onClick={() => setTxFilterAmount('medium')}
-                          className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
-                            txFilterAmount === 'medium'
-                              ? 'bg-[#00874e] text-white'
-                              : 'bg-white text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          500-1000$
-                        </button>
-                        <button
-                          onClick={() => setTxFilterAmount('large')}
-                          className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
-                            txFilterAmount === 'large'
-                              ? 'bg-[#00874e] text-white'
-                              : 'bg-white text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          &gt; 1000$
-                        </button>
-                      </div>
-
-                      <div className="w-px h-6 bg-gray-300"></div>
-
-                      {/* Sort Compact */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 font-medium">Tri:</span>
-                        <select
-                          value={txSortBy}
-                          onChange={(e) => setTxSortBy(e.target.value as typeof txSortBy)}
-                          className="px-2 py-1 text-xs bg-white border border-gray-200 rounded-lg hover:border-[#00874e] focus:border-[#00874e] focus:ring-1 focus:ring-[#00874e]/20"
-                        >
-                          <option value="recent">Plus récentes</option>
-                          <option value="oldest">Plus anciennes</option>
-                          <option value="amount-high">Montant ↓</option>
-                          <option value="amount-low">Montant ↑</option>
-                        </select>
-                      </div>
-
-                      {/* Reset Button */}
-                      {(txFilterType !== 'all' || txFilterStatus !== 'all' || txFilterPeriod !== 'all' || txFilterAmount !== 'all' || txSortBy !== 'recent') && (
-                        <>
-                          <div className="w-px h-6 bg-gray-300"></div>
+                  <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
+                    {/* Active Filters Chips */}
+                    {(txFilterType !== 'all' || txFilterStatus !== 'all' || txFilterPeriod !== 'all' || txFilterAmount !== 'all' || txSortBy !== 'recent') && (
+                      <div className="bg-white rounded-lg p-3 mb-4 shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Filtres actifs</span>
                           <button
                             onClick={() => {
                               setTxFilterType('all')
@@ -819,17 +613,164 @@ export default function AdminDashboard() {
                               setTxFilterAmount('all')
                               setTxSortBy('recent')
                             }}
-                            className="px-3 py-1 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all flex items-center gap-1"
+                            className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
                           >
-                            <X size={12} />
-                            Réinitialiser
+                            Tout effacer
                           </button>
-                        </>
-                      )}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {/* Type Chip */}
+                          {txFilterType !== 'all' && (
+                            <span className="inline-flex items-center gap-1.5 bg-[#e8f5e9] text-[#00874e] px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
+                              📊 {txFilterType === 'deposits' ? 'Dépôts' : 'Retraits'}
+                              <button
+                                onClick={() => setTxFilterType('all')}
+                                className="hover:bg-[#00874e]/10 rounded-full p-0.5 transition-colors"
+                              >
+                                <X size={14} />
+                              </button>
+                            </span>
+                          )}
+
+                          {/* Status Chip */}
+                          {txFilterStatus !== 'all' && (
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm ${
+                              txFilterStatus === 'successful' ? 'bg-green-100 text-green-700' :
+                              txFilterStatus === 'failed' ? 'bg-red-100 text-red-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {txFilterStatus === 'successful' ? '✓' : txFilterStatus === 'failed' ? '✗' : '⏳'} {
+                                txFilterStatus === 'successful' ? 'Succès' :
+                                txFilterStatus === 'failed' ? 'Échecs' :
+                                'En attente'
+                              }
+                              <button
+                                onClick={() => setTxFilterStatus('all')}
+                                className="hover:bg-black/5 rounded-full p-0.5 transition-colors"
+                              >
+                                <X size={14} />
+                              </button>
+                            </span>
+                          )}
+
+                          {/* Period Chip */}
+                          {txFilterPeriod !== 'all' && (
+                            <span className="inline-flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
+                              📅 {txFilterPeriod === 'today' ? "Aujourd'hui" : txFilterPeriod === '7d' ? '7 jours' : '30 jours'}
+                              <button
+                                onClick={() => setTxFilterPeriod('all')}
+                                className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                              >
+                                <X size={14} />
+                              </button>
+                            </span>
+                          )}
+
+                          {/* Amount Chip */}
+                          {txFilterAmount !== 'all' && (
+                            <span className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
+                              💰 {
+                                txFilterAmount === 'small' ? '< 500$' :
+                                txFilterAmount === 'medium' ? '500-1000$' :
+                                '> 1000$'
+                              }
+                              <button
+                                onClick={() => setTxFilterAmount('all')}
+                                className="hover:bg-purple-200 rounded-full p-0.5 transition-colors"
+                              >
+                                <X size={14} />
+                              </button>
+                            </span>
+                          )}
+
+                          {/* Sort Chip */}
+                          {txSortBy !== 'recent' && (
+                            <span className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
+                              🔽 {
+                                txSortBy === 'oldest' ? 'Plus anciens' :
+                                txSortBy === 'amount-high' ? 'Montant ↓' :
+                                'Montant ↑'
+                              }
+                              <button
+                                onClick={() => setTxSortBy('recent')}
+                                className="hover:bg-gray-200 rounded-full p-0.5 transition-colors"
+                              >
+                                <X size={14} />
+                              </button>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Filter Dropdowns - Grid 2x2 */}
+                    <div className="bg-white rounded-lg p-3 shadow-sm">
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* Type Filter */}
+                        <select
+                          value={txFilterType}
+                          onChange={(e) => setTxFilterType(e.target.value as typeof txFilterType)}
+                          className="border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-gray-300"
+                        >
+                          <option value="all">📊 Type: Toutes</option>
+                          <option value="deposits">📥 Dépôts</option>
+                          <option value="withdrawals">📤 Retraits</option>
+                        </select>
+
+                        {/* Status Filter */}
+                        <select
+                          value={txFilterStatus}
+                          onChange={(e) => setTxFilterStatus(e.target.value as typeof txFilterStatus)}
+                          className="border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-gray-300"
+                        >
+                          <option value="all">🎯 Statut: Tous</option>
+                          <option value="successful">✓ Succès</option>
+                          <option value="failed">✗ Échecs</option>
+                          <option value="pending">⏳ En attente</option>
+                        </select>
+
+                        {/* Period Filter */}
+                        <select
+                          value={txFilterPeriod}
+                          onChange={(e) => setTxFilterPeriod(e.target.value as typeof txFilterPeriod)}
+                          className="border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-gray-300"
+                        >
+                          <option value="all">📅 Période: Toutes</option>
+                          <option value="today">Aujourd&apos;hui</option>
+                          <option value="7d">7 derniers jours</option>
+                          <option value="30d">30 derniers jours</option>
+                        </select>
+
+                        {/* Amount Filter */}
+                        <select
+                          value={txFilterAmount}
+                          onChange={(e) => setTxFilterAmount(e.target.value as typeof txFilterAmount)}
+                          className="border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-gray-300"
+                        >
+                          <option value="all">💰 Montant: Tous</option>
+                          <option value="small">&lt; 500$</option>
+                          <option value="medium">500$ - 1000$</option>
+                          <option value="large">&gt; 1000$</option>
+                        </select>
+                      </div>
+
+                      {/* Sort - Full Width Below */}
+                      <div className="mt-3">
+                        <select
+                          value={txSortBy}
+                          onChange={(e) => setTxSortBy(e.target.value as typeof txSortBy)}
+                          className="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-gray-300"
+                        >
+                          <option value="recent">🔽 Tri: Plus récents</option>
+                          <option value="oldest">🔼 Plus anciens</option>
+                          <option value="amount-high">💵 Montant décroissant</option>
+                          <option value="amount-low">💰 Montant croissant</option>
+                        </select>
+                      </div>
                     </div>
 
                     {/* Results Count */}
-                    <div className="px-6 py-2 bg-gray-50 border-t border-gray-100">
+                    <div className="mt-3 text-center">
                       <span className="text-xs text-gray-500 font-medium">
                         {(() => {
                           const filtered = getFilteredTransactions()
