@@ -695,231 +695,57 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    {/* Button-Based Filters */}
-                    <div className="bg-white rounded-lg p-4 shadow-sm space-y-4">
-                      {/* Type Filter */}
-                      <div>
-                        <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2 block">Type</label>
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={() => setTxFilterType('all')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterType === 'all'
-                                ? 'bg-[#00874e] text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            Toutes
-                          </button>
-                          <button
-                            onClick={() => setTxFilterType('deposits')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterType === 'deposits'
-                                ? 'bg-[#00874e] text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            Dépôts
-                          </button>
-                          <button
-                            onClick={() => setTxFilterType('withdrawals')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterType === 'withdrawals'
-                                ? 'bg-[#00874e] text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            Retraits
-                          </button>
-                        </div>
-                      </div>
+                    {/* Compact Filters - Single Line */}
+                    <div className="bg-white rounded-lg px-4 py-3 shadow-sm">
+                      <div className="flex items-center gap-6">
+                        <span className="text-xs font-medium text-gray-600">Filtres:</span>
 
-                      {/* Status Filter */}
-                      <div>
-                        <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2 block">Statut</label>
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={() => setTxFilterStatus('all')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterStatus === 'all'
-                                ? 'bg-[#00874e] text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            Tous
-                          </button>
-                          <button
-                            onClick={() => setTxFilterStatus('successful')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterStatus === 'successful'
-                                ? 'bg-green-600 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            Succès
-                          </button>
-                          <button
-                            onClick={() => setTxFilterStatus('failed')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterStatus === 'failed'
-                                ? 'bg-red-600 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            Échecs
-                          </button>
-                          <button
-                            onClick={() => setTxFilterStatus('pending')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterStatus === 'pending'
-                                ? 'bg-yellow-600 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            En attente
-                          </button>
-                        </div>
-                      </div>
+                        {/* Type Select */}
+                        <select
+                          value={txFilterType}
+                          onChange={(e) => setTxFilterType(e.target.value as typeof txFilterType)}
+                          className="border border-gray-200 bg-white text-gray-700 px-3 py-1.5 text-xs rounded hover:border-gray-300 focus:border-emerald-500 focus:outline-none transition-colors"
+                        >
+                          <option value="all">Toutes</option>
+                          <option value="deposits">Dépôts</option>
+                          <option value="withdrawals">Retraits</option>
+                        </select>
 
-                      {/* Period Filter */}
-                      <div>
-                        <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2 block">Période</label>
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={() => setTxFilterPeriod('all')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterPeriod === 'all'
-                                ? 'bg-[#00874e] text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            Toutes
-                          </button>
-                          <button
-                            onClick={() => setTxFilterPeriod('today')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterPeriod === 'today'
-                                ? 'bg-blue-600 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            Aujourd&apos;hui
-                          </button>
-                          <button
-                            onClick={() => setTxFilterPeriod('7d')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterPeriod === '7d'
-                                ? 'bg-blue-600 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            7 jours
-                          </button>
-                          <button
-                            onClick={() => setTxFilterPeriod('30d')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterPeriod === '30d'
-                                ? 'bg-blue-600 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            30 jours
-                          </button>
-                        </div>
-                      </div>
+                        {/* Status Select */}
+                        <select
+                          value={txFilterStatus}
+                          onChange={(e) => setTxFilterStatus(e.target.value as typeof txFilterStatus)}
+                          className="border border-gray-200 bg-white text-gray-700 px-3 py-1.5 text-xs rounded hover:border-gray-300 focus:border-emerald-500 focus:outline-none transition-colors"
+                        >
+                          <option value="all">Tous</option>
+                          <option value="successful">Succès</option>
+                          <option value="failed">Échecs</option>
+                          <option value="pending">En attente</option>
+                        </select>
 
-                      {/* Amount Filter */}
-                      <div>
-                        <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2 block">Montant</label>
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={() => setTxFilterAmount('all')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterAmount === 'all'
-                                ? 'bg-[#00874e] text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            Tous
-                          </button>
-                          <button
-                            onClick={() => setTxFilterAmount('small')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterAmount === 'small'
-                                ? 'bg-purple-600 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            &lt; 500$
-                          </button>
-                          <button
-                            onClick={() => setTxFilterAmount('medium')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterAmount === 'medium'
-                                ? 'bg-purple-600 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            500$ - 1000$
-                          </button>
-                          <button
-                            onClick={() => setTxFilterAmount('large')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txFilterAmount === 'large'
-                                ? 'bg-purple-600 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            &gt; 1000$
-                          </button>
-                        </div>
-                      </div>
+                        {/* Period Select */}
+                        <select
+                          value={txFilterPeriod}
+                          onChange={(e) => setTxFilterPeriod(e.target.value as typeof txFilterPeriod)}
+                          className="border border-gray-200 bg-white text-gray-700 px-3 py-1.5 text-xs rounded hover:border-gray-300 focus:border-emerald-500 focus:outline-none transition-colors"
+                        >
+                          <option value="all">Toutes</option>
+                          <option value="today">Aujourd&apos;hui</option>
+                          <option value="7d">7 jours</option>
+                          <option value="30d">30 jours</option>
+                        </select>
 
-                      {/* Sort Filter */}
-                      <div>
-                        <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2 block">Tri</label>
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={() => setTxSortBy('recent')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txSortBy === 'recent'
-                                ? 'bg-[#00874e] text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            Plus récents
-                          </button>
-                          <button
-                            onClick={() => setTxSortBy('oldest')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txSortBy === 'oldest'
-                                ? 'bg-gray-700 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            Plus anciens
-                          </button>
-                          <button
-                            onClick={() => setTxSortBy('amount-high')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txSortBy === 'amount-high'
-                                ? 'bg-gray-700 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            Montant ↓
-                          </button>
-                          <button
-                            onClick={() => setTxSortBy('amount-low')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              txSortBy === 'amount-low'
-                                ? 'bg-gray-700 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            Montant ↑
-                          </button>
-                        </div>
+                        {/* Amount Select */}
+                        <select
+                          value={txFilterAmount}
+                          onChange={(e) => setTxFilterAmount(e.target.value as typeof txFilterAmount)}
+                          className="border border-gray-200 bg-white text-gray-700 px-3 py-1.5 text-xs rounded hover:border-gray-300 focus:border-emerald-500 focus:outline-none transition-colors"
+                        >
+                          <option value="all">Tous</option>
+                          <option value="small">&lt; 500$</option>
+                          <option value="medium">500$ - 1000$</option>
+                          <option value="large">&gt; 1000$</option>
+                        </select>
                       </div>
                     </div>
 
