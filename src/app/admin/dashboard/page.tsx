@@ -20,6 +20,10 @@ interface Message {
   lu: boolean
   status: string
   reference: string
+  assigned_to?: string
+  assigned_at?: string
+  assigned_by?: string
+  system_responded?: boolean
   client_ip?: string
   client_user_agent?: string
   client_device?: string
@@ -171,6 +175,16 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [stats, setStats] = useState({ total: 0, nonLus: 0 })
+  const [messageStats, setMessageStats] = useState({
+    total: 0,
+    assigned: 0,
+    unassigned: 0,
+    withSystemResponse: 0,
+    withoutSystemResponse: 0,
+    read: 0,
+    unread: 0,
+    byColleague: {} as Record<string, number>
+  })
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [selectedView, setSelectedView] = useState<'dashboard' | 'messages' | 'vopay' | 'margill'>('dashboard')
   const [vopayLoading, setVopayLoading] = useState(false)
@@ -258,6 +272,50 @@ export default function AdminDashboard() {
     setMessageNotes([])
   }
 
+  const fetchMessageStats = async () => {
+    try {
+      const res = await fetch('/api/admin/messages/assign/stats', { credentials: 'include' })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.success && data.stats) {
+          setMessageStats(data.stats)
+        }
+      }
+    } catch (error) {
+      console.error('Erreur stats:', error)
+    }
+  }
+
+  const assignMessage = async (messageId: string, assignTo: string) => {
+    try {
+      const res = await fetch('/api/admin/messages/assign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ messageId, assignTo })
+      })
+
+      if (res.ok) {
+        // Rafraîchir les données
+        await Promise.all([fetchMessages(), fetchMessageStats()])
+
+        // Mettre à jour le message sélectionné si c'est le même
+        if (selectedMessage && selectedMessage.id === messageId) {
+          const updatedMessage = messages.find(m => m.id === messageId)
+          if (updatedMessage) {
+            setSelectedMessage({
+              ...updatedMessage,
+              assigned_to: assignTo === 'Unassigned' ? undefined : assignTo,
+              assigned_at: new Date().toISOString()
+            })
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Erreur assignation:', error)
+    }
+  }
+
   const fetchVopayData = async () => {
     setVopayLoading(true)
     setVopayError(null)
@@ -299,10 +357,12 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchMessages()
+    fetchMessageStats()
     fetchVopayData()
     fetchWebhookStats()
     const interval = setInterval(() => {
       fetchMessages()
+      fetchMessageStats()
       fetchWebhookStats()
     }, 30000)
     return () => clearInterval(interval)
@@ -773,13 +833,98 @@ export default function AdminDashboard() {
                   <p className="text-gray-600 mt-2 ml-7 font-medium">{stats.total} message(s) au total</p>
                 </div>
                 <button
-                  onClick={fetchMessages}
+                  onClick={() => { fetchMessages(); fetchMessageStats(); }}
                   className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-all shadow-sm hover:shadow hover:scale-105"
                 >
                   <RefreshCw size={16} />
                   Actualiser
                 </button>
               </div>
+
+              {/* Statistiques Messages */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {/* Total Messages */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                      <MessageSquare size={20} className="text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Total</p>
+                      <p className="text-2xl font-bold text-gray-900">{messageStats.total}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Avec Réponse Système */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                      <CheckCircle size={20} className="text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Avec réponse</p>
+                      <p className="text-2xl font-bold text-gray-900">{messageStats.withSystemResponse}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sans Réponse Système */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center">
+                      <XCircle size={20} className="text-red-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Sans réponse</p>
+                      <p className="text-2xl font-bold text-gray-900">{messageStats.withoutSystemResponse}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Non Lus */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+                      <Bell size={20} className="text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Non lus</p>
+                      <p className="text-2xl font-bold text-gray-900">{messageStats.unread}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Assignations par Collègue */}
+              {(messageStats.byColleague.Sandra || messageStats.byColleague.Michel) && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <Users size={16} />
+                    Assignations
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center justify-between p-3 bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center text-white text-xs font-bold">
+                          S
+                        </div>
+                        <span className="font-medium text-gray-900">Sandra</span>
+                      </div>
+                      <span className="text-2xl font-bold text-pink-600">{messageStats.byColleague.Sandra || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold">
+                          M
+                        </div>
+                        <span className="font-medium text-gray-900">Michel</span>
+                      </div>
+                      <span className="text-2xl font-bold text-indigo-600">{messageStats.byColleague.Michel || 0}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="divide-y divide-gray-100">
@@ -801,6 +946,27 @@ export default function AdminDashboard() {
                               <span className="text-xs px-2 py-1 rounded-lg bg-gray-100 text-gray-500 font-mono font-semibold">#{msg.reference}</span>
                               {!msg.lu && (
                                 <span className="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold shadow-sm">Nouveau</span>
+                              )}
+                              {msg.system_responded ? (
+                                <span className="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-green-100 to-green-200 text-green-700 font-semibold flex items-center gap-1">
+                                  <CheckCircle size={12} />
+                                  Répondu
+                                </span>
+                              ) : (
+                                <span className="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-amber-100 to-amber-200 text-amber-700 font-semibold flex items-center gap-1">
+                                  <Clock size={12} />
+                                  En attente
+                                </span>
+                              )}
+                              {msg.assigned_to && (
+                                <span className={`text-xs px-2 py-1 rounded-full font-semibold flex items-center gap-1 ${
+                                  msg.assigned_to === 'Sandra'
+                                    ? 'bg-gradient-to-r from-pink-100 to-pink-200 text-pink-700'
+                                    : 'bg-gradient-to-r from-indigo-100 to-indigo-200 text-indigo-700'
+                                }`}>
+                                  <User size={12} />
+                                  {msg.assigned_to}
+                                </span>
                               )}
                             </div>
                             {/* Option Badge */}
@@ -904,6 +1070,101 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Assignation et Réponse Système */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+                      <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <Users size={14} />
+                        Gestion du Message
+                      </h3>
+
+                      {/* Statut Réponse Système */}
+                      <div className="mb-4 p-3 bg-white rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600 font-medium">Réponse Système</span>
+                          {selectedMessage.system_responded ? (
+                            <span className="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-green-100 to-green-200 text-green-700 font-semibold flex items-center gap-1">
+                              <CheckCircle size={14} />
+                              Envoyée
+                            </span>
+                          ) : (
+                            <span className="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-amber-100 to-amber-200 text-amber-700 font-semibold flex items-center gap-1">
+                              <Clock size={14} />
+                              En attente
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Assignation Actuelle */}
+                      {selectedMessage.assigned_to && (
+                        <div className="mb-4 p-3 bg-white rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600 font-medium">Assigné à</span>
+                            <span className={`text-sm px-3 py-1 rounded-full font-semibold flex items-center gap-1 ${
+                              selectedMessage.assigned_to === 'Sandra'
+                                ? 'bg-gradient-to-r from-pink-100 to-pink-200 text-pink-700'
+                                : 'bg-gradient-to-r from-indigo-100 to-indigo-200 text-indigo-700'
+                            }`}>
+                              <User size={14} />
+                              {selectedMessage.assigned_to}
+                            </span>
+                          </div>
+                          {selectedMessage.assigned_at && (
+                            <p className="text-xs text-gray-500 mt-2">
+                              Assigné le {new Date(selectedMessage.assigned_at).toLocaleString('fr-CA')}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Boutons d'Assignation */}
+                      <div className="space-y-2">
+                        <p className="text-xs text-gray-600 font-medium mb-3">Assigner à un collègue:</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => assignMessage(selectedMessage.id, 'Sandra')}
+                            disabled={selectedMessage.assigned_to === 'Sandra'}
+                            className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all ${
+                              selectedMessage.assigned_to === 'Sandra'
+                                ? 'bg-pink-200 text-pink-800 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-pink-500 to-pink-600 text-white hover:from-pink-600 hover:to-pink-700 shadow-md hover:shadow-lg transform hover:scale-105'
+                            }`}
+                          >
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-xs font-bold">
+                                S
+                              </div>
+                              Sandra
+                            </div>
+                          </button>
+                          <button
+                            onClick={() => assignMessage(selectedMessage.id, 'Michel')}
+                            disabled={selectedMessage.assigned_to === 'Michel'}
+                            className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all ${
+                              selectedMessage.assigned_to === 'Michel'
+                                ? 'bg-indigo-200 text-indigo-800 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-indigo-700 shadow-md hover:shadow-lg transform hover:scale-105'
+                            }`}
+                          >
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-xs font-bold">
+                                M
+                              </div>
+                              Michel
+                            </div>
+                          </button>
+                        </div>
+                        {selectedMessage.assigned_to && (
+                          <button
+                            onClick={() => assignMessage(selectedMessage.id, 'Unassigned')}
+                            className="w-full px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 transition-all"
+                          >
+                            Retirer l'assignation
+                          </button>
+                        )}
                       </div>
                     </div>
 

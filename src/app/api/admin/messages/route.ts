@@ -117,6 +117,11 @@ export async function GET(request: NextRequest) {
       lu: m.lu,
       status: m.status || (m.lu ? 'traite' : 'nouveau'),
       reference: generateReference(m.id),
+      // Assignation et réponse système
+      assigned_to: m.assigned_to,
+      assigned_at: m.assigned_at,
+      assigned_by: m.assigned_by,
+      system_responded: m.system_responded || false,
       // Métriques de connexion client
       client_ip: m.client_ip,
       client_user_agent: m.client_user_agent,
