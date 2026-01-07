@@ -861,97 +861,127 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
-              {/* Statistiques Messages - Grid de 4 cartes */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              {/* Statistiques Messages - Ligne fluide avec 5 cartes */}
+              <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
                 {/* Tous */}
                 <button
                   onClick={() => changeMessageFilter('all')}
-                  className={`bg-white rounded-xl p-5 border-2 transition-all hover:shadow-lg ${
-                    messageFilter === 'all' ? 'border-blue-500 shadow-lg' : 'border-gray-100 hover:border-blue-200'
+                  className={`min-w-[180px] rounded-2xl p-5 transition-all hover:shadow-xl hover:scale-105 ${
+                    messageFilter === 'all'
+                      ? 'bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 shadow-lg'
+                      : 'bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      messageFilter === 'all' ? 'bg-gradient-to-br from-blue-500 to-blue-600' : 'bg-blue-100'
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      messageFilter === 'all' ? 'bg-white/30' : 'bg-blue-300'
                     }`}>
-                      <MessageSquare size={24} className={messageFilter === 'all' ? 'text-white' : 'text-blue-600'} />
+                      <MessageSquare size={20} className={messageFilter === 'all' ? 'text-white' : 'text-blue-700'} />
                     </div>
+                    <p className={`text-3xl font-bold ${messageFilter === 'all' ? 'text-white' : 'text-blue-900'}`}>
+                      {messageStats.totalDuMois}
+                    </p>
                   </div>
-                  <p className="text-3xl font-bold text-gray-900 mb-1">{messageStats.totalDuMois}</p>
-                  <p className="text-sm font-medium text-gray-600">Tous</p>
+                  <p className={`text-sm font-semibold ${messageFilter === 'all' ? 'text-white' : 'text-blue-700'}`}>
+                    Tous
+                  </p>
                 </button>
 
                 {/* Réponses Envoyées */}
                 <button
                   onClick={() => changeMessageFilter(messageFilter === 'reponses' ? 'all' : 'reponses')}
-                  className={`bg-white rounded-xl p-5 border-2 transition-all hover:shadow-lg ${
-                    messageFilter === 'reponses' ? 'border-green-500 shadow-lg' : 'border-gray-100 hover:border-green-200'
+                  className={`min-w-[200px] rounded-2xl p-5 transition-all hover:shadow-xl hover:scale-105 ${
+                    messageFilter === 'reponses'
+                      ? 'bg-gradient-to-br from-green-400 via-green-500 to-green-600 shadow-lg'
+                      : 'bg-gradient-to-br from-green-50 via-green-100 to-green-200'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      messageFilter === 'reponses' ? 'bg-gradient-to-br from-green-500 to-green-600' : 'bg-green-100'
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      messageFilter === 'reponses' ? 'bg-white/30' : 'bg-green-300'
                     }`}>
-                      <CheckCircle size={24} className={messageFilter === 'reponses' ? 'text-white' : 'text-green-600'} />
+                      <CheckCircle size={20} className={messageFilter === 'reponses' ? 'text-white' : 'text-green-700'} />
                     </div>
+                    <p className={`text-3xl font-bold ${messageFilter === 'reponses' ? 'text-white' : 'text-green-900'}`}>
+                      {messageStats.reponsesEnvoyees}
+                    </p>
                   </div>
-                  <p className="text-3xl font-bold text-gray-900 mb-1">{messageStats.reponsesEnvoyees}</p>
-                  <p className="text-sm font-medium text-gray-600">Réponses envoyées</p>
+                  <p className={`text-sm font-semibold ${messageFilter === 'reponses' ? 'text-white' : 'text-green-700'}`}>
+                    Réponses envoyées
+                  </p>
                 </button>
 
                 {/* Sandra */}
                 <button
                   onClick={() => changeMessageFilter(messageFilter === 'sandra' ? 'all' : 'sandra')}
-                  className={`bg-white rounded-xl p-5 border-2 transition-all hover:shadow-lg ${
-                    messageFilter === 'sandra' ? 'border-pink-500 shadow-lg' : 'border-gray-100 hover:border-pink-200'
+                  className={`min-w-[180px] rounded-2xl p-5 transition-all hover:shadow-xl hover:scale-105 ${
+                    messageFilter === 'sandra'
+                      ? 'bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 shadow-lg'
+                      : 'bg-gradient-to-br from-pink-50 via-pink-100 to-pink-200'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      messageFilter === 'sandra' ? 'bg-gradient-to-br from-pink-500 to-pink-600' : 'bg-pink-100'
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      messageFilter === 'sandra' ? 'bg-white/30' : 'bg-pink-300'
                     }`}>
-                      <User size={24} className={messageFilter === 'sandra' ? 'text-white' : 'text-pink-600'} />
+                      <User size={20} className={messageFilter === 'sandra' ? 'text-white' : 'text-pink-700'} />
                     </div>
+                    <p className={`text-3xl font-bold ${messageFilter === 'sandra' ? 'text-white' : 'text-pink-900'}`}>
+                      {messageStats.acheminesSandra}
+                    </p>
                   </div>
-                  <p className="text-3xl font-bold text-gray-900 mb-1">{messageStats.acheminesSandra}</p>
-                  <p className="text-sm font-medium text-gray-600">Sandra</p>
+                  <p className={`text-sm font-semibold ${messageFilter === 'sandra' ? 'text-white' : 'text-pink-700'}`}>
+                    Sandra
+                  </p>
                 </button>
 
                 {/* Michel */}
                 <button
                   onClick={() => changeMessageFilter(messageFilter === 'michel' ? 'all' : 'michel')}
-                  className={`bg-white rounded-xl p-5 border-2 transition-all hover:shadow-lg ${
-                    messageFilter === 'michel' ? 'border-indigo-500 shadow-lg' : 'border-gray-100 hover:border-indigo-200'
+                  className={`min-w-[180px] rounded-2xl p-5 transition-all hover:shadow-xl hover:scale-105 ${
+                    messageFilter === 'michel'
+                      ? 'bg-gradient-to-br from-indigo-400 via-indigo-500 to-indigo-600 shadow-lg'
+                      : 'bg-gradient-to-br from-indigo-50 via-indigo-100 to-indigo-200'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      messageFilter === 'michel' ? 'bg-gradient-to-br from-indigo-500 to-indigo-600' : 'bg-indigo-100'
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      messageFilter === 'michel' ? 'bg-white/30' : 'bg-indigo-300'
                     }`}>
-                      <User size={24} className={messageFilter === 'michel' ? 'text-white' : 'text-indigo-600'} />
+                      <User size={20} className={messageFilter === 'michel' ? 'text-white' : 'text-indigo-700'} />
                     </div>
+                    <p className={`text-3xl font-bold ${messageFilter === 'michel' ? 'text-white' : 'text-indigo-900'}`}>
+                      {messageStats.acheminesMichel}
+                    </p>
                   </div>
-                  <p className="text-3xl font-bold text-gray-900 mb-1">{messageStats.acheminesMichel}</p>
-                  <p className="text-sm font-medium text-gray-600">Michel</p>
+                  <p className={`text-sm font-semibold ${messageFilter === 'michel' ? 'text-white' : 'text-indigo-700'}`}>
+                    Michel
+                  </p>
                 </button>
 
                 {/* Non Acheminés (si > 0) */}
                 {messageStats.nonAchemines > 0 && (
                   <button
                     onClick={() => changeMessageFilter(messageFilter === 'none' ? 'all' : 'none')}
-                    className={`bg-white rounded-xl p-5 border-2 transition-all hover:shadow-lg ${
-                      messageFilter === 'none' ? 'border-amber-500 shadow-lg' : 'border-gray-100 hover:border-amber-200'
+                    className={`min-w-[200px] rounded-2xl p-5 transition-all hover:shadow-xl hover:scale-105 ${
+                      messageFilter === 'none'
+                        ? 'bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 shadow-lg'
+                        : 'bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                        messageFilter === 'none' ? 'bg-gradient-to-br from-amber-500 to-amber-600' : 'bg-amber-100'
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                        messageFilter === 'none' ? 'bg-white/30' : 'bg-amber-300'
                       }`}>
-                        <AlertTriangle size={24} className={messageFilter === 'none' ? 'text-white' : 'text-amber-600'} />
+                        <AlertTriangle size={20} className={messageFilter === 'none' ? 'text-white' : 'text-amber-700'} />
                       </div>
+                      <p className={`text-3xl font-bold ${messageFilter === 'none' ? 'text-white' : 'text-amber-900'}`}>
+                        {messageStats.nonAchemines}
+                      </p>
                     </div>
-                    <p className="text-3xl font-bold text-gray-900 mb-1">{messageStats.nonAchemines}</p>
-                    <p className="text-sm font-medium text-gray-600">Non acheminés</p>
+                    <p className={`text-sm font-semibold ${messageFilter === 'none' ? 'text-white' : 'text-amber-700'}`}>
+                      Non acheminés
+                    </p>
                   </button>
                 )}
               </div>
