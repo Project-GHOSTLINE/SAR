@@ -621,7 +621,7 @@ export default function AdminDashboard() {
                           {/* Type Chip */}
                           {txFilterType !== 'all' && (
                             <span className="inline-flex items-center gap-1.5 bg-[#e8f5e9] text-[#00874e] px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
-                              📊 {txFilterType === 'deposits' ? 'Dépôts' : 'Retraits'}
+                              {txFilterType === 'deposits' ? 'Dépôts' : 'Retraits'}
                               <button
                                 onClick={() => setTxFilterType('all')}
                                 className="hover:bg-[#00874e]/10 rounded-full p-0.5"
@@ -638,11 +638,9 @@ export default function AdminDashboard() {
                               txFilterStatus === 'failed' ? 'bg-red-100 text-red-700' :
                               'bg-yellow-100 text-yellow-700'
                             }`}>
-                              {txFilterStatus === 'successful' ? '✓' : txFilterStatus === 'failed' ? '✗' : '⏳'} {
-                                txFilterStatus === 'successful' ? 'Succès' :
+                              {txFilterStatus === 'successful' ? 'Succès' :
                                 txFilterStatus === 'failed' ? 'Échecs' :
-                                'En attente'
-                              }
+                                'En attente'}
                               <button
                                 onClick={() => setTxFilterStatus('all')}
                                 className="hover:bg-black/5 rounded-full p-0.5"
@@ -655,7 +653,7 @@ export default function AdminDashboard() {
                           {/* Period Chip */}
                           {txFilterPeriod !== 'all' && (
                             <span className="inline-flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
-                              📅 {txFilterPeriod === 'today' ? "Aujourd'hui" : txFilterPeriod === '7d' ? '7 jours' : '30 jours'}
+                              {txFilterPeriod === 'today' ? "Aujourd'hui" : txFilterPeriod === '7d' ? '7 jours' : '30 jours'}
                               <button
                                 onClick={() => setTxFilterPeriod('all')}
                                 className="hover:bg-blue-200 rounded-full p-0.5"
@@ -668,11 +666,9 @@ export default function AdminDashboard() {
                           {/* Amount Chip */}
                           {txFilterAmount !== 'all' && (
                             <span className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
-                              💰 {
-                                txFilterAmount === 'small' ? '< 500$' :
+                              {txFilterAmount === 'small' ? '< 500$' :
                                 txFilterAmount === 'medium' ? '500-1000$' :
-                                '> 1000$'
-                              }
+                                '> 1000$'}
                               <button
                                 onClick={() => setTxFilterAmount('all')}
                                 className="hover:bg-purple-200 rounded-full p-0.5"
@@ -685,11 +681,9 @@ export default function AdminDashboard() {
                           {/* Sort Chip */}
                           {txSortBy !== 'recent' && (
                             <span className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
-                              🔽 {
-                                txSortBy === 'oldest' ? 'Plus anciens' :
+                              {txSortBy === 'oldest' ? 'Plus anciens' :
                                 txSortBy === 'amount-high' ? 'Montant ↓' :
-                                'Montant ↑'
-                              }
+                                'Montant ↑'}
                               <button
                                 onClick={() => setTxSortBy('recent')}
                                 className="hover:bg-gray-200 rounded-full p-0.5"
@@ -710,9 +704,9 @@ export default function AdminDashboard() {
                           onChange={(e) => setTxFilterType(e.target.value as typeof txFilterType)}
                           className="border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-gray-300"
                         >
-                          <option value="all">📊 Type: Toutes</option>
-                          <option value="deposits">📥 Dépôts</option>
-                          <option value="withdrawals">📤 Retraits</option>
+                          <option value="all">Type: Toutes</option>
+                          <option value="deposits">Dépôts</option>
+                          <option value="withdrawals">Retraits</option>
                         </select>
 
                         {/* Status Filter */}
@@ -721,10 +715,10 @@ export default function AdminDashboard() {
                           onChange={(e) => setTxFilterStatus(e.target.value as typeof txFilterStatus)}
                           className="border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-gray-300"
                         >
-                          <option value="all">🎯 Statut: Tous</option>
-                          <option value="successful">✓ Succès</option>
-                          <option value="failed">✗ Échecs</option>
-                          <option value="pending">⏳ En attente</option>
+                          <option value="all">Statut: Tous</option>
+                          <option value="successful">Succès</option>
+                          <option value="failed">Échecs</option>
+                          <option value="pending">En attente</option>
                         </select>
 
                         {/* Period Filter */}
@@ -733,7 +727,7 @@ export default function AdminDashboard() {
                           onChange={(e) => setTxFilterPeriod(e.target.value as typeof txFilterPeriod)}
                           className="border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-gray-300"
                         >
-                          <option value="all">📅 Période: Toutes</option>
+                          <option value="all">Période: Toutes</option>
                           <option value="today">Aujourd&apos;hui</option>
                           <option value="7d">7 derniers jours</option>
                           <option value="30d">30 derniers jours</option>
@@ -745,7 +739,7 @@ export default function AdminDashboard() {
                           onChange={(e) => setTxFilterAmount(e.target.value as typeof txFilterAmount)}
                           className="border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-gray-300"
                         >
-                          <option value="all">💰 Montant: Tous</option>
+                          <option value="all">Montant: Tous</option>
                           <option value="small">&lt; 500$</option>
                           <option value="medium">500$ - 1000$</option>
                           <option value="large">&gt; 1000$</option>
@@ -759,10 +753,10 @@ export default function AdminDashboard() {
                           onChange={(e) => setTxSortBy(e.target.value as typeof txSortBy)}
                           className="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-gray-300"
                         >
-                          <option value="recent">🔽 Tri: Plus récents</option>
-                          <option value="oldest">🔼 Plus anciens</option>
-                          <option value="amount-high">💵 Montant décroissant</option>
-                          <option value="amount-low">💰 Montant croissant</option>
+                          <option value="recent">Tri: Plus récents</option>
+                          <option value="oldest">Plus anciens</option>
+                          <option value="amount-high">Montant décroissant</option>
+                          <option value="amount-low">Montant croissant</option>
                         </select>
                       </div>
                     </div>
