@@ -197,12 +197,8 @@ export default function AdminDashboard() {
   const [webhookStats, setWebhookStats] = useState<WebhookStats | null>(null)
   const [webhookStatsLoading, setWebhookStatsLoading] = useState(false)
 
-  // Filtres pour transactions récentes
-  const [txFilterType, setTxFilterType] = useState<'all' | 'deposits' | 'withdrawals'>('all')
-  const [txFilterStatus, setTxFilterStatus] = useState<'all' | 'successful' | 'failed' | 'pending'>('all')
-  const [txFilterPeriod, setTxFilterPeriod] = useState<'all' | 'today' | '7d' | '30d'>('all')
-  const [txFilterAmount, setTxFilterAmount] = useState<'all' | 'small' | 'medium' | 'large'>('all')
-  const [txSortBy, setTxSortBy] = useState<'recent' | 'oldest' | 'amount-high' | 'amount-low'>('recent')
+  // Vue pour transactions récentes
+  const [txView, setTxView] = useState<'all' | 'deposits' | 'withdrawals'>('all')
 
   useEffect(() => {
     // Initialiser l'heure côté client seulement pour éviter hydration mismatch
@@ -328,81 +324,6 @@ export default function AdminDashboard() {
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-  }
-
-  // Fonction pour filtrer et trier les transactions
-  const getFilteredTransactions = () => {
-    if (!webhookStats?.recentTransactions) return []
-
-    let filtered = [...webhookStats.recentTransactions]
-
-    // Filtre par type (dépôt/retrait)
-    if (txFilterType !== 'all') {
-      filtered = filtered.filter(tx => {
-        const type = tx.transaction_type?.toLowerCase() || ''
-        if (txFilterType === 'deposits') {
-          return type.includes('deposit') || type.includes('credit') || type.includes('eft_credit')
-        } else {
-          return type.includes('withdrawal') || type.includes('debit') || type.includes('eft_debit')
-        }
-      })
-    }
-
-    // Filtre par statut
-    if (txFilterStatus !== 'all') {
-      filtered = filtered.filter(tx => {
-        const status = tx.status?.toLowerCase() || ''
-        if (txFilterStatus === 'pending') {
-          return status === 'pending' || status === 'in progress'
-        }
-        return status === txFilterStatus
-      })
-    }
-
-    // Filtre par période
-    if (txFilterPeriod !== 'all') {
-      const now = new Date()
-      filtered = filtered.filter(tx => {
-        const txDate = new Date(tx.received_at)
-        if (txFilterPeriod === 'today') {
-          return txDate.toDateString() === now.toDateString()
-        } else if (txFilterPeriod === '7d') {
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-          return txDate >= weekAgo
-        } else if (txFilterPeriod === '30d') {
-          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-          return txDate >= monthAgo
-        }
-        return true
-      })
-    }
-
-    // Filtre par montant
-    if (txFilterAmount !== 'all') {
-      filtered = filtered.filter(tx => {
-        const amount = parseFloat(tx.transaction_amount) || 0
-        if (txFilterAmount === 'small') return amount < 500
-        if (txFilterAmount === 'medium') return amount >= 500 && amount <= 1000
-        if (txFilterAmount === 'large') return amount > 1000
-        return true
-      })
-    }
-
-    // Tri
-    filtered.sort((a, b) => {
-      if (txSortBy === 'recent') {
-        return new Date(b.received_at).getTime() - new Date(a.received_at).getTime()
-      } else if (txSortBy === 'oldest') {
-        return new Date(a.received_at).getTime() - new Date(b.received_at).getTime()
-      } else if (txSortBy === 'amount-high') {
-        return (parseFloat(b.transaction_amount) || 0) - (parseFloat(a.transaction_amount) || 0)
-      } else if (txSortBy === 'amount-low') {
-        return (parseFloat(a.transaction_amount) || 0) - (parseFloat(b.transaction_amount) || 0)
-      }
-      return 0
-    })
-
-    return filtered
   }
 
   return (
@@ -597,104 +518,41 @@ export default function AdminDashboard() {
                   </button>
                 </div>
 
-                {/* Filters Section */}
+                {/* View Buttons */}
                 {webhookStats?.recentTransactions && webhookStats.recentTransactions.length > 0 && (
-                  <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
-                    {/* Active Filters Chips */}
-                    <div className={(txFilterType !== 'all' || txFilterStatus !== 'all' || txFilterPeriod !== 'all' || txFilterAmount !== 'all' || txSortBy !== 'recent') ? "no-transition bg-white rounded-lg p-3 mb-4 shadow-sm" : "hidden"}>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Filtres actifs</span>
-                          <button
-                            onClick={() => {
-                              setTxFilterType('all')
-                              setTxFilterStatus('all')
-                              setTxFilterPeriod('all')
-                              setTxFilterAmount('all')
-                              setTxSortBy('recent')
-                            }}
-                            className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                          >
-                            Tout effacer
-                          </button>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {/* Type Chip */}
-                          {txFilterType !== 'all' && (
-                            <span className="inline-flex items-center gap-1.5 bg-[#e8f5e9] text-[#00874e] px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
-                              {txFilterType === 'deposits' ? 'Dépôts' : 'Retraits'}
-                              <button
-                                onClick={() => setTxFilterType('all')}
-                                className="hover:bg-[#00874e]/10 rounded-full p-0.5"
-                              >
-                                <X size={14} />
-                              </button>
-                            </span>
-                          )}
-
-                          {/* Status Chip */}
-                          {txFilterStatus !== 'all' && (
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm ${
-                              txFilterStatus === 'successful' ? 'bg-green-100 text-green-700' :
-                              txFilterStatus === 'failed' ? 'bg-red-100 text-red-700' :
-                              'bg-yellow-100 text-yellow-700'
-                            }`}>
-                              {txFilterStatus === 'successful' ? 'Succès' :
-                                txFilterStatus === 'failed' ? 'Échecs' :
-                                'En attente'}
-                              <button
-                                onClick={() => setTxFilterStatus('all')}
-                                className="hover:bg-black/5 rounded-full p-0.5"
-                              >
-                                <X size={14} />
-                              </button>
-                            </span>
-                          )}
-
-                          {/* Period Chip */}
-                          {txFilterPeriod !== 'all' && (
-                            <span className="inline-flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
-                              {txFilterPeriod === 'today' ? "Aujourd'hui" : txFilterPeriod === '7d' ? '7 jours' : '30 jours'}
-                              <button
-                                onClick={() => setTxFilterPeriod('all')}
-                                className="hover:bg-blue-200 rounded-full p-0.5"
-                              >
-                                <X size={14} />
-                              </button>
-                            </span>
-                          )}
-
-                          {/* Amount Chip */}
-                          {txFilterAmount !== 'all' && (
-                            <span className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
-                              {txFilterAmount === 'small' ? '< 500$' :
-                                txFilterAmount === 'medium' ? '500-1000$' :
-                                '> 1000$'}
-                              <button
-                                onClick={() => setTxFilterAmount('all')}
-                                className="hover:bg-purple-200 rounded-full p-0.5"
-                              >
-                                <X size={14} />
-                              </button>
-                            </span>
-                          )}
-
-                          {/* Sort Chip */}
-                          {txSortBy !== 'recent' && (
-                            <span className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
-                              {txSortBy === 'oldest' ? 'Plus anciens' :
-                                txSortBy === 'amount-high' ? 'Montant ↓' :
-                                'Montant ↑'}
-                              <button
-                                onClick={() => setTxSortBy('recent')}
-                                className="hover:bg-gray-200 rounded-full p-0.5"
-                              >
-                                <X size={14} />
-                              </button>
-                            </span>
-                          )}
-                        </div>
+                  <div className="px-6 py-3 bg-gray-50 border-b border-gray-100">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setTxView('all')}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                          txView === 'all'
+                            ? 'bg-[#00874e] text-white shadow-md'
+                            : 'bg-white text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        Tous
+                      </button>
+                      <button
+                        onClick={() => setTxView('deposits')}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                          txView === 'deposits'
+                            ? 'bg-emerald-600 text-white shadow-md'
+                            : 'bg-white text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        Entrées
+                      </button>
+                      <button
+                        onClick={() => setTxView('withdrawals')}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                          txView === 'withdrawals'
+                            ? 'bg-red-600 text-white shadow-md'
+                            : 'bg-white text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        Sorties
+                      </button>
                     </div>
-
                   </div>
                 )}
 
@@ -704,7 +562,24 @@ export default function AdminDashboard() {
                       <Loader2 size={24} className="animate-spin text-[#00874e] mx-auto" />
                     </div>
                   ) : webhookStats?.recentTransactions && webhookStats.recentTransactions.length > 0 ? (
-                    webhookStats.recentTransactions.slice(0, 20).map((tx: any, i: number) => {
+                    (() => {
+                      // Filtrer selon la vue active
+                      let filteredTx = webhookStats.recentTransactions
+
+                      if (txView !== 'all') {
+                        filteredTx = webhookStats.recentTransactions.filter((tx: any) => {
+                          const txType = (tx.transaction_type || '').toLowerCase()
+                          const isDeposit = txType.includes('deposit') || txType.includes('credit') || txType.includes('payment')
+                          const isWithdrawal = txType.includes('withdrawal') || txType.includes('reversal') || txType.includes('fee') || txType.includes('debit')
+
+                          if (txView === 'deposits') return isDeposit
+                          if (txView === 'withdrawals') return isWithdrawal
+                          return true
+                        })
+                      }
+
+                      // Limiter à 10 transactions
+                      return filteredTx.slice(0, 10).map((tx: any, i: number) => {
                         const status = tx.status.toLowerCase()
                         const isSuccessful = status === 'successful'
                         const isFailed = status === 'failed'
@@ -759,6 +634,7 @@ export default function AdminDashboard() {
                           </div>
                         )
                       })
+                    })()
                   ) : (
                     <div className="px-6 py-12 text-center">
                       <Activity size={48} className="text-gray-300 mx-auto mb-4" />
