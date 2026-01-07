@@ -1250,7 +1250,10 @@ export default function AdminDashboard() {
 
             {/* Panneau de details */}
             {selectedMessage && (
-              <div className="w-1/2 bg-white rounded-xl shadow-lg border border-gray-100 sticky top-24 h-fit max-h-[calc(100vh-120px)] overflow-auto">
+              <div
+                onClick={closeDetail}
+                className="w-1/2 bg-white rounded-xl shadow-lg border border-gray-100 sticky top-24 h-fit max-h-[calc(100vh-120px)] overflow-auto cursor-pointer"
+              >
                 {/* Header */}
                 <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex items-center justify-between sticky top-0 z-10 rounded-t-xl">
                   <h2 className="font-bold text-gray-900 flex items-center gap-2">
@@ -1258,7 +1261,10 @@ export default function AdminDashboard() {
                     Details du message
                   </h2>
                   <button
-                    onClick={closeDetail}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      closeDetail()
+                    }}
                     className="flex items-center gap-2 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-all hover:scale-105 border border-red-200 hover:border-red-300"
                   >
                     <X size={20} />
@@ -1293,7 +1299,11 @@ export default function AdminDashboard() {
                             <Mail size={18} className="text-[#00874e]" />
                             <div>
                               <p className="text-xs text-gray-500">Courriel</p>
-                              <a href={`mailto:${selectedMessage.email}`} className="text-gray-900 font-medium hover:text-[#00874e]">
+                              <a
+                                href={`mailto:${selectedMessage.email}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-gray-900 font-medium hover:text-[#00874e]"
+                              >
                                 {selectedMessage.email || 'Non fourni'}
                               </a>
                             </div>
@@ -1302,7 +1312,11 @@ export default function AdminDashboard() {
                             <Phone size={18} className="text-[#00874e]" />
                             <div>
                               <p className="text-xs text-gray-500">Telephone</p>
-                              <a href={`tel:${selectedMessage.telephone}`} className="text-gray-900 font-medium hover:text-[#00874e]">
+                              <a
+                                href={`tel:${selectedMessage.telephone}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-gray-900 font-medium hover:text-[#00874e]"
+                              >
                                 {selectedMessage.telephone || 'Non fourni'}
                               </a>
                             </div>
@@ -1370,7 +1384,10 @@ export default function AdminDashboard() {
                         <p className="text-xs text-gray-600 font-medium mb-3">Assigner à un collègue:</p>
                         <div className="grid grid-cols-2 gap-2">
                           <button
-                            onClick={() => assignMessage(selectedMessage.id, 'Sandra')}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              assignMessage(selectedMessage.id, 'Sandra')
+                            }}
                             disabled={selectedMessage.assigned_to === 'Sandra'}
                             className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all ${
                               selectedMessage.assigned_to === 'Sandra'
@@ -1386,7 +1403,10 @@ export default function AdminDashboard() {
                             </div>
                           </button>
                           <button
-                            onClick={() => assignMessage(selectedMessage.id, 'Michel')}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              assignMessage(selectedMessage.id, 'Michel')
+                            }}
                             disabled={selectedMessage.assigned_to === 'Michel'}
                             className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all ${
                               selectedMessage.assigned_to === 'Michel'
@@ -1404,7 +1424,10 @@ export default function AdminDashboard() {
                         </div>
                         {selectedMessage.assigned_to && (
                           <button
-                            onClick={() => assignMessage(selectedMessage.id, 'Unassigned')}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              assignMessage(selectedMessage.id, 'Unassigned')
+                            }}
                             className="w-full px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 transition-all"
                           >
                             Retirer l'assignation
