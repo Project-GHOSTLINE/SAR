@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
+    // Vérification de l'authentification admin
+    const authHeader = request.headers.get('cookie')
+    if (!authHeader?.includes('admin-session=')) {
+      return NextResponse.json(
+        { error: 'Non autorisé' },
+        { status: 401 }
+      )
+    }
+
     const supabase = getSupabase()
     if (!supabase) {
       return NextResponse.json(
