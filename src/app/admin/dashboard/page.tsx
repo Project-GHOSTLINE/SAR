@@ -695,73 +695,6 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    {/* Compact Filters - Single Line */}
-                    <div className="bg-white rounded-lg px-4 py-3 shadow-sm">
-                      <div className="flex items-center gap-6">
-                        <span className="text-xs font-medium text-gray-600">Filtres:</span>
-
-                        {/* Type Select */}
-                        <select
-                          value={txFilterType}
-                          onChange={(e) => setTxFilterType(e.target.value as typeof txFilterType)}
-                          className="border border-gray-200 bg-white text-gray-700 px-3 py-1.5 text-xs rounded hover:border-gray-300 focus:border-emerald-500 focus:outline-none transition-colors"
-                        >
-                          <option value="all">Toutes</option>
-                          <option value="deposits">Dépôts</option>
-                          <option value="withdrawals">Retraits</option>
-                        </select>
-
-                        {/* Status Select */}
-                        <select
-                          value={txFilterStatus}
-                          onChange={(e) => setTxFilterStatus(e.target.value as typeof txFilterStatus)}
-                          className="border border-gray-200 bg-white text-gray-700 px-3 py-1.5 text-xs rounded hover:border-gray-300 focus:border-emerald-500 focus:outline-none transition-colors"
-                        >
-                          <option value="all">Tous</option>
-                          <option value="successful">Succès</option>
-                          <option value="failed">Échecs</option>
-                          <option value="pending">En attente</option>
-                        </select>
-
-                        {/* Period Select */}
-                        <select
-                          value={txFilterPeriod}
-                          onChange={(e) => setTxFilterPeriod(e.target.value as typeof txFilterPeriod)}
-                          className="border border-gray-200 bg-white text-gray-700 px-3 py-1.5 text-xs rounded hover:border-gray-300 focus:border-emerald-500 focus:outline-none transition-colors"
-                        >
-                          <option value="all">Toutes</option>
-                          <option value="today">Aujourd&apos;hui</option>
-                          <option value="7d">7 jours</option>
-                          <option value="30d">30 jours</option>
-                        </select>
-
-                        {/* Amount Select */}
-                        <select
-                          value={txFilterAmount}
-                          onChange={(e) => setTxFilterAmount(e.target.value as typeof txFilterAmount)}
-                          className="border border-gray-200 bg-white text-gray-700 px-3 py-1.5 text-xs rounded hover:border-gray-300 focus:border-emerald-500 focus:outline-none transition-colors"
-                        >
-                          <option value="all">Tous</option>
-                          <option value="small">&lt; 500$</option>
-                          <option value="medium">500$ - 1000$</option>
-                          <option value="large">&gt; 1000$</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Results Count */}
-                    <div className="mt-3 text-center">
-                      <span className="text-xs text-gray-500 font-medium">
-                        {(() => {
-                          const filtered = getFilteredTransactions()
-                          const total = webhookStats?.recentTransactions?.length || 0
-                          if (filtered.length !== total) {
-                            return `${filtered.length} résultat(s) sur ${total} transactions`
-                          }
-                          return `${total} transaction(s)`
-                        })()}
-                      </span>
-                    </div>
                   </div>
                 )}
 
@@ -771,29 +704,23 @@ export default function AdminDashboard() {
                       <Loader2 size={24} className="animate-spin text-[#00874e] mx-auto" />
                     </div>
                   ) : webhookStats?.recentTransactions && webhookStats.recentTransactions.length > 0 ? (
-                    (() => {
-                      const filteredTransactions = getFilteredTransactions()
-
-                      if (filteredTransactions.length === 0) {
-                        return (
-                          <div className="px-6 py-12 text-center">
-                            <Search size={48} className="text-gray-300 mx-auto mb-4" />
-                            <p className="text-gray-500 font-medium mb-2">Aucun résultat</p>
-                            <p className="text-sm text-gray-400">
-                              Essayez de modifier vos filtres
-                            </p>
-                          </div>
-                        )
-                      }
-
-                      return filteredTransactions.slice(0, 10).map((tx: any, i: number) => {
+                    webhookStats.recentTransactions.slice(0, 20).map((tx: any, i: number) => {
                         const status = tx.status.toLowerCase()
                         const isSuccessful = status === 'successful'
                         const isFailed = status === 'failed'
                         const isPending = status === 'pending' || status === 'in progress'
 
+                        // Déterminer si c'est une entrée ou sortie
+                        const txType = (tx.transaction_type || '').toLowerCase()
+                        const isDeposit = txType.includes('deposit') || txType.includes('credit') || txType.includes('payment')
+                        const isWithdrawal = txType.includes('withdrawal') || txType.includes('reversal') || txType.includes('fee') || txType.includes('debit')
+
                         return (
-                          <div key={tx.id || i} className="px-6 py-4 flex items-center justify-between hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all duration-200 cursor-pointer group">
+                          <div key={tx.id || i} className={`px-6 py-4 flex items-center justify-between hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all duration-200 cursor-pointer group border-l-4 ${
+                            isDeposit ? 'border-l-emerald-500 bg-emerald-50/30' :
+                            isWithdrawal ? 'border-l-red-500 bg-red-50/30' :
+                            'border-l-gray-300'
+                          }`}>
                             <div className="flex items-center gap-4">
                               <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
                                 isSuccessful ? 'bg-gradient-to-br from-[#e8f5e9] to-emerald-100' :
@@ -832,7 +759,6 @@ export default function AdminDashboard() {
                           </div>
                         )
                       })
-                    })()
                   ) : (
                     <div className="px-6 py-12 text-center">
                       <Activity size={48} className="text-gray-300 mx-auto mb-4" />
