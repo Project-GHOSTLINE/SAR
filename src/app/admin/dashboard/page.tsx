@@ -214,7 +214,15 @@ export default function AdminDashboard() {
   const [txView, setTxView] = useState<'all' | 'deposits' | 'withdrawals'>('all')
 
   // Filtre pour messages stats
-  const [messageFilter, setMessageFilter] = useState<'all' | 'reponses' | 'sandra' | 'michel' | 'none' | 'no_response'>('all')
+  type MessageFilterType = 'all' | 'reponses' | 'sandra' | 'michel' | 'none' | 'no_response'
+  const [messageFilter, setMessageFilter] = useState<MessageFilterType>('all')
+  const [messageSubFilter, setMessageSubFilter] = useState<string | null>(null)
+
+  // Helper pour changer le filtre et réinitialiser le sous-filtre
+  const changeMessageFilter = (newFilter: MessageFilterType) => {
+    setMessageFilter(newFilter)
+    setMessageSubFilter(null) // Reset sub-filter when main filter changes
+  }
 
   useEffect(() => {
     // Initialiser l'heure côté client seulement pour éviter hydration mismatch
@@ -857,7 +865,7 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 {/* Total du Mois */}
                 <div
-                  onClick={() => setMessageFilter(messageFilter === 'all' ? 'all' : 'all')}
+                  onClick={() => changeMessageFilter('all')}
                   className={`bg-white rounded-xl shadow-sm border p-4 hover:shadow-md transition-all cursor-pointer ${
                     messageFilter === 'all' ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-100'
                   }`}
@@ -875,7 +883,7 @@ export default function AdminDashboard() {
 
                 {/* Réponses Envoyées */}
                 <div
-                  onClick={() => setMessageFilter(messageFilter === 'reponses' ? 'all' : 'reponses')}
+                  onClick={() => changeMessageFilter(messageFilter === 'reponses' ? 'all' : 'reponses')}
                   className={`bg-white rounded-xl shadow-sm border p-4 hover:shadow-md transition-all cursor-pointer ${
                     messageFilter === 'reponses' ? 'border-green-500 ring-2 ring-green-200' : 'border-gray-100'
                   }`}
@@ -893,7 +901,7 @@ export default function AdminDashboard() {
 
                 {/* Acheminés à Sandra */}
                 <div
-                  onClick={() => setMessageFilter(messageFilter === 'sandra' ? 'all' : 'sandra')}
+                  onClick={() => changeMessageFilter(messageFilter === 'sandra' ? 'all' : 'sandra')}
                   className={`bg-white rounded-xl shadow-sm border p-4 hover:shadow-md transition-all cursor-pointer ${
                     messageFilter === 'sandra' ? 'border-pink-500 ring-2 ring-pink-200' : 'border-gray-100'
                   }`}
@@ -911,7 +919,7 @@ export default function AdminDashboard() {
 
                 {/* Acheminés à Michel */}
                 <div
-                  onClick={() => setMessageFilter(messageFilter === 'michel' ? 'all' : 'michel')}
+                  onClick={() => changeMessageFilter(messageFilter === 'michel' ? 'all' : 'michel')}
                   className={`bg-white rounded-xl shadow-sm border p-4 hover:shadow-md transition-all cursor-pointer ${
                     messageFilter === 'michel' ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-gray-100'
                   }`}
@@ -931,7 +939,7 @@ export default function AdminDashboard() {
               {/* Non Acheminés (si > 0) */}
               {messageStats.nonAchemines > 0 && (
                 <div
-                  onClick={() => setMessageFilter(messageFilter === 'none' ? 'all' : 'none')}
+                  onClick={() => changeMessageFilter(messageFilter === 'none' ? 'all' : 'none')}
                   className={`bg-amber-50 border rounded-xl p-4 mb-6 cursor-pointer transition-all hover:shadow-md ${
                     messageFilter === 'none' ? 'border-amber-500 ring-2 ring-amber-200' : 'border-amber-200'
                   }`}
@@ -954,7 +962,7 @@ export default function AdminDashboard() {
               {/* Réponses Non Envoyées (si > 0) */}
               {messageStats.reponsesNonEnvoyees > 0 && (
                 <div
-                  onClick={() => setMessageFilter(messageFilter === 'no_response' ? 'all' : 'no_response')}
+                  onClick={() => changeMessageFilter(messageFilter === 'no_response' ? 'all' : 'no_response')}
                   className={`bg-red-50 border rounded-xl p-4 mb-6 cursor-pointer transition-all hover:shadow-md ${
                     messageFilter === 'no_response' ? 'border-red-500 ring-2 ring-red-200' : 'border-red-200'
                   }`}
@@ -1034,10 +1042,65 @@ export default function AdminDashboard() {
                           'Tous les messages du mois'
                         }
                       </p>
+
+                      {/* Options de reclassement par sujet */}
+                      {(() => {
+                        // Calculer les options uniques dans les messages filtrés
+                        // Note: messageFilter ne peut pas être 'all' ici (déjà filtré par condition parent)
+                        const filteredMessages = messages.filter((msg) => {
+                          if (messageFilter === 'reponses') return msg.system_responded === true
+                          if (messageFilter === 'sandra') return msg.assigned_to === 'Sandra'
+                          if (messageFilter === 'michel') return msg.assigned_to === 'Michel'
+                          if (messageFilter === 'none') return !msg.assigned_to || msg.assigned_to === null
+                          if (messageFilter === 'no_response') return !msg.system_responded
+                          return true
+                        })
+
+                        const uniqueOptions = Array.from(
+                          new Set(
+                            filteredMessages
+                              .map(msg => extractOptionFromMessage(msg.question).option)
+                              .filter(opt => opt !== null)
+                          )
+                        ).sort()
+
+                        if (uniqueOptions.length === 0) return null
+
+                        return (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <p className="text-xs font-semibold text-gray-700 mb-2">Reclasser par sujet :</p>
+                            <div className="flex flex-wrap gap-2">
+                              {uniqueOptions.map((option) => (
+                                <button
+                                  key={option}
+                                  onClick={() => setMessageSubFilter(messageSubFilter === option ? null : option)}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                    messageSubFilter === option
+                                      ? messageFilter === 'reponses' ? 'bg-green-600 text-white ring-2 ring-green-300' :
+                                        messageFilter === 'sandra' ? 'bg-pink-600 text-white ring-2 ring-pink-300' :
+                                        messageFilter === 'michel' ? 'bg-indigo-600 text-white ring-2 ring-indigo-300' :
+                                        messageFilter === 'none' ? 'bg-amber-600 text-white ring-2 ring-amber-300' :
+                                        messageFilter === 'no_response' ? 'bg-red-600 text-white ring-2 ring-red-300' :
+                                        'bg-gray-600 text-white ring-2 ring-gray-300'
+                                      : messageFilter === 'reponses' ? 'bg-white text-green-700 border border-green-300 hover:bg-green-50' :
+                                        messageFilter === 'sandra' ? 'bg-white text-pink-700 border border-pink-300 hover:bg-pink-50' :
+                                        messageFilter === 'michel' ? 'bg-white text-indigo-700 border border-indigo-300 hover:bg-indigo-50' :
+                                        messageFilter === 'none' ? 'bg-white text-amber-700 border border-amber-300 hover:bg-amber-50' :
+                                        messageFilter === 'no_response' ? 'bg-white text-red-700 border border-red-300 hover:bg-red-50' :
+                                        'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  {option}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      })()}
                     </div>
                   </div>
                   <button
-                    onClick={() => setMessageFilter('all')}
+                    onClick={() => changeMessageFilter('all')}
                     className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                       messageFilter === 'reponses' ? 'bg-green-200 text-green-800 hover:bg-green-300' :
                       messageFilter === 'sandra' ? 'bg-pink-200 text-pink-800 hover:bg-pink-300' :
@@ -1064,6 +1127,12 @@ export default function AdminDashboard() {
                       if (messageFilter === 'none') return !msg.assigned_to || msg.assigned_to === null
                       if (messageFilter === 'no_response') return !msg.system_responded
                       return true
+                    })
+                    .filter((msg) => {
+                      // Sous-filtre par option/sujet
+                      if (!messageSubFilter) return true
+                      const { option } = extractOptionFromMessage(msg.question)
+                      return option === messageSubFilter
                     })
                     .map((msg) => {
                     const { option, message: cleanMsg } = extractOptionFromMessage(msg.question)
