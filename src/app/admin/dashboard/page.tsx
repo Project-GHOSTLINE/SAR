@@ -601,7 +601,7 @@ export default function AdminDashboard() {
                 {webhookStats?.recentTransactions && webhookStats.recentTransactions.length > 0 && (
                   <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
                     {/* Active Filters Chips */}
-                    <div className={(txFilterType !== 'all' || txFilterStatus !== 'all' || txFilterPeriod !== 'all' || txFilterAmount !== 'all' || txSortBy !== 'recent') ? "bg-white rounded-lg p-3 mb-4 shadow-sm" : "hidden"}>
+                    <div className={(txFilterType !== 'all' || txFilterStatus !== 'all' || txFilterPeriod !== 'all' || txFilterAmount !== 'all' || txSortBy !== 'recent') ? "!transition-none !duration-0 !animate-none bg-white rounded-lg p-3 mb-4 shadow-sm" : "hidden"}>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Filtres actifs</span>
                           <button
