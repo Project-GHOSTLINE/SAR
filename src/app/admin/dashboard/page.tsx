@@ -197,6 +197,13 @@ export default function AdminDashboard() {
   const [webhookStats, setWebhookStats] = useState<WebhookStats | null>(null)
   const [webhookStatsLoading, setWebhookStatsLoading] = useState(false)
 
+  // Filtres pour transactions récentes
+  const [txFilterType, setTxFilterType] = useState<'all' | 'deposits' | 'withdrawals'>('all')
+  const [txFilterStatus, setTxFilterStatus] = useState<'all' | 'successful' | 'failed' | 'pending'>('all')
+  const [txFilterPeriod, setTxFilterPeriod] = useState<'all' | 'today' | '7d' | '30d'>('all')
+  const [txFilterAmount, setTxFilterAmount] = useState<'all' | 'small' | 'medium' | 'large'>('all')
+  const [txSortBy, setTxSortBy] = useState<'recent' | 'oldest' | 'amount-high' | 'amount-low'>('recent')
+
   useEffect(() => {
     // Initialiser l'heure côté client seulement pour éviter hydration mismatch
     setCurrentTime(new Date())
@@ -321,6 +328,81 @@ export default function AdminDashboard() {
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  }
+
+  // Fonction pour filtrer et trier les transactions
+  const getFilteredTransactions = () => {
+    if (!webhookStats?.recentTransactions) return []
+
+    let filtered = [...webhookStats.recentTransactions]
+
+    // Filtre par type (dépôt/retrait)
+    if (txFilterType !== 'all') {
+      filtered = filtered.filter(tx => {
+        const type = tx.transaction_type?.toLowerCase() || ''
+        if (txFilterType === 'deposits') {
+          return type.includes('deposit') || type.includes('credit') || type.includes('eft_credit')
+        } else {
+          return type.includes('withdrawal') || type.includes('debit') || type.includes('eft_debit')
+        }
+      })
+    }
+
+    // Filtre par statut
+    if (txFilterStatus !== 'all') {
+      filtered = filtered.filter(tx => {
+        const status = tx.status?.toLowerCase() || ''
+        if (txFilterStatus === 'pending') {
+          return status === 'pending' || status === 'in progress'
+        }
+        return status === txFilterStatus
+      })
+    }
+
+    // Filtre par période
+    if (txFilterPeriod !== 'all') {
+      const now = new Date()
+      filtered = filtered.filter(tx => {
+        const txDate = new Date(tx.received_at)
+        if (txFilterPeriod === 'today') {
+          return txDate.toDateString() === now.toDateString()
+        } else if (txFilterPeriod === '7d') {
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+          return txDate >= weekAgo
+        } else if (txFilterPeriod === '30d') {
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+          return txDate >= monthAgo
+        }
+        return true
+      })
+    }
+
+    // Filtre par montant
+    if (txFilterAmount !== 'all') {
+      filtered = filtered.filter(tx => {
+        const amount = parseFloat(tx.transaction_amount) || 0
+        if (txFilterAmount === 'small') return amount < 500
+        if (txFilterAmount === 'medium') return amount >= 500 && amount <= 1000
+        if (txFilterAmount === 'large') return amount > 1000
+        return true
+      })
+    }
+
+    // Tri
+    filtered.sort((a, b) => {
+      if (txSortBy === 'recent') {
+        return new Date(b.received_at).getTime() - new Date(a.received_at).getTime()
+      } else if (txSortBy === 'oldest') {
+        return new Date(a.received_at).getTime() - new Date(b.received_at).getTime()
+      } else if (txSortBy === 'amount-high') {
+        return (parseFloat(b.transaction_amount) || 0) - (parseFloat(a.transaction_amount) || 0)
+      } else if (txSortBy === 'amount-low') {
+        return (parseFloat(a.transaction_amount) || 0) - (parseFloat(b.transaction_amount) || 0)
+      }
+      return 0
+    })
+
+    return filtered
   }
 
   return (
@@ -514,58 +596,170 @@ export default function AdminDashboard() {
                     <RefreshCw size={16} className={webhookStatsLoading ? 'animate-spin' : ''} />
                   </button>
                 </div>
+
+                {/* Filter Bar */}
+                {webhookStats?.recentTransactions && webhookStats.recentTransactions.length > 0 && (
+                  <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
+                    <div className="flex flex-wrap items-center gap-3">
+                      {/* Type Filter */}
+                      <select
+                        value={txFilterType}
+                        onChange={(e) => setTxFilterType(e.target.value as typeof txFilterType)}
+                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white hover:border-[#00874e] focus:border-[#00874e] focus:ring-2 focus:ring-[#00874e]/20 transition-all"
+                      >
+                        <option value="all">📊 Tous les types</option>
+                        <option value="deposits">📥 Dépôts seulement</option>
+                        <option value="withdrawals">📤 Retraits seulement</option>
+                      </select>
+
+                      {/* Status Filter */}
+                      <select
+                        value={txFilterStatus}
+                        onChange={(e) => setTxFilterStatus(e.target.value as typeof txFilterStatus)}
+                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white hover:border-[#00874e] focus:border-[#00874e] focus:ring-2 focus:ring-[#00874e]/20 transition-all"
+                      >
+                        <option value="all">🎯 Tous les statuts</option>
+                        <option value="successful">✅ Succès</option>
+                        <option value="failed">❌ Échecs</option>
+                        <option value="pending">⏳ En attente</option>
+                      </select>
+
+                      {/* Period Filter */}
+                      <select
+                        value={txFilterPeriod}
+                        onChange={(e) => setTxFilterPeriod(e.target.value as typeof txFilterPeriod)}
+                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white hover:border-[#00874e] focus:border-[#00874e] focus:ring-2 focus:ring-[#00874e]/20 transition-all"
+                      >
+                        <option value="all">📅 Toutes les périodes</option>
+                        <option value="today">Aujourd&apos;hui</option>
+                        <option value="7d">Depuis 7 jours</option>
+                        <option value="30d">Depuis 30 jours</option>
+                      </select>
+
+                      {/* Amount Filter */}
+                      <select
+                        value={txFilterAmount}
+                        onChange={(e) => setTxFilterAmount(e.target.value as typeof txFilterAmount)}
+                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white hover:border-[#00874e] focus:border-[#00874e] focus:ring-2 focus:ring-[#00874e]/20 transition-all"
+                      >
+                        <option value="all">💰 Tous les montants</option>
+                        <option value="small">&lt; 500$</option>
+                        <option value="medium">500$ - 1000$</option>
+                        <option value="large">&gt; 1000$</option>
+                      </select>
+
+                      {/* Sort By */}
+                      <select
+                        value={txSortBy}
+                        onChange={(e) => setTxSortBy(e.target.value as typeof txSortBy)}
+                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white hover:border-[#00874e] focus:border-[#00874e] focus:ring-2 focus:ring-[#00874e]/20 transition-all"
+                      >
+                        <option value="recent">🕐 Plus récentes</option>
+                        <option value="oldest">🕰️ Plus anciennes</option>
+                        <option value="amount-high">💵 Montant décroissant</option>
+                        <option value="amount-low">💴 Montant croissant</option>
+                      </select>
+
+                      {/* Clear Filters Button */}
+                      {(txFilterType !== 'all' || txFilterStatus !== 'all' || txFilterPeriod !== 'all' || txFilterAmount !== 'all' || txSortBy !== 'recent') && (
+                        <button
+                          onClick={() => {
+                            setTxFilterType('all')
+                            setTxFilterStatus('all')
+                            setTxFilterPeriod('all')
+                            setTxFilterAmount('all')
+                            setTxSortBy('recent')
+                          }}
+                          className="ml-auto px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-all flex items-center gap-1"
+                        >
+                          <X size={14} />
+                          Réinitialiser
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Filter Results Count */}
+                    <div className="mt-3 text-xs text-gray-500 font-medium">
+                      {(() => {
+                        const filtered = getFilteredTransactions()
+                        const total = webhookStats?.recentTransactions?.length || 0
+                        if (filtered.length !== total) {
+                          return `Affichage de ${filtered.length} sur ${total} transactions`
+                        }
+                        return `${total} transaction(s) au total`
+                      })()}
+                    </div>
+                  </div>
+                )}
+
                 <div className="divide-y divide-gray-100">
                   {webhookStatsLoading ? (
                     <div className="px-6 py-8 text-center">
                       <Loader2 size={24} className="animate-spin text-[#00874e] mx-auto" />
                     </div>
                   ) : webhookStats?.recentTransactions && webhookStats.recentTransactions.length > 0 ? (
-                    webhookStats.recentTransactions.slice(0, 10).map((tx: any, i: number) => {
-                      const status = tx.status.toLowerCase()
-                      const isSuccessful = status === 'successful'
-                      const isFailed = status === 'failed'
-                      const isPending = status === 'pending' || status === 'in progress'
+                    (() => {
+                      const filteredTransactions = getFilteredTransactions()
 
-                      return (
-                        <div key={tx.id || i} className="px-6 py-4 flex items-center justify-between hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all duration-200 cursor-pointer group">
-                          <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
-                              isSuccessful ? 'bg-gradient-to-br from-[#e8f5e9] to-emerald-100' :
-                              isFailed ? 'bg-gradient-to-br from-red-50 to-red-100' :
-                              isPending ? 'bg-gradient-to-br from-blue-50 to-blue-100' :
-                              'bg-gray-50'
-                            }`}>
-                              {isSuccessful && <CheckCircle size={18} className="text-[#00874e]" />}
-                              {isFailed && <XCircle size={18} className="text-red-500" />}
-                              {isPending && <Clock size={18} className="text-blue-600" />}
-                              {status === 'cancelled' && <XCircle size={18} className="text-gray-400" />}
+                      if (filteredTransactions.length === 0) {
+                        return (
+                          <div className="px-6 py-12 text-center">
+                            <Search size={48} className="text-gray-300 mx-auto mb-4" />
+                            <p className="text-gray-500 font-medium mb-2">Aucun résultat</p>
+                            <p className="text-sm text-gray-400">
+                              Essayez de modifier vos filtres
+                            </p>
+                          </div>
+                        )
+                      }
+
+                      return filteredTransactions.slice(0, 10).map((tx: any, i: number) => {
+                        const status = tx.status.toLowerCase()
+                        const isSuccessful = status === 'successful'
+                        const isFailed = status === 'failed'
+                        const isPending = status === 'pending' || status === 'in progress'
+
+                        return (
+                          <div key={tx.id || i} className="px-6 py-4 flex items-center justify-between hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all duration-200 cursor-pointer group">
+                            <div className="flex items-center gap-4">
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
+                                isSuccessful ? 'bg-gradient-to-br from-[#e8f5e9] to-emerald-100' :
+                                isFailed ? 'bg-gradient-to-br from-red-50 to-red-100' :
+                                isPending ? 'bg-gradient-to-br from-blue-50 to-blue-100' :
+                                'bg-gray-50'
+                              }`}>
+                                {isSuccessful && <CheckCircle size={18} className="text-[#00874e]" />}
+                                {isFailed && <XCircle size={18} className="text-red-500" />}
+                                {isPending && <Clock size={18} className="text-blue-600" />}
+                                {status === 'cancelled' && <XCircle size={18} className="text-gray-400" />}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900">{tx.transaction_id}</p>
+                                <p className="text-sm text-gray-500">
+                                  {tx.transaction_type}
+                                  {tx.failure_reason && ` - ${tx.failure_reason}`}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-medium text-gray-900">{tx.transaction_id}</p>
-                              <p className="text-sm text-gray-500">
-                                {tx.transaction_type}
-                                {tx.failure_reason && ` - ${tx.failure_reason}`}
+                            <div className="text-right">
+                              <p className={`font-semibold ${
+                                isFailed ? 'text-red-500' :
+                                isSuccessful ? 'text-[#00874e]' :
+                                'text-gray-900'
+                              }`}>
+                                {formatCurrency(tx.transaction_amount)}
+                              </p>
+                              <p className="text-sm text-gray-400">
+                                {new Date(tx.received_at).toLocaleTimeString('fr-CA', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className={`font-semibold ${
-                              isFailed ? 'text-red-500' :
-                              isSuccessful ? 'text-[#00874e]' :
-                              'text-gray-900'
-                            }`}>
-                              {formatCurrency(tx.transaction_amount)}
-                            </p>
-                            <p className="text-sm text-gray-400">
-                              {new Date(tx.received_at).toLocaleTimeString('fr-CA', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </p>
-                          </div>
-                        </div>
-                      )
-                    })
+                        )
+                      })
+                    })()
                   ) : (
                     <div className="px-6 py-12 text-center">
                       <Activity size={48} className="text-gray-300 mx-auto mb-4" />
