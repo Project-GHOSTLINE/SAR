@@ -274,7 +274,7 @@ export default function AdminDashboard() {
   const fetchMessageStats = async () => {
     try {
       console.log('🔄 Chargement des stats messages...')
-      const res = await fetch('/api/admin/messages/assign/stats', { credentials: 'include' })
+      const res = await fetch('/api/admin/messages/assign', { credentials: 'include' })
       console.log('📡 Réponse API stats:', res.status)
 
       if (res.ok) {
@@ -1597,7 +1597,7 @@ export default function AdminDashboard() {
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-4">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 text-sm" suppressHydrationWarning>
             © {new Date().getFullYear()} Solution Argent Rapide. Tous droits reserves.
           </p>
         </div>
