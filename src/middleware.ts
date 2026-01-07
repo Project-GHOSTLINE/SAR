@@ -28,9 +28,11 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Protect admin dashboard
-  if (pathname.startsWith('/admin/dashboard') ||
-      (hostname.startsWith('admin.') && pathname.startsWith('/dashboard'))) {
+  // Protect ALL admin pages except login page
+  const isAdminRoute = pathname.startsWith('/admin') && pathname !== '/admin'
+  const isAdminSubdomainRoute = hostname.startsWith('admin.') && pathname !== '/' && !pathname.startsWith('/_next')
+
+  if (isAdminRoute || isAdminSubdomainRoute) {
     const token = request.cookies.get('admin-session')?.value
 
     if (!token) {
