@@ -436,3 +436,10 @@ body {
   stroke-dasharray: 100;
   animation: checkmark 0.5s ease-out forwards;
 }
+
+/* Fix hydration: No transition for instant show/hide */
+.no-transition {
+  transition: none !important;
+  animation: none !important;
+  transition-duration: 0s !important;
+}
