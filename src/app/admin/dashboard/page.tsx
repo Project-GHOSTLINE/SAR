@@ -613,7 +613,7 @@ export default function AdminDashboard() {
                               setTxFilterAmount('all')
                               setTxSortBy('recent')
                             }}
-                            className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                            className="text-xs text-blue-600 hover:text-blue-700 font-medium"
                           >
                             Tout effacer
                           </button>
@@ -625,7 +625,7 @@ export default function AdminDashboard() {
                               📊 {txFilterType === 'deposits' ? 'Dépôts' : 'Retraits'}
                               <button
                                 onClick={() => setTxFilterType('all')}
-                                className="hover:bg-[#00874e]/10 rounded-full p-0.5 transition-colors"
+                                className="hover:bg-[#00874e]/10 rounded-full p-0.5"
                               >
                                 <X size={14} />
                               </button>
@@ -646,7 +646,7 @@ export default function AdminDashboard() {
                               }
                               <button
                                 onClick={() => setTxFilterStatus('all')}
-                                className="hover:bg-black/5 rounded-full p-0.5 transition-colors"
+                                className="hover:bg-black/5 rounded-full p-0.5"
                               >
                                 <X size={14} />
                               </button>
@@ -659,7 +659,7 @@ export default function AdminDashboard() {
                               📅 {txFilterPeriod === 'today' ? "Aujourd'hui" : txFilterPeriod === '7d' ? '7 jours' : '30 jours'}
                               <button
                                 onClick={() => setTxFilterPeriod('all')}
-                                className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                                className="hover:bg-blue-200 rounded-full p-0.5"
                               >
                                 <X size={14} />
                               </button>
@@ -676,7 +676,7 @@ export default function AdminDashboard() {
                               }
                               <button
                                 onClick={() => setTxFilterAmount('all')}
-                                className="hover:bg-purple-200 rounded-full p-0.5 transition-colors"
+                                className="hover:bg-purple-200 rounded-full p-0.5"
                               >
                                 <X size={14} />
                               </button>
@@ -693,7 +693,7 @@ export default function AdminDashboard() {
                               }
                               <button
                                 onClick={() => setTxSortBy('recent')}
-                                className="hover:bg-gray-200 rounded-full p-0.5 transition-colors"
+                                className="hover:bg-gray-200 rounded-full p-0.5"
                               >
                                 <X size={14} />
                               </button>
