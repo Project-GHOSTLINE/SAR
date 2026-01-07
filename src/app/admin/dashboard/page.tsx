@@ -214,7 +214,7 @@ export default function AdminDashboard() {
   const [txView, setTxView] = useState<'all' | 'deposits' | 'withdrawals'>('all')
 
   // Filtre pour messages stats
-  const [messageFilter, setMessageFilter] = useState<'all' | 'reponses' | 'sandra' | 'michel' | 'none'>('all')
+  const [messageFilter, setMessageFilter] = useState<'all' | 'reponses' | 'sandra' | 'michel' | 'none' | 'no_response'>('all')
 
   useEffect(() => {
     // Initialiser l'heure côté client seulement pour éviter hydration mismatch
@@ -930,7 +930,12 @@ export default function AdminDashboard() {
 
               {/* Non Acheminés (si > 0) */}
               {messageStats.nonAchemines > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                <div
+                  onClick={() => setMessageFilter(messageFilter === 'none' ? 'all' : 'none')}
+                  className={`bg-amber-50 border rounded-xl p-4 mb-6 cursor-pointer transition-all hover:shadow-md ${
+                    messageFilter === 'none' ? 'border-amber-500 ring-2 ring-amber-200' : 'border-amber-200'
+                  }`}
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
                       <AlertTriangle size={20} className="text-amber-600" />
@@ -948,7 +953,12 @@ export default function AdminDashboard() {
 
               {/* Réponses Non Envoyées (si > 0) */}
               {messageStats.reponsesNonEnvoyees > 0 && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                <div
+                  onClick={() => setMessageFilter(messageFilter === 'no_response' ? 'all' : 'no_response')}
+                  className={`bg-red-50 border rounded-xl p-4 mb-6 cursor-pointer transition-all hover:shadow-md ${
+                    messageFilter === 'no_response' ? 'border-red-500 ring-2 ring-red-200' : 'border-red-200'
+                  }`}
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center">
                       <XCircle size={20} className="text-red-600" />
@@ -970,6 +980,8 @@ export default function AdminDashboard() {
                   messageFilter === 'reponses' ? 'bg-gradient-to-br from-green-50 to-green-100 border border-green-200' :
                   messageFilter === 'sandra' ? 'bg-gradient-to-br from-pink-50 to-pink-100 border border-pink-200' :
                   messageFilter === 'michel' ? 'bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200' :
+                  messageFilter === 'none' ? 'bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200' :
+                  messageFilter === 'no_response' ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200' :
                   'bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200'
                 }`}>
                   <div className="flex items-center gap-3">
@@ -977,23 +989,31 @@ export default function AdminDashboard() {
                       messageFilter === 'reponses' ? 'bg-green-200' :
                       messageFilter === 'sandra' ? 'bg-pink-200' :
                       messageFilter === 'michel' ? 'bg-indigo-200' :
+                      messageFilter === 'none' ? 'bg-amber-200' :
+                      messageFilter === 'no_response' ? 'bg-red-200' :
                       'bg-gray-200'
                     }`}>
                       {messageFilter === 'reponses' && <CheckCircle size={20} className="text-green-700" />}
                       {messageFilter === 'sandra' && <User size={20} className="text-pink-700" />}
                       {messageFilter === 'michel' && <User size={20} className="text-indigo-700" />}
+                      {messageFilter === 'none' && <AlertTriangle size={20} className="text-amber-700" />}
+                      {messageFilter === 'no_response' && <XCircle size={20} className="text-red-700" />}
                     </div>
                     <div>
                       <p className={`text-sm font-semibold ${
                         messageFilter === 'reponses' ? 'text-green-900' :
                         messageFilter === 'sandra' ? 'text-pink-900' :
                         messageFilter === 'michel' ? 'text-indigo-900' :
+                        messageFilter === 'none' ? 'text-amber-900' :
+                        messageFilter === 'no_response' ? 'text-red-900' :
                         'text-gray-900'
                       }`}>
                         Filtre actif : {
                           messageFilter === 'reponses' ? 'Réponses envoyées' :
                           messageFilter === 'sandra' ? 'Acheminés à Sandra' :
                           messageFilter === 'michel' ? 'Acheminés à Michel' :
+                          messageFilter === 'none' ? 'Messages non acheminés' :
+                          messageFilter === 'no_response' ? 'Réponses non envoyées' :
                           'Tous les messages'
                         }
                       </p>
@@ -1001,12 +1021,16 @@ export default function AdminDashboard() {
                         messageFilter === 'reponses' ? 'text-green-700' :
                         messageFilter === 'sandra' ? 'text-pink-700' :
                         messageFilter === 'michel' ? 'text-indigo-700' :
+                        messageFilter === 'none' ? 'text-amber-700' :
+                        messageFilter === 'no_response' ? 'text-red-700' :
                         'text-gray-700'
                       }`}>
                         {
                           messageFilter === 'reponses' ? `${messageStats.reponsesEnvoyees} message(s) avec réponse système` :
                           messageFilter === 'sandra' ? `${messageStats.acheminesSandra} message(s) acheminés à Sandra` :
                           messageFilter === 'michel' ? `${messageStats.acheminesMichel} message(s) acheminés à Michel` :
+                          messageFilter === 'none' ? `${messageStats.nonAchemines} message(s) en attente d'acheminement` :
+                          messageFilter === 'no_response' ? `${messageStats.reponsesNonEnvoyees} message(s) sans réponse automatique` :
                           'Tous les messages du mois'
                         }
                       </p>
@@ -1018,6 +1042,8 @@ export default function AdminDashboard() {
                       messageFilter === 'reponses' ? 'bg-green-200 text-green-800 hover:bg-green-300' :
                       messageFilter === 'sandra' ? 'bg-pink-200 text-pink-800 hover:bg-pink-300' :
                       messageFilter === 'michel' ? 'bg-indigo-200 text-indigo-800 hover:bg-indigo-300' :
+                      messageFilter === 'none' ? 'bg-amber-200 text-amber-800 hover:bg-amber-300' :
+                      messageFilter === 'no_response' ? 'bg-red-200 text-red-800 hover:bg-red-300' :
                       'bg-gray-200 text-gray-800 hover:bg-gray-300'
                     }`}
                   >
@@ -1035,6 +1061,8 @@ export default function AdminDashboard() {
                       if (messageFilter === 'reponses') return msg.system_responded === true
                       if (messageFilter === 'sandra') return msg.assigned_to === 'Sandra'
                       if (messageFilter === 'michel') return msg.assigned_to === 'Michel'
+                      if (messageFilter === 'none') return !msg.assigned_to || msg.assigned_to === null
+                      if (messageFilter === 'no_response') return !msg.system_responded
                       return true
                     })
                     .map((msg) => {
