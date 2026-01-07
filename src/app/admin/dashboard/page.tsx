@@ -861,255 +861,144 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
-              {/* Onglets Filtres Messages */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6 overflow-x-auto">
-                <div className="flex items-center">
-                  {/* Tous */}
-                  <button
-                    onClick={() => changeMessageFilter('all')}
-                    className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-all whitespace-nowrap ${
-                      messageFilter === 'all'
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-transparent hover:bg-gray-50 text-gray-600'
-                    }`}
-                  >
-                    <MessageSquare size={18} />
-                    <span className="font-medium text-sm">Tous</span>
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold ${
-                      messageFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
+              {/* Statistiques Messages - Grid de 4 cartes */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {/* Tous */}
+                <button
+                  onClick={() => changeMessageFilter('all')}
+                  className={`bg-white rounded-xl p-5 border-2 transition-all hover:shadow-lg ${
+                    messageFilter === 'all' ? 'border-blue-500 shadow-lg' : 'border-gray-100 hover:border-blue-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                      messageFilter === 'all' ? 'bg-gradient-to-br from-blue-500 to-blue-600' : 'bg-blue-100'
                     }`}>
-                      {messageStats.totalDuMois}
-                    </span>
-                  </button>
-
-                  {/* Réponses Envoyées */}
-                  <button
-                    onClick={() => changeMessageFilter(messageFilter === 'reponses' ? 'all' : 'reponses')}
-                    className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-all whitespace-nowrap ${
-                      messageFilter === 'reponses'
-                        ? 'border-green-500 bg-green-50 text-green-700'
-                        : 'border-transparent hover:bg-gray-50 text-gray-600'
-                    }`}
-                  >
-                    <CheckCircle size={18} />
-                    <span className="font-medium text-sm">Réponses envoyées</span>
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold ${
-                      messageFilter === 'reponses' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'
-                    }`}>
-                      {messageStats.reponsesEnvoyees}
-                    </span>
-                  </button>
-
-                  {/* Sandra */}
-                  <button
-                    onClick={() => changeMessageFilter(messageFilter === 'sandra' ? 'all' : 'sandra')}
-                    className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-all whitespace-nowrap ${
-                      messageFilter === 'sandra'
-                        ? 'border-pink-500 bg-pink-50 text-pink-700'
-                        : 'border-transparent hover:bg-gray-50 text-gray-600'
-                    }`}
-                  >
-                    <User size={18} />
-                    <span className="font-medium text-sm">Sandra</span>
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold ${
-                      messageFilter === 'sandra' ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-700'
-                    }`}>
-                      {messageStats.acheminesSandra}
-                    </span>
-                  </button>
-
-                  {/* Michel */}
-                  <button
-                    onClick={() => changeMessageFilter(messageFilter === 'michel' ? 'all' : 'michel')}
-                    className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-all whitespace-nowrap ${
-                      messageFilter === 'michel'
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                        : 'border-transparent hover:bg-gray-50 text-gray-600'
-                    }`}
-                  >
-                    <User size={18} />
-                    <span className="font-medium text-sm">Michel</span>
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold ${
-                      messageFilter === 'michel' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'
-                    }`}>
-                      {messageStats.acheminesMichel}
-                    </span>
-                  </button>
-
-                  {/* Non Acheminés (si > 0) */}
-                  {messageStats.nonAchemines > 0 && (
-                    <button
-                      onClick={() => changeMessageFilter(messageFilter === 'none' ? 'all' : 'none')}
-                      className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-all whitespace-nowrap ${
-                        messageFilter === 'none'
-                          ? 'border-amber-500 bg-amber-50 text-amber-700'
-                          : 'border-transparent hover:bg-gray-50 text-gray-600'
-                      }`}
-                    >
-                      <AlertTriangle size={18} />
-                      <span className="font-medium text-sm">Non acheminés</span>
-                      <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold ${
-                        messageFilter === 'none' ? 'bg-amber-600 text-white' : 'bg-gray-200 text-gray-700'
-                      }`}>
-                        {messageStats.nonAchemines}
-                      </span>
-                    </button>
-                  )}
-
-                  {/* Sans Réponse (si > 0) */}
-                  {messageStats.reponsesNonEnvoyees > 0 && (
-                    <button
-                      onClick={() => changeMessageFilter(messageFilter === 'no_response' ? 'all' : 'no_response')}
-                      className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-all whitespace-nowrap ${
-                        messageFilter === 'no_response'
-                          ? 'border-red-500 bg-red-50 text-red-700'
-                          : 'border-transparent hover:bg-gray-50 text-gray-600'
-                      }`}
-                    >
-                      <XCircle size={18} />
-                      <span className="font-medium text-sm">Sans réponse</span>
-                      <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold ${
-                        messageFilter === 'no_response' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'
-                      }`}>
-                        {messageStats.reponsesNonEnvoyees}
-                      </span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Boîte Filtre Actif */}
-              {messageFilter !== 'all' && (
-                <div className={`rounded-xl p-4 mb-6 flex items-center justify-between ${
-                  messageFilter === 'reponses' ? 'bg-gradient-to-br from-green-50 to-green-100 border border-green-200' :
-                  messageFilter === 'sandra' ? 'bg-gradient-to-br from-pink-50 to-pink-100 border border-pink-200' :
-                  messageFilter === 'michel' ? 'bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200' :
-                  messageFilter === 'none' ? 'bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200' :
-                  messageFilter === 'no_response' ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200' :
-                  'bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200'
-                }`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      messageFilter === 'reponses' ? 'bg-green-200' :
-                      messageFilter === 'sandra' ? 'bg-pink-200' :
-                      messageFilter === 'michel' ? 'bg-indigo-200' :
-                      messageFilter === 'none' ? 'bg-amber-200' :
-                      messageFilter === 'no_response' ? 'bg-red-200' :
-                      'bg-gray-200'
-                    }`}>
-                      {messageFilter === 'reponses' && <CheckCircle size={20} className="text-green-700" />}
-                      {messageFilter === 'sandra' && <User size={20} className="text-pink-700" />}
-                      {messageFilter === 'michel' && <User size={20} className="text-indigo-700" />}
-                      {messageFilter === 'none' && <AlertTriangle size={20} className="text-amber-700" />}
-                      {messageFilter === 'no_response' && <XCircle size={20} className="text-red-700" />}
-                    </div>
-                    <div>
-                      <p className={`text-sm font-semibold ${
-                        messageFilter === 'reponses' ? 'text-green-900' :
-                        messageFilter === 'sandra' ? 'text-pink-900' :
-                        messageFilter === 'michel' ? 'text-indigo-900' :
-                        messageFilter === 'none' ? 'text-amber-900' :
-                        messageFilter === 'no_response' ? 'text-red-900' :
-                        'text-gray-900'
-                      }`}>
-                        Filtre actif : {
-                          messageFilter === 'reponses' ? 'Réponses envoyées' :
-                          messageFilter === 'sandra' ? 'Acheminés à Sandra' :
-                          messageFilter === 'michel' ? 'Acheminés à Michel' :
-                          messageFilter === 'none' ? 'Messages non acheminés' :
-                          messageFilter === 'no_response' ? 'Réponses non envoyées' :
-                          'Tous les messages'
-                        }
-                      </p>
-                      <p className={`text-xs ${
-                        messageFilter === 'reponses' ? 'text-green-700' :
-                        messageFilter === 'sandra' ? 'text-pink-700' :
-                        messageFilter === 'michel' ? 'text-indigo-700' :
-                        messageFilter === 'none' ? 'text-amber-700' :
-                        messageFilter === 'no_response' ? 'text-red-700' :
-                        'text-gray-700'
-                      }`}>
-                        {
-                          messageFilter === 'reponses' ? `${messageStats.reponsesEnvoyees} message(s) avec réponse système` :
-                          messageFilter === 'sandra' ? `${messageStats.acheminesSandra} message(s) acheminés à Sandra` :
-                          messageFilter === 'michel' ? `${messageStats.acheminesMichel} message(s) acheminés à Michel` :
-                          messageFilter === 'none' ? `${messageStats.nonAchemines} message(s) en attente d'acheminement` :
-                          messageFilter === 'no_response' ? `${messageStats.reponsesNonEnvoyees} message(s) sans réponse automatique` :
-                          'Tous les messages du mois'
-                        }
-                      </p>
-
-                      {/* Options de reclassement par sujet */}
-                      {(() => {
-                        // Calculer les options uniques dans les messages filtrés
-                        // Note: messageFilter ne peut pas être 'all' ici (déjà filtré par condition parent)
-                        const filteredMessages = messages.filter((msg) => {
-                          if (messageFilter === 'reponses') return msg.system_responded === true
-                          if (messageFilter === 'sandra') return msg.assigned_to === 'Sandra'
-                          if (messageFilter === 'michel') return msg.assigned_to === 'Michel'
-                          if (messageFilter === 'none') return !msg.assigned_to || msg.assigned_to === null
-                          if (messageFilter === 'no_response') return !msg.system_responded
-                          return true
-                        })
-
-                        const uniqueOptions = Array.from(
-                          new Set(
-                            filteredMessages
-                              .map(msg => extractOptionFromMessage(msg.question).option)
-                              .filter(opt => opt !== null)
-                          )
-                        ).sort()
-
-                        if (uniqueOptions.length === 0) return null
-
-                        return (
-                          <div className="mt-4 pt-4 border-t border-gray-200">
-                            <p className="text-xs font-semibold text-gray-700 mb-2">Classer par type de demande :</p>
-                            <div className="flex flex-wrap gap-2">
-                              {uniqueOptions.map((option) => (
-                                <button
-                                  key={option}
-                                  onClick={() => setMessageSubFilter(messageSubFilter === option ? null : option)}
-                                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                    messageSubFilter === option
-                                      ? messageFilter === 'reponses' ? 'bg-green-600 text-white ring-2 ring-green-300' :
-                                        messageFilter === 'sandra' ? 'bg-pink-600 text-white ring-2 ring-pink-300' :
-                                        messageFilter === 'michel' ? 'bg-indigo-600 text-white ring-2 ring-indigo-300' :
-                                        messageFilter === 'none' ? 'bg-amber-600 text-white ring-2 ring-amber-300' :
-                                        messageFilter === 'no_response' ? 'bg-red-600 text-white ring-2 ring-red-300' :
-                                        'bg-gray-600 text-white ring-2 ring-gray-300'
-                                      : messageFilter === 'reponses' ? 'bg-white text-green-700 border border-green-300 hover:bg-green-50' :
-                                        messageFilter === 'sandra' ? 'bg-white text-pink-700 border border-pink-300 hover:bg-pink-50' :
-                                        messageFilter === 'michel' ? 'bg-white text-indigo-700 border border-indigo-300 hover:bg-indigo-50' :
-                                        messageFilter === 'none' ? 'bg-white text-amber-700 border border-amber-300 hover:bg-amber-50' :
-                                        messageFilter === 'no_response' ? 'bg-white text-red-700 border border-red-300 hover:bg-red-50' :
-                                        'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                                  }`}
-                                >
-                                  {option}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )
-                      })()}
+                      <MessageSquare size={24} className={messageFilter === 'all' ? 'text-white' : 'text-blue-600'} />
                     </div>
                   </div>
+                  <p className="text-3xl font-bold text-gray-900 mb-1">{messageStats.totalDuMois}</p>
+                  <p className="text-sm font-medium text-gray-600">Tous</p>
+                </button>
+
+                {/* Réponses Envoyées */}
+                <button
+                  onClick={() => changeMessageFilter(messageFilter === 'reponses' ? 'all' : 'reponses')}
+                  className={`bg-white rounded-xl p-5 border-2 transition-all hover:shadow-lg ${
+                    messageFilter === 'reponses' ? 'border-green-500 shadow-lg' : 'border-gray-100 hover:border-green-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                      messageFilter === 'reponses' ? 'bg-gradient-to-br from-green-500 to-green-600' : 'bg-green-100'
+                    }`}>
+                      <CheckCircle size={24} className={messageFilter === 'reponses' ? 'text-white' : 'text-green-600'} />
+                    </div>
+                  </div>
+                  <p className="text-3xl font-bold text-gray-900 mb-1">{messageStats.reponsesEnvoyees}</p>
+                  <p className="text-sm font-medium text-gray-600">Réponses envoyées</p>
+                </button>
+
+                {/* Sandra */}
+                <button
+                  onClick={() => changeMessageFilter(messageFilter === 'sandra' ? 'all' : 'sandra')}
+                  className={`bg-white rounded-xl p-5 border-2 transition-all hover:shadow-lg ${
+                    messageFilter === 'sandra' ? 'border-pink-500 shadow-lg' : 'border-gray-100 hover:border-pink-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                      messageFilter === 'sandra' ? 'bg-gradient-to-br from-pink-500 to-pink-600' : 'bg-pink-100'
+                    }`}>
+                      <User size={24} className={messageFilter === 'sandra' ? 'text-white' : 'text-pink-600'} />
+                    </div>
+                  </div>
+                  <p className="text-3xl font-bold text-gray-900 mb-1">{messageStats.acheminesSandra}</p>
+                  <p className="text-sm font-medium text-gray-600">Sandra</p>
+                </button>
+
+                {/* Michel */}
+                <button
+                  onClick={() => changeMessageFilter(messageFilter === 'michel' ? 'all' : 'michel')}
+                  className={`bg-white rounded-xl p-5 border-2 transition-all hover:shadow-lg ${
+                    messageFilter === 'michel' ? 'border-indigo-500 shadow-lg' : 'border-gray-100 hover:border-indigo-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                      messageFilter === 'michel' ? 'bg-gradient-to-br from-indigo-500 to-indigo-600' : 'bg-indigo-100'
+                    }`}>
+                      <User size={24} className={messageFilter === 'michel' ? 'text-white' : 'text-indigo-600'} />
+                    </div>
+                  </div>
+                  <p className="text-3xl font-bold text-gray-900 mb-1">{messageStats.acheminesMichel}</p>
+                  <p className="text-sm font-medium text-gray-600">Michel</p>
+                </button>
+
+                {/* Non Acheminés (si > 0) */}
+                {messageStats.nonAchemines > 0 && (
                   <button
-                    onClick={() => changeMessageFilter('all')}
-                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                      messageFilter === 'reponses' ? 'bg-green-200 text-green-800 hover:bg-green-300' :
-                      messageFilter === 'sandra' ? 'bg-pink-200 text-pink-800 hover:bg-pink-300' :
-                      messageFilter === 'michel' ? 'bg-indigo-200 text-indigo-800 hover:bg-indigo-300' :
-                      messageFilter === 'none' ? 'bg-amber-200 text-amber-800 hover:bg-amber-300' :
-                      messageFilter === 'no_response' ? 'bg-red-200 text-red-800 hover:bg-red-300' :
-                      'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                    onClick={() => changeMessageFilter(messageFilter === 'none' ? 'all' : 'none')}
+                    className={`bg-white rounded-xl p-5 border-2 transition-all hover:shadow-lg ${
+                      messageFilter === 'none' ? 'border-amber-500 shadow-lg' : 'border-gray-100 hover:border-amber-200'
                     }`}
                   >
-                    Retirer le filtre
+                    <div className="flex items-center justify-between mb-3">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                        messageFilter === 'none' ? 'bg-gradient-to-br from-amber-500 to-amber-600' : 'bg-amber-100'
+                      }`}>
+                        <AlertTriangle size={24} className={messageFilter === 'none' ? 'text-white' : 'text-amber-600'} />
+                      </div>
+                    </div>
+                    <p className="text-3xl font-bold text-gray-900 mb-1">{messageStats.nonAchemines}</p>
+                    <p className="text-sm font-medium text-gray-600">Non acheminés</p>
                   </button>
-                </div>
-              )}
+                )}
+              </div>
+
+              {/* Filtres par Type de Demande */}
+              {(() => {
+                const uniqueOptions = Array.from(
+                  new Set(
+                    messages
+                      .map(msg => extractOptionFromMessage(msg.question).option)
+                      .filter(opt => opt !== null)
+                  )
+                ).sort()
+
+                if (uniqueOptions.length === 0) return null
+
+                return (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+                    <p className="text-sm font-semibold text-gray-700 mb-3">Filtrer par type de demande:</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setMessageSubFilter(null)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                          messageSubFilter === null
+                            ? 'bg-blue-600 text-white shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        Tous les types
+                      </button>
+                      {uniqueOptions.map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => setMessageSubFilter(option)}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                            messageSubFilter === option
+                              ? 'bg-[#00874e] text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })()}
 
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="divide-y divide-gray-100">
