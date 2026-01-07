@@ -41,10 +41,10 @@ export async function GET(request: NextRequest) {
     const monthAgo = new Date(today)
     monthAgo.setDate(monthAgo.getDate() - 30)
 
-    // 1. Stats globales
+    // 1. Stats globales - FILTRER UNIQUEMENT LES DONNÉES DE PRODUCTION
     const { data: allWebhooks, error: allError } = await supabase
       .from('vopay_webhook_logs')
-      .select('status, transaction_amount, received_at')
+      .select('status, transaction_amount, received_at, environment')
       .order('received_at', { ascending: false })
 
     if (allError) {
@@ -55,7 +55,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const webhooks = allWebhooks || []
+    // IMPORTANT: Filtrer UNIQUEMENT les transactions de production (pas sandbox/test)
+    const webhooks = (allWebhooks || []).filter(w =>
+      !w.environment || w.environment.toLowerCase() === 'production'
+    )
 
     // 2. Filtrer par période
     const todayWebhooks = webhooks.filter(w => new Date(w.received_at) >= today)
@@ -117,28 +120,38 @@ export async function GET(request: NextRequest) {
 
     const volumeChange = calculatePercentageChange(todayVolume, yesterdayVolume)
 
-    // 7. Récupérer les transactions récentes (20 dernières)
-    const { data: recentTransactions, error: recentError } = await supabase
+    // 7. Récupérer les transactions récentes de PRODUCTION uniquement (20 dernières)
+    const { data: allRecentTransactions, error: recentError } = await supabase
       .from('vopay_webhook_logs')
       .select('*')
       .order('received_at', { ascending: false })
-      .limit(20)
+      .limit(100) // Prendre plus pour filtrer ensuite
 
     if (recentError) {
       console.error('Error fetching recent transactions:', recentError)
     }
 
-    // 8. Récupérer les transactions failed qui nécessitent une action
-    const { data: failedTransactions, error: failedError } = await supabase
+    // Filtrer uniquement production
+    const recentTransactions = (allRecentTransactions || [])
+      .filter(w => !w.environment || w.environment.toLowerCase() === 'production')
+      .slice(0, 20)
+
+    // 8. Récupérer les transactions failed de PRODUCTION qui nécessitent une action
+    const { data: allFailedTransactions, error: failedError } = await supabase
       .from('vopay_webhook_logs')
       .select('*')
       .eq('status', 'failed')
       .order('received_at', { ascending: false })
-      .limit(10)
+      .limit(50) // Prendre plus pour filtrer ensuite
 
     if (failedError) {
       console.error('Error fetching failed transactions:', failedError)
     }
+
+    // Filtrer uniquement production
+    const failedTransactions = (allFailedTransactions || [])
+      .filter(w => !w.environment || w.environment.toLowerCase() === 'production')
+      .slice(0, 10)
 
     // 9. Statistiques par jour (7 derniers jours)
     const dailyStats = []

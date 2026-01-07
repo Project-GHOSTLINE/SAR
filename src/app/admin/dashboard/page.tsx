@@ -567,8 +567,12 @@ export default function AdminDashboard() {
                       )
                     })
                   ) : (
-                    <div className="px-6 py-8 text-center text-gray-500">
-                      Aucune transaction récente
+                    <div className="px-6 py-12 text-center">
+                      <Activity size={48} className="text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500 font-medium mb-2">Pas encore configuré</p>
+                      <p className="text-sm text-gray-400">
+                        Aucune transaction de production n'a été reçue
+                      </p>
                     </div>
                   )}
                 </div>
