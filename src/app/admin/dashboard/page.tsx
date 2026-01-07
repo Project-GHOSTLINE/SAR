@@ -1164,7 +1164,14 @@ export default function AdminDashboard() {
                     return (
                       <div
                         key={msg.id}
-                        onClick={() => fetchMessageDetails(msg)}
+                        onClick={() => {
+                          // Toggle: si déjà sélectionné, fermer, sinon ouvrir
+                          if (selectedMessage?.id === msg.id) {
+                            closeDetail()
+                          } else {
+                            fetchMessageDetails(msg)
+                          }
+                        }}
                         className={`px-6 py-5 hover:bg-gradient-to-r ${filterColors.hover} hover:to-transparent transition-all cursor-pointer group ${!msg.lu ? 'bg-gradient-to-r from-blue-50/30 to-transparent' : ''} ${selectedMessage?.id === msg.id ? `ring-2 ${filterColors.selected} ring-inset` : ''}`}
                       >
                         <div className="flex items-start gap-4">
@@ -1197,6 +1204,12 @@ export default function AdminDashboard() {
                                 }`}>
                                   <User size={12} />
                                   {msg.assigned_to}
+                                </span>
+                              )}
+                              {selectedMessage?.id === msg.id && (
+                                <span className="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold shadow-md animate-pulse flex items-center gap-1">
+                                  <ChevronRight size={12} />
+                                  Ouvert
                                 </span>
                               )}
                             </div>
@@ -1246,9 +1259,10 @@ export default function AdminDashboard() {
                   </h2>
                   <button
                     onClick={closeDetail}
-                    className="p-2 hover:bg-red-50 rounded-lg transition-all hover:scale-110"
+                    className="flex items-center gap-2 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-all hover:scale-105 border border-red-200 hover:border-red-300"
                   >
-                    <X size={18} className="text-gray-500 hover:text-red-600" />
+                    <X size={20} />
+                    <span className="text-sm font-medium">Fermer</span>
                   </button>
                 </div>
 
