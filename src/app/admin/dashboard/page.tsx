@@ -176,13 +176,12 @@ export default function AdminDashboard() {
   const [messages, setMessages] = useState<Message[]>([])
   const [stats, setStats] = useState({ total: 0, nonLus: 0 })
   const [messageStats, setMessageStats] = useState({
-    total: 0,
-    assigned: 0,
-    unassigned: 0,
-    withSystemResponse: 0,
-    withoutSystemResponse: 0,
-    read: 0,
-    unread: 0,
+    totalDuMois: 0,
+    reponsesEnvoyees: 0,
+    reponsesNonEnvoyees: 0,
+    acheminesSandra: 0,
+    acheminesMichel: 0,
+    nonAchemines: 0,
     byColleague: {} as Record<string, number>
   })
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
@@ -843,85 +842,91 @@ export default function AdminDashboard() {
 
               {/* Statistiques Messages */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                {/* Total Messages */}
+                {/* Total du Mois */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
                       <MessageSquare size={20} className="text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 font-medium">Total</p>
-                      <p className="text-2xl font-bold text-gray-900">{messageStats.total}</p>
+                      <p className="text-xs text-gray-500 font-medium">Reçus ce mois</p>
+                      <p className="text-2xl font-bold text-gray-900">{messageStats.totalDuMois}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Avec Réponse Système */}
+                {/* Réponses Envoyées */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
                       <CheckCircle size={20} className="text-green-600" />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 font-medium">Avec réponse</p>
-                      <p className="text-2xl font-bold text-gray-900">{messageStats.withSystemResponse}</p>
+                      <p className="text-xs text-gray-500 font-medium">Réponses envoyées</p>
+                      <p className="text-2xl font-bold text-gray-900">{messageStats.reponsesEnvoyees}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Sans Réponse Système */}
+                {/* Acheminés à Sandra */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center">
-                      <XCircle size={20} className="text-red-600" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center">
+                      <User size={20} className="text-pink-600" />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 font-medium">Sans réponse</p>
-                      <p className="text-2xl font-bold text-gray-900">{messageStats.withoutSystemResponse}</p>
+                      <p className="text-xs text-gray-500 font-medium">Acheminés à Sandra</p>
+                      <p className="text-2xl font-bold text-gray-900">{messageStats.acheminesSandra}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Non Lus */}
+                {/* Acheminés à Michel */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
-                      <Bell size={20} className="text-purple-600" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center">
+                      <User size={20} className="text-indigo-600" />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 font-medium">Non lus</p>
-                      <p className="text-2xl font-bold text-gray-900">{messageStats.unread}</p>
+                      <p className="text-xs text-gray-500 font-medium">Acheminés à Michel</p>
+                      <p className="text-2xl font-bold text-gray-900">{messageStats.acheminesMichel}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Assignations par Collègue */}
-              {(messageStats.byColleague.Sandra || messageStats.byColleague.Michel) && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <Users size={16} />
-                    Assignations
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center justify-between p-3 bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center text-white text-xs font-bold">
-                          S
-                        </div>
-                        <span className="font-medium text-gray-900">Sandra</span>
-                      </div>
-                      <span className="text-2xl font-bold text-pink-600">{messageStats.byColleague.Sandra || 0}</span>
+              {/* Non Acheminés (si > 0) */}
+              {messageStats.nonAchemines > 0 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
+                      <AlertTriangle size={20} className="text-amber-600" />
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold">
-                          M
-                        </div>
-                        <span className="font-medium text-gray-900">Michel</span>
-                      </div>
-                      <span className="text-2xl font-bold text-indigo-600">{messageStats.byColleague.Michel || 0}</span>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-amber-900">Messages non acheminés</p>
+                      <p className="text-xs text-amber-700">
+                        {messageStats.nonAchemines} message(s) en attente d'acheminement à un collègue
+                      </p>
                     </div>
+                    <p className="text-2xl font-bold text-amber-600">{messageStats.nonAchemines}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Réponses Non Envoyées (si > 0) */}
+              {messageStats.reponsesNonEnvoyees > 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center">
+                      <XCircle size={20} className="text-red-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-red-900">Réponses non envoyées</p>
+                      <p className="text-xs text-red-700">
+                        {messageStats.reponsesNonEnvoyees} message(s) sans réponse automatique
+                      </p>
+                    </div>
+                    <p className="text-2xl font-bold text-red-600">{messageStats.reponsesNonEnvoyees}</p>
                   </div>
                 </div>
               )}

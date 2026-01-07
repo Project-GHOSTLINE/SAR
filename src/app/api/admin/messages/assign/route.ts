@@ -133,44 +133,65 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabase()
 
-    // Récupérer tous les messages avec leurs infos d'assignation
+    // Calculer le début du mois actuel
+    const now = new Date()
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const firstDayISO = firstDayOfMonth.toISOString()
+
+    // Récupérer tous les messages DU MOIS EN COURS avec leurs infos
     const { data: messages, error } = await supabase
       .from('contact_messages')
       .select('id, assigned_to, system_responded, lu, created_at')
+      .gte('created_at', firstDayISO)
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Supabase error:', error)
       throw error
     }
 
-    // Calculer les stats
-    const total = messages?.length || 0
-    const assigned = messages?.filter(m => m.assigned_to).length || 0
-    const unassigned = total - assigned
-    const withSystemResponse = messages?.filter(m => m.system_responded).length || 0
-    const withoutSystemResponse = total - withSystemResponse
-    const read = messages?.filter(m => m.lu).length || 0
-    const unread = total - read
+    // Calculer les stats du mois
+    const totalDuMois = messages?.length || 0
 
-    // Stats par collègue
-    const byColleague = messages?.reduce((acc, m) => {
-      if (m.assigned_to) {
-        acc[m.assigned_to] = (acc[m.assigned_to] || 0) + 1
-      }
-      return acc
-    }, {} as Record<string, number>)
+    // Réponses envoyées avec succès = messages où system_responded = true
+    const reponsesEnvoyees = messages?.filter(m => m.system_responded).length || 0
+
+    // Acheminés à Sandra
+    const acheminesSandra = messages?.filter(m => m.assigned_to === 'Sandra').length || 0
+
+    // Acheminés à Michel
+    const acheminesMichel = messages?.filter(m => m.assigned_to === 'Michel').length || 0
+
+    // Non acheminés = pas d'assigned_to
+    const nonAchemines = messages?.filter(m => !m.assigned_to).length || 0
+
+    // Réponses non envoyées (échec)
+    const reponsesNonEnvoyees = messages?.filter(m => !m.system_responded).length || 0
+
+    // Stats détaillées par collègue (pour la carte d'assignations)
+    const byColleague: Record<string, number> = {
+      Sandra: acheminesSandra,
+      Michel: acheminesMichel
+    }
 
     return NextResponse.json({
       success: true,
       stats: {
-        total,
-        assigned,
-        unassigned,
-        withSystemResponse,
-        withoutSystemResponse,
-        read,
-        unread,
-        byColleague: byColleague || {}
+        // Total du mois
+        totalDuMois,
+
+        // Réponses envoyées
+        reponsesEnvoyees,
+        reponsesNonEnvoyees,
+
+        // Acheminements
+        acheminesSandra,
+        acheminesMichel,
+        nonAchemines,
+
+        // Pour compatibilité avec l'ancienne structure
+        total: totalDuMois,
+        byColleague
       }
     })
   } catch (error) {
