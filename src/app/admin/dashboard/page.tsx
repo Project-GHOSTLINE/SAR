@@ -725,7 +725,7 @@ export default function AdminDashboard() {
                               <p className="font-semibold text-gray-900">{msg.nom}</p>
                               <span className="text-xs px-2 py-1 rounded-lg bg-gray-100 text-gray-500 font-mono font-semibold">#{msg.reference}</span>
                               {!msg.lu && (
-                                <span className="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold shadow-sm animate-pulse">Nouveau</span>
+                                <span className="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold shadow-sm">Nouveau</span>
                               )}
                             </div>
                             {/* Option Badge */}

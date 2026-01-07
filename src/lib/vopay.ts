@@ -27,21 +27,38 @@ interface VoPayBalance {
 }
 
 interface VoPayTransaction {
-  TransactionID?: string
-  TransactionType?: string
-  Amount?: string
-  Status?: string
-  TransactionDateTime?: string
-  ClientReferenceNumber?: string
-  Notes?: string
-  // Fields from account/transactions
-  transaction_id?: string
-  transaction_type?: string
-  amount?: number
-  status?: string
-  created_at?: string
-  reference?: string
-  description?: string
+  TransactionID: string
+  AccountName: string
+  TransactionDateTime: string
+  SettlementDate: string
+  TransactionType: string
+  TransactionStatus: string
+  Notes: string
+  DebitAmount: string
+  CreditAmount: string
+  Currency: string
+  HoldAmount: string
+  ConvenienceFeeAmount: string
+  LastModified: string
+  ParentTransactionID: string
+  ParentTransactionDateTime: string
+  ChildTransactionIDs: string
+  ClientReferenceNumber: string
+  ScheduledTransactionID: string
+  WalletID: string
+  WalletName1: string
+  WalletName2: string
+  ClientAccountID: string
+  TransactionErrorCode: string
+  TransactionFailureReason: string
+  TransactionFlag: string
+  ELinxRequestID: string
+  IsRefunded: string
+  IsRefund: string
+  FullName: string
+  GLCode: string
+  TransactionTypeCode: string
+  PaymentRailID: string
 }
 
 interface VoPayStats {
@@ -129,9 +146,18 @@ class VoPayClient {
   }): Promise<VoPayTransaction[]> {
     const authParams = this.getAuthParams()
 
+    // StartDateTime et EndDateTime sont OBLIGATOIRES selon l'API VoPay
+    // Par défaut: 30 derniers jours
+    const endDate = params?.EndDateTime || new Date().toISOString().split('T')[0]
+    const startDate = params?.StartDateTime || (() => {
+      const date = new Date()
+      date.setDate(date.getDate() - 30)
+      return date.toISOString().split('T')[0]
+    })()
+
+    authParams.set('StartDateTime', startDate)
+    authParams.set('EndDateTime', endDate)
     if (params?.limit) authParams.set('NumberOfTransactions', params.limit.toString())
-    if (params?.StartDateTime) authParams.set('StartDateTime', params.StartDateTime)
-    if (params?.EndDateTime) authParams.set('EndDateTime', params.EndDateTime)
 
     const url = `${this.config.apiUrl}account/transactions?${authParams.toString()}`
 
@@ -171,15 +197,15 @@ class VoPayClient {
       const pendingFunds = parseFloat(balanceData.PendingFunds)
       const frozen = accountBalance - availableFunds
 
-      // Récupération des transactions (30 derniers jours)
+      // Récupération des transactions (7 derniers jours, limite de 20)
       const endDate = new Date()
       const startDate = new Date()
-      startDate.setDate(startDate.getDate() - 30)
+      startDate.setDate(startDate.getDate() - 7)
 
       let transactions: VoPayTransaction[] = []
       try {
         transactions = await this.getTransactions({
-          limit: 100,
+          limit: 20,
           StartDateTime: startDate.toISOString().split('T')[0],
           EndDateTime: endDate.toISOString().split('T')[0]
         })
@@ -196,31 +222,31 @@ class VoPayClient {
       weekAgo.setDate(weekAgo.getDate() - 7)
 
       const todayTransactions = transactions.filter(t => {
-        const txDate = new Date(t.TransactionDateTime || t.created_at || '')
+        const txDate = new Date(t.TransactionDateTime)
         return txDate >= today
       })
 
       const weekTransactions = transactions.filter(t => {
-        const txDate = new Date(t.TransactionDateTime || t.created_at || '')
+        const txDate = new Date(t.TransactionDateTime)
         return txDate >= weekAgo
       })
 
       const pendingCount = transactions.filter(t =>
-        (t.Status || t.status || '').toLowerCase().includes('pending')
+        t.TransactionStatus.toLowerCase().includes('pending')
       ).length
 
       const completedCount = transactions.filter(t => {
-        const status = (t.Status || t.status || '').toLowerCase()
+        const status = t.TransactionStatus.toLowerCase()
         return status === 'completed' || status === 'success'
       }).length
 
       const todayInterac = todayTransactions.reduce((sum, t) => {
-        const amount = parseFloat(t.Amount || t.amount?.toString() || '0')
+        const amount = parseFloat(t.CreditAmount) - parseFloat(t.DebitAmount)
         return sum + amount
       }, 0)
 
       const weeklyVolume = weekTransactions.reduce((sum, t) => {
-        const amount = parseFloat(t.Amount || t.amount?.toString() || '0')
+        const amount = parseFloat(t.CreditAmount) - parseFloat(t.DebitAmount)
         return sum + amount
       }, 0)
 

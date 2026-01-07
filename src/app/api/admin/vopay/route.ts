@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createVoPayClient } from '@/lib/vopay'
 
-// Force dynamic rendering
+// Force dynamic rendering et désactiver le cache
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
 
 /**
  * GET /api/admin/vopay
