@@ -8,29 +8,13 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isApiRoute = pathname.startsWith('/api/')
 
-  // Handle admin subdomain
-  if (hostname.startsWith('admin.')) {
-    if (pathname === '/') {
-      return NextResponse.rewrite(new URL('/admin', request.url))
-    }
-    if (!pathname.startsWith('/admin') && !isApiRoute && !pathname.startsWith('/_next')) {
-      return NextResponse.rewrite(new URL('/admin' + pathname, request.url))
-    }
-  }
-
-  // Handle client subdomain
-  if (hostname.startsWith('client.')) {
-    if (pathname === '/') {
-      return NextResponse.rewrite(new URL('/client', request.url))
-    }
-    if (!pathname.startsWith('/client') && !isApiRoute && !pathname.startsWith('/_next')) {
-      return NextResponse.rewrite(new URL('/client' + pathname, request.url))
-    }
-  }
-
+  // CHECK AUTHENTICATION FIRST - before any rewrite
   // Protect ALL admin pages except login page
   const isAdminRoute = pathname.startsWith('/admin') && pathname !== '/admin'
-  const isAdminSubdomainRoute = hostname.startsWith('admin.') && pathname !== '/' && !pathname.startsWith('/_next')
+  const isAdminSubdomainRoute = hostname.startsWith('admin.') &&
+                                 pathname !== '/' &&
+                                 !pathname.startsWith('/_next') &&
+                                 !isApiRoute
 
   if (isAdminRoute || isAdminSubdomainRoute) {
     const token = request.cookies.get('admin-session')?.value
@@ -47,6 +31,26 @@ export async function middleware(request: NextRequest) {
       const response = NextResponse.redirect(new URL(hostname.startsWith('admin.') ? '/' : '/admin', request.url))
       response.cookies.delete('admin-session')
       return response
+    }
+  }
+
+  // Handle admin subdomain rewrites AFTER auth check
+  if (hostname.startsWith('admin.')) {
+    if (pathname === '/') {
+      return NextResponse.rewrite(new URL('/admin', request.url))
+    }
+    if (!pathname.startsWith('/admin') && !isApiRoute && !pathname.startsWith('/_next')) {
+      return NextResponse.rewrite(new URL('/admin' + pathname, request.url))
+    }
+  }
+
+  // Handle client subdomain
+  if (hostname.startsWith('client.')) {
+    if (pathname === '/') {
+      return NextResponse.rewrite(new URL('/client', request.url))
+    }
+    if (!pathname.startsWith('/client') && !isApiRoute && !pathname.startsWith('/_next')) {
+      return NextResponse.rewrite(new URL('/client' + pathname, request.url))
     }
   }
 
