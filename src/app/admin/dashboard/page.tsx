@@ -322,19 +322,19 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7] flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-emerald-50 flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#00874e] rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#00874e] to-emerald-600 rounded-xl flex items-center justify-center shadow-md">
                 <span className="text-white text-lg font-bold">$</span>
               </div>
               <div>
-                <span className="text-[#003d2c] text-lg font-semibold">Solution Argent Rapide</span>
-                <span className="text-gray-400 text-sm ml-2">Administration</span>
+                <span className="text-[#003d2c] text-lg font-bold">Solution Argent Rapide</span>
+                <span className="text-gray-400 text-sm ml-2 font-medium">Admin</span>
               </div>
             </div>
 
@@ -349,10 +349,10 @@ export default function AdminDashboard() {
                 <button
                   key={item.id}
                   onClick={() => setSelectedView(item.id as typeof selectedView)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                     selectedView === item.id
-                      ? 'bg-[#00874e] text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
+                      ? 'bg-gradient-to-r from-[#00874e] to-emerald-600 text-white shadow-md'
+                      : 'text-gray-600 hover:bg-gray-100 hover:scale-105'
                   }`}
                 >
                   {item.label}
@@ -403,40 +403,43 @@ export default function AdminDashboard() {
           <>
             {/* Welcome Section */}
             <div className="mb-8">
-              <h1 className="text-2xl font-semibold text-[#003d2c]">Tableau de bord</h1>
-              <p className="text-gray-500 mt-1">Vue d'ensemble de votre activite</p>
+              <h1 className="text-3xl font-bold text-[#003d2c] flex items-center gap-3">
+                <div className="w-1 h-8 bg-gradient-to-b from-[#00874e] to-emerald-600 rounded-full"></div>
+                Tableau de bord
+              </h1>
+              <p className="text-gray-600 mt-2 ml-7 font-medium">Vue d'ensemble de votre activite</p>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-4 gap-6 mb-8">
               {/* Solde VoPay */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 p-6 group hover:scale-105">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-500 text-sm">Solde VoPay</span>
-                  <div className="w-10 h-10 bg-[#e8f5e9] rounded-full flex items-center justify-center">
+                  <span className="text-gray-600 text-sm font-medium">Solde VoPay</span>
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#e8f5e9] to-emerald-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                     <DollarSign size={20} className="text-[#00874e]" />
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-gray-900 mb-2">
                   {vopayLoading ? '...' : formatCurrency(vopayData.balance)}
                 </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm text-gray-500">Disponible: {formatCurrency(vopayData.available)}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 font-medium">Disponible: {formatCurrency(vopayData.available)}</span>
                 </div>
               </div>
 
               {/* Volume Aujourd'hui */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 p-6 group hover:scale-105">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-500 text-sm">Volume Aujourd'hui</span>
-                  <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
+                  <span className="text-gray-600 text-sm font-medium">Volume Aujourd'hui</span>
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                     <TrendingUp size={20} className="text-blue-600" />
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-gray-900 mb-2">
                   {webhookStatsLoading ? '...' : formatCurrency(webhookStats?.todayVolume || 0)}
                 </p>
-                <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center gap-2">
                   {webhookStats && webhookStats.volumeChange !== 0 ? (
                     <>
                       {webhookStats.volumeChange > 0 ? (
@@ -444,50 +447,50 @@ export default function AdminDashboard() {
                       ) : (
                         <TrendingDown size={14} className="text-red-500" />
                       )}
-                      <span className={`text-sm ${webhookStats.volumeChange > 0 ? 'text-[#00874e]' : 'text-red-500'}`}>
+                      <span className={`text-xs font-semibold ${webhookStats.volumeChange > 0 ? 'text-[#00874e]' : 'text-red-500'}`}>
                         {webhookStats.volumeChange > 0 ? '+' : ''}{webhookStats.volumeChange}% vs hier
                       </span>
                     </>
                   ) : (
-                    <span className="text-sm text-gray-500">Pas de variation</span>
+                    <span className="text-xs text-gray-500 font-medium">Pas de variation</span>
                   )}
                 </div>
               </div>
 
               {/* Transactions Actives */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 p-6 group hover:scale-105">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-500 text-sm">Transactions Actives</span>
-                  <div className="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center">
+                  <span className="text-gray-600 text-sm font-medium">Transactions Actives</span>
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Activity size={20} className="text-purple-600" />
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-gray-900 mb-2">
                   {webhookStatsLoading ? '...' : webhookStats?.totalPending || 0}
                 </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm text-gray-500">En cours de traitement</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 font-medium">En cours de traitement</span>
                 </div>
               </div>
 
               {/* Taux de Succès */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 p-6 group hover:scale-105">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-500 text-sm">Taux de Succès 7j</span>
-                  <div className="w-10 h-10 bg-[#e8f5e9] rounded-full flex items-center justify-center">
+                  <span className="text-gray-600 text-sm font-medium">Taux de Succès 7j</span>
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#e8f5e9] to-emerald-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                     <CheckCircle size={20} className="text-[#00874e]" />
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-gray-900 mb-2">
                   {webhookStatsLoading ? '...' : `${webhookStats?.weekSuccessRate || 0}%`}
                 </p>
-                <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center gap-2">
                   {webhookStats && webhookStats.weekSuccessRate >= 90 ? (
-                    <span className="text-sm text-[#00874e]">Excellent</span>
+                    <span className="text-xs font-semibold text-[#00874e]">Excellent</span>
                   ) : webhookStats && webhookStats.weekSuccessRate >= 75 ? (
-                    <span className="text-sm text-blue-600">Bon</span>
+                    <span className="text-xs font-semibold text-blue-600">Bon</span>
                   ) : (
-                    <span className="text-sm text-amber-600">À surveiller</span>
+                    <span className="text-xs font-semibold text-amber-600">À surveiller</span>
                   )}
                 </div>
               </div>
@@ -496,15 +499,15 @@ export default function AdminDashboard() {
             {/* Two Column Layout */}
             <div className="grid grid-cols-3 gap-6">
               {/* Activity Feed - Transactions Récentes */}
-              <div className="col-span-2 bg-white rounded-lg border border-gray-200">
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                  <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+              <div className="col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex items-center justify-between">
+                  <h2 className="font-bold text-gray-900 flex items-center gap-2">
                     <Activity size={18} className="text-[#00874e]" />
                     Transactions recentes
                   </h2>
                   <button
                     onClick={fetchWebhookStats}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    className="text-gray-400 hover:text-[#00874e] transition-all hover:scale-110"
                   >
                     <RefreshCw size={16} className={webhookStatsLoading ? 'animate-spin' : ''} />
                   </button>
@@ -522,12 +525,12 @@ export default function AdminDashboard() {
                       const isPending = status === 'pending' || status === 'in progress'
 
                       return (
-                        <div key={tx.id || i} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                        <div key={tx.id || i} className="px-6 py-4 flex items-center justify-between hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all duration-200 cursor-pointer group">
                           <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                              isSuccessful ? 'bg-[#e8f5e9]' :
-                              isFailed ? 'bg-red-50' :
-                              isPending ? 'bg-blue-50' :
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
+                              isSuccessful ? 'bg-gradient-to-br from-[#e8f5e9] to-emerald-100' :
+                              isFailed ? 'bg-gradient-to-br from-red-50 to-red-100' :
+                              isPending ? 'bg-gradient-to-br from-blue-50 to-blue-100' :
                               'bg-gray-50'
                             }`}>
                               {isSuccessful && <CheckCircle size={18} className="text-[#00874e]" />}
@@ -572,8 +575,11 @@ export default function AdminDashboard() {
               {/* Right Sidebar */}
               <div className="space-y-6">
                 {/* Quick Stats */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                  <h3 className="font-semibold text-gray-900 mb-4">Statistiques rapides</h3>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                  <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-[#00874e] rounded-full"></div>
+                    Statistiques rapides
+                  </h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-500 text-sm">Taux de succes 7j</span>
@@ -583,7 +589,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-[#00874e] rounded-full transition-all"
+                        className="h-full bg-gradient-to-r from-[#00874e] to-emerald-600 rounded-full transition-all duration-500"
                         style={{ width: `${webhookStats?.weekSuccessRate || 0}%` }}
                       />
                     </div>
@@ -616,19 +622,21 @@ export default function AdminDashboard() {
 
                 {/* Alertes - Transactions Échouées */}
                 {webhookStats && webhookStats.failedCount > 0 && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                  <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-xl p-6 shadow-sm">
                     <div className="flex items-center gap-3 mb-4">
-                      <AlertTriangle size={20} className="text-red-500" />
+                      <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                        <AlertTriangle size={20} className="text-red-600" />
+                      </div>
                       <div>
-                        <h3 className="font-semibold text-red-900">Alertes</h3>
-                        <p className="text-sm text-red-600">
+                        <h3 className="font-bold text-red-900">Alertes</h3>
+                        <p className="text-sm text-red-700 font-medium">
                           {webhookStats.failedCount} transaction(s) échouée(s)
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() => setSelectedView('vopay')}
-                      className="w-full px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+                      className="w-full px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg text-sm font-semibold hover:from-red-700 hover:to-red-800 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
                     >
                       Voir les détails
                     </button>
@@ -636,20 +644,20 @@ export default function AdminDashboard() {
                 )}
 
                 {/* Recent Messages */}
-                <div className="bg-white rounded-lg border border-gray-200">
-                  <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900">Messages recents</h3>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex items-center justify-between">
+                    <h3 className="font-bold text-gray-900">Messages recents</h3>
                     {stats.nonLus > 0 && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-600 font-medium">
+                      <span className="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white font-bold shadow-sm">
                         {stats.nonLus} nouveau(x)
                       </span>
                     )}
                   </div>
                   <div className="divide-y divide-gray-100">
                     {messages.slice(0, 3).map((msg) => (
-                      <div key={msg.id} className="px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer">
+                      <div key={msg.id} className="px-6 py-4 hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all cursor-pointer group">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-[#e8f5e9] flex items-center justify-center text-sm font-semibold text-[#00874e]">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#e8f5e9] to-emerald-100 flex items-center justify-center text-sm font-bold text-[#00874e] group-hover:scale-110 transition-transform">
                             {msg.nom.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -665,10 +673,10 @@ export default function AdminDashboard() {
                   </div>
                   <button
                     onClick={() => setSelectedView('messages')}
-                    className="w-full px-6 py-3 text-sm font-medium text-[#00874e] hover:bg-gray-50 transition-colors border-t border-gray-100 flex items-center justify-center gap-1"
+                    className="w-full px-6 py-3 text-sm font-semibold text-[#00874e] hover:bg-gradient-to-r hover:from-gray-50 hover:to-white transition-all border-t border-gray-100 flex items-center justify-center gap-1 group"
                   >
                     Voir tous les messages
-                    <ChevronRight size={16} />
+                    <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
               </div>
@@ -683,19 +691,22 @@ export default function AdminDashboard() {
             <div className={`${selectedMessage ? 'w-1/2' : 'w-full'} transition-all duration-300`}>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h1 className="text-2xl font-semibold text-[#003d2c]">Messages</h1>
-                  <p className="text-gray-500 mt-1">{stats.total} message(s) au total</p>
+                  <h1 className="text-3xl font-bold text-[#003d2c] flex items-center gap-3">
+                    <div className="w-1 h-8 bg-gradient-to-b from-[#00874e] to-emerald-600 rounded-full"></div>
+                    Messages
+                  </h1>
+                  <p className="text-gray-600 mt-2 ml-7 font-medium">{stats.total} message(s) au total</p>
                 </div>
                 <button
                   onClick={fetchMessages}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-all shadow-sm hover:shadow hover:scale-105"
                 >
                   <RefreshCw size={16} />
                   Actualiser
                 </button>
               </div>
 
-              <div className="bg-white rounded-lg border border-gray-200">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="divide-y divide-gray-100">
                   {messages.map((msg) => {
                     const { option, message: cleanMsg } = extractOptionFromMessage(msg.question)
@@ -703,18 +714,18 @@ export default function AdminDashboard() {
                       <div
                         key={msg.id}
                         onClick={() => fetchMessageDetails(msg)}
-                        className={`px-6 py-5 hover:bg-gray-50 transition-colors cursor-pointer ${!msg.lu ? 'bg-blue-50/50' : ''} ${selectedMessage?.id === msg.id ? 'ring-2 ring-[#00874e] ring-inset' : ''}`}
+                        className={`px-6 py-5 hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all cursor-pointer group ${!msg.lu ? 'bg-gradient-to-r from-blue-50/30 to-transparent' : ''} ${selectedMessage?.id === msg.id ? 'ring-2 ring-[#00874e] ring-inset bg-emerald-50/30' : ''}`}
                       >
                         <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-full bg-[#e8f5e9] flex items-center justify-center text-sm font-bold text-[#00874e]">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#e8f5e9] to-emerald-100 flex items-center justify-center text-sm font-bold text-[#00874e] group-hover:scale-110 transition-transform shadow-sm">
                             {msg.nom.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-2 flex-wrap">
                               <p className="font-semibold text-gray-900">{msg.nom}</p>
-                              <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-500 font-mono">#{msg.reference}</span>
+                              <span className="text-xs px-2 py-1 rounded-lg bg-gray-100 text-gray-500 font-mono font-semibold">#{msg.reference}</span>
                               {!msg.lu && (
-                                <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-600 font-medium">Nouveau</span>
+                                <span className="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold shadow-sm animate-pulse">Nouveau</span>
                               )}
                             </div>
                             {/* Option Badge */}
@@ -754,18 +765,18 @@ export default function AdminDashboard() {
 
             {/* Panneau de details */}
             {selectedMessage && (
-              <div className="w-1/2 bg-white rounded-lg border border-gray-200 sticky top-24 h-fit max-h-[calc(100vh-120px)] overflow-auto">
+              <div className="w-1/2 bg-white rounded-xl shadow-lg border border-gray-100 sticky top-24 h-fit max-h-[calc(100vh-120px)] overflow-auto">
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
-                  <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex items-center justify-between sticky top-0 z-10 rounded-t-xl">
+                  <h2 className="font-bold text-gray-900 flex items-center gap-2">
                     <MessageSquare size={18} className="text-[#00874e]" />
                     Details du message
                   </h2>
                   <button
                     onClick={closeDetail}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="p-2 hover:bg-red-50 rounded-lg transition-all hover:scale-110"
                   >
-                    <X size={18} className="text-gray-500" />
+                    <X size={18} className="text-gray-500 hover:text-red-600" />
                   </button>
                 </div>
 
