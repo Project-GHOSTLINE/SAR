@@ -6,6 +6,35 @@ function generateReference(id: number) {
   return `SAR-${id.toString().padStart(6, '0')}`
 }
 
+function getClientIP(request: NextRequest): string {
+  return request.headers.get('x-forwarded-for')?.split(',')[0] ||
+         request.headers.get('x-real-ip') ||
+         'unknown'
+}
+
+// Parser le User-Agent pour extraire device, browser, OS
+function parseUserAgent(ua: string): { device: string; browser: string; os: string } {
+  const device = /mobile|android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua)
+    ? (/tablet|ipad/i.test(ua) ? 'Tablet' : 'Mobile')
+    : 'Desktop'
+
+  let browser = 'Unknown'
+  if (/edg/i.test(ua)) browser = 'Edge'
+  else if (/chrome/i.test(ua) && !/edg/i.test(ua)) browser = 'Chrome'
+  else if (/firefox/i.test(ua)) browser = 'Firefox'
+  else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browser = 'Safari'
+  else if (/opera|opr/i.test(ua)) browser = 'Opera'
+
+  let os = 'Unknown'
+  if (/windows/i.test(ua)) os = 'Windows'
+  else if (/mac os x/i.test(ua)) os = 'macOS'
+  else if (/android/i.test(ua)) os = 'Android'
+  else if (/iphone|ipad|ipod/i.test(ua)) os = 'iOS'
+  else if (/linux/i.test(ua)) os = 'Linux'
+
+  return { device, browser, os }
+}
+
 function getSupabase() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY
@@ -75,6 +104,13 @@ export async function POST(request: NextRequest) {
       departement = 'Analyse et suivi'
     }
 
+    // Capturer métriques client
+    const clientIP = getClientIP(request)
+    const userAgent = request.headers.get('user-agent') || ''
+    const { device, browser, os } = parseUserAgent(userAgent)
+    const referrer = request.headers.get('referer') || request.headers.get('referrer') || ''
+    const acceptLanguage = request.headers.get('accept-language')?.split(',')[0] || 'unknown'
+
     const supabase = getSupabase()
     let messageId: number | null = null
     let reference = ''
@@ -89,7 +125,14 @@ export async function POST(request: NextRequest) {
           telephone,
           question: questionWithTag.trim(),
           lu: false,
-          status: 'nouveau'
+          status: 'nouveau',
+          client_ip: clientIP,
+          client_user_agent: userAgent,
+          client_device: device,
+          client_browser: browser,
+          client_os: os,
+          client_language: acceptLanguage,
+          referrer: referrer || null
         })
         .select()
         .single()

@@ -1384,6 +1384,133 @@ export default function AdminDashboard() {
                       </div>
                     )}
 
+                    {/* Analyse Intelligente et Suggestions */}
+                    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-5 border border-purple-200">
+                      <h3 className="text-sm font-semibold text-purple-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        Analyse Intelligente
+                      </h3>
+
+                      <div className="space-y-3">
+                        {/* Statut Assignation */}
+                        {!selectedMessage.assigned_to && (
+                          <div className="bg-amber-100 border-l-4 border-amber-500 rounded-lg p-3">
+                            <div className="flex items-start gap-2">
+                              <AlertTriangle size={16} className="text-amber-700 mt-0.5 flex-shrink-0" />
+                              <div>
+                                <p className="text-sm font-semibold text-amber-900">Message non acheminé</p>
+                                <p className="text-xs text-amber-800 mt-1">Ce message n'a pas encore été assigné à un collègue. Utilisez les boutons ci-dessus pour l'acheminer à Sandra ou Michel.</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Analyse des données techniques */}
+                        {!selectedMessage.client_ip && !selectedMessage.client_device && !selectedMessage.client_browser && (
+                          <div className="bg-blue-100 border-l-4 border-blue-500 rounded-lg p-3">
+                            <div className="flex items-start gap-2">
+                              <svg className="w-4 h-4 text-blue-700 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <div>
+                                <p className="text-sm font-semibold text-blue-900">Données techniques manquantes</p>
+                                <p className="text-xs text-blue-800 mt-1">Ce message a été reçu avant l'implémentation du système de tracking technique. Les nouveaux messages capturent automatiquement l'IP, le browser, l'OS et l'appareil utilisé.</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Suggestions basées sur l'appareil */}
+                        {selectedMessage.client_device === 'Mobile' && (
+                          <div className="bg-green-100 border-l-4 border-green-500 rounded-lg p-3">
+                            <div className="flex items-start gap-2">
+                              <CheckCircle size={16} className="text-green-700 mt-0.5 flex-shrink-0" />
+                              <div>
+                                <p className="text-sm font-semibold text-green-900">Utilisateur mobile détecté</p>
+                                <p className="text-xs text-green-800 mt-1">Client utilise un appareil mobile. Assurez-vous que toute réponse avec liens soit optimisée pour mobile.</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {selectedMessage.client_device === 'Desktop' && selectedMessage.client_os === 'Windows' && (
+                          <div className="bg-indigo-100 border-l-4 border-indigo-500 rounded-lg p-3">
+                            <div className="flex items-start gap-2">
+                              <svg className="w-4 h-4 text-indigo-700 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                              </svg>
+                              <div>
+                                <p className="text-sm font-semibold text-indigo-900">Desktop Windows</p>
+                                <p className="text-xs text-indigo-800 mt-1">Client utilise un ordinateur Windows. Idéal pour partager des documents PDF ou des formulaires détaillés.</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Analyse Browser */}
+                        {selectedMessage.client_browser === 'Safari' && selectedMessage.client_os === 'iOS' && (
+                          <div className="bg-pink-100 border-l-4 border-pink-500 rounded-lg p-3">
+                            <div className="flex items-start gap-2">
+                              <Phone size={16} className="text-pink-700 mt-0.5 flex-shrink-0" />
+                              <div>
+                                <p className="text-sm font-semibold text-pink-900">Utilisateur iPhone/iPad</p>
+                                <p className="text-xs text-pink-800 mt-1">Safari sur iOS détecté. Privilégiez les appels téléphoniques directs via liens tel: dans vos réponses.</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Analyse Langue */}
+                        {selectedMessage.client_language && !selectedMessage.client_language.toLowerCase().startsWith('fr') && (
+                          <div className="bg-yellow-100 border-l-4 border-yellow-500 rounded-lg p-3">
+                            <div className="flex items-start gap-2">
+                              <svg className="w-4 h-4 text-yellow-700 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                              </svg>
+                              <div>
+                                <p className="text-sm font-semibold text-yellow-900">Langue non-française détectée</p>
+                                <p className="text-xs text-yellow-800 mt-1">Le navigateur du client est configuré en <strong>{selectedMessage.client_language}</strong>. Considérez une réponse bilingue ou vérifiez la préférence linguistique.</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Tracking UTM Campaign */}
+                        {(selectedMessage.utm_source || selectedMessage.utm_campaign) && (
+                          <div className="bg-teal-100 border-l-4 border-teal-500 rounded-lg p-3">
+                            <div className="flex items-start gap-2">
+                              <svg className="w-4 h-4 text-teal-700 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                              </svg>
+                              <div>
+                                <p className="text-sm font-semibold text-teal-900">Source trackée : Campagne Marketing</p>
+                                <p className="text-xs text-teal-800 mt-1">
+                                  Ce client provient d'une campagne marketing trackée
+                                  {selectedMessage.utm_source && <> (<strong>{selectedMessage.utm_source}</strong>)</>}.
+                                  Assurez un suivi prioritaire pour maximiser le ROI de la campagne.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Réponse système envoyée */}
+                        {selectedMessage.system_responded && (
+                          <div className="bg-emerald-100 border-l-4 border-emerald-500 rounded-lg p-3">
+                            <div className="flex items-start gap-2">
+                              <CheckCircle size={16} className="text-emerald-700 mt-0.5 flex-shrink-0" />
+                              <div>
+                                <p className="text-sm font-semibold text-emerald-900">Email de confirmation envoyé</p>
+                                <p className="text-xs text-emerald-800 mt-1">Le client a reçu un email automatique de confirmation. Veillez à répondre dans les 24-48h ouvrables tel qu'indiqué dans la confirmation.</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
                     {/* Emails Envoyes */}
                     <div className="bg-gray-50 rounded-xl p-5">
                       <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
