@@ -602,7 +602,7 @@ export default function AdminDashboard() {
                   <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
                     {/* Active Filters Chips */}
                     {(txFilterType !== 'all' || txFilterStatus !== 'all' || txFilterPeriod !== 'all' || txFilterAmount !== 'all' || txSortBy !== 'recent') && (
-                      <div className="bg-white rounded-lg p-3 mb-4 shadow-sm">
+                      <div className="bg-white rounded-lg p-3 mb-4 shadow-sm opacity-100" style={{ transition: 'none' }}>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Filtres actifs</span>
                           <button
