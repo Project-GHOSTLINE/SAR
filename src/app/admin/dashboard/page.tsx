@@ -1068,7 +1068,7 @@ export default function AdminDashboard() {
 
                         return (
                           <div className="mt-4 pt-4 border-t border-gray-200">
-                            <p className="text-xs font-semibold text-gray-700 mb-2">Reclasser par sujet :</p>
+                            <p className="text-xs font-semibold text-gray-700 mb-2">Classer par type de demande :</p>
                             <div className="flex flex-wrap gap-2">
                               {uniqueOptions.map((option) => (
                                 <button
@@ -1136,14 +1136,43 @@ export default function AdminDashboard() {
                     })
                     .map((msg) => {
                     const { option, message: cleanMsg } = extractOptionFromMessage(msg.question)
+
+                    // Définir les couleurs selon le filtre actif
+                    const filterColors = {
+                      hover: messageFilter === 'reponses' ? 'hover:from-green-50' :
+                             messageFilter === 'sandra' ? 'hover:from-pink-50' :
+                             messageFilter === 'michel' ? 'hover:from-indigo-50' :
+                             messageFilter === 'none' ? 'hover:from-amber-50' :
+                             messageFilter === 'no_response' ? 'hover:from-red-50' :
+                             'hover:from-gray-50',
+                      selected: messageFilter === 'reponses' ? 'ring-green-500 bg-green-50/30' :
+                                messageFilter === 'sandra' ? 'ring-pink-500 bg-pink-50/30' :
+                                messageFilter === 'michel' ? 'ring-indigo-500 bg-indigo-50/30' :
+                                messageFilter === 'none' ? 'ring-amber-500 bg-amber-50/30' :
+                                messageFilter === 'no_response' ? 'ring-red-500 bg-red-50/30' :
+                                'ring-[#00874e] bg-emerald-50/30',
+                      avatarBg: messageFilter === 'reponses' ? 'from-green-100 to-green-200' :
+                                messageFilter === 'sandra' ? 'from-pink-100 to-pink-200' :
+                                messageFilter === 'michel' ? 'from-indigo-100 to-indigo-200' :
+                                messageFilter === 'none' ? 'from-amber-100 to-amber-200' :
+                                messageFilter === 'no_response' ? 'from-red-100 to-red-200' :
+                                'from-[#e8f5e9] to-emerald-100',
+                      avatarText: messageFilter === 'reponses' ? 'text-green-700' :
+                                  messageFilter === 'sandra' ? 'text-pink-700' :
+                                  messageFilter === 'michel' ? 'text-indigo-700' :
+                                  messageFilter === 'none' ? 'text-amber-700' :
+                                  messageFilter === 'no_response' ? 'text-red-700' :
+                                  'text-[#00874e]'
+                    }
+
                     return (
                       <div
                         key={msg.id}
                         onClick={() => fetchMessageDetails(msg)}
-                        className={`px-6 py-5 hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all cursor-pointer group ${!msg.lu ? 'bg-gradient-to-r from-blue-50/30 to-transparent' : ''} ${selectedMessage?.id === msg.id ? 'ring-2 ring-[#00874e] ring-inset bg-emerald-50/30' : ''}`}
+                        className={`px-6 py-5 hover:bg-gradient-to-r ${filterColors.hover} hover:to-transparent transition-all cursor-pointer group ${!msg.lu ? 'bg-gradient-to-r from-blue-50/30 to-transparent' : ''} ${selectedMessage?.id === msg.id ? `ring-2 ${filterColors.selected} ring-inset` : ''}`}
                       >
                         <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#e8f5e9] to-emerald-100 flex items-center justify-center text-sm font-bold text-[#00874e] group-hover:scale-110 transition-transform shadow-sm">
+                          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${filterColors.avatarBg} flex items-center justify-center text-sm font-bold ${filterColors.avatarText} group-hover:scale-110 transition-transform shadow-sm`}>
                             {msg.nom.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
                           <div className="flex-1 min-w-0">
