@@ -609,22 +609,18 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <p className="text-3xl font-bold text-gray-900 mb-2">
-                  {webhookStatsLoading ? '...' : formatCurrency(webhookStats?.todayVolume || 0)}
+                  {vopayLoading ? '...' : formatCurrency(vopayData.todayInterac || 0)}
                 </p>
                 <div className="flex items-center gap-2">
-                  {webhookStats && webhookStats.volumeChange !== 0 ? (
+                  {!vopayLoading && vopayData.todayInterac > 0 ? (
                     <>
-                      {webhookStats.volumeChange > 0 ? (
-                        <TrendingUp size={14} className="text-[#00874e]" />
-                      ) : (
-                        <TrendingDown size={14} className="text-red-500" />
-                      )}
-                      <span className={`text-xs font-semibold ${webhookStats.volumeChange > 0 ? 'text-[#00874e]' : 'text-red-500'}`}>
-                        {webhookStats.volumeChange > 0 ? '+' : ''}{webhookStats.volumeChange}% vs hier
+                      <TrendingUp size={14} className="text-[#00874e]" />
+                      <span className="text-xs font-semibold text-[#00874e]">
+                        Transactions VoPay du jour
                       </span>
                     </>
                   ) : (
-                    <span className="text-xs text-gray-500 font-medium">Pas de variation</span>
+                    <span className="text-xs text-gray-500 font-medium">Aucune transaction aujourd'hui</span>
                   )}
                 </div>
               </div>
