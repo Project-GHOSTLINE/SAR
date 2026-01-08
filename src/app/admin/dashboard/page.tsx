@@ -807,7 +807,7 @@ export default function AdminDashboard() {
                                       <span>•</span>
                                       <span className="font-medium">{tx.transaction_type}</span>
                                       <span>•</span>
-                                      <span>{new Date(tx.received_at).toLocaleString('fr-CA')}</span>
+                                      <span suppressHydrationWarning>{new Date(tx.received_at).toLocaleString('fr-CA')}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -1429,7 +1429,7 @@ export default function AdminDashboard() {
                                   {msg.telephone}
                                 </span>
                               )}
-                              <span className="flex items-center gap-1">
+                              <span className="flex items-center gap-1" suppressHydrationWarning>
                                 <Clock size={14} />
                                 {new Date(msg.date).toLocaleString('fr-CA')}
                               </span>
@@ -2252,7 +2252,7 @@ export default function AdminDashboard() {
                                   <span>•</span>
                                   <span className="font-medium">{tx.TransactionType}</span>
                                   <span>•</span>
-                                  <span>{new Date(tx.TransactionDateTime).toLocaleString('fr-CA')}</span>
+                                  <span suppressHydrationWarning>{new Date(tx.TransactionDateTime).toLocaleString('fr-CA')}</span>
                                 </div>
                               </div>
                             </div>
