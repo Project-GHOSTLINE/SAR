@@ -42,7 +42,14 @@ export default function Home() {
       const response = await fetch('/api/contact-analyse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(contactForm)
+        body: JSON.stringify({
+          ...contactForm,
+          source: 'accueil',
+          clientMetadata: {
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            screenResolution: `${window.screen.width}x${window.screen.height}`
+          }
+        })
       })
 
       if (!response.ok) {

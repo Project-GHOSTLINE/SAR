@@ -49,7 +49,7 @@ function getSupabase() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { nom, email, telephone, question, questionAutre, source = 'analyse' } = body
+    const { nom, email, telephone, question, questionAutre, source = 'analyse', clientMetadata } = body
 
     // Validation
     if (!nom || !email || !telephone || !question) {
@@ -111,6 +111,12 @@ export async function POST(request: NextRequest) {
     const referrer = request.headers.get('referer') || request.headers.get('referrer') || ''
     const acceptLanguage = request.headers.get('accept-language')?.split(',')[0] || 'unknown'
 
+    // Extraire UTM params du referrer si présent
+    const referrerUrl = referrer ? new URL(referrer, 'https://solutionargentrapide.ca') : null
+    const utmSource = referrerUrl?.searchParams.get('utm_source') || clientMetadata?.utmSource || null
+    const utmMedium = referrerUrl?.searchParams.get('utm_medium') || clientMetadata?.utmMedium || null
+    const utmCampaign = referrerUrl?.searchParams.get('utm_campaign') || clientMetadata?.utmCampaign || null
+
     const supabase = getSupabase()
     let messageId: number | null = null
     let reference = ''
@@ -135,8 +141,13 @@ export async function POST(request: NextRequest) {
           client_device: device,
           client_browser: browser,
           client_os: os,
+          client_timezone: clientMetadata?.timezone || null,
           client_language: acceptLanguage,
-          referrer: referrer || null
+          client_screen_resolution: clientMetadata?.screenResolution || null,
+          referrer: referrer || null,
+          utm_source: utmSource,
+          utm_medium: utmMedium,
+          utm_campaign: utmCampaign
         })
         .select()
         .single()
