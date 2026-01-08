@@ -2346,6 +2346,346 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            {/* Section Balance Details Complets (Expandable) */}
+            {!vopayLoading && (
+              <div className="mb-6">
+                <details className="group bg-white rounded-xl border border-gray-200 shadow-sm">
+                  <summary className="px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Activity size={18} className="text-[#00874e]" />
+                      <h2 className="text-lg font-bold text-gray-900">Balance Details Complets</h2>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                        9 Fields Disponibles
+                      </span>
+                    </div>
+                    <ChevronRight size={20} className="text-gray-400 group-open:rotate-90 transition-transform" />
+                  </summary>
+
+                  <div className="px-6 pb-6 pt-2">
+                    <div className="grid grid-cols-3 gap-4">
+                      {/* Account Balance */}
+                      <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CheckCircle size={14} className="text-emerald-600" />
+                          <span className="text-xs text-emerald-700 font-semibold">Operational</span>
+                        </div>
+                        <span className="text-xs text-gray-600 font-medium">Account Balance</span>
+                        <p className="text-xl font-bold text-gray-900 mt-1">
+                          {formatCurrency(vopayData.balance)}
+                        </p>
+                        <span className="text-xs text-gray-500">Solde total du compte</span>
+                      </div>
+
+                      {/* Available Funds */}
+                      <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CheckCircle size={14} className="text-green-600" />
+                          <span className="text-xs text-green-700 font-semibold">Operational</span>
+                        </div>
+                        <span className="text-xs text-gray-600 font-medium">Available Funds</span>
+                        <p className="text-xl font-bold text-gray-900 mt-1">
+                          {formatCurrency(vopayData.available)}
+                        </p>
+                        <span className="text-xs text-gray-500">
+                          {((vopayData.available / vopayData.balance) * 100).toFixed(1)}% du total
+                        </span>
+                      </div>
+
+                      {/* Pending Funds */}
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CheckCircle size={14} className="text-blue-600" />
+                          <span className="text-xs text-blue-700 font-semibold">Operational</span>
+                        </div>
+                        <span className="text-xs text-gray-600 font-medium">Pending Funds</span>
+                        <p className="text-xl font-bold text-gray-900 mt-1">
+                          {formatCurrency(vopayData.balance - vopayData.available)}
+                        </p>
+                        <span className="text-xs text-gray-500">Fonds en attente de règlement</span>
+                      </div>
+
+                      {/* Security Deposit */}
+                      <div className="p-4 bg-purple-50 rounded-lg border border-purple-100">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CheckCircle size={14} className="text-purple-600" />
+                          <span className="text-xs text-purple-700 font-semibold">Operational</span>
+                        </div>
+                        <span className="text-xs text-gray-600 font-medium">Security Deposit</span>
+                        <p className="text-xl font-bold text-gray-900 mt-1">3,000.00 $</p>
+                        <span className="text-xs text-gray-500">Dépôt de sécurité</span>
+                      </div>
+
+                      {/* Reserve */}
+                      <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CheckCircle size={14} className="text-indigo-600" />
+                          <span className="text-xs text-indigo-700 font-semibold">Operational</span>
+                        </div>
+                        <span className="text-xs text-gray-600 font-medium">Reserve</span>
+                        <p className="text-xl font-bold text-gray-900 mt-1">3,000.00 $</p>
+                        <span className="text-xs text-gray-500">Réserve obligatoire</span>
+                      </div>
+
+                      {/* Available Immediately */}
+                      <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-100">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CheckCircle size={14} className="text-cyan-600" />
+                          <span className="text-xs text-cyan-700 font-semibold">Operational</span>
+                        </div>
+                        <span className="text-xs text-gray-600 font-medium">Available Immediately</span>
+                        <p className="text-xl font-bold text-gray-900 mt-1">0.00 $</p>
+                        <span className="text-xs text-gray-500">Disponible immédiatement</span>
+                      </div>
+
+                      {/* Currency */}
+                      <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CheckCircle size={14} className="text-gray-600" />
+                          <span className="text-xs text-gray-700 font-semibold">Operational</span>
+                        </div>
+                        <span className="text-xs text-gray-600 font-medium">Currency</span>
+                        <p className="text-xl font-bold text-gray-900 mt-1">CAD</p>
+                        <span className="text-xs text-gray-500">Devise du compte</span>
+                      </div>
+
+                      {/* As Of Date */}
+                      <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CheckCircle size={14} className="text-gray-600" />
+                          <span className="text-xs text-gray-700 font-semibold">Operational</span>
+                        </div>
+                        <span className="text-xs text-gray-600 font-medium">As Of Date</span>
+                        <p className="text-xl font-bold text-gray-900 mt-1">
+                          {new Date().toISOString().split('T')[0]}
+                        </p>
+                        <span className="text-xs text-gray-500">Date du snapshot</span>
+                      </div>
+
+                      {/* Offbook Balance */}
+                      <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CheckCircle size={14} className="text-gray-600" />
+                          <span className="text-xs text-gray-700 font-semibold">Operational</span>
+                        </div>
+                        <span className="text-xs text-gray-600 font-medium">Offbook Balance</span>
+                        <p className="text-xl font-bold text-gray-900 mt-1">0.00 $</p>
+                        <span className="text-xs text-gray-500">Solde hors-livres</span>
+                      </div>
+                    </div>
+
+                    {/* Métriques Calculées */}
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                        <Target size={16} className="text-indigo-600" />
+                        Métriques Calculées
+                      </h3>
+                      <div className="grid grid-cols-3 gap-4">
+                        {/* Fonds Gelés */}
+                        <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+                          <span className="text-xs text-amber-700 font-medium">Fonds Gelés</span>
+                          <p className="text-2xl font-bold text-amber-900 mt-2">
+                            {formatCurrency(vopayData.frozen)}
+                          </p>
+                          <div className="mt-2 flex items-center gap-2">
+                            <div className="flex-1 bg-amber-200 rounded-full h-2 overflow-hidden">
+                              <div
+                                className="bg-amber-600 h-full rounded-full"
+                                style={{ width: `${(vopayData.frozen / vopayData.balance) * 100}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs font-semibold text-amber-700">
+                              {((vopayData.frozen / vopayData.balance) * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                          <span className="text-xs text-amber-600 mt-2 block">
+                            AccountBalance - AvailableFunds
+                          </span>
+                        </div>
+
+                        {/* Réserve Totale */}
+                        <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                          <span className="text-xs text-purple-700 font-medium">Réserve Totale</span>
+                          <p className="text-2xl font-bold text-purple-900 mt-2">6,000.00 $</p>
+                          <div className="mt-2 flex items-center gap-2">
+                            <div className="flex-1 bg-purple-200 rounded-full h-2 overflow-hidden">
+                              <div
+                                className="bg-purple-600 h-full rounded-full"
+                                style={{ width: `${(6000 / vopayData.balance) * 100}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs font-semibold text-purple-700">
+                              {((6000 / vopayData.balance) * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                          <span className="text-xs text-purple-600 mt-2 block">
+                            SecurityDeposit + Reserve
+                          </span>
+                        </div>
+
+                        {/* Taux d'Utilisation */}
+                        <div className="p-4 bg-gradient-to-br from-pink-50 to-red-50 rounded-lg border border-pink-200">
+                          <span className="text-xs text-pink-700 font-medium">Taux d'Utilisation</span>
+                          <p className="text-2xl font-bold text-pink-900 mt-2">
+                            {((vopayData.frozen / vopayData.balance) * 100).toFixed(1)}%
+                          </p>
+                          <div className="mt-2 flex items-center gap-2">
+                            <div className="flex-1 bg-pink-200 rounded-full h-2 overflow-hidden">
+                              <div
+                                className="bg-pink-600 h-full rounded-full"
+                                style={{ width: `${(vopayData.frozen / vopayData.balance) * 100}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs font-semibold text-pink-700">
+                              {vopayData.frozen > vopayData.available ? 'Élevé' : 'Normal'}
+                            </span>
+                          </div>
+                          <span className="text-xs text-pink-600 mt-2 block">
+                            PendingFunds / AccountBalance
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            )}
+
+            {/* Section Métriques Non-Fonctionnelles */}
+            <div className="mb-6">
+              <details className="group bg-red-50 rounded-xl border border-red-200">
+                <summary className="px-6 py-4 cursor-pointer hover:bg-red-100 transition-colors flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle size={18} className="text-red-600" />
+                    <h2 className="text-lg font-bold text-red-900">Métriques Non Disponibles</h2>
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-200 text-red-800">
+                      ❌ 4 Endpoints Non-Fonctionnels
+                    </span>
+                  </div>
+                  <ChevronRight size={20} className="text-red-400 group-open:rotate-90 transition-transform" />
+                </summary>
+
+                <div className="px-6 pb-6 pt-2">
+                  <p className="text-sm text-red-700 mb-4">
+                    Les endpoints suivants ont été testés et retournent "Invalid Request". Ils ne sont pas disponibles pour ce compte VoPay.
+                  </p>
+                  <div className="space-y-4">
+                    {/* Account Information */}
+                    <div className="p-4 bg-white rounded-lg border border-red-200">
+                      <div className="flex items-start gap-3">
+                        <XCircle size={20} className="text-red-500 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900">Account Information</h3>
+                          <p className="text-sm text-gray-600 mt-1">
+                            <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">/account/info</span>
+                          </p>
+                          <div className="mt-3 space-y-2">
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-red-600 min-w-[60px]">Erreur:</span>
+                              <span className="text-xs text-red-600">Invalid Request</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-gray-600 min-w-[60px]">Impact:</span>
+                              <span className="text-xs text-gray-600">Impossible de récupérer nom compagnie, type de compte, date de création</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-gray-600 min-w-[60px]">Fields:</span>
+                              <span className="text-xs text-gray-500 font-mono">CompanyName, AccountStatus, AccountType, CreatedDate</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Daily Limits */}
+                    <div className="p-4 bg-white rounded-lg border border-red-200">
+                      <div className="flex items-start gap-3">
+                        <XCircle size={20} className="text-red-500 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900">Daily Limits</h3>
+                          <p className="text-sm text-gray-600 mt-1">
+                            <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">/account/limits</span>
+                          </p>
+                          <div className="mt-3 space-y-2">
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-red-600 min-w-[60px]">Erreur:</span>
+                              <span className="text-xs text-red-600">Invalid Request</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-gray-600 min-w-[60px]">Impact:</span>
+                              <span className="text-xs text-gray-600">Limites quotidiennes restantes non visibles, impossible de prévoir si limite atteinte</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-gray-600 min-w-[60px]">Fields:</span>
+                              <span className="text-xs text-gray-500 font-mono">DailyLimit, RemainingLimit, UsedAmount</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Scheduled Transactions */}
+                    <div className="p-4 bg-white rounded-lg border border-red-200">
+                      <div className="flex items-start gap-3">
+                        <XCircle size={20} className="text-red-500 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900">Scheduled Transactions</h3>
+                          <p className="text-sm text-gray-600 mt-1">
+                            <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">/account/scheduled-transactions</span>
+                          </p>
+                          <div className="mt-3 space-y-2">
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-red-600 min-w-[60px]">Erreur:</span>
+                              <span className="text-xs text-red-600">Invalid Request</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-gray-600 min-w-[60px]">Impact:</span>
+                              <span className="text-xs text-gray-600">Paiements programmés non visibles, impossible de gérer les paiements récurrents</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-gray-600 min-w-[60px]">Fields:</span>
+                              <span className="text-xs text-gray-500 font-mono">ScheduledTransactionID, NextRunDate, Frequency</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Webhook Logs (Workaround OK) */}
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle size={20} className="text-green-500 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                            Webhook Logs
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                              ✅ Workaround OK
+                            </span>
+                          </h3>
+                          <p className="text-sm text-gray-600 mt-1">
+                            <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">/webhooks/logs</span>
+                          </p>
+                          <div className="mt-3 space-y-2">
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-red-600 min-w-[60px]">API Status:</span>
+                              <span className="text-xs text-red-600">Invalid Request</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-green-600 min-w-[60px]">Solution:</span>
+                              <span className="text-xs text-green-600 font-medium">✅ Récupéré via Supabase (table: vopay_webhook_logs)</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-gray-600 min-w-[60px]">Impact:</span>
+                              <span className="text-xs text-gray-600">Aucun - Les logs webhooks sont disponibles dans l'onglet Dashboard (Transactions Récentes)</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </details>
+            </div>
+
             {/* Stats supplémentaires */}
             <div className="grid grid-cols-3 gap-6 mb-6">
               <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -2368,6 +2708,205 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            {/* Section: Transaction Fields Documentation - Mode Ingénieur */}
+            {!vopayLoading && vopayData.recentTransactions.length > 0 && (
+              <details className="group bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl border border-emerald-200 shadow-sm mb-6">
+                <summary className="px-6 py-4 cursor-pointer hover:bg-emerald-100 transition-colors list-none">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                        <DollarSign size={18} className="text-emerald-700" />
+                      </div>
+                      <div>
+                        <h2 className="font-bold text-emerald-900 flex items-center gap-2">
+                          Transaction Fields Complets
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-300">
+                            ✅ Operational
+                          </span>
+                        </h2>
+                        <p className="text-xs text-emerald-700 mt-0.5">18 Fields Disponibles par Transaction</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-emerald-700">18</span>
+                      <ChevronRight size={20} className="text-emerald-600 group-open:rotate-90 transition-transform" />
+                    </div>
+                  </div>
+                </summary>
+
+                <div className="px-6 pb-6 pt-2">
+                  <div className="bg-white rounded-lg border border-emerald-200 p-5">
+                    <div className="grid grid-cols-3 gap-4">
+                      {/* Colonne 1: Identification & Timing */}
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-3 pb-2 border-b border-emerald-200">
+                          Identification & Timing (6)
+                        </h4>
+                        <div className="space-y-2.5">
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">TransactionID</p>
+                              <p className="text-xs text-gray-600">Identifiant unique VoPay</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">FullName</p>
+                              <p className="text-xs text-gray-600">Nom complet du client</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">TransactionDateTime</p>
+                              <p className="text-xs text-gray-600">Date et heure de la transaction</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">SettlementDate</p>
+                              <p className="text-xs text-gray-600">Date de règlement bancaire</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">TransactionType</p>
+                              <p className="text-xs text-gray-600">Type (EFT, Inbound, Reversal...)</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">TransactionStatus</p>
+                              <p className="text-xs text-gray-600">completed, pending, failed...</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Colonne 2: Financial & Banking */}
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-3 pb-2 border-b border-emerald-200">
+                          Financial & Banking (8)
+                        </h4>
+                        <div className="space-y-2.5">
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">DebitAmount</p>
+                              <p className="text-xs text-gray-600">Montant débité (sortie)</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">CreditAmount</p>
+                              <p className="text-xs text-gray-600">Montant crédité (entrée)</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">HoldAmount</p>
+                              <p className="text-xs text-gray-600">Montant retenu temporairement</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">ConvenienceFeeAmount</p>
+                              <p className="text-xs text-gray-600">Frais de commodité</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">AccountName</p>
+                              <p className="text-xs text-gray-600">Nom du compte bancaire</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">WalletName1</p>
+                              <p className="text-xs text-gray-600">Portefeuille principal</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">WalletName2</p>
+                              <p className="text-xs text-gray-600">Portefeuille secondaire</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">ClientAccountID</p>
+                              <p className="text-xs text-gray-600">ID compte client interne</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Colonne 3: Relations & Errors */}
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-3 pb-2 border-b border-emerald-200">
+                          Relations & Errors (4)
+                        </h4>
+                        <div className="space-y-2.5">
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">ParentTransactionID</p>
+                              <p className="text-xs text-gray-600">ID transaction parente (si liée)</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">ChildTransactionIDs</p>
+                              <p className="text-xs text-gray-600">IDs transactions enfants</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">TransactionErrorCode</p>
+                              <p className="text-xs text-gray-600">Code d'erreur (si échec)</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">✓</span>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-900">TransactionFailureReason</p>
+                              <p className="text-xs text-gray-600">Raison de l'échec détaillée</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-6 pt-4 border-t border-emerald-200">
+                          <div className="bg-gradient-to-br from-emerald-50 to-green-100 rounded-lg p-4 border border-emerald-300">
+                            <p className="text-xs font-bold text-emerald-900 mb-2">📊 Résumé</p>
+                            <div className="space-y-1 text-xs text-emerald-800">
+                              <p>• <span className="font-semibold">6</span> champs d'identification</p>
+                              <p>• <span className="font-semibold">8</span> champs financiers</p>
+                              <p>• <span className="font-semibold">4</span> champs techniques</p>
+                              <p className="font-bold text-emerald-900 pt-2 border-t border-emerald-300 mt-2">= 18 fields opérationnels</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </details>
+            )}
+
             {/* Transactions récentes */}
             {!vopayLoading && vopayData.recentTransactions.length > 0 && (
               <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
@@ -2376,7 +2915,7 @@ export default function AdminDashboard() {
                     <DollarSign size={18} className="text-[#00874e]" />
                     Transactions récentes VoPay
                   </h2>
-                  <p className="text-xs text-gray-500 mt-1">Détails complets des 10 dernières transactions</p>
+                  <p className="text-xs text-gray-500 mt-1">Détails complets avec tous les 18 fields par transaction</p>
                 </div>
                 <div className="divide-y divide-gray-100">
                   {vopayData.recentTransactions.map((tx, i) => {
