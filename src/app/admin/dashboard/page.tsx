@@ -668,6 +668,117 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            {/* Messages du Mois Section */}
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-1 h-6 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full"></div>
+                <h2 className="text-xl font-bold text-gray-900">Messages du Mois</h2>
+                <span className="text-sm text-gray-500 font-medium">Vue d'ensemble du support client</span>
+              </div>
+
+              <div className="grid grid-cols-6 gap-4">
+                {/* Total Messages */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-600">Total Messages</span>
+                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <MessageSquare size={16} className="text-indigo-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900 mb-1">{messageStats.totalDuMois}</p>
+                  <span className="text-xs text-gray-500">
+                    {messageStats.lastAll ? formatLastMessageDate(messageStats.lastAll) : 'Aucun'}
+                  </span>
+                </div>
+
+                {/* Réponses Envoyées */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-600">Réponses Envoyées</span>
+                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Send size={16} className="text-emerald-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900 mb-1">{messageStats.reponsesEnvoyees}</p>
+                  <span className="text-xs text-gray-500">
+                    {messageStats.totalDuMois > 0
+                      ? `${Math.round((messageStats.reponsesEnvoyees / messageStats.totalDuMois) * 100)}% du total`
+                      : 'Aucun message'}
+                  </span>
+                </div>
+
+                {/* Échecs Réponses */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-600">Échecs Réponses</span>
+                    <div className="w-8 h-8 bg-gradient-to-br from-red-50 to-red-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <AlertTriangle size={16} className="text-red-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900 mb-1">{messageStats.reponsesNonEnvoyees}</p>
+                  <span className="text-xs">
+                    {messageStats.reponsesNonEnvoyees > 5 ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-semibold">
+                        <AlertTriangle size={10} />
+                        À vérifier
+                      </span>
+                    ) : (
+                      <span className="text-gray-500">Normal</span>
+                    )}
+                  </span>
+                </div>
+
+                {/* Assignés Sandra */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-600">Assignés Sandra</span>
+                    <div className="w-8 h-8 bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <User size={16} className="text-pink-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900 mb-1">{messageStats.acheminesSandra}</p>
+                  <span className="text-xs text-gray-500">
+                    {messageStats.lastSandra ? formatLastMessageDate(messageStats.lastSandra) : 'Aucun'}
+                  </span>
+                </div>
+
+                {/* Assignés Michel */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-600">Assignés Michel</span>
+                    <div className="w-8 h-8 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <User size={16} className="text-cyan-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900 mb-1">{messageStats.acheminesMichel}</p>
+                  <span className="text-xs text-gray-500">
+                    {messageStats.lastMichel ? formatLastMessageDate(messageStats.lastMichel) : 'Aucun'}
+                  </span>
+                </div>
+
+                {/* Non Assignés */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-600">Non Assignés</span>
+                    <div className="w-8 h-8 bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <XCircle size={16} className="text-amber-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900 mb-1">{messageStats.nonAchemines}</p>
+                  <span className="text-xs">
+                    {messageStats.nonAchemines > 0 ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold">
+                        <AlertTriangle size={10} />
+                        URGENT
+                      </span>
+                    ) : (
+                      <span className="text-gray-500">Aucun en attente</span>
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
+
             {/* Two Column Layout */}
             <div className="grid grid-cols-3 gap-6">
               {/* Activity Feed - Transactions Récentes */}
