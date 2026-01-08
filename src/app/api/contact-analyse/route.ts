@@ -126,6 +126,10 @@ export async function POST(request: NextRequest) {
           question: questionWithTag.trim(),
           lu: false,
           status: 'nouveau',
+          assigned_to: destinataireNom, // Auto-assigner selon le destinataire
+          assigned_at: new Date().toISOString(),
+          assigned_by: 'auto-system',
+          system_responded: true, // Email de confirmation envoyé
           client_ip: clientIP,
           client_user_agent: userAgent,
           client_device: device,

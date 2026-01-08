@@ -211,6 +211,10 @@ export async function POST(request: NextRequest) {
           question: `[${sourceLabel}] ${message}`,
           lu: false,
           status: 'nouveau',
+          assigned_to: responsable, // Auto-assigner selon la source
+          assigned_at: new Date().toISOString(),
+          assigned_by: 'auto-system',
+          system_responded: true, // Email de confirmation envoyé
           client_ip: clientIP,
           client_user_agent: userAgent,
           client_device: device,

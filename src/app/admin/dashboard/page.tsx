@@ -901,38 +901,13 @@ export default function AdminDashboard() {
                   </h1>
                   <p className="text-gray-600 mt-2 ml-7 font-medium">{stats.total} message(s) au total</p>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={async () => {
-                      try {
-                        const res = await fetch('/api/admin/messages/auto-assign', {
-                          method: 'POST',
-                          credentials: 'include'
-                        })
-                        const data = await res.json()
-                        if (data.success) {
-                          alert(`✅ ${data.message}\n\nSandra: ${data.details.sandra}\nMichel: ${data.details.michel}`)
-                          fetchMessages()
-                          fetchMessageStats()
-                        }
-                      } catch (error) {
-                        console.error('Erreur auto-assign:', error)
-                        alert('❌ Erreur lors de l\'auto-assignation')
-                      }
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#00874e] to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all hover:scale-105 font-medium"
-                  >
-                    <Users size={16} />
-                    Auto-assigner
-                  </button>
-                  <button
-                    onClick={() => { fetchMessages(); fetchMessageStats(); }}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-all shadow-sm hover:shadow hover:scale-105"
-                  >
-                    <RefreshCw size={16} />
-                    Actualiser
-                  </button>
-                </div>
+                <button
+                  onClick={() => { fetchMessages(); fetchMessageStats(); }}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-all shadow-sm hover:shadow hover:scale-105"
+                >
+                  <RefreshCw size={16} />
+                  Actualiser
+                </button>
               </div>
 
               {/* Statistiques Messages - Ligne fluide avec 5 cartes */}
