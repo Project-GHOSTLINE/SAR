@@ -168,6 +168,13 @@ export async function GET(request: NextRequest) {
     // Réponses non envoyées (échec)
     const reponsesNonEnvoyees = messages?.filter(m => !m.system_responded).length || 0
 
+    // Dates des derniers messages par catégorie
+    const lastAll = messages?.[0]?.created_at || null
+    const lastReponse = messages?.filter(m => m.system_responded)[0]?.created_at || null
+    const lastSandra = messages?.filter(m => m.assigned_to === 'Sandra')[0]?.created_at || null
+    const lastMichel = messages?.filter(m => m.assigned_to === 'Michel')[0]?.created_at || null
+    const lastNone = messages?.filter(m => !m.assigned_to)[0]?.created_at || null
+
     // Stats détaillées par collègue (pour la carte d'assignations)
     const byColleague: Record<string, number> = {
       Sandra: acheminesSandra,
@@ -188,6 +195,13 @@ export async function GET(request: NextRequest) {
         acheminesSandra,
         acheminesMichel,
         nonAchemines,
+
+        // Dates des derniers messages
+        lastAll,
+        lastReponse,
+        lastSandra,
+        lastMichel,
+        lastNone,
 
         // Pour compatibilité avec l'ancienne structure
         total: totalDuMois,

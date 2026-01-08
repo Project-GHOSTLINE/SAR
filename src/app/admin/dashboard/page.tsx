@@ -151,6 +151,33 @@ function getSourceColor(source: string | null): string {
   return colors[source] || 'bg-gray-100 text-gray-600'
 }
 
+// Formatter la date du dernier message
+function formatLastMessageDate(dateString: string | null): string {
+  if (!dateString) return 'Aucun message'
+
+  const now = new Date()
+  const date = new Date(dateString)
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 1) return 'À l\'instant'
+  if (diffMins < 60) return `Il y a ${diffMins} min`
+  if (diffHours < 24) return `Il y a ${diffHours}h`
+  if (diffDays === 1) return 'Hier'
+
+  // Format: "7 jan, 19h27"
+  const options: Intl.DateTimeFormatOptions = {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }
+  return date.toLocaleDateString('fr-CA', options).replace(',', ' à')
+}
+
 // Couleur selon l'option (badge)
 function getOptionColor(option: string | null): string {
   if (!option) return 'bg-gray-100 text-gray-600'
@@ -231,6 +258,11 @@ export default function AdminDashboard() {
     acheminesSandra: 0,
     acheminesMichel: 0,
     nonAchemines: 0,
+    lastAll: null as string | null,
+    lastReponse: null as string | null,
+    lastSandra: null as string | null,
+    lastMichel: null as string | null,
+    lastNone: null as string | null,
     byColleague: {} as Record<string, number>
   })
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
@@ -934,6 +966,9 @@ export default function AdminDashboard() {
                   <p className={`text-sm font-semibold ${messageFilter === 'all' ? 'text-white' : 'text-blue-700'}`}>
                     Tous
                   </p>
+                  <p className={`text-xs mt-1 ${messageFilter === 'all' ? 'text-blue-100' : 'text-blue-600'}`}>
+                    {formatLastMessageDate(messageStats.lastAll)}
+                  </p>
                 </button>
 
                 {/* Réponses Envoyées */}
@@ -957,6 +992,9 @@ export default function AdminDashboard() {
                   </div>
                   <p className={`text-sm font-semibold ${messageFilter === 'reponses' ? 'text-white' : 'text-green-700'}`}>
                     Réponses envoyées
+                  </p>
+                  <p className={`text-xs mt-1 ${messageFilter === 'reponses' ? 'text-green-100' : 'text-green-600'}`}>
+                    {formatLastMessageDate(messageStats.lastReponse)}
                   </p>
                 </button>
 
@@ -991,6 +1029,9 @@ export default function AdminDashboard() {
                       </span>
                     )}
                   </div>
+                  <p className={`text-xs mt-1 ${messageFilter === 'sandra' ? 'text-pink-100' : 'text-pink-600'}`}>
+                    {formatLastMessageDate(messageStats.lastSandra)}
+                  </p>
                 </button>
 
                 {/* Michel */}
@@ -1024,6 +1065,9 @@ export default function AdminDashboard() {
                       </span>
                     )}
                   </div>
+                  <p className={`text-xs mt-1 ${messageFilter === 'michel' ? 'text-indigo-100' : 'text-indigo-600'}`}>
+                    {formatLastMessageDate(messageStats.lastMichel)}
+                  </p>
                 </button>
 
                 {/* Non Acheminés */}
@@ -1057,6 +1101,9 @@ export default function AdminDashboard() {
                       </span>
                     )}
                   </div>
+                  <p className={`text-xs mt-1 ${messageFilter === 'none' ? 'text-amber-100' : 'text-amber-600'}`}>
+                    {formatLastMessageDate(messageStats.lastNone)}
+                  </p>
                 </button>
               </div>
 
