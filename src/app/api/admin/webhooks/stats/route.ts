@@ -132,10 +132,10 @@ export async function GET(request: NextRequest) {
       console.error('Error fetching recent transactions:', recentError)
     }
 
-    // Filtrer uniquement production et limiter à 50 pour avoir assez pour les filtres frontend
+    // Filtrer uniquement production et limiter à 100 pour garantir d'avoir les entrées (positions #77-86)
     const recentTransactions = (allRecentTransactions || [])
       .filter(w => !w.environment || w.environment.toLowerCase() === 'production')
-      .slice(0, 50)
+      .slice(0, 100) // Augmenté de 50 à 100 pour inclure les entrées
 
     // 8. Récupérer les transactions failed de PRODUCTION qui nécessitent une action
     const { data: allFailedTransactions, error: failedError } = await supabase
