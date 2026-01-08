@@ -120,21 +120,22 @@ export async function GET(request: NextRequest) {
 
     const volumeChange = calculatePercentageChange(todayVolume, yesterdayVolume)
 
-    // 7. Récupérer les transactions récentes de PRODUCTION uniquement (20 dernières)
+    // 7. Récupérer les transactions récentes de PRODUCTION uniquement
+    // On récupère 500 transactions pour avoir assez d'entrées et sorties
     const { data: allRecentTransactions, error: recentError } = await supabase
       .from('vopay_webhook_logs')
       .select('*')
       .order('received_at', { ascending: false })
-      .limit(100) // Prendre plus pour filtrer ensuite
+      .limit(500) // Prendre beaucoup plus pour avoir assez d'entrées
 
     if (recentError) {
       console.error('Error fetching recent transactions:', recentError)
     }
 
-    // Filtrer uniquement production
+    // Filtrer uniquement production et limiter à 50 pour avoir assez pour les filtres frontend
     const recentTransactions = (allRecentTransactions || [])
       .filter(w => !w.environment || w.environment.toLowerCase() === 'production')
-      .slice(0, 20)
+      .slice(0, 50)
 
     // 8. Récupérer les transactions failed de PRODUCTION qui nécessitent une action
     const { data: allFailedTransactions, error: failedError } = await supabase

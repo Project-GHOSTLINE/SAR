@@ -736,8 +736,21 @@ export default function AdminDashboard() {
                       if (txView !== 'all') {
                         filteredTx = webhookStats.recentTransactions.filter((tx: any) => {
                           const txType = (tx.transaction_type || '').toLowerCase()
-                          const isDeposit = txType.includes('deposit') || txType.includes('credit') || txType.includes('payment')
-                          const isWithdrawal = txType.includes('withdrawal') || txType.includes('reversal') || txType.includes('fee') || txType.includes('debit')
+
+                          // Vrais types VoPay pour les ENTRÉES (argent qui rentre)
+                          const isDeposit = txType.includes('eft funding') ||
+                                           txType.includes('inbound') ||
+                                           txType.includes('payout') ||
+                                           txType.includes('deposit') ||
+                                           txType.includes('credit') ||
+                                           txType.includes('payment')
+
+                          // Vrais types VoPay pour les SORTIES (argent qui sort)
+                          const isWithdrawal = txType.includes('withdrawal') ||
+                                              txType.includes('reversal') ||
+                                              txType.includes('fee') ||
+                                              txType.includes('debit') ||
+                                              txType.includes('withdraw')
 
                           if (txView === 'deposits') return isDeposit
                           if (txView === 'withdrawals') return isWithdrawal
@@ -758,10 +771,19 @@ export default function AdminDashboard() {
                         const clientName = rawData.FullName || rawData.full_name || rawData.AccountName || 'Client VoPay'
                         const vopayTransactionId = rawData.TransactionID || tx.transaction_id
 
-                        // Déterminer si c'est une entrée ou sortie
+                        // Déterminer si c'est une entrée ou sortie (vrais types VoPay)
                         const txType = (tx.transaction_type || '').toLowerCase()
-                        const isDeposit = txType.includes('deposit') || txType.includes('credit') || txType.includes('payment')
-                        const isWithdrawal = txType.includes('withdrawal') || txType.includes('reversal') || txType.includes('fee') || txType.includes('debit')
+                        const isDeposit = txType.includes('eft funding') ||
+                                         txType.includes('inbound') ||
+                                         txType.includes('payout') ||
+                                         txType.includes('deposit') ||
+                                         txType.includes('credit') ||
+                                         txType.includes('payment')
+                        const isWithdrawal = txType.includes('withdrawal') ||
+                                            txType.includes('reversal') ||
+                                            txType.includes('fee') ||
+                                            txType.includes('debit') ||
+                                            txType.includes('withdraw')
 
                         const txId = tx.id || `tx-${i}`
                         const isOpen = openWebhookTxId === txId
