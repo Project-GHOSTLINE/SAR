@@ -1051,31 +1051,38 @@ export default function AdminDashboard() {
                   </div>
                 </button>
 
-                {/* Non Acheminés (si > 0) */}
-                {messageStats.nonAchemines > 0 && (
-                  <button
-                    onClick={() => changeMessageFilter(messageFilter === 'none' ? 'all' : 'none')}
-                    className={`min-w-[200px] rounded-2xl p-5 transition-all hover:shadow-xl hover:scale-105 ${
-                      messageFilter === 'none'
-                        ? 'bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 shadow-lg'
-                        : 'bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                        messageFilter === 'none' ? 'bg-white/30' : 'bg-amber-300'
-                      }`}>
-                        <AlertTriangle size={20} className={messageFilter === 'none' ? 'text-white' : 'text-amber-700'} />
-                      </div>
-                      <p className={`text-3xl font-bold ${messageFilter === 'none' ? 'text-white' : 'text-amber-900'}`}>
-                        {messageStats.nonAchemines}
-                      </p>
+                {/* Non Acheminés */}
+                <button
+                  onClick={() => changeMessageFilter(messageFilter === 'none' ? 'all' : 'none')}
+                  className={`min-w-[200px] rounded-2xl p-5 transition-all hover:shadow-xl hover:scale-105 ${
+                    messageFilter === 'none'
+                      ? 'bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 shadow-lg'
+                      : 'bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      messageFilter === 'none' ? 'bg-white/30' : 'bg-amber-300'
+                    }`}>
+                      <AlertTriangle size={20} className={messageFilter === 'none' ? 'text-white' : 'text-amber-700'} />
                     </div>
+                    <p className={`text-3xl font-bold ${messageFilter === 'none' ? 'text-white' : 'text-amber-900'}`}>
+                      {messageStats.nonAchemines}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between">
                     <p className={`text-sm font-semibold ${messageFilter === 'none' ? 'text-white' : 'text-amber-700'}`}>
                       Non acheminés
                     </p>
-                  </button>
-                )}
+                    {messageStats.nonAchemines === 0 && (
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                        messageFilter === 'none' ? 'bg-white/30 text-white' : 'bg-green-300 text-green-800'
+                      }`}>
+                        Tout assigné!
+                      </span>
+                    )}
+                  </div>
+                </button>
               </div>
 
               {/* Filtres par Type de Demande */}
