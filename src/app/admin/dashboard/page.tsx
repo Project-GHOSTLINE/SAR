@@ -151,7 +151,7 @@ function getSourceColor(source: string | null): string {
   return colors[source] || 'bg-gray-100 text-gray-600'
 }
 
-// Couleur selon l'option
+// Couleur selon l'option (badge)
 function getOptionColor(option: string | null): string {
   if (!option) return 'bg-gray-100 text-gray-600'
   const colors: Record<string, string> = {
@@ -168,6 +168,55 @@ function getOptionColor(option: string | null): string {
     'Autre question': 'bg-gray-100 text-gray-700'
   }
   return colors[option] || 'bg-gray-100 text-gray-600'
+}
+
+// Couleur selon l'option (bouton filtre)
+function getOptionButtonColor(option: string, isSelected: boolean): string {
+  const colors: Record<string, { selected: string, normal: string }> = {
+    'Reporter un paiement': {
+      selected: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md',
+      normal: 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+    },
+    'Reduire mes paiements': {
+      selected: 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md',
+      normal: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+    },
+    'Signaler un changement': {
+      selected: 'bg-gradient-to-r from-violet-500 to-violet-600 text-white shadow-md',
+      normal: 'bg-violet-100 text-violet-700 hover:bg-violet-200'
+    },
+    'Releve ou solde de compte': {
+      selected: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md',
+      normal: 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+    },
+    'Arrangement de paiement': {
+      selected: 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-md',
+      normal: 'bg-rose-100 text-rose-700 hover:bg-rose-200'
+    },
+    'Ou en est ma demande de credit?': {
+      selected: 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-md',
+      normal: 'bg-sky-100 text-sky-700 hover:bg-sky-200'
+    },
+    'Je veux annuler ma demande': {
+      selected: 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md',
+      normal: 'bg-red-100 text-red-700 hover:bg-red-200'
+    },
+    'Question sur mon remboursement': {
+      selected: 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md',
+      normal: 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+    },
+    'Autre question': {
+      selected: 'bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-md',
+      normal: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+    }
+  }
+
+  const colorSet = colors[option] || {
+    selected: 'bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-md',
+    normal: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+  }
+
+  return isSelected ? colorSet.selected : colorSet.normal
 }
 
 export default function AdminDashboard() {
@@ -1041,6 +1090,9 @@ export default function AdminDashboard() {
 
                 if (uniqueOptions.length === 0) return null
 
+                // Compter les messages "Autres demandes" (ceux sans option)
+                const autresCount = messages.filter(msg => !extractOptionFromMessage(msg.question).option).length
+
                 return (
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
                     <p className="text-sm font-semibold text-gray-700 mb-3">Filtrer par type de demande:</p>
@@ -1049,7 +1101,7 @@ export default function AdminDashboard() {
                         onClick={() => setMessageSubFilter(null)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                           messageSubFilter === null
-                            ? 'bg-blue-600 text-white shadow-md'
+                            ? 'bg-gradient-to-r from-[#00874e] to-emerald-600 text-white shadow-md'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
@@ -1059,15 +1111,23 @@ export default function AdminDashboard() {
                         <button
                           key={option}
                           onClick={() => setMessageSubFilter(option)}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                            messageSubFilter === option
-                              ? 'bg-[#00874e] text-white shadow-md'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${getOptionButtonColor(option, messageSubFilter === option)}`}
                         >
                           {option}
                         </button>
                       ))}
+                      {autresCount > 0 && (
+                        <button
+                          onClick={() => setMessageSubFilter('__autres__')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                            messageSubFilter === '__autres__'
+                              ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                              : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                          }`}
+                        >
+                          Autres demandes ({autresCount})
+                        </button>
+                      )}
                     </div>
                   </div>
                 )
@@ -1090,6 +1150,8 @@ export default function AdminDashboard() {
                       // Sous-filtre par option/sujet
                       if (!messageSubFilter) return true
                       const { option } = extractOptionFromMessage(msg.question)
+                      // Cas spécial: "Autres demandes" = messages sans option
+                      if (messageSubFilter === '__autres__') return !option
                       return option === messageSubFilter
                     })
                     .map((msg) => {
