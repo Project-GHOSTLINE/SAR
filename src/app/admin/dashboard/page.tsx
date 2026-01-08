@@ -600,30 +600,116 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Volume Aujourd'hui */}
-              <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 p-6 group hover:scale-105">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-600 text-sm font-medium">Volume Aujourd'hui</span>
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <TrendingUp size={20} className="text-blue-600" />
+              {/* Volume Aujourd'hui - Cliquable avec dropdown */}
+              <details className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 group">
+                <summary className="p-6 cursor-pointer list-none hover:bg-gray-50 rounded-xl transition-colors">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-gray-600 text-sm font-medium">Volume Aujourd'hui</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <TrendingUp size={20} className="text-blue-600" />
+                      </div>
+                      <ChevronRight size={18} className="text-gray-400 group-open:rotate-90 transition-transform" />
+                    </div>
                   </div>
+                  <p className="text-3xl font-bold text-gray-900 mb-2">
+                    {vopayLoading ? '...' : formatCurrency(vopayData.todayInterac || 0)}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {!vopayLoading && vopayData.todayInterac > 0 ? (
+                      <>
+                        <TrendingUp size={14} className="text-[#00874e]" />
+                        <span className="text-xs font-semibold text-[#00874e]">
+                          Cliquer pour voir par type
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-xs text-gray-500 font-medium">Aucune transaction aujourd'hui</span>
+                    )}
+                  </div>
+                </summary>
+
+                {/* Dropdown: Volume par type de transaction */}
+                <div className="px-6 pb-6 pt-2 border-t border-gray-100 bg-gradient-to-br from-gray-50 to-white">
+                  <h4 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-3">Volume par type</h4>
+                  {!vopayLoading && (() => {
+                    const today = new Date()
+                    today.setHours(0, 0, 0, 0)
+
+                    const todayTransactions = vopayData.recentTransactions.filter((tx: any) => {
+                      const txDate = new Date(tx.TransactionDateTime)
+                      return txDate >= today
+                    })
+
+                    // Grouper par type et calculer les volumes
+                    const volumeByType: Record<string, { credit: number; debit: number; count: number }> = {}
+
+                    todayTransactions.forEach((tx: any) => {
+                      const type = tx.TransactionType || 'Autre'
+                      if (!volumeByType[type]) {
+                        volumeByType[type] = { credit: 0, debit: 0, count: 0 }
+                      }
+                      volumeByType[type].credit += parseFloat(tx.CreditAmount || '0')
+                      volumeByType[type].debit += parseFloat(tx.DebitAmount || '0')
+                      volumeByType[type].count += 1
+                    })
+
+                    const sortedTypes = Object.entries(volumeByType).sort(([, a], [, b]) => {
+                      const netA = a.credit - a.debit
+                      const netB = b.credit - b.debit
+                      return Math.abs(netB) - Math.abs(netA)
+                    })
+
+                    if (sortedTypes.length === 0) {
+                      return (
+                        <p className="text-sm text-gray-500 italic py-2">Aucune transaction aujourd'hui</p>
+                      )
+                    }
+
+                    return (
+                      <div className="space-y-2">
+                        {sortedTypes.map(([type, data]) => {
+                          const net = data.credit - data.debit
+                          const isPositive = net >= 0
+
+                          return (
+                            <div key={type} className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-2 h-2 rounded-full ${
+                                    isPositive ? 'bg-green-500' : 'bg-red-500'
+                                  }`}></div>
+                                  <span className="text-sm font-semibold text-gray-900">{type}</span>
+                                  <span className="text-xs text-gray-500">({data.count} tx)</span>
+                                </div>
+                                <span className={`text-sm font-bold ${
+                                  isPositive ? 'text-green-600' : 'text-red-600'
+                                }`}>
+                                  {isPositive ? '+' : ''}{formatCurrency(net)}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-4 text-xs text-gray-600">
+                                {data.credit > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <span className="text-green-600">▲</span>
+                                    Entrée: {formatCurrency(data.credit)}
+                                  </span>
+                                )}
+                                {data.debit > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <span className="text-red-600">▼</span>
+                                    Sortie: {formatCurrency(data.debit)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )
+                  })()}
                 </div>
-                <p className="text-3xl font-bold text-gray-900 mb-2">
-                  {vopayLoading ? '...' : formatCurrency(vopayData.todayInterac || 0)}
-                </p>
-                <div className="flex items-center gap-2">
-                  {!vopayLoading && vopayData.todayInterac > 0 ? (
-                    <>
-                      <TrendingUp size={14} className="text-[#00874e]" />
-                      <span className="text-xs font-semibold text-[#00874e]">
-                        Transactions VoPay du jour
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-xs text-gray-500 font-medium">Aucune transaction aujourd'hui</span>
-                  )}
-                </div>
-              </div>
+              </details>
 
               {/* Transactions Actives */}
               <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 p-6 group hover:scale-105">
