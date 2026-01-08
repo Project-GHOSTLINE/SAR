@@ -7,7 +7,9 @@ import {
   AlertTriangle, RefreshCw, Activity, Bell, Mail,
   Phone, ChevronRight, MoreHorizontal, Search, Loader2,
   DollarSign, Calendar, Clock, CheckCircle, XCircle,
-  X, User, Send, MessageSquare, Tag, ExternalLink
+  X, User, Send, MessageSquare, Tag, ExternalLink,
+  Monitor, Smartphone, Globe, Chrome, MapPin, Languages,
+  Maximize2, Link2, TrendingUp as Campaign, Target
 } from 'lucide-react'
 
 interface Message {
@@ -1516,83 +1518,179 @@ export default function AdminDashboard() {
                       </p>
                     </div>
 
-                    {/* Métriques de Connexion */}
+                    {/* Métriques Techniques & Analytiques - Version Enrichie */}
                     {(selectedMessage.client_ip || selectedMessage.client_device) && (
-                      <div className="bg-gray-50 rounded-xl p-5">
-                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                          <Activity size={14} />
-                          Métriques de Connexion
-                        </h3>
-                        <div className="grid grid-cols-2 gap-3">
-                          {selectedMessage.client_ip && (
-                            <div className="bg-white rounded-lg p-3 border border-gray-100">
-                              <p className="text-xs text-gray-500 mb-1">Adresse IP</p>
-                              <p className="text-gray-900 font-mono text-sm">{selectedMessage.client_ip}</p>
-                            </div>
-                          )}
-                          {selectedMessage.client_device && (
-                            <div className="bg-white rounded-lg p-3 border border-gray-100">
-                              <p className="text-xs text-gray-500 mb-1">Appareil</p>
-                              <p className="text-gray-900 font-medium text-sm">{selectedMessage.client_device}</p>
-                            </div>
-                          )}
-                          {selectedMessage.client_browser && (
-                            <div className="bg-white rounded-lg p-3 border border-gray-100">
-                              <p className="text-xs text-gray-500 mb-1">Navigateur</p>
-                              <p className="text-gray-900 font-medium text-sm">{selectedMessage.client_browser}</p>
-                            </div>
-                          )}
-                          {selectedMessage.client_os && (
-                            <div className="bg-white rounded-lg p-3 border border-gray-100">
-                              <p className="text-xs text-gray-500 mb-1">Système</p>
-                              <p className="text-gray-900 font-medium text-sm">{selectedMessage.client_os}</p>
-                            </div>
-                          )}
-                          {selectedMessage.client_timezone && (
-                            <div className="bg-white rounded-lg p-3 border border-gray-100">
-                              <p className="text-xs text-gray-500 mb-1">Fuseau horaire</p>
-                              <p className="text-gray-900 font-mono text-sm">{selectedMessage.client_timezone}</p>
-                            </div>
-                          )}
-                          {selectedMessage.client_language && (
-                            <div className="bg-white rounded-lg p-3 border border-gray-100">
-                              <p className="text-xs text-gray-500 mb-1">Langue</p>
-                              <p className="text-gray-900 font-mono text-sm">{selectedMessage.client_language}</p>
-                            </div>
-                          )}
-                          {selectedMessage.client_screen_resolution && (
-                            <div className="bg-white rounded-lg p-3 border border-gray-100">
-                              <p className="text-xs text-gray-500 mb-1">Résolution</p>
-                              <p className="text-gray-900 font-mono text-sm">{selectedMessage.client_screen_resolution}</p>
-                            </div>
-                          )}
-                          {selectedMessage.referrer && (
-                            <div className="bg-white rounded-lg p-3 border border-gray-100 col-span-2">
-                              <p className="text-xs text-gray-500 mb-1">Page de provenance</p>
-                              <p className="text-gray-900 font-mono text-xs truncate">{selectedMessage.referrer}</p>
-                            </div>
-                          )}
-                          {(selectedMessage.utm_source || selectedMessage.utm_medium || selectedMessage.utm_campaign) && (
-                            <div className="bg-white rounded-lg p-3 border border-gray-100 col-span-2">
-                              <p className="text-xs text-gray-500 mb-2">Tracking Campagne (UTM)</p>
-                              <div className="space-y-1 text-xs">
-                                {selectedMessage.utm_source && <p><span className="text-gray-500">Source:</span> <span className="text-gray-900 font-medium">{selectedMessage.utm_source}</span></p>}
-                                {selectedMessage.utm_medium && <p><span className="text-gray-500">Medium:</span> <span className="text-gray-900 font-medium">{selectedMessage.utm_medium}</span></p>}
-                                {selectedMessage.utm_campaign && <p><span className="text-gray-500">Campagne:</span> <span className="text-gray-900 font-medium">{selectedMessage.utm_campaign}</span></p>}
+                      <div className="space-y-4">
+                        {/* Section 1: Appareil & Matériel */}
+                        <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl p-5 border border-blue-200">
+                          <h3 className="text-sm font-bold text-blue-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                            {selectedMessage.client_device === 'Mobile' ? (
+                              <Smartphone size={16} className="text-blue-600" />
+                            ) : (
+                              <Monitor size={16} className="text-blue-600" />
+                            )}
+                            Appareil & Matériel
+                          </h3>
+                          <div className="grid grid-cols-2 gap-3">
+                            {selectedMessage.client_device && (
+                              <div className="bg-white/80 backdrop-blur rounded-lg p-4 border border-blue-100 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                  {selectedMessage.client_device === 'Mobile' ? (
+                                    <Smartphone size={18} className="text-blue-600" />
+                                  ) : (
+                                    <Monitor size={18} className="text-blue-600" />
+                                  )}
+                                  <p className="text-xs text-gray-600 font-semibold">Type d'appareil</p>
+                                </div>
+                                <p className="text-gray-900 font-bold text-sm">{selectedMessage.client_device}</p>
                               </div>
-                            </div>
-                          )}
-                          {selectedMessage.client_user_agent && (
-                            <details className="col-span-2">
-                              <summary className="text-xs text-[#00874e] cursor-pointer hover:underline mb-2">
-                                Voir User-Agent complet
-                              </summary>
-                              <div className="bg-white rounded-lg p-3 border border-gray-100">
-                                <pre className="text-xs text-gray-600 whitespace-pre-wrap break-all">{selectedMessage.client_user_agent}</pre>
+                            )}
+                            {selectedMessage.client_browser && (
+                              <div className="bg-white/80 backdrop-blur rounded-lg p-4 border border-blue-100 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Chrome size={18} className="text-blue-600" />
+                                  <p className="text-xs text-gray-600 font-semibold">Navigateur</p>
+                                </div>
+                                <p className="text-gray-900 font-bold text-sm">{selectedMessage.client_browser}</p>
                               </div>
-                            </details>
-                          )}
+                            )}
+                            {selectedMessage.client_os && (
+                              <div className="bg-white/80 backdrop-blur rounded-lg p-4 border border-blue-100 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Monitor size={18} className="text-blue-600" />
+                                  <p className="text-xs text-gray-600 font-semibold">Système d'exploitation</p>
+                                </div>
+                                <p className="text-gray-900 font-bold text-sm">{selectedMessage.client_os}</p>
+                              </div>
+                            )}
+                            {selectedMessage.client_screen_resolution && (
+                              <div className="bg-white/80 backdrop-blur rounded-lg p-4 border border-blue-100 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Maximize2 size={18} className="text-blue-600" />
+                                  <p className="text-xs text-gray-600 font-semibold">Résolution écran</p>
+                                </div>
+                                <p className="text-gray-900 font-bold text-sm font-mono">{selectedMessage.client_screen_resolution}</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
+
+                        {/* Section 2: Localisation & Réseau */}
+                        <div className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 rounded-xl p-5 border border-emerald-200">
+                          <h3 className="text-sm font-bold text-emerald-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <Globe size={16} className="text-emerald-600" />
+                            Localisation & Réseau
+                          </h3>
+                          <div className="grid grid-cols-2 gap-3">
+                            {selectedMessage.client_ip && (
+                              <div className="bg-white/80 backdrop-blur rounded-lg p-4 border border-emerald-100 shadow-sm col-span-2">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <MapPin size={18} className="text-emerald-600" />
+                                  <p className="text-xs text-gray-600 font-semibold">Adresse IP</p>
+                                </div>
+                                <p className="text-gray-900 font-bold text-sm font-mono">{selectedMessage.client_ip}</p>
+                                <p className="text-xs text-emerald-600 mt-1">🌍 Connexion réseau identifiée</p>
+                              </div>
+                            )}
+                            {selectedMessage.client_timezone && (
+                              <div className="bg-white/80 backdrop-blur rounded-lg p-4 border border-emerald-100 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Clock size={18} className="text-emerald-600" />
+                                  <p className="text-xs text-gray-600 font-semibold">Fuseau horaire</p>
+                                </div>
+                                <p className="text-gray-900 font-bold text-sm font-mono">{selectedMessage.client_timezone}</p>
+                              </div>
+                            )}
+                            {selectedMessage.client_language && (
+                              <div className="bg-white/80 backdrop-blur rounded-lg p-4 border border-emerald-100 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Languages size={18} className="text-emerald-600" />
+                                  <p className="text-xs text-gray-600 font-semibold">Langue préférée</p>
+                                </div>
+                                <p className="text-gray-900 font-bold text-sm font-mono uppercase">{selectedMessage.client_language}</p>
+                              </div>
+                            )}
+                            {selectedMessage.referrer && (
+                              <div className="bg-white/80 backdrop-blur rounded-lg p-4 border border-emerald-100 shadow-sm col-span-2">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Link2 size={18} className="text-emerald-600" />
+                                  <p className="text-xs text-gray-600 font-semibold">Page de provenance</p>
+                                </div>
+                                <p className="text-gray-900 font-mono text-xs break-all">{selectedMessage.referrer}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Section 3: Tracking Marketing (UTM) */}
+                        {(selectedMessage.utm_source || selectedMessage.utm_medium || selectedMessage.utm_campaign) && (
+                          <div className="bg-gradient-to-br from-pink-50 via-rose-50 to-orange-50 rounded-xl p-5 border border-pink-200">
+                            <h3 className="text-sm font-bold text-pink-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                              <Target size={16} className="text-pink-600" />
+                              Tracking Campagne Marketing
+                            </h3>
+                            <div className="space-y-3">
+                              {selectedMessage.utm_source && (
+                                <div className="bg-white/80 backdrop-blur rounded-lg p-4 border border-pink-100 shadow-sm">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-8 h-8 rounded-lg bg-pink-100 flex items-center justify-center">
+                                        <span className="text-pink-700 font-bold text-xs">SRC</span>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-gray-500 font-medium">UTM Source</p>
+                                        <p className="text-gray-900 font-bold text-sm">{selectedMessage.utm_source}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                              {selectedMessage.utm_medium && (
+                                <div className="bg-white/80 backdrop-blur rounded-lg p-4 border border-pink-100 shadow-sm">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center">
+                                        <span className="text-rose-700 font-bold text-xs">MED</span>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-gray-500 font-medium">UTM Medium</p>
+                                        <p className="text-gray-900 font-bold text-sm">{selectedMessage.utm_medium}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                              {selectedMessage.utm_campaign && (
+                                <div className="bg-white/80 backdrop-blur rounded-lg p-4 border border-pink-100 shadow-sm">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                                        <span className="text-orange-700 font-bold text-xs">CPG</span>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-gray-500 font-medium">UTM Campaign</p>
+                                        <p className="text-gray-900 font-bold text-sm">{selectedMessage.utm_campaign}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* User-Agent Complet (Collapsible) */}
+                        {selectedMessage.client_user_agent && (
+                          <details className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-5 border border-gray-200">
+                            <summary className="text-sm font-bold text-gray-700 cursor-pointer hover:text-[#00874e] transition-colors flex items-center gap-2">
+                              <Activity size={14} />
+                              Afficher User-Agent complet (données techniques avancées)
+                            </summary>
+                            <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                              <pre className="text-xs text-gray-700 whitespace-pre-wrap break-all font-mono leading-relaxed">{selectedMessage.client_user_agent}</pre>
+                            </div>
+                          </details>
+                        )}
                       </div>
                     )}
 
