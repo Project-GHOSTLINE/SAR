@@ -197,7 +197,7 @@ class VoPayClient {
       const pendingFunds = parseFloat(balanceData.PendingFunds)
       const frozen = accountBalance - availableFunds
 
-      // Récupération des transactions (7 derniers jours, limite de 20)
+      // Récupération des transactions (7 derniers jours, limite de 1000 pour avoir toutes les transactions d'aujourd'hui)
       const endDate = new Date()
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - 7)
@@ -205,7 +205,7 @@ class VoPayClient {
       let transactions: VoPayTransaction[] = []
       try {
         transactions = await this.getTransactions({
-          limit: 20,
+          limit: 1000,
           StartDateTime: startDate.toISOString().split('T')[0],
           EndDateTime: endDate.toISOString().split('T')[0]
         })
@@ -262,7 +262,7 @@ class VoPayClient {
         todayInterac,
         weeklyVolume,
         successRate: Math.round(successRate * 10) / 10,
-        recentTransactions: transactions.slice(0, 10)
+        recentTransactions: transactions.slice(0, 100) // Augmenté de 10 à 100 pour le dropdown "Volume Aujourd'hui"
       }
     } catch (error) {
       console.error('VoPay Stats Error:', error)
