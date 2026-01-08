@@ -6,18 +6,50 @@ export const runtime = 'nodejs'
 export const fetchCache = 'force-no-store'
 export const revalidate = 0
 
+// CORS headers helper
+function corsHeaders(origin: string | null) {
+  // Allow requests from inverite.com and admin.solutionargentrapide.ca
+  const allowedOrigins = [
+    'https://inverite.com',
+    'https://app.inverite.com',
+    'https://admin.solutionargentrapide.ca',
+    'http://localhost:3000'
+  ]
+
+  const isAllowed = origin && allowedOrigins.some(allowed => origin.includes(allowed.replace('https://', '')))
+
+  return {
+    'Access-Control-Allow-Origin': isAllowed ? origin : allowedOrigins[0],
+    'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Cookie',
+    'Access-Control-Allow-Credentials': 'true',
+  }
+}
+
+/**
+ * OPTIONS - Handle CORS preflight
+ */
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders(origin)
+  })
+}
+
 /**
  * POST /api/admin/client-analysis
  * Reçoit les données d'analyse client depuis l'extension Chrome Inverite/Flinks
  */
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get('origin')
   try {
     // Vérification de l'authentification admin
     const authHeader = request.headers.get('cookie')
     if (!authHeader?.includes('admin-session=')) {
       return NextResponse.json(
         { error: 'Non autorisé - Session admin requise' },
-        { status: 401 }
+        { status: 401, headers: corsHeaders(origin) }
       )
     }
 
@@ -25,7 +57,7 @@ export async function POST(request: NextRequest) {
     if (!supabase) {
       return NextResponse.json(
         { error: 'Database unavailable' },
-        { status: 500 }
+        { status: 500, headers: corsHeaders(origin) }
       )
     }
 
@@ -36,7 +68,7 @@ export async function POST(request: NextRequest) {
     if (!body.client_name || !body.raw_data) {
       return NextResponse.json(
         { error: 'client_name et raw_data sont requis' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders(origin) }
       )
     }
 
@@ -62,7 +94,7 @@ export async function POST(request: NextRequest) {
       console.error('Erreur Supabase insert:', error)
       return NextResponse.json(
         { error: 'Échec de l\'insertion', details: error.message },
-        { status: 500 }
+        { status: 500, headers: corsHeaders(origin) }
       )
     }
 
@@ -94,18 +126,21 @@ export async function POST(request: NextRequest) {
       // Continuer quand même - les données sont dans raw_data
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Analyse sauvegardée avec succès',
-      data: {
-        id: data.id,
-        client_name: data.client_name,
-        total_accounts: data.total_accounts,
-        total_balance: data.total_balance,
-        total_transactions: data.total_transactions,
-        created_at: data.created_at
-      }
-    })
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Analyse sauvegardée avec succès',
+        data: {
+          id: data.id,
+          client_name: data.client_name,
+          total_accounts: data.total_accounts,
+          total_balance: data.total_balance,
+          total_transactions: data.total_transactions,
+          created_at: data.created_at
+        }
+      },
+      { headers: corsHeaders(origin) }
+    )
 
   } catch (error) {
     console.error('Erreur API client-analysis:', error)
@@ -116,7 +151,7 @@ export async function POST(request: NextRequest) {
         error: 'Erreur lors de la sauvegarde',
         details: errorMessage
       },
-      { status: 500 }
+      { status: 500, headers: corsHeaders(origin) }
     )
   }
 }
