@@ -930,9 +930,18 @@ export default function AdminDashboard() {
                       {messageStats.acheminesSandra}
                     </p>
                   </div>
-                  <p className={`text-sm font-semibold ${messageFilter === 'sandra' ? 'text-white' : 'text-pink-700'}`}>
-                    Sandra
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className={`text-sm font-semibold ${messageFilter === 'sandra' ? 'text-white' : 'text-pink-700'}`}>
+                      Sandra
+                    </p>
+                    {messageStats.acheminesSandra === 0 && (
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                        messageFilter === 'sandra' ? 'bg-white/30 text-white' : 'bg-pink-300 text-pink-800'
+                      }`}>
+                        À configurer!
+                      </span>
+                    )}
+                  </div>
                 </button>
 
                 {/* Michel */}
@@ -954,9 +963,18 @@ export default function AdminDashboard() {
                       {messageStats.acheminesMichel}
                     </p>
                   </div>
-                  <p className={`text-sm font-semibold ${messageFilter === 'michel' ? 'text-white' : 'text-indigo-700'}`}>
-                    Michel
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className={`text-sm font-semibold ${messageFilter === 'michel' ? 'text-white' : 'text-indigo-700'}`}>
+                      Michel
+                    </p>
+                    {messageStats.acheminesMichel === 0 && (
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                        messageFilter === 'michel' ? 'bg-white/30 text-white' : 'bg-indigo-300 text-indigo-800'
+                      }`}>
+                        À configurer!
+                      </span>
+                    )}
+                  </div>
                 </button>
 
                 {/* Non Acheminés (si > 0) */}
