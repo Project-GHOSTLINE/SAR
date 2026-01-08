@@ -2062,36 +2062,253 @@ export default function AdminDashboard() {
 
             {/* Transactions récentes */}
             {!vopayLoading && vopayData.recentTransactions.length > 0 && (
-              <div className="bg-white rounded-lg border border-gray-200">
-                <div className="px-6 py-4 border-b border-gray-100">
-                  <h2 className="font-semibold text-gray-900">Transactions récentes</h2>
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                  <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                    <DollarSign size={18} className="text-[#00874e]" />
+                    Transactions récentes VoPay
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-1">Détails complets des 10 dernières transactions</p>
                 </div>
                 <div className="divide-y divide-gray-100">
                   {vopayData.recentTransactions.map((tx, i) => {
                     const status = (tx.TransactionStatus || '').toLowerCase()
-                    const amount = parseFloat(tx.CreditAmount || '0') - parseFloat(tx.DebitAmount || '0')
+                    const creditAmount = parseFloat(tx.CreditAmount || '0')
+                    const debitAmount = parseFloat(tx.DebitAmount || '0')
+                    const feeAmount = parseFloat(tx.ConvenienceFeeAmount || '0')
+                    const netAmount = creditAmount - debitAmount
+
                     return (
-                      <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            status.includes('completed') || status.includes('success') ? 'bg-[#e8f5e9]' :
-                            status.includes('pending') ? 'bg-blue-50' :
-                            'bg-red-50'
-                          }`}>
-                            {(status.includes('completed') || status.includes('success')) && <CheckCircle size={18} className="text-[#00874e]" />}
-                            {status.includes('pending') && <Clock size={18} className="text-blue-600" />}
-                            {(status.includes('failed') || status.includes('error') || status.includes('cancelled')) && <XCircle size={18} className="text-red-500" />}
+                      <details key={i} className="group">
+                        <summary className="px-6 py-4 cursor-pointer hover:bg-gradient-to-r from-gray-50 to-transparent transition-all list-none">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 flex-1">
+                              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${
+                                status.includes('completed') || status.includes('success') ? 'bg-gradient-to-br from-green-100 to-emerald-200' :
+                                status.includes('pending') ? 'bg-gradient-to-br from-blue-100 to-blue-200' :
+                                status.includes('reversal') ? 'bg-gradient-to-br from-orange-100 to-orange-200' :
+                                'bg-gradient-to-br from-red-100 to-red-200'
+                              }`}>
+                                {(status.includes('completed') || status.includes('success')) && <CheckCircle size={20} className="text-green-700" />}
+                                {status.includes('pending') && <Clock size={20} className="text-blue-700" />}
+                                {status.includes('reversal') && <RefreshCw size={20} className="text-orange-700" />}
+                                {(status.includes('failed') || status.includes('error') || status.includes('cancelled')) && <XCircle size={20} className="text-red-700" />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <p className="font-bold text-gray-900">{tx.FullName || 'Sans nom'}</p>
+                                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                                    status.includes('completed') || status.includes('success') ? 'bg-green-100 text-green-700' :
+                                    status.includes('pending') ? 'bg-blue-100 text-blue-700' :
+                                    status.includes('reversal') ? 'bg-orange-100 text-orange-700' :
+                                    'bg-red-100 text-red-700'
+                                  }`}>
+                                    {tx.TransactionStatus}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-3 text-xs text-gray-500">
+                                  <span className="font-mono">#{tx.TransactionID}</span>
+                                  <span>•</span>
+                                  <span className="font-medium">{tx.TransactionType}</span>
+                                  <span>•</span>
+                                  <span>{new Date(tx.TransactionDateTime).toLocaleString('fr-CA')}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right ml-4">
+                              <p className={`text-lg font-bold ${netAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {netAmount >= 0 ? '+' : ''}{formatCurrency(netAmount)}
+                              </p>
+                              {feeAmount > 0 && (
+                                <p className="text-xs text-amber-600 font-semibold">Frais: {formatCurrency(feeAmount)}</p>
+                              )}
+                            </div>
+                            <ChevronRight size={20} className="text-gray-400 ml-2 group-open:rotate-90 transition-transform" />
                           </div>
-                          <div>
-                            <p className="font-medium text-gray-900">{tx.TransactionID}</p>
-                            <p className="text-sm text-gray-500">{tx.TransactionType} - {tx.FullName}</p>
+                        </summary>
+
+                        {/* Détails complets de la transaction */}
+                        <div className="px-6 pb-4 pt-2 bg-gradient-to-br from-gray-50 to-white border-t border-gray-100">
+                          <div className="grid grid-cols-2 gap-4">
+                            {/* Colonne 1: Informations financières */}
+                            <div className="space-y-3">
+                              <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                  <DollarSign size={14} className="text-green-600" />
+                                  Détails financiers
+                                </h4>
+                                <div className="space-y-2 text-sm">
+                                  {creditAmount > 0 && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">Crédit:</span>
+                                      <span className="font-bold text-green-600">+{formatCurrency(creditAmount)}</span>
+                                    </div>
+                                  )}
+                                  {debitAmount > 0 && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">Débit:</span>
+                                      <span className="font-bold text-red-600">-{formatCurrency(debitAmount)}</span>
+                                    </div>
+                                  )}
+                                  {feeAmount > 0 && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">Frais:</span>
+                                      <span className="font-semibold text-amber-600">{formatCurrency(feeAmount)}</span>
+                                    </div>
+                                  )}
+                                  {parseFloat(tx.HoldAmount || '0') > 0 && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">Retenu:</span>
+                                      <span className="font-medium text-orange-600">{formatCurrency(parseFloat(tx.HoldAmount))}</span>
+                                    </div>
+                                  )}
+                                  <div className="pt-2 border-t border-gray-200">
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-900 font-semibold">Net:</span>
+                                      <span className={`font-bold text-lg ${netAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {netAmount >= 0 ? '+' : ''}{formatCurrency(netAmount)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Informations bancaires */}
+                              {(tx.AccountName || tx.WalletName1 || tx.WalletName2) && (
+                                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200 shadow-sm">
+                                  <h4 className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                    <Globe size={14} className="text-blue-600" />
+                                    Données bancaires
+                                  </h4>
+                                  <div className="space-y-2 text-sm">
+                                    {tx.AccountName && (
+                                      <div>
+                                        <p className="text-xs text-blue-600 font-medium">Compte:</p>
+                                        <p className="font-semibold text-blue-900">{tx.AccountName}</p>
+                                      </div>
+                                    )}
+                                    {tx.WalletName1 && (
+                                      <div>
+                                        <p className="text-xs text-blue-600 font-medium">Portefeuille 1:</p>
+                                        <p className="font-semibold text-blue-900">{tx.WalletName1}</p>
+                                      </div>
+                                    )}
+                                    {tx.WalletName2 && (
+                                      <div>
+                                        <p className="text-xs text-blue-600 font-medium">Portefeuille 2:</p>
+                                        <p className="font-semibold text-blue-900">{tx.WalletName2}</p>
+                                      </div>
+                                    )}
+                                    {tx.ClientAccountID && (
+                                      <div>
+                                        <p className="text-xs text-blue-600 font-medium">ID Compte Client:</p>
+                                        <p className="font-mono text-xs text-blue-900">{tx.ClientAccountID}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Colonne 2: Informations techniques */}
+                            <div className="space-y-3">
+                              <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                  <Activity size={14} className="text-purple-600" />
+                                  Informations techniques
+                                </h4>
+                                <div className="space-y-2 text-xs">
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600">ID Transaction:</span>
+                                    <span className="font-mono font-semibold text-gray-900">{tx.TransactionID}</span>
+                                  </div>
+                                  {tx.ClientReferenceNumber && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">Réf. client:</span>
+                                      <span className="font-mono font-medium text-gray-900">{tx.ClientReferenceNumber}</span>
+                                    </div>
+                                  )}
+                                  {tx.SettlementDate && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">Date règlement:</span>
+                                      <span className="font-medium text-gray-900">{new Date(tx.SettlementDate).toLocaleDateString('fr-CA')}</span>
+                                    </div>
+                                  )}
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600">Type:</span>
+                                    <span className="font-semibold text-gray-900">{tx.TransactionType}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600">Statut:</span>
+                                    <span className={`font-semibold ${
+                                      status.includes('completed') || status.includes('success') ? 'text-green-600' :
+                                      status.includes('pending') ? 'text-blue-600' :
+                                      'text-red-600'
+                                    }`}>{tx.TransactionStatus}</span>
+                                  </div>
+                                  {tx.Currency && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">Devise:</span>
+                                      <span className="font-bold text-gray-900">{tx.Currency}</span>
+                                    </div>
+                                  )}
+                                  {tx.LastModified && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">Modifié:</span>
+                                      <span className="font-medium text-gray-900">{new Date(tx.LastModified).toLocaleString('fr-CA')}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Notes et erreurs */}
+                              {(tx.Notes || tx.TransactionFailureReason || tx.TransactionErrorCode) && (
+                                <div className={`rounded-lg p-4 border shadow-sm ${
+                                  tx.TransactionFailureReason || tx.TransactionErrorCode
+                                    ? 'bg-red-50 border-red-200'
+                                    : 'bg-gray-50 border-gray-200'
+                                }`}>
+                                  <h4 className={`text-xs font-bold uppercase tracking-wider mb-2 ${
+                                    tx.TransactionFailureReason || tx.TransactionErrorCode
+                                      ? 'text-red-700'
+                                      : 'text-gray-500'
+                                  }`}>
+                                    {tx.TransactionFailureReason || tx.TransactionErrorCode ? 'Erreur' : 'Notes'}
+                                  </h4>
+                                  {tx.TransactionErrorCode && (
+                                    <p className="text-xs text-red-700 font-mono mb-1">Code: {tx.TransactionErrorCode}</p>
+                                  )}
+                                  {tx.TransactionFailureReason && (
+                                    <p className="text-xs text-red-700 font-semibold mb-2">{tx.TransactionFailureReason}</p>
+                                  )}
+                                  {tx.Notes && (
+                                    <p className="text-xs text-gray-700">{tx.Notes}</p>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Relations parent/enfant */}
+                              {(tx.ParentTransactionID || tx.ChildTransactionIDs) && (
+                                <div className="bg-purple-50 rounded-lg p-4 border border-purple-200 shadow-sm">
+                                  <h4 className="text-xs font-bold text-purple-700 uppercase tracking-wider mb-2">Relations</h4>
+                                  {tx.ParentTransactionID && (
+                                    <div className="text-xs">
+                                      <span className="text-purple-600">Parent:</span>
+                                      <span className="font-mono ml-2 text-purple-900">{tx.ParentTransactionID}</span>
+                                    </div>
+                                  )}
+                                  {tx.ChildTransactionIDs && (
+                                    <div className="text-xs mt-1">
+                                      <span className="text-purple-600">Enfants:</span>
+                                      <span className="font-mono ml-2 text-purple-900">{tx.ChildTransactionIDs}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-gray-900">{formatCurrency(amount)}</p>
-                          <p className="text-sm text-gray-400">{new Date(tx.TransactionDateTime).toLocaleString('fr-CA')}</p>
-                        </div>
-                      </div>
+                      </details>
                     )
                   })}
                 </div>
