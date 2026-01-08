@@ -2273,32 +2273,51 @@ export default function AdminDashboard() {
         {/* VoPay View */}
         {selectedView === 'vopay' && (
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-2xl font-semibold text-[#003d2c]">VoPay</h1>
-                <p className="text-gray-500 mt-1">Gestion des paiements Interac</p>
-              </div>
-              <button
-                onClick={fetchVopayData}
-                disabled={vopayLoading}
-                className="flex items-center gap-2 px-4 py-2 bg-[#00874e] text-white rounded-lg text-sm font-medium hover:bg-[#006d3f] transition-colors disabled:opacity-50"
-              >
-                <RefreshCw size={16} className={vopayLoading ? 'animate-spin' : ''} />
-                {vopayLoading ? 'Chargement...' : 'Rafraichir'}
-              </button>
-            </div>
-
-            {vopayError && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            {/* Header avec Diagnostics - Mode Ingénieur */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h1 className="text-2xl font-semibold text-[#003d2c] flex items-center gap-3">
+                    <div className="w-1 h-8 bg-gradient-to-b from-[#00874e] to-emerald-600 rounded-full"></div>
+                    VoPay - Mode Ingénieur
+                  </h1>
+                  <p className="text-gray-600 mt-2 ml-7 font-medium">
+                    Gestion des paiements Interac & Diagnostics complets
+                  </p>
+                </div>
                 <div className="flex items-center gap-3">
-                  <AlertTriangle size={20} className="text-red-500" />
-                  <div>
-                    <h3 className="font-semibold text-red-800">Erreur de connexion</h3>
-                    <p className="text-sm text-red-600">{vopayError}</p>
+                  <div className="px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      <span className="text-xs font-semibold text-emerald-700">Opérationnel</span>
+                    </div>
                   </div>
+                  <button
+                    onClick={fetchVopayData}
+                    disabled={vopayLoading}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#00874e] text-white rounded-lg text-sm font-medium hover:bg-[#006d3f] transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw size={16} className={vopayLoading ? 'animate-spin' : ''} />
+                    {vopayLoading ? 'Chargement...' : 'Rafraîchir'}
+                  </button>
                 </div>
               </div>
-            )}
+
+              {vopayError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle size={20} className="text-red-500" />
+                    <div>
+                      <h3 className="font-semibold text-red-800">Erreur de connexion</h3>
+                      <p className="text-sm text-red-600">{vopayError}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="grid grid-cols-4 gap-6 mb-6">
               <div className="bg-white rounded-lg border border-gray-200 p-6">
