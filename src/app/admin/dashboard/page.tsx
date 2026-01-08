@@ -1293,6 +1293,80 @@ export default function AdminDashboard() {
                                 {new Date(msg.date).toLocaleString('fr-CA')}
                               </span>
                             </div>
+                            {/* Métriques Techniques - Aperçu Rapide */}
+                            {(msg.client_device || msg.client_browser || msg.client_ip) && (
+                              <div className="mt-3 pt-3 border-t border-gray-100">
+                                {/* Description en langage simple */}
+                                <div className="mb-2 flex items-start gap-2">
+                                  <Activity size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
+                                  <p className="text-xs text-gray-600 leading-relaxed">
+                                    Ce message provient
+                                    {msg.client_device && (
+                                      <span className="font-semibold text-blue-700"> d'un {msg.client_device === 'Mobile' ? 'téléphone mobile' : 'ordinateur'}</span>
+                                    )}
+                                    {msg.client_os && (
+                                      <span className="font-semibold text-purple-700"> utilisant {msg.client_os}</span>
+                                    )}
+                                    {msg.client_browser && (
+                                      <span className="font-semibold text-indigo-700"> et le navigateur {msg.client_browser}</span>
+                                    )}
+                                    {msg.client_ip && (
+                                      <span className="font-semibold text-emerald-700"> depuis l'adresse IP {msg.client_ip}</span>
+                                    )}
+                                    {msg.client_language && (
+                                      <span className="font-semibold text-teal-700"> avec la langue {msg.client_language.toUpperCase()}</span>
+                                    )}
+                                    {(msg.utm_source || msg.utm_medium || msg.utm_campaign) && (
+                                      <span className="font-semibold text-pink-700"> via une campagne marketing</span>
+                                    )}
+                                    .
+                                  </p>
+                                </div>
+                                {/* Badges */}
+                                <div className="flex items-center gap-3 flex-wrap">
+                                {msg.client_device && (
+                                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100">
+                                    {msg.client_device === 'Mobile' ? (
+                                      <Smartphone size={13} className="text-blue-600" />
+                                    ) : (
+                                      <Monitor size={13} className="text-blue-600" />
+                                    )}
+                                    <span className="text-xs font-semibold text-blue-700">{msg.client_device}</span>
+                                  </div>
+                                )}
+                                {msg.client_browser && (
+                                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100">
+                                    <Chrome size={13} className="text-indigo-600" />
+                                    <span className="text-xs font-semibold text-indigo-700">{msg.client_browser}</span>
+                                  </div>
+                                )}
+                                {msg.client_os && (
+                                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
+                                    <Monitor size={13} className="text-purple-600" />
+                                    <span className="text-xs font-semibold text-purple-700">{msg.client_os}</span>
+                                  </div>
+                                )}
+                                {msg.client_ip && (
+                                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100">
+                                    <MapPin size={13} className="text-emerald-600" />
+                                    <span className="text-xs font-mono font-semibold text-emerald-700">{msg.client_ip}</span>
+                                  </div>
+                                )}
+                                {msg.client_language && (
+                                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-100">
+                                    <Languages size={13} className="text-teal-600" />
+                                    <span className="text-xs font-mono font-semibold text-teal-700 uppercase">{msg.client_language}</span>
+                                  </div>
+                                )}
+                                {(msg.utm_source || msg.utm_medium || msg.utm_campaign) && (
+                                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200">
+                                    <Target size={13} className="text-pink-600" />
+                                    <span className="text-xs font-bold text-pink-700">UTM</span>
+                                  </div>
+                                )}
+                                </div>
+                              </div>
+                            )}
                           </div>
                           <ChevronRight size={20} className="text-gray-400 flex-shrink-0" />
                         </div>
