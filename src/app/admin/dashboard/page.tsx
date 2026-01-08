@@ -747,6 +747,7 @@ export default function AdminDashboard() {
                         const isSuccessful = status === 'successful'
                         const isFailed = status === 'failed'
                         const isPending = status === 'pending' || status === 'in progress'
+                        const isCancelled = status === 'cancelled'
 
                         // Déterminer si c'est une entrée ou sortie
                         const txType = (tx.transaction_type || '').toLowerCase()
@@ -754,47 +755,181 @@ export default function AdminDashboard() {
                         const isWithdrawal = txType.includes('withdrawal') || txType.includes('reversal') || txType.includes('fee') || txType.includes('debit')
 
                         return (
-                          <div key={tx.id || i} className={`px-6 py-4 flex items-center justify-between hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all duration-200 cursor-pointer group border-l-4 ${
-                            isDeposit ? 'border-l-emerald-500 bg-emerald-50/30' :
-                            isWithdrawal ? 'border-l-red-500 bg-red-50/30' :
-                            'border-l-gray-300'
-                          }`}>
-                            <div className="flex items-center gap-4">
-                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
-                                isSuccessful ? 'bg-gradient-to-br from-[#e8f5e9] to-emerald-100' :
-                                isFailed ? 'bg-gradient-to-br from-red-50 to-red-100' :
-                                isPending ? 'bg-gradient-to-br from-blue-50 to-blue-100' :
-                                'bg-gray-50'
-                              }`}>
-                                {isSuccessful && <CheckCircle size={18} className="text-[#00874e]" />}
-                                {isFailed && <XCircle size={18} className="text-red-500" />}
-                                {isPending && <Clock size={18} className="text-blue-600" />}
-                                {status === 'cancelled' && <XCircle size={18} className="text-gray-400" />}
+                          <details key={tx.id || i} className="group">
+                            <summary className={`px-6 py-4 cursor-pointer hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all list-none border-l-4 ${
+                              isDeposit ? 'border-l-emerald-500 bg-emerald-50/30' :
+                              isWithdrawal ? 'border-l-red-500 bg-red-50/30' :
+                              'border-l-gray-300'
+                            }`}>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4 flex-1">
+                                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${
+                                    isSuccessful ? 'bg-gradient-to-br from-green-100 to-emerald-200' :
+                                    isFailed ? 'bg-gradient-to-br from-red-100 to-red-200' :
+                                    isPending ? 'bg-gradient-to-br from-blue-100 to-blue-200' :
+                                    isCancelled ? 'bg-gradient-to-br from-gray-100 to-gray-200' :
+                                    'bg-gray-50'
+                                  }`}>
+                                    {isSuccessful && <CheckCircle size={20} className="text-green-700" />}
+                                    {isFailed && <XCircle size={20} className="text-red-700" />}
+                                    {isPending && <Clock size={20} className="text-blue-700" />}
+                                    {isCancelled && <XCircle size={20} className="text-gray-500" />}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <p className="font-bold text-gray-900">{tx.full_name || 'Client VoPay'}</p>
+                                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                                        isSuccessful ? 'bg-green-100 text-green-700' :
+                                        isFailed ? 'bg-red-100 text-red-700' :
+                                        isPending ? 'bg-blue-100 text-blue-700' :
+                                        'bg-gray-100 text-gray-700'
+                                      }`}>
+                                        {tx.status}
+                                      </span>
+                                      {isDeposit && (
+                                        <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">
+                                          Entrée
+                                        </span>
+                                      )}
+                                      {isWithdrawal && (
+                                        <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-semibold">
+                                          Sortie
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                                      <span className="font-mono">#{tx.transaction_id}</span>
+                                      <span>•</span>
+                                      <span className="font-medium">{tx.transaction_type}</span>
+                                      <span>•</span>
+                                      <span>{new Date(tx.received_at).toLocaleString('fr-CA')}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-right ml-4">
+                                  <p className={`text-lg font-bold ${
+                                    isDeposit && isSuccessful ? 'text-green-600' :
+                                    isWithdrawal && isSuccessful ? 'text-red-600' :
+                                    isFailed ? 'text-gray-400' :
+                                    'text-gray-900'
+                                  }`}>
+                                    {isDeposit && '+'}{isWithdrawal && '-'}{formatCurrency(tx.transaction_amount)}
+                                  </p>
+                                </div>
+                                <ChevronRight size={20} className="text-gray-400 ml-2 group-open:rotate-90 transition-transform" />
                               </div>
-                              <div>
-                                <p className="font-medium text-gray-900">{tx.transaction_id}</p>
-                                <p className="text-sm text-gray-500">
-                                  {tx.transaction_type}
-                                  {tx.failure_reason && ` - ${tx.failure_reason}`}
-                                </p>
+                            </summary>
+
+                            {/* Détails complets de la transaction webhook */}
+                            <div className="px-6 pb-4 pt-2 bg-gradient-to-br from-gray-50 to-white border-t border-gray-100">
+                              <div className="grid grid-cols-2 gap-4">
+                                {/* Colonne 1: Informations principales */}
+                                <div className="space-y-3">
+                                  <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                      <DollarSign size={14} className="text-green-600" />
+                                      Détails de la transaction
+                                    </h4>
+                                    <div className="space-y-2 text-sm">
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Montant:</span>
+                                        <span className={`font-bold text-lg ${
+                                          isDeposit ? 'text-green-600' : isWithdrawal ? 'text-red-600' : 'text-gray-900'
+                                        }`}>
+                                          {isDeposit && '+'}{isWithdrawal && '-'}{formatCurrency(tx.transaction_amount)}
+                                        </span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Type:</span>
+                                        <span className="font-semibold text-gray-900">{tx.transaction_type}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Statut:</span>
+                                        <span className={`font-semibold ${
+                                          isSuccessful ? 'text-green-600' :
+                                          isFailed ? 'text-red-600' :
+                                          isPending ? 'text-blue-600' :
+                                          'text-gray-600'
+                                        }`}>{tx.status}</span>
+                                      </div>
+                                      {tx.currency && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">Devise:</span>
+                                          <span className="font-bold text-gray-900">{tx.currency}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Client info si disponible */}
+                                  {tx.full_name && (
+                                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200 shadow-sm">
+                                      <h4 className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                        <User size={14} className="text-blue-600" />
+                                        Client
+                                      </h4>
+                                      <p className="font-semibold text-blue-900 text-sm">{tx.full_name}</p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Colonne 2: Informations techniques */}
+                                <div className="space-y-3">
+                                  <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                      <Activity size={14} className="text-purple-600" />
+                                      Informations techniques
+                                    </h4>
+                                    <div className="space-y-2 text-xs">
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">ID Transaction:</span>
+                                        <span className="font-mono font-semibold text-gray-900">{tx.transaction_id}</span>
+                                      </div>
+                                      {tx.vopay_transaction_id && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">VoPay ID:</span>
+                                          <span className="font-mono font-medium text-gray-900">{tx.vopay_transaction_id}</span>
+                                        </div>
+                                      )}
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Webhook reçu:</span>
+                                        <span className="font-medium text-gray-900">{new Date(tx.received_at).toLocaleString('fr-CA')}</span>
+                                      </div>
+                                      {tx.processed_at && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">Traité:</span>
+                                          <span className="font-medium text-gray-900">{new Date(tx.processed_at).toLocaleString('fr-CA')}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Erreur si échec */}
+                                  {tx.failure_reason && (
+                                    <div className="bg-red-50 rounded-lg p-4 border border-red-200 shadow-sm">
+                                      <h4 className="text-xs font-bold text-red-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                        <AlertTriangle size={14} className="text-red-600" />
+                                        Raison d'échec
+                                      </h4>
+                                      <p className="text-xs text-red-700 font-semibold">{tx.failure_reason}</p>
+                                    </div>
+                                  )}
+
+                                  {/* Données brutes webhook */}
+                                  {tx.raw_data && (
+                                    <details className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                      <summary className="text-xs font-bold text-gray-600 cursor-pointer hover:text-[#00874e] transition-colors">
+                                        Voir données brutes webhook
+                                      </summary>
+                                      <pre className="mt-2 text-xs text-gray-700 whitespace-pre-wrap break-all font-mono bg-white p-2 rounded border border-gray-200 max-h-40 overflow-auto">
+                                        {JSON.stringify(tx.raw_data, null, 2)}
+                                      </pre>
+                                    </details>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <p className={`font-semibold ${
-                                isFailed ? 'text-red-500' :
-                                isSuccessful ? 'text-[#00874e]' :
-                                'text-gray-900'
-                              }`}>
-                                {formatCurrency(tx.transaction_amount)}
-                              </p>
-                              <p className="text-sm text-gray-400">
-                                {new Date(tx.received_at).toLocaleTimeString('fr-CA', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </p>
-                            </div>
-                          </div>
+                          </details>
                         )
                       })
                     })()
