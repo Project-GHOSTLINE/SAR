@@ -749,6 +749,11 @@ export default function AdminDashboard() {
                         const isPending = status === 'pending' || status === 'in progress'
                         const isCancelled = status === 'cancelled'
 
+                        // Extraire le nom du client et description du raw_payload
+                        const rawData = tx.raw_payload || {}
+                        const clientName = rawData.FullName || rawData.full_name || rawData.AccountName || 'Client VoPay'
+                        const vopayTransactionId = rawData.TransactionID || tx.transaction_id
+
                         // Déterminer si c'est une entrée ou sortie
                         const txType = (tx.transaction_type || '').toLowerCase()
                         const isDeposit = txType.includes('deposit') || txType.includes('credit') || txType.includes('payment')
@@ -777,7 +782,7 @@ export default function AdminDashboard() {
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
-                                      <p className="font-bold text-gray-900">{tx.full_name || 'Client VoPay'}</p>
+                                      <p className="font-bold text-gray-900">{clientName}</p>
                                       <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
                                         isSuccessful ? 'bg-green-100 text-green-700' :
                                         isFailed ? 'bg-red-100 text-red-700' :
@@ -861,16 +866,17 @@ export default function AdminDashboard() {
                                     </div>
                                   </div>
 
-                                  {/* Client info si disponible */}
-                                  {tx.full_name && (
-                                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200 shadow-sm">
-                                      <h4 className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                        <User size={14} className="text-blue-600" />
-                                        Client
-                                      </h4>
-                                      <p className="font-semibold text-blue-900 text-sm">{tx.full_name}</p>
-                                    </div>
-                                  )}
+                                  {/* Client info */}
+                                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200 shadow-sm">
+                                    <h4 className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                      <User size={14} className="text-blue-600" />
+                                      Client
+                                    </h4>
+                                    <p className="font-semibold text-blue-900 text-sm">{clientName}</p>
+                                    {rawData.AccountName && rawData.AccountName !== clientName && (
+                                      <p className="text-xs text-blue-600 mt-1">Compte: {rawData.AccountName}</p>
+                                    )}
+                                  </div>
                                 </div>
 
                                 {/* Colonne 2: Informations techniques */}
@@ -882,13 +888,13 @@ export default function AdminDashboard() {
                                     </h4>
                                     <div className="space-y-2 text-xs">
                                       <div className="flex justify-between">
-                                        <span className="text-gray-600">ID Transaction:</span>
-                                        <span className="font-mono font-semibold text-gray-900">{tx.transaction_id}</span>
+                                        <span className="text-gray-600">ID Webhook:</span>
+                                        <span className="font-mono font-semibold text-gray-900 text-[10px]">{tx.id ? String(tx.id).slice(0, 8) : 'N/A'}</span>
                                       </div>
-                                      {tx.vopay_transaction_id && (
+                                      {vopayTransactionId && (
                                         <div className="flex justify-between">
-                                          <span className="text-gray-600">VoPay ID:</span>
-                                          <span className="font-mono font-medium text-gray-900">{tx.vopay_transaction_id}</span>
+                                          <span className="text-gray-600">ID Transaction VoPay:</span>
+                                          <span className="font-mono font-medium text-gray-900">{vopayTransactionId}</span>
                                         </div>
                                       )}
                                       <div className="flex justify-between">
@@ -916,13 +922,13 @@ export default function AdminDashboard() {
                                   )}
 
                                   {/* Données brutes webhook */}
-                                  {tx.raw_data && (
+                                  {rawData && Object.keys(rawData).length > 0 && (
                                     <details className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                                       <summary className="text-xs font-bold text-gray-600 cursor-pointer hover:text-[#00874e] transition-colors">
                                         Voir données brutes webhook
                                       </summary>
                                       <pre className="mt-2 text-xs text-gray-700 whitespace-pre-wrap break-all font-mono bg-white p-2 rounded border border-gray-200 max-h-40 overflow-auto">
-                                        {JSON.stringify(tx.raw_data, null, 2)}
+                                        {JSON.stringify(rawData, null, 2)}
                                       </pre>
                                     </details>
                                   )}
