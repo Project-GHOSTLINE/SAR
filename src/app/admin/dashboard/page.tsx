@@ -296,6 +296,10 @@ export default function AdminDashboard() {
   // Vue pour transactions récentes
   const [txView, setTxView] = useState<'all' | 'deposits' | 'withdrawals'>('all')
 
+  // Contrôle des transactions ouvertes (un seul à la fois)
+  const [openWebhookTxId, setOpenWebhookTxId] = useState<string | null>(null)
+  const [openVopayTxId, setOpenVopayTxId] = useState<string | null>(null)
+
   // Filtre pour messages stats
   type MessageFilterType = 'all' | 'reponses' | 'sandra' | 'michel' | 'none' | 'no_response'
   const [messageFilter, setMessageFilter] = useState<MessageFilterType>('all')
@@ -759,8 +763,19 @@ export default function AdminDashboard() {
                         const isDeposit = txType.includes('deposit') || txType.includes('credit') || txType.includes('payment')
                         const isWithdrawal = txType.includes('withdrawal') || txType.includes('reversal') || txType.includes('fee') || txType.includes('debit')
 
+                        const txId = tx.id || `tx-${i}`
+                        const isOpen = openWebhookTxId === txId
+
                         return (
-                          <details key={tx.id || i} className="group">
+                          <details
+                            key={txId}
+                            className="group"
+                            open={isOpen}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              setOpenWebhookTxId(isOpen ? null : txId)
+                            }}
+                          >
                             <summary className={`px-6 py-4 cursor-pointer hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all list-none border-l-4 ${
                               isDeposit ? 'border-l-emerald-500 bg-emerald-50/30' :
                               isWithdrawal ? 'border-l-red-500 bg-red-50/30' :
@@ -2219,8 +2234,19 @@ export default function AdminDashboard() {
                     const feeAmount = parseFloat(tx.ConvenienceFeeAmount || '0')
                     const netAmount = creditAmount - debitAmount
 
+                    const txId = tx.TransactionID || `vopay-tx-${i}`
+                    const isOpen = openVopayTxId === txId
+
                     return (
-                      <details key={i} className="group">
+                      <details
+                        key={txId}
+                        className="group"
+                        open={isOpen}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setOpenVopayTxId(isOpen ? null : txId)
+                        }}
+                      >
                         <summary className="px-6 py-4 cursor-pointer hover:bg-gradient-to-r from-gray-50 to-transparent transition-all list-none">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4 flex-1">
