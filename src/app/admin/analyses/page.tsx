@@ -169,6 +169,21 @@ export default function AnalysesClientPage() {
     fetchAnalyses()
   }, [statusFilter, assignedFilter, sourceFilter])
 
+  // Auto-open analysis from URL parameter ?id=...
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const analysisId = urlParams.get('id')
+
+    if (analysisId && analyses.length > 0) {
+      const analysis = analyses.find(a => a.id === analysisId)
+      if (analysis) {
+        setSelectedAnalysis(analysis)
+        // Clear URL parameter after opening
+        window.history.replaceState({}, '', '/admin/analyses')
+      }
+    }
+  }, [analyses])
+
   // Filter analyses by search query
   const filteredAnalyses = analyses.filter(analysis => {
     const query = searchQuery.toLowerCase()
