@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase'
+import { jwtVerify } from 'jose'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -21,7 +22,7 @@ function corsHeaders(origin: string | null) {
   return {
     'Access-Control-Allow-Origin': isAllowed ? origin : allowedOrigins[0],
     'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Cookie',
+    'Access-Control-Allow-Headers': 'Content-Type, Cookie, Authorization',
     'Access-Control-Allow-Credentials': 'true',
   }
 }
@@ -44,13 +45,34 @@ export async function OPTIONS(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin')
   try {
-    // Vérification de l'authentification admin
-    const authHeader = request.headers.get('cookie')
-    if (!authHeader?.includes('admin-session=')) {
+    // Vérification de l'authentification admin - Cookie OU Token Bearer
+    const cookieHeader = request.headers.get('cookie')
+    const authorizationHeader = request.headers.get('authorization')
+    const bearerToken = authorizationHeader?.replace('Bearer ', '')
+
+    const hasValidCookie = cookieHeader?.includes('admin-session=')
+    const hasValidToken = !!bearerToken
+
+    if (!hasValidCookie && !hasValidToken) {
       return NextResponse.json(
-        { error: 'Non autorisé - Session admin requise' },
+        { error: 'Non autorisé - Session admin ou token Bearer requis' },
         { status: 401, headers: corsHeaders(origin) }
       )
+    }
+
+    // Si token Bearer fourni, valider avec JWT
+    if (hasValidToken) {
+      try {
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'sar-admin-secret-key-2024')
+        await jwtVerify(bearerToken!, secret)
+        console.log('✅ Token Bearer validé')
+      } catch (err) {
+        console.error('❌ Token Bearer invalide:', err)
+        return NextResponse.json(
+          { error: 'Token Bearer invalide ou expiré' },
+          { status: 401, headers: corsHeaders(origin) }
+        )
+      }
     }
 
     const supabase = getSupabase()
@@ -181,13 +203,37 @@ export async function GET(request: NextRequest) {
 
     // Récupérer les paramètres de filtre
     const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
     const status = searchParams.get('status')
     const assigned_to = searchParams.get('assigned_to')
     const source = searchParams.get('source')
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    // Construire la requête
+    // Si ID fourni, retourner directement cette analyse
+    if (id) {
+      const { data: singleData, error: singleError } = await supabase
+        .from('client_analyses')
+        .select('*')
+        .eq('id', id)
+        .is('deleted_at', null)
+        .single()
+
+      if (singleError) {
+        console.error('Erreur Supabase select single:', singleError)
+        return NextResponse.json(
+          { error: 'Analyse non trouvée', details: singleError.message },
+          { status: 404 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: singleData
+      })
+    }
+
+    // Construire la requête pour liste
     let query = supabase
       .from('client_analyses')
       .select('*', { count: 'exact' })
