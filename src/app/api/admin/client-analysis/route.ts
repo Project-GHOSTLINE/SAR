@@ -49,27 +49,37 @@ export async function OPTIONS(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin')
   try {
-    // Vérification de l'authentification admin - Cookie OU Token Bearer
+    // Vérification de l'authentification admin - Cookie OU Token Bearer OU Origine de confiance
     const cookieHeader = request.headers.get('cookie')
     const authorizationHeader = request.headers.get('authorization')
     const bearerToken = authorizationHeader?.replace('Bearer ', '')
 
     const hasValidCookie = cookieHeader?.includes('admin-session=')
-    const hasValidToken = !!bearerToken
 
-    if (!hasValidCookie && !hasValidToken) {
-      return NextResponse.json(
-        { error: 'Non autorisé - Session admin ou token Bearer requis' },
-        { status: 401, headers: corsHeaders(origin) }
-      )
-    }
+    // Origines de confiance (extensions Chrome sur Flinks/Inverite)
+    const trustedOrigins = [
+      'dashboard.flinks.com',
+      'flinks.com',
+      'fin.ag',
+      'inverite.com',
+      'app.inverite.com',
+      'www.inverite.com'
+    ]
+    const isTrustedOrigin = origin && trustedOrigins.some(trusted => origin.includes(trusted))
 
-    // Si token Bearer fourni, valider avec JWT
-    if (hasValidToken) {
+    // Si c'est une origine de confiance, pas besoin de vérifier le token JWT
+    if (isTrustedOrigin) {
+      console.log('✅ Origine de confiance:', origin)
+      // Passer la validation - l'extension est autorisée
+    } else if (hasValidCookie) {
+      console.log('✅ Cookie admin-session validé')
+      // Admin authentifié via cookie
+    } else if (bearerToken) {
+      // Valider le JWT seulement si ce n'est pas une origine de confiance
       try {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'sar-admin-secret-key-2024')
-        await jwtVerify(bearerToken!, secret)
-        console.log('✅ Token Bearer validé')
+        await jwtVerify(bearerToken, secret)
+        console.log('✅ Token Bearer JWT validé')
       } catch (err) {
         console.error('❌ Token Bearer invalide:', err)
         return NextResponse.json(
@@ -77,6 +87,12 @@ export async function POST(request: NextRequest) {
           { status: 401, headers: corsHeaders(origin) }
         )
       }
+    } else {
+      // Aucune authentification valide
+      return NextResponse.json(
+        { error: 'Non autorisé - Session admin, token JWT, ou origine de confiance requis' },
+        { status: 401, headers: corsHeaders(origin) }
+      )
     }
 
     const supabase = getSupabase()
