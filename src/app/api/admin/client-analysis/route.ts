@@ -114,7 +114,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Préparer les données pour insertion
+    // Vérifier si ce GUID existe déjà
+    const guidToCheck = body.inverite_guid
+    let existingAnalysis = null
+
+    if (guidToCheck) {
+      const { data: existing } = await supabase
+        .from('client_analyses')
+        .select('id, inverite_guid')
+        .eq('inverite_guid', guidToCheck)
+        .maybeSingle()
+
+      existingAnalysis = existing
+    }
+
+    // Préparer les données
     const analysisData: any = {
       client_name: body.client_name,
       source: body.source || 'inverite', // 'inverite' ou 'flinks'
@@ -124,23 +138,44 @@ export async function POST(request: NextRequest) {
       assigned_to: body.assigned_to || null
     }
 
-    // N'ajouter tags que si la colonne existe (structure optimisée)
-    // Pour la structure simple actuelle, on l'ignore
-    // if (body.tags) {
-    //   analysisData.tags = body.tags
-    // }
+    let data, error
 
-    // Insérer dans Supabase
-    const { data, error } = await supabase
-      .from('client_analyses')
-      .insert([analysisData])
-      .select()
-      .single()
+    if (existingAnalysis) {
+      // MISE À JOUR de l'analyse existante
+      console.log('🔄 Mise à jour analyse existante:', existingAnalysis.id)
+
+      const updateResult = await supabase
+        .from('client_analyses')
+        .update({
+          client_name: analysisData.client_name,
+          raw_data: analysisData.raw_data,
+          source: analysisData.source,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingAnalysis.id)
+        .select()
+        .single()
+
+      data = updateResult.data
+      error = updateResult.error
+    } else {
+      // CRÉATION d'une nouvelle analyse
+      console.log('✨ Création nouvelle analyse')
+
+      const insertResult = await supabase
+        .from('client_analyses')
+        .insert([analysisData])
+        .select()
+        .single()
+
+      data = insertResult.data
+      error = insertResult.error
+    }
 
     if (error) {
-      console.error('Erreur Supabase insert:', error)
+      console.error('Erreur Supabase:', error)
       return NextResponse.json(
-        { error: 'Échec de l\'insertion', details: error.message },
+        { error: existingAnalysis ? 'Échec de la mise à jour' : 'Échec de l\'insertion', details: error.message },
         { status: 500, headers: corsHeaders(origin) }
       )
     }
@@ -176,7 +211,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Analyse sauvegardée avec succès',
+        message: existingAnalysis ? 'Analyse mise à jour avec succès' : 'Analyse créée avec succès',
+        isUpdate: !!existingAnalysis,
         data: {
           id: data.id,
           client_name: data.client_name,
