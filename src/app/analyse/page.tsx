@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   ArrowLeft, Building, DollarSign, TrendingUp, CreditCard,
@@ -26,7 +26,7 @@ interface ClientAnalysis {
   created_at: string
 }
 
-export default function AnalysePage() {
+function AnalysePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const analysisId = searchParams.get('id')
@@ -35,6 +35,7 @@ export default function AnalysePage() {
   const [analysis, setAnalysis] = useState<ClientAnalysis | null>(null)
   const [expandedAccount, setExpandedAccount] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [accounts, setAccounts] = useState<any[]>([])
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -56,7 +57,7 @@ export default function AnalysePage() {
   }
 
   // Fetch analysis
-  const fetchAnalysis = async () => {
+  const fetchAnalysis = useCallback(async () => {
     if (!analysisId) {
       setError('Aucun ID d\'analyse fourni')
       setLoading(false)
@@ -64,21 +65,31 @@ export default function AnalysePage() {
     }
 
     try {
-      const res = await fetch(`/api/admin/client-analysis?limit=1000`, {
+      const res = await fetch(`/api/admin/client-analysis?id=${analysisId}`, {
         credentials: 'include'
       })
 
       if (res.ok) {
         const data = await res.json()
-        const foundAnalysis = data.data.find((a: ClientAnalysis) => a.id === analysisId)
+        const analysisData = data.data
 
-        if (foundAnalysis) {
-          setAnalysis(foundAnalysis)
-        } else {
-          setError('Analyse non trouvée')
+        // Extraire les comptes depuis raw_data
+        const accountsData = analysisData.raw_data?.accounts || analysisData.accounts || []
+        setAccounts(accountsData)
+
+        // Extraire les infos client depuis raw_data.clientInfo si disponible
+        if (analysisData.raw_data?.clientInfo) {
+          const clientInfo = analysisData.raw_data.clientInfo
+          analysisData.client_email = analysisData.client_email || clientInfo.email
+          analysisData.client_address = analysisData.client_address || clientInfo.address
+          analysisData.client_phones = analysisData.client_phones || (clientInfo.phone ? [clientInfo.phone] : [])
         }
+
+        setAnalysis(analysisData)
       } else if (res.status === 401) {
         router.push('/admin')
+      } else if (res.status === 404) {
+        setError('Analyse non trouvée')
       } else {
         setError('Erreur lors du chargement')
       }
@@ -88,11 +99,11 @@ export default function AnalysePage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [analysisId, router])
 
   useEffect(() => {
     fetchAnalysis()
-  }, [analysisId])
+  }, [fetchAnalysis])
 
   if (loading) {
     return (
@@ -243,11 +254,11 @@ export default function AnalysePage() {
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
             <CreditCard size={24} />
-            Comptes bancaires ({analysis.total_accounts})
+            Comptes bancaires ({accounts.length})
           </h2>
 
           <div className="space-y-4">
-            {analysis.accounts && analysis.accounts.map((account: any, index: number) => (
+            {accounts && accounts.map((account: any, index: number) => (
               <div key={index} className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 <div
                   className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
@@ -257,7 +268,7 @@ export default function AnalysePage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
                         <h3 className="text-xl font-bold text-gray-900">
-                          {account.accountNumber || `Compte ${index + 1}`}
+                          {account.title || account.accountNumber || account.account_number || `Compte ${index + 1}`}
                         </h3>
                         {account.type && (
                           <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
@@ -265,13 +276,15 @@ export default function AnalysePage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-gray-600">{account.institutionName || 'Institution inconnue'}</p>
+                      <p className="text-gray-600">
+                        {account.account_number || account.accountNumber || 'Numéro inconnu'}
+                      </p>
                     </div>
 
                     <div className="flex items-center gap-6">
                       <div className="text-right">
                         <p className="text-3xl font-bold text-gray-900">
-                          {formatCurrency(account.balance || 0)}
+                          {formatCurrency(account.current_balance || account.balance || 0)}
                         </p>
                         <p className="text-sm text-gray-500 mt-1">
                           {account.transactions ? `${account.transactions.length} transactions` : 'Aucune transaction'}
@@ -293,21 +306,38 @@ export default function AnalysePage() {
                     </h4>
 
                     <div className="space-y-2 max-h-96 overflow-y-auto">
-                      {account.transactions.map((tx: any, txIndex: number) => (
-                        <div key={txIndex} className="bg-white p-4 rounded-lg border border-gray-100 flex items-center justify-between hover:border-gray-300 transition-colors">
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-900">{tx.description || 'Transaction'}</p>
-                            <p className="text-sm text-gray-500 mt-1">
-                              {tx.date ? new Date(tx.date).toLocaleDateString('fr-CA') : 'Date inconnue'}
-                            </p>
+                      {account.transactions.map((tx: any, txIndex: number) => {
+                        // Calculer le montant (retrait = négatif, dépôt = positif)
+                        const withdrawal = parseFloat(tx.withdrawals || tx.withdrawal || 0)
+                        const deposit = parseFloat(tx.deposits || tx.deposit || 0)
+                        const amount = tx.amount !== undefined ? parseFloat(tx.amount) : (deposit - withdrawal)
+                        const balance = parseFloat(tx.balance || tx.solde || 0)
+
+                        return (
+                          <div key={txIndex} className="bg-white p-4 rounded-lg border border-gray-100 hover:border-gray-300 transition-colors">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex-1">
+                                <p className="font-medium text-gray-900">{tx.description || 'Transaction'}</p>
+                                <p className="text-sm text-gray-500 mt-1">
+                                  {tx.date ? new Date(tx.date).toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Date inconnue'}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className={`text-2xl font-bold ${
+                                  amount >= 0 ? 'text-green-600' : 'text-red-600'
+                                }`}>
+                                  {amount >= 0 ? '+' : ''}{formatCurrency(amount)}
+                                </p>
+                                {balance !== 0 && (
+                                  <p className="text-sm text-gray-500 mt-1">
+                                    Solde: {formatCurrency(balance)}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <p className={`text-2xl font-bold ${
-                            (tx.amount || 0) >= 0 ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {(tx.amount || 0) >= 0 ? '+' : ''}{formatCurrency(tx.amount || 0)}
-                          </p>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -346,5 +376,20 @@ export default function AnalysePage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AnalysePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center">
+          <Loader2 size={48} className="animate-spin text-[#00874e] mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">Chargement de l'analyse...</p>
+        </div>
+      </div>
+    }>
+      <AnalysePageContent />
+    </Suspense>
   )
 }

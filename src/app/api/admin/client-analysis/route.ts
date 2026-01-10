@@ -9,10 +9,14 @@ export const revalidate = 0
 
 // CORS headers helper
 function corsHeaders(origin: string | null) {
-  // Allow requests from inverite.com and admin.solutionargentrapide.ca
+  // Allow requests from inverite.com, flinks.com and admin.solutionargentrapide.ca
   const allowedOrigins = [
     'https://inverite.com',
     'https://app.inverite.com',
+    'https://www.inverite.com',
+    'https://dashboard.flinks.com',
+    'https://flinks.com',
+    'https://fin.ag',
     'https://admin.solutionargentrapide.ca',
     'http://localhost:3000'
   ]
