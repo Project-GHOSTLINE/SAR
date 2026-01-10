@@ -115,15 +115,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Préparer les données pour insertion
-    const analysisData = {
+    const analysisData: any = {
       client_name: body.client_name,
       source: body.source || 'inverite', // 'inverite' ou 'flinks'
       inverite_guid: body.inverite_guid || null,
       raw_data: body.raw_data,
       status: 'pending',
-      assigned_to: body.assigned_to || null,
-      tags: body.tags || []
+      assigned_to: body.assigned_to || null
     }
+
+    // N'ajouter tags que si la colonne existe (structure optimisée)
+    // Pour la structure simple actuelle, on l'ignore
+    // if (body.tags) {
+    //   analysisData.tags = body.tags
+    // }
 
     // Insérer dans Supabase
     const { data, error } = await supabase
@@ -370,7 +375,7 @@ export async function PATCH(request: NextRequest) {
     if (body.status) updateData.status = body.status
     if (body.assigned_to !== undefined) updateData.assigned_to = body.assigned_to
     if (body.notes !== undefined) updateData.notes = body.notes
-    if (body.tags !== undefined) updateData.tags = body.tags
+    // if (body.tags !== undefined) updateData.tags = body.tags // Colonne tags non disponible dans structure simple
 
     // Si status passe à 'reviewed', ajouter reviewed_by et reviewed_at
     if (body.status === 'reviewed') {
