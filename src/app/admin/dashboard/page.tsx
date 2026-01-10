@@ -11,6 +11,7 @@ import {
   Monitor, Smartphone, Globe, Chrome, MapPin, Languages,
   Maximize2, Link2, TrendingUp as Campaign, Target
 } from 'lucide-react'
+import SupportView from '@/components/admin/SupportView'
 
 interface Message {
   id: string
@@ -268,7 +269,7 @@ export default function AdminDashboard() {
     byColleague: {} as Record<string, number>
   })
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
-  const [selectedView, setSelectedView] = useState<'dashboard' | 'messages' | 'vopay' | 'margill'>('dashboard')
+  const [selectedView, setSelectedView] = useState<'dashboard' | 'messages' | 'vopay' | 'margill' | 'support'>('dashboard')
   const [vopayLoading, setVopayLoading] = useState(false)
   const [vopayError, setVopayError] = useState<string | null>(null)
 
@@ -517,6 +518,7 @@ export default function AdminDashboard() {
                 { id: 'messages', label: 'Messages', badge: stats.nonLus },
                 { id: 'vopay', label: 'VoPay' },
                 { id: 'margill', label: 'Margill' },
+                { id: 'support', label: '🛠️ Support', badge: 0 }, // TODO: Add support stats badge
               ].map((item) => (
                 <button
                   key={item.id}
@@ -544,6 +546,13 @@ export default function AdminDashboard() {
                 className="px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100"
               >
                 Webhooks
+              </button>
+              <button
+                onClick={() => router.push('/admin/analyses')}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-[#00874e] hover:bg-emerald-50 font-semibold"
+              >
+                <FileText size={18} />
+                Analyses Client
               </button>
             </nav>
 
@@ -2350,6 +2359,11 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Support View */}
+        {selectedView === 'support' && (
+          <SupportView />
         )}
 
         {/* VoPay View */}
