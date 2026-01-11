@@ -243,7 +243,7 @@ function AnalysePageContent() {
           </h2>
 
           <div className="space-y-4">
-            {analysis.accounts && analysis.accounts.map((account: any, index: number) => (
+            {analysis.raw_data?.accounts && analysis.raw_data.accounts.map((account: any, index: number) => (
               <div key={index} className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 <div
                   className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
@@ -253,7 +253,7 @@ function AnalysePageContent() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
                         <h3 className="text-xl font-bold text-gray-900">
-                          {account.accountNumber || `Compte ${index + 1}`}
+                          {account.account || account.accountNumber || `Compte ${index + 1}`}
                         </h3>
                         {account.type && (
                           <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
@@ -261,13 +261,13 @@ function AnalysePageContent() {
                           </span>
                         )}
                       </div>
-                      <p className="text-gray-600">{account.institutionName || 'Institution inconnue'}</p>
+                      <p className="text-gray-600">{account.bank || account.institution || account.institutionName || 'Institution inconnue'}</p>
                     </div>
 
                     <div className="flex items-center gap-6">
                       <div className="text-right">
                         <p className="text-3xl font-bold text-gray-900">
-                          {formatCurrency(account.balance || 0)}
+                          {formatCurrency(parseFloat(account.current_balance || account.balance || 0))}
                         </p>
                         <p className="text-sm text-gray-500 mt-1">
                           {account.transactions ? `${account.transactions.length} transactions` : 'Aucune transaction'}
