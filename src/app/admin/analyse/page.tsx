@@ -590,12 +590,25 @@ function AnalysePageContent() {
               </button>
               {/* Comptes Section */}
               <div className="p-4">
-                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <CreditCard size={14} />
-                  Comptes
-                </h2>
+                {/* Header Comptes avec glassmorphism */}
+                <div className="mb-4 -mx-4 px-4 py-3"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(0, 135, 78, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    borderBottom: '1px solid rgba(0, 135, 78, 0.2)'
+                  }}
+                >
+                  <h2 className="text-sm font-bold text-[#00874e] uppercase tracking-wide flex items-center gap-2">
+                    <div className="w-8 h-8 bg-gradient-to-br from-[#00874e] to-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
+                      <CreditCard size={16} className="text-white" />
+                    </div>
+                    <span>Comptes Bancaires</span>
+                  </h2>
+                  <p className="text-xs text-gray-600 mt-1 ml-10">Sélectionnez un compte</p>
+                </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 px-2">
                   {accounts.map((account: any, index: number) => {
                     const isSelected = selectedAccountIndex === index
                     const accountBalance = cleanValue(account.current_balance || account.balance)
@@ -661,20 +674,48 @@ function AnalysePageContent() {
                 </div>
               </div>
 
-              {/* Divider */}
-              <div className="mx-4 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+              {/* Divider avec effet glass */}
+              <div className="my-4 relative">
+                <div className="absolute inset-0 flex items-center px-4">
+                  <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+                </div>
+                <div className="relative flex justify-center">
+                  <div className="px-4 py-1 rounded-full"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(200, 200, 200, 0.3)',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+                    }}
+                  >
+                    <span className="text-xs font-semibold text-gray-500">•••</span>
+                  </div>
+                </div>
+              </div>
 
               {/* Mois Section */}
               {selectedAccount && selectedAccount.transactions && selectedAccount.transactions.length > 0 && (
                 <div className="p-4">
-              <div className="mb-3">
-                <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                  <BarChart3 size={14} className="text-blue-500" />
-                  Par mois
-                </h2>
-              </div>
+                  {/* Header Mois avec glassmorphism */}
+                  <div className="mb-4 -mx-4 px-4 py-3"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
+                      borderBottom: '1px solid rgba(59, 130, 246, 0.2)'
+                    }}
+                  >
+                    <h2 className="text-sm font-bold text-blue-600 uppercase tracking-wide flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
+                        <BarChart3 size={16} className="text-white" />
+                      </div>
+                      <span>Analyse Mensuelle</span>
+                    </h2>
+                    <p className="text-xs text-gray-600 mt-1 ml-10">Filtrer par période</p>
+                  </div>
 
-              <div className="space-y-2">
+                  <div className="space-y-2 px-2">
                 {monthsStats.map((month) => {
                   const isSelected = selectedMonth === month.index
 
@@ -763,8 +804,8 @@ function AnalysePageContent() {
                 })}
               </div>
 
-              {/* Bouton Voir tous les mois */}
-              <div className="mt-3 px-2">
+              {/* Bouton Voir tous les mois avec glassmorphism */}
+              <div className="mt-4 px-2">
                 <button
                   onClick={() => {
                     setShowAllMonths(!showAllMonths)
@@ -772,10 +813,23 @@ function AnalysePageContent() {
                       setSelectedMonth(0) // Reset to first month when showing all
                     }
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white/50 hover:bg-white/80 rounded-xl border border-gray-200 hover:border-[#00874e] transition-all text-sm font-medium text-gray-700 hover:text-[#00874e]"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-medium group"
+                  style={{
+                    background: showAllMonths
+                      ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%)'
+                      : 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    border: showAllMonths
+                      ? '1px solid rgba(59, 130, 246, 0.4)'
+                      : '1px solid rgba(200, 200, 200, 0.3)',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+                  }}
                 >
-                  <Calendar size={16} />
-                  {showAllMonths ? 'Voir moins de mois' : 'Voir tous les mois'}
+                  <Calendar size={16} className={showAllMonths ? 'text-blue-600' : 'text-gray-600 group-hover:text-blue-600'} />
+                  <span className={showAllMonths ? 'text-blue-600 font-semibold' : 'text-gray-700 group-hover:text-blue-600'}>
+                    {showAllMonths ? 'Voir moins de mois' : 'Voir tous les mois'}
+                  </span>
                 </button>
               </div>
             </div>
