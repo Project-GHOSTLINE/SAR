@@ -316,6 +316,11 @@ function AnalysePageContent() {
       <div className="min-h-screen bg-gray-50 py-6 px-4">
         <div className="max-w-7xl mx-auto">
 
+          {/* VERSION BANNER - WILL REMOVE AFTER DEBUG */}
+          <div className="mb-4 p-4 bg-orange-500 text-white font-bold text-center text-lg rounded-lg">
+            🚀 VERSION: 2026-01-11-15:52 | ACCOUNTS LOADED: {accounts.length} | HYDRATION FIX ACTIVE
+          </div>
+
           {/* Header Section */}
           <div className="bg-gradient-to-br from-[#00874e] to-emerald-700 rounded-xl shadow-lg p-6 text-white mb-6">
             <div className="flex items-start justify-between mb-4">
