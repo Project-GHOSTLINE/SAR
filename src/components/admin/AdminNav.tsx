@@ -71,9 +71,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
     }
   }
 
+  // Show breadcrumb for analyse page
+  const showAnalyseBreadcrumb = currentPage?.includes('analyse')
+
   const navItems = [
     {
-      name: 'Tableau de bord',
+      name: 'Dashboard',
       href: '/admin/dashboard',
       icon: LayoutDashboard,
       badge: null
@@ -144,26 +147,34 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
 
   return (
     <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
-      <div className="w-full px-8 lg:px-16">
-        <div className="flex items-center justify-between h-24">
+      <div className="w-full px-6 lg:px-12">
+        <div className="flex items-center justify-between h-20">
           {/* Logo & Brand */}
-          <div className="flex items-center min-w-[280px]">
+          <div className="flex items-center">
             <button
               onClick={() => router.push('/admin/dashboard')}
-              className="flex items-center gap-5 hover:opacity-80 transition-opacity"
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
-              <div className="w-14 h-14 bg-gradient-to-br from-[#00874e] to-emerald-600 rounded-xl flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-2xl">$</span>
+              <div className="w-12 h-12 bg-gradient-to-br from-[#00874e] to-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
+                <span className="text-white font-bold text-xl">$</span>
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-gray-900 leading-tight">Solution Argent Rapide</h1>
-                <p className="text-sm text-gray-500 mt-0.5">Admin</p>
+                <h1 className="text-lg font-bold text-gray-900 leading-tight">SAR Admin</h1>
+                <p className="text-xs text-gray-500">Solution Argent Rapide</p>
               </div>
             </button>
+
+            {/* Breadcrumb for analyse page */}
+            {showAnalyseBreadcrumb && (
+              <div className="hidden md:flex items-center gap-2 ml-4 text-sm text-gray-500">
+                <span>/</span>
+                <span className="text-[#00874e] font-medium">Analyse Client</span>
+              </div>
+            )}
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-2">
             {navItems.map((item) => {
               const Icon = item.icon
               const active = isActive(item.href)
@@ -174,20 +185,20 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                   onClick={() => !item.disabled && router.push(item.href)}
                   disabled={item.disabled}
                   className={`
-                    relative flex items-center gap-3 px-6 py-3 rounded-lg text-base font-medium transition-all
+                    relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
                     ${active
-                      ? 'bg-[#00874e] text-white shadow-lg'
+                      ? 'bg-[#00874e] text-white shadow-md'
                       : item.disabled
                         ? 'text-gray-400 cursor-not-allowed'
                         : 'text-gray-700 hover:bg-gray-100'
                     }
                   `}
                 >
-                  <Icon size={22} />
+                  <Icon size={18} />
                   <span>{item.name}</span>
                   {item.badge !== null && item.badge > 0 && (
                     <span className={`
-                      absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 flex items-center justify-center
+                      absolute -top-1 -right-1 min-w-[18px] h-5 px-1.5 flex items-center justify-center
                       rounded-full text-xs font-bold
                       ${active ? 'bg-white text-[#00874e]' : 'bg-red-500 text-white'}
                     `}>
@@ -200,19 +211,16 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
           </div>
 
           {/* Right Section - Time & Logout */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             {/* Time Display */}
-            <div className="hidden md:flex flex-col items-end text-sm">
-              <div className="flex items-center gap-2 text-gray-900 font-semibold">
-                <Clock size={17} />
-                <span>{formatTime()}</span>
-              </div>
-              <span className="text-xs text-gray-500">{formatDate()}</span>
+            <div className="hidden md:flex items-center gap-2 text-sm text-gray-700">
+              <Clock size={16} />
+              <span className="font-medium">{formatTime()}</span>
             </div>
 
             {/* Notifications */}
-            <button className="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-              <Bell size={21} />
+            <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+              <Bell size={20} />
               {(messagesCount + supportCount) > 0 && (
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
               )}
@@ -221,9 +229,9 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
             {/* Logout */}
             <button
               onClick={handleLogout}
-              className="hidden sm:flex items-center gap-2.5 px-5 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors text-sm font-medium"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors text-sm font-medium"
             >
-              <LogOut size={19} />
+              <LogOut size={18} />
               <span>Déconnexion</span>
             </button>
 
