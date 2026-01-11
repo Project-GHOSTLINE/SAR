@@ -634,6 +634,11 @@ function AnalysePageContent() {
                 </div>
 
                 <div className="space-y-3 px-2">
+                  {(() => {
+                    console.log('🏦 COMPTES:', accounts);
+                    console.log('📊 Nombre de comptes:', accounts.length);
+                    return null;
+                  })()}
                   {accounts.map((account: any, index: number) => {
                     const isSelected = selectedAccountIndex === index
                     const accountBalance = cleanValue(account.current_balance || account.balance)
@@ -653,7 +658,7 @@ function AnalysePageContent() {
                         className={`w-full text-left rounded-2xl transition-all duration-300 overflow-hidden group ${
                           isSelected
                             ? 'shadow-2xl scale-105'
-                            : 'shadow-md hover:shadow-xl hover:scale-102'
+                            : 'shadow-md hover:shadow-xl hover:scale-105'
                         }`}
                         style={{
                           border: isSelected ? '2px solid rgba(255, 255, 255, 0.5)' : '1px solid rgba(0, 0, 0, 0.1)'
