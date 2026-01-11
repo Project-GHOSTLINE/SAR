@@ -202,6 +202,41 @@ function AnalysePageContent() {
     return parseFloat(cleaned) || 0
   }
 
+  // Bank style helper - moved outside render for performance
+  const getBankStyle = useCallback((bank: string) => {
+    const bankLower = bank.toLowerCase()
+
+    if (bankLower.includes('desjardins')) {
+      return { gradient: 'from-green-600 to-green-800', logo: 'D', color: '#059669' }
+    }
+    if (bankLower.includes('national')) {
+      return { gradient: 'from-red-600 to-red-800', logo: 'BN', color: '#DC2626' }
+    }
+    if (bankLower.includes('royal') || bankLower.includes('rbc')) {
+      return { gradient: 'from-blue-700 to-blue-900', logo: 'RBC', color: '#1D4ED8' }
+    }
+    if (bankLower.includes('td')) {
+      return { gradient: 'from-green-700 to-green-900', logo: 'TD', color: '#15803D' }
+    }
+    if (bankLower.includes('scotiabank')) {
+      return { gradient: 'from-red-700 to-red-900', logo: 'SB', color: '#B91C1C' }
+    }
+    if (bankLower.includes('bmo') || bankLower.includes('montreal')) {
+      return { gradient: 'from-blue-600 to-blue-800', logo: 'BMO', color: '#2563EB' }
+    }
+    if (bankLower.includes('cibc')) {
+      return { gradient: 'from-red-800 to-red-950', logo: 'CIBC', color: '#991B1B' }
+    }
+    if (bankLower.includes('tangerine')) {
+      return { gradient: 'from-orange-500 to-orange-700', logo: 'T', color: '#F97316' }
+    }
+    return {
+      gradient: 'from-gray-700 to-gray-900',
+      logo: bank && bank.length >= 2 ? bank.substring(0, 2).toUpperCase() : 'BK',
+      color: '#374151'
+    }
+  }, [])
+
   // Get filtered and searched transactions for selected account
   const filteredTransactions = useMemo(() => {
     if (!accounts[selectedAccountIndex]?.transactions) return []
@@ -616,74 +651,6 @@ function AnalysePageContent() {
                     const accountNumber = account.account || account.accountNumber || '••••'
                     const institutionNumber = account.institution_number || account.institutionNumber || '000'
                     const transitNumber = account.transit_number || account.transitNumber || '00000'
-
-                    // Fonction pour obtenir la couleur et le logo de la banque
-                    const getBankStyle = (bank: string) => {
-                      const bankLower = bank.toLowerCase()
-
-                      if (bankLower.includes('desjardins')) {
-                        return {
-                          gradient: 'from-green-600 to-green-800',
-                          logo: 'D',
-                          color: '#059669'
-                        }
-                      }
-                      if (bankLower.includes('national')) {
-                        return {
-                          gradient: 'from-red-600 to-red-800',
-                          logo: 'BN',
-                          color: '#DC2626'
-                        }
-                      }
-                      if (bankLower.includes('royal') || bankLower.includes('rbc')) {
-                        return {
-                          gradient: 'from-blue-700 to-blue-900',
-                          logo: 'RBC',
-                          color: '#1D4ED8'
-                        }
-                      }
-                      if (bankLower.includes('td')) {
-                        return {
-                          gradient: 'from-green-700 to-green-900',
-                          logo: 'TD',
-                          color: '#15803D'
-                        }
-                      }
-                      if (bankLower.includes('scotiabank')) {
-                        return {
-                          gradient: 'from-red-700 to-red-900',
-                          logo: 'SB',
-                          color: '#B91C1C'
-                        }
-                      }
-                      if (bankLower.includes('bmo') || bankLower.includes('montreal')) {
-                        return {
-                          gradient: 'from-blue-600 to-blue-800',
-                          logo: 'BMO',
-                          color: '#2563EB'
-                        }
-                      }
-                      if (bankLower.includes('cibc')) {
-                        return {
-                          gradient: 'from-red-800 to-red-950',
-                          logo: 'CIBC',
-                          color: '#991B1B'
-                        }
-                      }
-                      if (bankLower.includes('tangerine')) {
-                        return {
-                          gradient: 'from-orange-500 to-orange-700',
-                          logo: 'T',
-                          color: '#F97316'
-                        }
-                      }
-                      return {
-                        gradient: 'from-gray-700 to-gray-900',
-                        logo: bank.substring(0, 2).toUpperCase(),
-                        color: '#374151'
-                      }
-                    }
-
                     const bankStyle = getBankStyle(bankName)
 
                     return (
