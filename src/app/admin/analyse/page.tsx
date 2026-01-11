@@ -207,31 +207,31 @@ function AnalysePageContent() {
     const bankLower = bank.toLowerCase()
 
     if (bankLower.includes('desjardins')) {
-      return { gradient: 'from-green-600 to-green-800', logo: 'D', color: '#059669' }
+      return { gradient: 'from-green-700 to-green-900', logo: 'D', color: '#059669' }
     }
     if (bankLower.includes('national')) {
-      return { gradient: 'from-red-600 to-red-800', logo: 'BN', color: '#DC2626' }
+      return { gradient: 'from-red-700 to-red-950', logo: 'BN', color: '#DC2626' }
     }
     if (bankLower.includes('royal') || bankLower.includes('rbc')) {
-      return { gradient: 'from-blue-700 to-blue-900', logo: 'RBC', color: '#1D4ED8' }
+      return { gradient: 'from-blue-800 to-blue-950', logo: 'RBC', color: '#1D4ED8' }
     }
     if (bankLower.includes('td')) {
-      return { gradient: 'from-green-700 to-green-900', logo: 'TD', color: '#15803D' }
+      return { gradient: 'from-green-800 to-green-950', logo: 'TD', color: '#15803D' }
     }
     if (bankLower.includes('scotiabank')) {
-      return { gradient: 'from-red-700 to-red-900', logo: 'SB', color: '#B91C1C' }
+      return { gradient: 'from-red-800 to-red-950', logo: 'SB', color: '#B91C1C' }
     }
     if (bankLower.includes('bmo') || bankLower.includes('montreal')) {
-      return { gradient: 'from-blue-600 to-blue-800', logo: 'BMO', color: '#2563EB' }
+      return { gradient: 'from-blue-700 to-blue-950', logo: 'BMO', color: '#2563EB' }
     }
     if (bankLower.includes('cibc')) {
-      return { gradient: 'from-red-800 to-red-950', logo: 'CIBC', color: '#991B1B' }
+      return { gradient: 'from-red-900 to-red-950', logo: 'CIBC', color: '#991B1B' }
     }
     if (bankLower.includes('tangerine')) {
-      return { gradient: 'from-orange-500 to-orange-700', logo: 'T', color: '#F97316' }
+      return { gradient: 'from-orange-600 to-orange-900', logo: 'T', color: '#F97316' }
     }
     return {
-      gradient: 'from-gray-700 to-gray-900',
+      gradient: 'from-gray-800 to-gray-950',
       logo: bank && bank.length >= 2 ? bank.substring(0, 2).toUpperCase() : 'BK',
       color: '#374151'
     }
@@ -681,13 +681,13 @@ function AnalysePageContent() {
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-2">
                               {/* Logo de la banque */}
-                              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-white/30">
-                                <span className="text-white font-black text-sm">{bankStyle.logo}</span>
+                              <div className="w-12 h-12 bg-white/30 backdrop-blur-sm rounded-lg flex items-center justify-center border-2 border-white/40 shadow-lg">
+                                <span className="text-white font-black text-base drop-shadow-md">{bankStyle.logo}</span>
                               </div>
                               <div>
-                                <p className="text-white/90 text-xs font-semibold leading-tight">{bankName}</p>
+                                <p className="text-white text-xs font-bold leading-tight drop-shadow-sm">{bankName}</p>
                                 {account.type && (
-                                  <p className="text-white/70 text-xs mt-0.5">{account.type}</p>
+                                  <p className="text-white/90 text-xs mt-0.5">{account.type}</p>
                                 )}
                               </div>
                             </div>
@@ -698,8 +698,8 @@ function AnalysePageContent() {
 
                           {/* Numéro de compte */}
                           <div className="mb-3">
-                            <p className="text-white/70 text-xs font-medium mb-1">Numéro de compte</p>
-                            <p className="text-white text-lg font-mono font-bold tracking-wider">
+                            <p className="text-white/95 text-xs font-semibold mb-1 uppercase tracking-wide">Numéro de compte</p>
+                            <p className="text-white text-lg font-mono font-bold tracking-wider drop-shadow-sm">
                               {accountNumber}
                             </p>
                           </div>
@@ -707,28 +707,28 @@ function AnalysePageContent() {
                           {/* Institution et Transit */}
                           <div className="flex items-center gap-4 mb-3">
                             <div>
-                              <p className="text-white/60 text-xs font-medium">Institution</p>
-                              <p className="text-white text-sm font-mono font-bold">{institutionNumber}</p>
+                              <p className="text-white/90 text-xs font-semibold uppercase tracking-wide">Institution</p>
+                              <p className="text-white text-sm font-mono font-bold drop-shadow-sm">{institutionNumber}</p>
                             </div>
-                            <div className="w-px h-8 bg-white/30"></div>
+                            <div className="w-px h-8 bg-white/40"></div>
                             <div>
-                              <p className="text-white/60 text-xs font-medium">Transit</p>
-                              <p className="text-white text-sm font-mono font-bold">{transitNumber}</p>
+                              <p className="text-white/90 text-xs font-semibold uppercase tracking-wide">Transit</p>
+                              <p className="text-white text-sm font-mono font-bold drop-shadow-sm">{transitNumber}</p>
                             </div>
                           </div>
 
                           {/* Solde */}
-                          <div className="pt-3 border-t border-white/20 flex items-center justify-between">
+                          <div className="pt-3 border-t border-white/30 flex items-center justify-between">
                             <div>
-                              <p className="text-white/70 text-xs font-medium">Solde disponible</p>
-                              <p className="text-white text-xl font-bold tabular-nums">
+                              <p className="text-white/95 text-xs font-semibold uppercase tracking-wide">Solde disponible</p>
+                              <p className="text-white text-xl font-bold tabular-nums drop-shadow-md">
                                 {formatCurrency(accountBalance)}
                               </p>
                             </div>
                             {account.transactions && (
                               <div className="text-right">
-                                <p className="text-white/60 text-xs">{account.transactions.length}</p>
-                                <p className="text-white/80 text-xs font-medium">transactions</p>
+                                <p className="text-white text-xs font-bold">{account.transactions.length}</p>
+                                <p className="text-white/95 text-xs font-medium">transactions</p>
                               </div>
                             )}
                           </div>
