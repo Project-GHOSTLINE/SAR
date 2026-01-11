@@ -429,105 +429,7 @@ function AnalysePageContent() {
             </div>
           </div>
 
-          {/* Comptes Bancaires Section - MOVED FROM SIDEBAR */}
-          {accounts.length > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-3">
-              {/* Header Comptes */}
-              <div className="mb-3 pb-2 border-b border-gray-200">
-                <h2 className="text-sm font-bold text-[#00653a] flex items-center gap-2">
-                  <CreditCard size={16} className="text-[#00874e]" />
-                  <span>Comptes Bancaires</span>
-                  <span className="text-xs text-gray-500 font-normal ml-auto">Cliquez pour sélectionner</span>
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                {accounts.map((account: any, index: number) => {
-                  const isSelected = selectedAccountIndex === index
-                  const accountBalance = cleanValue(account.current_balance || account.balance)
-                  const bankName = account.bank || account.institution || 'Banque'
-                  const accountNumber = account.account || account.accountNumber || '••••'
-                  const institutionNumber = account.institution_number || account.institutionNumber || '000'
-                  const transitNumber = account.transit_number || account.transitNumber || '00000'
-                  const bankStyle = getBankStyle(bankName)
-
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedAccountIndex(index)}
-                      className={`w-full text-left rounded-lg transition-all duration-200 overflow-hidden group relative ${
-                        isSelected
-                          ? 'ring-2 ring-white shadow-lg scale-[1.02]'
-                          : 'shadow hover:shadow-md'
-                      }`}
-                      style={{
-                        border: isSelected ? '2px solid rgba(255, 255, 255, 0.8)' : '1px solid rgba(0, 0, 0, 0.1)'
-                      }}
-                    >
-                      {/* Carte bancaire design - COMPACT */}
-                      <div className="p-2.5 relative"
-                        style={{
-                          background: `linear-gradient(to bottom right, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo})`,
-                          backgroundImage: isSelected
-                            ? `linear-gradient(to bottom right, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo}), radial-gradient(circle at top right, rgba(255, 255, 255, 0.15) 0%, transparent 60%)`
-                            : `linear-gradient(to bottom right, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo})`
-                        }}
-                      >
-                        {/* Header compact avec logo et infos */}
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            {/* Logo plus petit */}
-                            <div className="w-8 h-8 bg-white/30 rounded flex items-center justify-center border border-white/40">
-                              <span className="text-white font-black text-xs">{bankStyle.logo}</span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-white text-xs font-bold truncate">{bankName}</p>
-                              {account.type && (
-                                <p className="text-white/80 text-[10px] truncate">{account.type}</p>
-                              )}
-                            </div>
-                          </div>
-                          {isSelected && (
-                            <div className="w-2 h-2 bg-white rounded-full animate-pulse ml-2"></div>
-                          )}
-                        </div>
-
-                        {/* Infos en ligne compacte */}
-                        <div className="flex items-center justify-between gap-3 text-white">
-                          {/* Numéro de compte */}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[10px] text-white/70 font-medium uppercase">Compte</p>
-                            <p className="text-sm font-mono font-bold truncate">{accountNumber}</p>
-                          </div>
-
-                          {/* Institution */}
-                          <div>
-                            <p className="text-[10px] text-white/70 font-medium uppercase">Inst.</p>
-                            <p className="text-xs font-mono font-bold">{institutionNumber}</p>
-                          </div>
-
-                          {/* Transit */}
-                          <div>
-                            <p className="text-[10px] text-white/70 font-medium uppercase">Trans.</p>
-                            <p className="text-xs font-mono font-bold">{transitNumber}</p>
-                          </div>
-
-                          {/* Divider */}
-                          <div className="w-px h-8 bg-white/30"></div>
-
-                          {/* Solde */}
-                          <div className="text-right">
-                            <p className="text-[10px] text-white/70 font-medium uppercase">Solde</p>
-                            <p className="text-sm font-bold tabular-nums">{formatCurrency(accountBalance)}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
+          {/* Comptes Bancaires removed - now in sidebar as mini checks */}
 
           {/* Analyse Mensuelle Section - MOVED FROM SIDEBAR */}
           {selectedAccount && selectedAccount.transactions && selectedAccount.transactions.length > 0 && (
@@ -690,8 +592,104 @@ function AnalysePageContent() {
                 <X size={18} className="text-gray-700" />
               </button>
 
+              {/* Mini Chèques - Comptes Bancaires */}
+              <div className="p-4 pb-2">
+                <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-3 flex items-center gap-2">
+                  <CreditCard size={14} className="text-[#00874e]" />
+                  Comptes
+                </h3>
+                <div className="space-y-2">
+                  {accounts.map((account: any, index: number) => {
+                    const isSelected = selectedAccountIndex === index
+                    const accountBalance = cleanValue(account.current_balance || account.balance)
+                    const bankName = account.bank || account.institution || 'Banque'
+                    const accountNumber = account.account || account.accountNumber || '••••'
+                    const institutionNumber = account.institution_number || account.institutionNumber || '000'
+                    const transitNumber = account.transit_number || account.transitNumber || '00000'
+                    const bankStyle = getBankStyle(bankName)
+
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          setSelectedAccountIndex(index)
+                          setSidebarOpen(false)
+                        }}
+                        className={`w-full text-left rounded-lg overflow-hidden transition-all duration-200 ${
+                          isSelected
+                            ? 'ring-2 ring-[#00874e] shadow-md'
+                            : 'hover:shadow-sm border border-gray-200'
+                        }`}
+                        style={{
+                          background: isSelected
+                            ? `linear-gradient(135deg, ${bankStyle.gradientFrom}05 0%, ${bankStyle.gradientTo}05 100%)`
+                            : '#ffffff'
+                        }}
+                      >
+                        {/* Mini Chèque Design */}
+                        <div className="relative p-2.5">
+                          {/* Header - Logo et Banque */}
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="w-6 h-6 rounded flex items-center justify-center text-white text-[10px] font-black"
+                                style={{
+                                  background: `linear-gradient(135deg, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo})`
+                                }}
+                              >
+                                {bankStyle.logo}
+                              </div>
+                              <div>
+                                <p className="text-[11px] font-bold text-gray-900 leading-tight">{bankName}</p>
+                                {account.type && (
+                                  <p className="text-[9px] text-gray-500">{account.type}</p>
+                                )}
+                              </div>
+                            </div>
+                            {isSelected && (
+                              <div className="w-1.5 h-1.5 bg-[#00874e] rounded-full animate-pulse"></div>
+                            )}
+                          </div>
+
+                          {/* Montant - Style chèque */}
+                          <div className="mb-2 py-1.5 px-2 bg-gray-50 rounded border border-dashed border-gray-300">
+                            <p className="text-[9px] text-gray-500 font-medium uppercase mb-0.5">Solde disponible</p>
+                            <p className="text-lg font-bold text-gray-900 tabular-nums leading-none">
+                              {formatCurrency(accountBalance)}
+                            </p>
+                          </div>
+
+                          {/* Numéros - Style bas de chèque */}
+                          <div className="flex items-center justify-between text-[9px] font-mono text-gray-600">
+                            <div className="flex items-center gap-1">
+                              <span className="font-semibold text-gray-400">⊏</span>
+                              <span>{transitNumber}</span>
+                              <span className="font-semibold text-gray-400">⊐</span>
+                              <span>{institutionNumber}</span>
+                              <span className="font-semibold text-gray-400">⊏</span>
+                            </div>
+                            <span className="font-bold text-gray-700">{accountNumber}</span>
+                          </div>
+
+                          {/* Nombre de transactions */}
+                          {account.transactions && (
+                            <div className="absolute top-2 right-2">
+                              <div className="bg-white/90 backdrop-blur-sm rounded-full px-1.5 py-0.5 border border-gray-200">
+                                <p className="text-[9px] font-bold text-gray-600">{account.transactions.length} tx</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="border-t border-gray-200 my-2"></div>
+
               {/* Client Info Section - MOVED FROM MAIN CONTENT */}
-              <div className="p-4">
+              <div className="p-4 pt-2">
                 {/* En-tête avec source et compagnie */}
                 <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
                   <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
