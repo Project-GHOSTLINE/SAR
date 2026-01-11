@@ -69,19 +69,15 @@ export async function POST(request: NextRequest) {
 
     // Si c'est une origine de confiance, pas besoin de vérifier le token JWT
     if (isTrustedOrigin) {
-      console.log('✅ Origine de confiance:', origin)
       // Passer la validation - l'extension est autorisée
     } else if (hasValidCookie) {
-      console.log('✅ Cookie admin-session validé')
       // Admin authentifié via cookie
     } else if (bearerToken) {
       // Valider le JWT seulement si ce n'est pas une origine de confiance
       try {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'sar-admin-secret-key-2024')
         await jwtVerify(bearerToken, secret)
-        console.log('✅ Token Bearer JWT validé')
       } catch (err) {
-        console.error('❌ Token Bearer invalide:', err)
         return NextResponse.json(
           { error: 'Token Bearer invalide ou expiré' },
           { status: 401, headers: corsHeaders(origin) }
@@ -142,8 +138,6 @@ export async function POST(request: NextRequest) {
 
     if (existingAnalysis) {
       // MISE À JOUR de l'analyse existante
-      console.log('🔄 Mise à jour analyse existante:', existingAnalysis.id)
-
       const updateResult = await supabase
         .from('client_analyses')
         .update({
@@ -160,8 +154,6 @@ export async function POST(request: NextRequest) {
       error = updateResult.error
     } else {
       // CRÉATION d'une nouvelle analyse
-      console.log('✨ Création nouvelle analyse')
-
       const insertResult = await supabase
         .from('client_analyses')
         .insert([analysisData])
@@ -180,31 +172,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('✅ Analyse client sauvegardée:', {
-      id: data.id,
-      name: data.client_name,
-      accounts: data.total_accounts,
-      balance: data.total_balance
-    })
-
-    // 🚀 NOUVEAU: Extraire comptes, transactions, téléphones dans tables normalisées
+    // Extraire comptes, transactions, téléphones dans tables normalisées
     try {
       const { data: processResult, error: processError } = await supabase
         .rpc('process_analysis', { p_analysis_id: data.id })
 
       if (processError) {
-        console.warn('⚠️ Erreur extraction données normalisées:', processError)
         // Ne pas bloquer - les données sont déjà sauvegardées dans raw_data
-      } else if (processResult && processResult.length > 0) {
-        const result = processResult[0]
-        console.log('✅ Données normalisées extraites:', {
-          accounts: result.accounts_extracted,
-          transactions: result.transactions_extracted,
-          phones: result.phones_extracted
-        })
       }
     } catch (processErr) {
-      console.warn('⚠️ Impossible d\'extraire données normalisées:', processErr)
       // Continuer quand même - les données sont dans raw_data
     }
 

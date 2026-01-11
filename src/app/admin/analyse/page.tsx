@@ -166,15 +166,6 @@ function AnalysePageContent() {
 
         // Extraire les comptes depuis raw_data
         const accountsData = analysisData.raw_data?.accounts || analysisData.accounts || []
-        console.log('📊 Comptes extraits:', {
-          length: accountsData.length,
-          first: accountsData[0] ? {
-            bank: accountsData[0].bank,
-            account: accountsData[0].account,
-            type: accountsData[0].type,
-            hasTransactions: !!accountsData[0].transactions
-          } : null
-        })
         setAccounts(accountsData)
 
         // Extraire les infos client depuis raw_data.clientInfo si disponible
@@ -194,7 +185,6 @@ function AnalysePageContent() {
         setError('Erreur lors du chargement')
       }
     } catch (err) {
-      console.error('Erreur fetch:', err)
       setError('Erreur de connexion')
     } finally {
       setLoading(false)

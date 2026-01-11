@@ -380,25 +380,17 @@ function AdminDashboardContent() {
 
   const fetchMessageStats = async () => {
     try {
-      console.log('🔄 Chargement des stats messages...')
       const res = await fetch('/api/admin/messages/assign', { credentials: 'include' })
-      console.log('📡 Réponse API stats:', res.status)
 
       if (res.ok) {
         const data = await res.json()
-        console.log('📊 Données stats reçues:', data)
 
         if (data.success && data.stats) {
-          console.log('✅ Mise à jour des stats:', data.stats)
           setMessageStats(data.stats)
-        } else {
-          console.warn('⚠️ Format de réponse inattendu:', data)
         }
-      } else {
-        console.error('❌ Erreur API stats:', res.status, await res.text())
       }
     } catch (error) {
-      console.error('❌ Erreur stats:', error)
+      console.error('Erreur stats:', error)
     }
   }
 
