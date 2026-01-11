@@ -406,6 +406,25 @@ function AnalysePageContent() {
             </div>
           )}
 
+          {/* DEBUG BANNER */}
+          {accounts.length > 0 && (
+            <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 mb-4">
+              <h3 className="font-bold text-yellow-900 mb-2">🐛 DEBUG INFO</h3>
+              <pre className="text-xs text-yellow-800 whitespace-pre-wrap">
+                {JSON.stringify({
+                  accountsLength: accounts.length,
+                  firstAccount: accounts[0] ? {
+                    title: accounts[0].title,
+                    type: accounts[0].type,
+                    bank: accounts[0].bank,
+                    balance: accounts[0].balance || accounts[0].current_balance,
+                    transactionsCount: accounts[0].transactions?.length
+                  } : null
+                }, null, 2)}
+              </pre>
+            </div>
+          )}
+
           {/* Accounts Navigation */}
           {accounts.length > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
