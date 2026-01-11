@@ -46,6 +46,7 @@ function AnalysePageContent() {
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedMonth, setSelectedMonth] = useState<number>(0) // 0 = current month, 1 = -1 month, 2 = -2 months
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showAllMonths, setShowAllMonths] = useState(false)
   const transactionsPerPage = 50
 
   // Format currency
@@ -76,26 +77,65 @@ function AnalysePageContent() {
     })
   }
 
-  // Get last 3 months info
-  const getMonthsData = () => {
+  // Get months data (either last 3 or all available months)
+  const getMonthsData = useMemo(() => {
     const now = new Date()
     const months = []
 
-    for (let i = 0; i < 3; i++) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      months.push({
-        index: i,
-        name: date.toLocaleDateString('fr-CA', { month: 'long', year: 'numeric' }),
-        shortName: date.toLocaleDateString('fr-CA', { month: 'short' }),
-        year: date.getFullYear(),
-        month: date.getMonth()
-      })
+    if (!showAllMonths) {
+      // Show only last 3 months
+      for (let i = 0; i < 3; i++) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+        months.push({
+          index: i,
+          name: date.toLocaleDateString('fr-CA', { month: 'long', year: 'numeric' }),
+          shortName: date.toLocaleDateString('fr-CA', { month: 'short' }),
+          year: date.getFullYear(),
+          month: date.getMonth()
+        })
+      }
+    } else {
+      // Get all unique months from transactions
+      const selectedAcc = accounts[selectedAccountIndex]
+      if (selectedAcc?.transactions) {
+        const monthsMap = new Map<string, { year: number; month: number }>()
+
+        selectedAcc.transactions.forEach((tx: any) => {
+          if (tx.date) {
+            const txDate = new Date(tx.date)
+            const key = `${txDate.getFullYear()}-${txDate.getMonth()}`
+            if (!monthsMap.has(key)) {
+              monthsMap.set(key, {
+                year: txDate.getFullYear(),
+                month: txDate.getMonth()
+              })
+            }
+          }
+        })
+
+        // Convert to array and sort (most recent first)
+        const sortedMonths = Array.from(monthsMap.values()).sort((a, b) => {
+          if (a.year !== b.year) return b.year - a.year
+          return b.month - a.month
+        })
+
+        sortedMonths.forEach((m, index) => {
+          const date = new Date(m.year, m.month, 1)
+          months.push({
+            index,
+            name: date.toLocaleDateString('fr-CA', { month: 'long', year: 'numeric' }),
+            shortName: date.toLocaleDateString('fr-CA', { month: 'short' }),
+            year: m.year,
+            month: m.month
+          })
+        })
+      }
     }
 
     return months
-  }
+  }, [showAllMonths, accounts, selectedAccountIndex])
 
-  const monthsData = getMonthsData()
+  const monthsData = getMonthsData
 
   // Check if transaction is in selected month
   const isTransactionInMonth = (txDate: string, monthIndex: number) => {
@@ -625,6 +665,22 @@ function AnalysePageContent() {
                     </button>
                   )
                 })}
+              </div>
+
+              {/* Bouton Voir tous les mois */}
+              <div className="mt-3 px-2">
+                <button
+                  onClick={() => {
+                    setShowAllMonths(!showAllMonths)
+                    if (!showAllMonths) {
+                      setSelectedMonth(0) // Reset to first month when showing all
+                    }
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white/50 hover:bg-white/80 rounded-xl border border-gray-200 hover:border-[#00874e] transition-all text-sm font-medium text-gray-700 hover:text-[#00874e]"
+                >
+                  <Calendar size={16} />
+                  {showAllMonths ? 'Voir moins de mois' : 'Voir tous les mois'}
+                </button>
               </div>
             </div>
           )}
