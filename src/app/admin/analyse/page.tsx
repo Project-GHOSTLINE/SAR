@@ -429,353 +429,142 @@ function AnalysePageContent() {
             </div>
           </div>
 
-          {/* Client Info Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mb-4">
-            {/* En-tête avec source et compagnie */}
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
-              <h2 className="text-sm sm:text-base font-semibold text-gray-900 flex items-center gap-2">
-                <User size={14} className="sm:w-4 sm:h-4" />
-                Informations client
-              </h2>
-              <div className="flex items-center gap-2">
-                {/* Source IBV */}
-                <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${
-                  analysis.source === 'inverite'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-purple-500 text-white'
-                }`}>
-                  <Wallet size={12} />
-                  {analysis.source === 'inverite' ? 'Inverite' : 'Flinks'}
-                </span>
-                {/* Compagnie */}
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-800 text-white flex items-center gap-1.5">
-                  <Building size={12} />
-                  {analysis.source === 'flinks' ? 'Solution Argent Rapide' : 'Crédit Secours'}
-                </span>
+          {/* Comptes Bancaires Section - MOVED FROM SIDEBAR */}
+          {accounts.length > 0 && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mb-4">
+              {/* Header Comptes */}
+              <div className="mb-4 pb-3 border-b border-gray-200">
+                <h2 className="text-sm sm:text-base font-semibold text-[#00653a] flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-[#00874e] to-emerald-600 rounded-lg flex items-center justify-center shadow-md">
+                    <CreditCard size={16} className="text-white" />
+                  </div>
+                  <span>Comptes Bancaires</span>
+                </h2>
+                <p className="text-xs text-gray-600 mt-1 ml-10 font-medium">Sélectionnez un compte pour voir les transactions</p>
               </div>
-            </div>
 
-            {/* Institution financière avec couleur distinctive */}
-            {(() => {
-              const institutionName = accounts[selectedAccountIndex]?.bank || accounts[selectedAccountIndex]?.institution || accounts[0]?.bank || accounts[0]?.institution || 'Institution inconnue'
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                {accounts.map((account: any, index: number) => {
+                  const isSelected = selectedAccountIndex === index
+                  const accountBalance = cleanValue(account.current_balance || account.balance)
+                  const bankName = account.bank || account.institution || 'Banque'
+                  const accountNumber = account.account || account.accountNumber || '••••'
+                  const institutionNumber = account.institution_number || account.institutionNumber || '000'
+                  const transitNumber = account.transit_number || account.transitNumber || '00000'
+                  const bankStyle = getBankStyle(bankName)
 
-              // Couleurs par institution
-              const getInstitutionColor = (inst: string) => {
-                const instLower = inst.toLowerCase()
-                if (instLower.includes('desjardins')) return 'bg-green-600'
-                if (instLower.includes('national')) return 'bg-red-600'
-                if (instLower.includes('royal') || instLower.includes('rbc')) return 'bg-blue-700'
-                if (instLower.includes('td')) return 'bg-green-700'
-                if (instLower.includes('scotiabank')) return 'bg-red-700'
-                if (instLower.includes('bmo') || instLower.includes('montreal')) return 'bg-blue-600'
-                if (instLower.includes('cibc')) return 'bg-red-800'
-                if (instLower.includes('tangerine')) return 'bg-orange-500'
-                return 'bg-gray-700'
-              }
-
-              return (
-                <div className="mb-4">
-                  <div className={`${getInstitutionColor(institutionName)} text-white rounded-lg p-3 flex items-center gap-3`}>
-                    <Landmark size={24} className="shrink-0" />
-                    <div>
-                      <p className="text-xs opacity-90 font-medium">Institution financière</p>
-                      <p className="text-lg font-bold">{institutionName}</p>
-                    </div>
-                  </div>
-                </div>
-              )
-            })()}
-
-            {/* Informations de contact */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-              {analysis.client_email && (
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                    <Mail size={14} className="text-gray-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs text-gray-500 font-medium">Email</p>
-                    <p className="text-sm text-gray-900 truncate">{analysis.client_email}</p>
-                  </div>
-                </div>
-              )}
-
-              {analysis.client_phones && analysis.client_phones.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                    <Phone size={14} className="text-gray-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs text-gray-500 font-medium">Téléphone</p>
-                    <p className="text-sm text-gray-900 truncate">{analysis.client_phones.join(', ')}</p>
-                  </div>
-                </div>
-              )}
-
-              {analysis.client_address && (
-                <div className="flex items-center gap-2 sm:col-span-2">
-                  <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                    <MapPin size={14} className="text-gray-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs text-gray-500 font-medium">Adresse</p>
-                    <p className="text-sm text-gray-900 truncate">{analysis.client_address}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 4 dernières paies */}
-            {(() => {
-              const paychecks = analysis.raw_data?.paychecks || []
-              const last4Paychecks = paychecks.slice(-4).reverse() // Prendre les 4 dernières et inverser pour avoir la plus récente en premier
-
-              if (last4Paychecks.length > 0) {
-                return (
-                  <div className="border-t border-gray-200 pt-4">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Briefcase size={14} />
-                      Dernières paies reçues
-                    </h3>
-                    <div className="space-y-2">
-                      {last4Paychecks.map((paycheck: any, index: number) => {
-                        const date = paycheck.date || paycheck.payDate
-                        const amount = cleanValue(paycheck.amount || paycheck.netPay || 0)
-                        const employer = paycheck.employer || paycheck.employerName || 'Employeur non spécifié'
-
-                        return (
-                          <div key={index} className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-lg p-3">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Calendar size={12} className="text-emerald-600 shrink-0" />
-                                  <p className="text-xs font-semibold text-emerald-800">
-                                    Paie du {date ? new Date(date).toLocaleDateString('fr-CA', {
-                                      day: 'numeric',
-                                      month: 'long',
-                                      year: 'numeric'
-                                    }) : 'Date inconnue'}
-                                  </p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Briefcase size={12} className="text-gray-500 shrink-0" />
-                                  <p className="text-xs text-gray-700 truncate font-medium">{employer}</p>
-                                </div>
-                              </div>
-                              <div className="text-right shrink-0">
-                                <p className="text-lg font-bold text-emerald-700">{formatCurrency(amount)}</p>
-                              </div>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                    {paychecks.length > 4 && (
-                      <p className="text-xs text-gray-500 mt-2 text-center">
-                        {paychecks.length - 4} paie(s) supplémentaire(s) disponible(s)
-                      </p>
-                    )}
-                  </div>
-                )
-              }
-              return null
-            })()}
-          </div>
-
-          {/* Bouton flottant pour ouvrir la sidebar sur mobile */}
-          {accounts.length > 0 && (
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-[#00874e] to-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
-            >
-              <Menu size={24} />
-            </button>
-          )}
-
-          {/* Backdrop pour mobile */}
-          {sidebarOpen && (
-            <div
-              className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
-              onClick={() => setSidebarOpen(false)}
-            />
-          )}
-
-          {/* Sidebar fixe à droite - Glassmorphism */}
-          {accounts.length > 0 && (
-            <div className={`
-              fixed top-32 z-40 w-80 max-h-[calc(100vh-160px)] overflow-y-auto rounded-2xl
-              transition-transform duration-300 ease-in-out
-              lg:right-6 lg:translate-x-0
-              ${sidebarOpen ? 'right-4 translate-x-0' : 'right-4 translate-x-[calc(100%+2rem)]'}
-              lg:block bg-white
-            `}
-              style={{
-                border: '1px solid rgba(200, 200, 200, 0.4)',
-                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.1)'
-              }}
-            >
-              {/* Bouton fermer sur mobile */}
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="lg:hidden absolute top-4 right-4 z-10 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors"
-              >
-                <X size={18} className="text-gray-700" />
-              </button>
-              {/* Comptes Section */}
-              <div className="p-4">
-                {/* Header Comptes */}
-                <div className="mb-4 -mx-4 px-4 py-3 bg-gradient-to-r from-emerald-50 to-green-50 border-b-2 border-emerald-200 relative z-0">
-                  <h2 className="text-sm font-bold text-[#00653a] uppercase tracking-wide flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-[#00874e] to-emerald-600 rounded-lg flex items-center justify-center shadow-md">
-                      <CreditCard size={16} className="text-white" />
-                    </div>
-                    <span>Comptes Bancaires</span>
-                  </h2>
-                  <p className="text-xs text-gray-700 mt-1 ml-10 font-medium">Sélectionnez un compte</p>
-                </div>
-
-                <div className="space-y-3 px-2 relative z-10">
-                  {accounts.map((account: any, index: number) => {
-                    const isSelected = selectedAccountIndex === index
-                    const accountBalance = cleanValue(account.current_balance || account.balance)
-                    const bankName = account.bank || account.institution || 'Banque'
-                    const accountNumber = account.account || account.accountNumber || '••••'
-                    const institutionNumber = account.institution_number || account.institutionNumber || '000'
-                    const transitNumber = account.transit_number || account.transitNumber || '00000'
-                    const bankStyle = getBankStyle(bankName)
-
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => {
-                          setSelectedAccountIndex(index)
-                          setSidebarOpen(false)
-                        }}
-                        className={`w-full text-left rounded-2xl transition-all duration-300 overflow-hidden group relative z-20 ${
-                          isSelected
-                            ? 'shadow-2xl scale-105'
-                            : 'shadow-md hover:shadow-xl hover:scale-105'
-                        }`}
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedAccountIndex(index)}
+                      className={`w-full text-left rounded-2xl transition-all duration-300 overflow-hidden group relative ${
+                        isSelected
+                          ? 'shadow-2xl scale-105'
+                          : 'shadow-md hover:shadow-xl hover:scale-[1.02]'
+                      }`}
+                      style={{
+                        border: isSelected ? '2px solid rgba(255, 255, 255, 0.5)' : '1px solid rgba(0, 0, 0, 0.1)'
+                      }}
+                    >
+                      {/* Carte bancaire design */}
+                      <div className="p-4 relative"
                         style={{
-                          border: isSelected ? '2px solid rgba(255, 255, 255, 0.5)' : '1px solid rgba(0, 0, 0, 0.1)'
+                          background: `linear-gradient(to bottom right, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo})`,
+                          backgroundImage: isSelected
+                            ? `linear-gradient(to bottom right, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo}), radial-gradient(circle at top right, rgba(255, 255, 255, 0.2) 0%, transparent 60%)`
+                            : `linear-gradient(to bottom right, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo}), radial-gradient(circle at top right, rgba(255, 255, 255, 0.1) 0%, transparent 60%)`
                         }}
                       >
-                        {/* Carte bancaire design */}
-                        <div className="p-4 relative"
-                          style={{
-                            background: `linear-gradient(to bottom right, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo})`,
-                            backgroundImage: isSelected
-                              ? `linear-gradient(to bottom right, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo}), radial-gradient(circle at top right, rgba(255, 255, 255, 0.2) 0%, transparent 60%)`
-                              : `linear-gradient(to bottom right, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo}), radial-gradient(circle at top right, rgba(255, 255, 255, 0.1) 0%, transparent 60%)`
-                          }}
-                        >
-                          {/* Header avec logo */}
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                              {/* Logo de la banque */}
-                              <div className="w-12 h-12 bg-white/30 backdrop-blur-sm rounded-lg flex items-center justify-center border-2 border-white/40 shadow-lg">
-                                <span className="text-white font-black text-base drop-shadow-md">{bankStyle.logo}</span>
-                              </div>
-                              <div>
-                                <p className="text-white text-xs font-bold leading-tight drop-shadow-sm">{bankName}</p>
-                                {account.type && (
-                                  <p className="text-white/90 text-xs mt-0.5">{account.type}</p>
-                                )}
-                              </div>
+                        {/* Header avec logo */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            {/* Logo de la banque */}
+                            <div className="w-12 h-12 bg-white/30 backdrop-blur-sm rounded-lg flex items-center justify-center border-2 border-white/40 shadow-lg">
+                              <span className="text-white font-black text-base drop-shadow-md">{bankStyle.logo}</span>
                             </div>
-                            {isSelected && (
-                              <div className="w-3 h-3 bg-white rounded-full shrink-0 animate-pulse shadow-lg"></div>
-                            )}
-                          </div>
-
-                          {/* Numéro de compte */}
-                          <div className="mb-3">
-                            <p className="text-white/95 text-xs font-semibold mb-1 uppercase tracking-wide">Numéro de compte</p>
-                            <p className="text-white text-lg font-mono font-bold tracking-wider drop-shadow-sm">
-                              {accountNumber}
-                            </p>
-                          </div>
-
-                          {/* Institution et Transit */}
-                          <div className="flex items-center gap-4 mb-3">
                             <div>
-                              <p className="text-white/90 text-xs font-semibold uppercase tracking-wide">Institution</p>
-                              <p className="text-white text-sm font-mono font-bold drop-shadow-sm">{institutionNumber}</p>
-                            </div>
-                            <div className="w-px h-8 bg-white/40"></div>
-                            <div>
-                              <p className="text-white/90 text-xs font-semibold uppercase tracking-wide">Transit</p>
-                              <p className="text-white text-sm font-mono font-bold drop-shadow-sm">{transitNumber}</p>
+                              <p className="text-white text-xs font-bold leading-tight drop-shadow-sm">{bankName}</p>
+                              {account.type && (
+                                <p className="text-white/90 text-xs mt-0.5">{account.type}</p>
+                              )}
                             </div>
                           </div>
+                          {isSelected && (
+                            <div className="w-3 h-3 bg-white rounded-full shrink-0 animate-pulse shadow-lg"></div>
+                          )}
+                        </div>
 
-                          {/* Solde */}
-                          <div className="pt-3 border-t border-white/30 flex items-center justify-between">
-                            <div>
-                              <p className="text-white/95 text-xs font-semibold uppercase tracking-wide">Solde disponible</p>
-                              <p className="text-white text-xl font-bold tabular-nums drop-shadow-md">
-                                {formatCurrency(accountBalance)}
-                              </p>
-                            </div>
-                            {account.transactions && (
-                              <div className="text-right">
-                                <p className="text-white text-xs font-bold">{account.transactions.length}</p>
-                                <p className="text-white/95 text-xs font-medium">transactions</p>
-                              </div>
-                            )}
+                        {/* Numéro de compte */}
+                        <div className="mb-3">
+                          <p className="text-white/95 text-xs font-semibold mb-1 uppercase tracking-wide">Numéro de compte</p>
+                          <p className="text-white text-lg font-mono font-bold tracking-wider drop-shadow-sm">
+                            {accountNumber}
+                          </p>
+                        </div>
+
+                        {/* Institution et Transit */}
+                        <div className="flex items-center gap-4 mb-3">
+                          <div>
+                            <p className="text-white/90 text-xs font-semibold uppercase tracking-wide">Institution</p>
+                            <p className="text-white text-sm font-mono font-bold drop-shadow-sm">{institutionNumber}</p>
+                          </div>
+                          <div className="w-px h-8 bg-white/40"></div>
+                          <div>
+                            <p className="text-white/90 text-xs font-semibold uppercase tracking-wide">Transit</p>
+                            <p className="text-white text-sm font-mono font-bold drop-shadow-sm">{transitNumber}</p>
                           </div>
                         </div>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
 
-              {/* Divider */}
-              <div className="my-4 relative">
-                <div className="absolute inset-0 flex items-center px-4">
-                  <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
-                </div>
-                <div className="relative flex justify-center">
-                  <div className="px-4 py-1 rounded-full bg-white border-2 border-gray-300 shadow-sm">
-                    <span className="text-xs font-bold text-gray-600">•••</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Mois Section */}
-              {selectedAccount && selectedAccount.transactions && selectedAccount.transactions.length > 0 && (
-                <div className="p-4">
-                  {/* Header Mois */}
-                  <div className="mb-4 -mx-4 px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 border-b-2 border-blue-200">
-                    <h2 className="text-sm font-bold text-blue-700 uppercase tracking-wide flex items-center gap-2">
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
-                        <BarChart3 size={16} className="text-white" />
+                        {/* Solde */}
+                        <div className="pt-3 border-t border-white/30 flex items-center justify-between">
+                          <div>
+                            <p className="text-white/95 text-xs font-semibold uppercase tracking-wide">Solde disponible</p>
+                            <p className="text-white text-xl font-bold tabular-nums drop-shadow-md">
+                              {formatCurrency(accountBalance)}
+                            </p>
+                          </div>
+                          {account.transactions && (
+                            <div className="text-right">
+                              <p className="text-white text-xs font-bold">{account.transactions.length}</p>
+                              <p className="text-white/95 text-xs font-medium">transactions</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <span>Analyse Mensuelle</span>
-                    </h2>
-                    <p className="text-xs text-gray-700 mt-1 ml-10 font-medium">Filtrer par période</p>
-                  </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
-                  <div className="space-y-2 px-2">
+          {/* Analyse Mensuelle Section - MOVED FROM SIDEBAR */}
+          {selectedAccount && selectedAccount.transactions && selectedAccount.transactions.length > 0 && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mb-4">
+              {/* Header Mois */}
+              <div className="mb-4 pb-3 border-b border-gray-200">
+                <h2 className="text-sm sm:text-base font-semibold text-blue-700 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                    <BarChart3 size={16} className="text-white" />
+                  </div>
+                  <span>Analyse Mensuelle</span>
+                </h2>
+                <p className="text-xs text-gray-600 mt-1 ml-10 font-medium">Filtrer les transactions par période</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
                 {monthsStats.map((month) => {
                   const isSelected = selectedMonth === month.index
 
                   return (
                     <button
                       key={month.index}
-                      onClick={() => {
-                        setSelectedMonth(month.index)
-                        setSidebarOpen(false)
-                      }}
+                      onClick={() => setSelectedMonth(month.index)}
                       className={`w-full text-left p-3 rounded-xl transition-all duration-300 ${
                         isSelected
                           ? 'bg-gradient-to-br from-[#00874e] to-emerald-600 text-white shadow-lg scale-105'
-                          : 'bg-white/50 hover:bg-white/70 text-gray-900 shadow-sm hover:shadow-md'
+                          : 'bg-white hover:bg-gray-50 text-gray-900 shadow-sm hover:shadow-md border border-gray-200'
                       }`}
-                      style={{
-                        border: isSelected ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(0, 0, 0, 0.05)'
-                      }}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex-1 min-w-0">
@@ -827,7 +616,7 @@ function AnalysePageContent() {
                           </span>
                         </div>
                         <div className="flex items-center justify-between pt-2 border-t" style={{
-                          borderColor: isSelected ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.05)'
+                          borderColor: isSelected ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'
                         }}>
                           <span className={`text-xs font-medium ${isSelected ? 'text-emerald-100' : 'text-gray-700'}`}>
                             Net
@@ -847,15 +636,15 @@ function AnalysePageContent() {
               </div>
 
               {/* Bouton Voir tous les mois */}
-              <div className="mt-4 px-2">
+              <div className="flex justify-center">
                 <button
                   onClick={() => {
                     setShowAllMonths(!showAllMonths)
                     if (!showAllMonths) {
-                      setSelectedMonth(0) // Reset to first month when showing all
+                      setSelectedMonth(0)
                     }
                   }}
-                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-medium border-2 ${
+                  className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-medium border-2 ${
                     showAllMonths
                       ? 'bg-gradient-to-r from-blue-100 to-purple-100 border-blue-300 text-blue-700'
                       : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-blue-300 hover:text-blue-600'
@@ -869,6 +658,199 @@ function AnalysePageContent() {
               </div>
             </div>
           )}
+
+          {/* Bouton flottant pour ouvrir la sidebar sur mobile */}
+          {accounts.length > 0 && (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-[#00874e] to-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
+            >
+              <Menu size={24} />
+            </button>
+          )}
+
+          {/* Backdrop pour mobile */}
+          {sidebarOpen && (
+            <div
+              className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
+
+          {/* Sidebar fixe à droite - Informations Client */}
+          {accounts.length > 0 && (
+            <div className={`
+              fixed top-32 z-40 w-80 max-h-[calc(100vh-160px)] overflow-y-auto rounded-2xl
+              transition-transform duration-300 ease-in-out
+              lg:right-6 lg:translate-x-0
+              ${sidebarOpen ? 'right-4 translate-x-0' : 'right-4 translate-x-[calc(100%+2rem)]'}
+              lg:block bg-white
+            `}
+              style={{
+                border: '1px solid rgba(200, 200, 200, 0.4)',
+                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.1)'
+              }}
+            >
+              {/* Bouton fermer sur mobile */}
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden absolute top-4 right-4 z-10 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors"
+              >
+                <X size={18} className="text-gray-700" />
+              </button>
+
+              {/* Client Info Section - MOVED FROM MAIN CONTENT */}
+              <div className="p-4">
+                {/* En-tête avec source et compagnie */}
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+                  <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                    <User size={14} />
+                    Informations client
+                  </h2>
+                  <div className="flex flex-col gap-1.5">
+                    {/* Source IBV */}
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${
+                      analysis.source === 'inverite'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-purple-500 text-white'
+                    }`}>
+                      <Wallet size={10} />
+                      {analysis.source === 'inverite' ? 'Inverite' : 'Flinks'}
+                    </span>
+                    {/* Compagnie */}
+                    <span className="px-2 py-1 rounded-full text-xs font-bold bg-gray-800 text-white flex items-center gap-1.5">
+                      <Building size={10} />
+                      {analysis.source === 'flinks' ? 'SAR' : 'CS'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Institution financière avec couleur distinctive */}
+                {(() => {
+                  const institutionName = accounts[selectedAccountIndex]?.bank || accounts[selectedAccountIndex]?.institution || accounts[0]?.bank || accounts[0]?.institution || 'Institution inconnue'
+
+                  // Couleurs par institution
+                  const getInstitutionColor = (inst: string) => {
+                    const instLower = inst.toLowerCase()
+                    if (instLower.includes('desjardins')) return 'bg-green-600'
+                    if (instLower.includes('national')) return 'bg-red-600'
+                    if (instLower.includes('royal') || instLower.includes('rbc')) return 'bg-blue-700'
+                    if (instLower.includes('td')) return 'bg-green-700'
+                    if (instLower.includes('scotiabank')) return 'bg-red-700'
+                    if (instLower.includes('bmo') || instLower.includes('montreal')) return 'bg-blue-600'
+                    if (instLower.includes('cibc')) return 'bg-red-800'
+                    if (instLower.includes('tangerine')) return 'bg-orange-500'
+                    return 'bg-gray-700'
+                  }
+
+                  return (
+                    <div className="mb-4">
+                      <div className={`${getInstitutionColor(institutionName)} text-white rounded-lg p-3 flex items-center gap-3`}>
+                        <Landmark size={20} className="shrink-0" />
+                        <div>
+                          <p className="text-xs opacity-90 font-medium">Institution financière</p>
+                          <p className="text-base font-bold">{institutionName}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })()}
+
+                {/* Informations de contact */}
+                <div className="space-y-3 mb-4">
+                  {analysis.client_email && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                        <Mail size={14} className="text-gray-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500 font-medium">Email</p>
+                        <p className="text-sm text-gray-900 truncate">{analysis.client_email}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {analysis.client_phones && analysis.client_phones.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                        <Phone size={14} className="text-gray-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500 font-medium">Téléphone</p>
+                        <p className="text-sm text-gray-900 truncate">{analysis.client_phones.join(', ')}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {analysis.client_address && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                        <MapPin size={14} className="text-gray-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500 font-medium">Adresse</p>
+                        <p className="text-sm text-gray-900 truncate">{analysis.client_address}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 4 dernières paies */}
+                {(() => {
+                  const paychecks = analysis.raw_data?.paychecks || []
+                  const last4Paychecks = paychecks.slice(-4).reverse()
+
+                  if (last4Paychecks.length > 0) {
+                    return (
+                      <div className="border-t border-gray-200 pt-4">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                          <Briefcase size={14} />
+                          Dernières paies reçues
+                        </h3>
+                        <div className="space-y-2">
+                          {last4Paychecks.map((paycheck: any, index: number) => {
+                            const date = paycheck.date || paycheck.payDate
+                            const amount = cleanValue(paycheck.amount || paycheck.netPay || 0)
+                            const employer = paycheck.employer || paycheck.employerName || 'Employeur non spécifié'
+
+                            return (
+                              <div key={index} className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-lg p-3">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Calendar size={12} className="text-emerald-600 shrink-0" />
+                                      <p className="text-xs font-semibold text-emerald-800">
+                                        {date ? new Date(date).toLocaleDateString('fr-CA', {
+                                          day: 'numeric',
+                                          month: 'short',
+                                          year: 'numeric'
+                                        }) : 'Date inconnue'}
+                                      </p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Briefcase size={10} className="text-gray-500 shrink-0" />
+                                      <p className="text-xs text-gray-700 truncate font-medium">{employer}</p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right shrink-0">
+                                    <p className="text-base font-bold text-emerald-700">{formatCurrency(amount)}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                        {paychecks.length > 4 && (
+                          <p className="text-xs text-gray-500 mt-2 text-center">
+                            +{paychecks.length - 4} paie(s)
+                          </p>
+                        )}
+                      </div>
+                    )
+                  }
+                  return null
+                })()}
+              </div>
             </div>
           )}
 
