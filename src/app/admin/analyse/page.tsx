@@ -8,7 +8,7 @@ import {
   ArrowLeft, Building, DollarSign, TrendingUp, CreditCard,
   Calendar, User, Mail, Phone, MapPin, RefreshCw, Loader2,
   Search, Filter, ChevronLeft, ChevronRight, FileText, Download, BarChart3,
-  Tag, Flag, Menu, X, Briefcase, Wallet, Landmark
+  Tag, Flag, Menu, X, Briefcase, Wallet, Landmark, Check
 } from 'lucide-react'
 
 interface ClientAnalysis {
@@ -47,6 +47,8 @@ function AnalysePageContent() {
   const [selectedMonth, setSelectedMonth] = useState<number>(0) // 0 = current month, 1 = -1 month, 2 = -2 months
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showAllMonths, setShowAllMonths] = useState(false)
+  const [showDebugModal, setShowDebugModal] = useState(false)
+  const [debugCopied, setDebugCopied] = useState(false)
   const transactionsPerPage = 2500
 
   // Format currency
@@ -194,6 +196,32 @@ function AnalysePageContent() {
   useEffect(() => {
     fetchAnalysis()
   }, [fetchAnalysis])
+
+  // Copy debug data to clipboard
+  const copyDebugData = () => {
+    const debugData = {
+      analysis: {
+        id: analysis?.id,
+        client_name: analysis?.client_name,
+        client_email: analysis?.client_email,
+        client_phones: analysis?.client_phones,
+        client_address: analysis?.client_address,
+        inverite_guid: analysis?.inverite_guid,
+        source: analysis?.source,
+        total_accounts: analysis?.total_accounts,
+        total_balance: analysis?.total_balance,
+        total_transactions: analysis?.total_transactions,
+        created_at: analysis?.created_at,
+      },
+      raw_data: analysis?.raw_data,
+      accounts: accounts,
+    }
+
+    const jsonString = JSON.stringify(debugData, null, 2)
+    navigator.clipboard.writeText(jsonString)
+    setDebugCopied(true)
+    setTimeout(() => setDebugCopied(false), 2000)
+  }
 
   // Clean value helper
   const cleanValue = (val: any) => {
@@ -1218,6 +1246,14 @@ function AnalysePageContent() {
                 </button>
 
                 <button
+                  onClick={() => setShowDebugModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all text-xs font-medium"
+                >
+                  <FileText size={14} />
+                  Debug
+                </button>
+
+                <button
                   onClick={() => router.push('/admin/dashboard?tab=analyses')}
                   className="px-3 py-1.5 bg-[#00874e] text-white rounded-lg hover:bg-[#00653a] transition-colors font-medium text-xs"
                 >
@@ -1228,6 +1264,88 @@ function AnalysePageContent() {
           </div>
         </div>
       </div>
+
+      {/* Debug Modal */}
+      {showDebugModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowDebugModal(false)}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText size={24} />
+                <div>
+                  <h3 className="text-lg font-bold">Debug - Données Raw</h3>
+                  <p className="text-sm text-purple-100">Données complètes de l'analyse</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDebugModal(false)}
+                className="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 overflow-y-auto max-h-[calc(90vh-140px)]">
+              <pre className="bg-gray-50 p-4 rounded-lg text-xs font-mono overflow-x-auto border border-gray-200">
+                {JSON.stringify({
+                  analysis: {
+                    id: analysis?.id,
+                    client_name: analysis?.client_name,
+                    client_email: analysis?.client_email,
+                    client_phones: analysis?.client_phones,
+                    client_address: analysis?.client_address,
+                    inverite_guid: analysis?.inverite_guid,
+                    source: analysis?.source,
+                    total_accounts: analysis?.total_accounts,
+                    total_balance: analysis?.total_balance,
+                    total_transactions: analysis?.total_transactions,
+                    created_at: analysis?.created_at,
+                  },
+                  raw_data: analysis?.raw_data,
+                  accounts: accounts,
+                }, null, 2)}
+              </pre>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-gray-200 p-4 bg-gray-50 flex items-center justify-between">
+              <p className="text-xs text-gray-600">
+                Cliquez sur "Copier" pour copier les données dans le presse-papiers
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowDebugModal(false)}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all text-sm font-medium"
+                >
+                  Fermer
+                </button>
+                <button
+                  onClick={copyDebugData}
+                  className={`px-4 py-2 rounded-lg text-white transition-all text-sm font-medium flex items-center gap-2 ${
+                    debugCopied
+                      ? 'bg-green-500 hover:bg-green-600'
+                      : 'bg-purple-500 hover:bg-purple-600'
+                  }`}
+                >
+                  {debugCopied ? (
+                    <>
+                      <Check size={16} />
+                      Copié!
+                    </>
+                  ) : (
+                    <>
+                      <FileText size={16} />
+                      Copier
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
