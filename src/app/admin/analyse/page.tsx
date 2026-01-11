@@ -39,6 +39,14 @@ function AnalysePageContent() {
   const [error, setError] = useState<string | null>(null)
   const [accounts, setAccounts] = useState<any[]>([])
 
+  // Filters and search - MUST be declared before any conditional return
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterType, setFilterType] = useState<'all' | 'credit' | 'debit'>('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [selectedMonth, setSelectedMonth] = useState<number>(0) // 0 = current month, 1 = -1 month, 2 = -2 months
+  const [isMonthsSticky, setIsMonthsSticky] = useState(false)
+  const transactionsPerPage = 50
+
   // Prevent hydration mismatch by only rendering after mount
   useEffect(() => {
     setMounted(true)
@@ -54,14 +62,6 @@ function AnalysePageContent() {
       </div>
     )
   }
-
-  // Filters and search
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterType, setFilterType] = useState<'all' | 'credit' | 'debit'>('all')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [selectedMonth, setSelectedMonth] = useState<number>(0) // 0 = current month, 1 = -1 month, 2 = -2 months
-  const [isMonthsSticky, setIsMonthsSticky] = useState(false)
-  const transactionsPerPage = 50
 
   // Format currency
   const formatCurrency = (amount: number) => {
