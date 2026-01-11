@@ -623,7 +623,7 @@ function AnalysePageContent() {
               {/* Comptes Section */}
               <div className="p-4">
                 {/* Header Comptes */}
-                <div className="mb-4 -mx-4 px-4 py-3 bg-gradient-to-r from-emerald-50 to-green-50 border-b-2 border-emerald-200">
+                <div className="mb-4 -mx-4 px-4 py-3 bg-gradient-to-r from-emerald-50 to-green-50 border-b-2 border-emerald-200 relative z-0">
                   <h2 className="text-sm font-bold text-[#00653a] uppercase tracking-wide flex items-center gap-2">
                     <div className="w-8 h-8 bg-gradient-to-br from-[#00874e] to-emerald-600 rounded-lg flex items-center justify-center shadow-md">
                       <CreditCard size={16} className="text-white" />
@@ -633,7 +633,7 @@ function AnalysePageContent() {
                   <p className="text-xs text-gray-700 mt-1 ml-10 font-medium">Sélectionnez un compte</p>
                 </div>
 
-                <div className="space-y-3 px-2">
+                <div className="space-y-3 px-2 relative z-10">
                   {(() => {
                     console.log('🏦 COMPTES:', accounts);
                     console.log('📊 Nombre de comptes:', accounts.length);
@@ -655,7 +655,7 @@ function AnalysePageContent() {
                           setSelectedAccountIndex(index)
                           setSidebarOpen(false)
                         }}
-                        className={`w-full text-left rounded-2xl transition-all duration-300 overflow-hidden group ${
+                        className={`w-full text-left rounded-2xl transition-all duration-300 overflow-hidden group relative z-20 ${
                           isSelected
                             ? 'shadow-2xl scale-105'
                             : 'shadow-md hover:shadow-xl hover:scale-105'
