@@ -197,9 +197,9 @@ function AnalysePageContent() {
     fetchAnalysis()
   }, [fetchAnalysis])
 
-  // Copy debug data to clipboard
-  const copyDebugData = () => {
-    const debugData = {
+  // Get debug data object
+  const getDebugData = () => {
+    return {
       analysis: {
         id: analysis?.id,
         client_name: analysis?.client_name,
@@ -216,11 +216,41 @@ function AnalysePageContent() {
       raw_data: analysis?.raw_data,
       accounts: accounts,
     }
+  }
 
-    const jsonString = JSON.stringify(debugData, null, 2)
+  // Copy debug data to clipboard
+  const copyDebugData = () => {
+    const jsonString = JSON.stringify(getDebugData(), null, 2)
     navigator.clipboard.writeText(jsonString)
     setDebugCopied(true)
     setTimeout(() => setDebugCopied(false), 2000)
+  }
+
+  // Download debug data as JSON file
+  const downloadDebugData = () => {
+    const debugData = getDebugData()
+    const jsonString = JSON.stringify(debugData, null, 2)
+
+    // Create blob
+    const blob = new Blob([jsonString], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+
+    // Create filename
+    const clientName = analysis?.client_name?.replace(/\s+/g, '-') || 'client'
+    const clientId = analysis?.id?.slice(0, 8) || 'unknown'
+    const date = new Date().toISOString().split('T')[0]
+    const filename = `debug-${clientName}-${clientId}-${date}.json`
+
+    // Create temporary link and trigger download
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+
+    // Cleanup
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
   }
 
   // Clean value helper
@@ -1312,7 +1342,7 @@ function AnalysePageContent() {
             {/* Footer */}
             <div className="border-t border-gray-200 p-4 bg-gray-50 flex items-center justify-between">
               <p className="text-xs text-gray-600">
-                Cliquez sur "Copier" pour copier les données dans le presse-papiers
+                Copier ou télécharger les données de debug
               </p>
               <div className="flex gap-2">
                 <button
@@ -1320,6 +1350,13 @@ function AnalysePageContent() {
                   className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all text-sm font-medium"
                 >
                   Fermer
+                </button>
+                <button
+                  onClick={downloadDebugData}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all text-sm font-medium flex items-center gap-2"
+                >
+                  <Download size={16} />
+                  Télécharger
                 </button>
                 <button
                   onClick={copyDebugData}
