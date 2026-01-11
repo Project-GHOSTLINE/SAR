@@ -7,7 +7,7 @@ import {
   Calendar, User, Mail, Phone, MapPin, RefreshCw, Loader2,
   Search, Filter, ChevronLeft, ChevronRight, FileText, Download, BarChart3
 } from 'lucide-react'
-import AdminNav from '@/components/admin/AdminNav'
+// AdminNav retiré - La page doit être publique pour les rapports
 
 interface ClientAnalysis {
   id: string
@@ -287,7 +287,6 @@ function AnalysePageContent() {
 
   return (
     <>
-      <AdminNav currentPage="/analyse" />
       <div className="min-h-screen bg-gray-50 py-6 px-4">
         <div className="max-w-7xl mx-auto">
 

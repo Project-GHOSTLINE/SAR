@@ -245,15 +245,6 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    // Vérification de l'authentification admin
-    const authHeader = request.headers.get('cookie')
-    if (!authHeader?.includes('admin-session=')) {
-      return NextResponse.json(
-        { error: 'Non autorisé' },
-        { status: 401 }
-      )
-    }
-
     const supabase = getSupabase()
     if (!supabase) {
       return NextResponse.json(
@@ -265,6 +256,18 @@ export async function GET(request: NextRequest) {
     // Récupérer les paramètres de filtre
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
+
+    // Si ID fourni, permettre l'accès public (pour les rapports partagés)
+    // Sinon, nécessite authentification pour lister toutes les analyses
+    const authHeader = request.headers.get('cookie')
+    const isAuthenticated = authHeader?.includes('admin-session=')
+
+    if (!id && !isAuthenticated) {
+      return NextResponse.json(
+        { error: 'Non autorisé' },
+        { status: 401 }
+      )
+    }
     const status = searchParams.get('status')
     const assigned_to = searchParams.get('assigned_to')
     const source = searchParams.get('source')
