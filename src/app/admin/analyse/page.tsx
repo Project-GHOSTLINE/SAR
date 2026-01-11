@@ -170,9 +170,36 @@ function AnalysePageContent() {
         const accountsData = analysisData.raw_data?.accounts || analysisData.accounts || []
         setAccounts(accountsData)
 
-        // Extraire les infos client depuis raw_data.clientInfo si disponible
-        if (analysisData.raw_data?.clientInfo) {
-          const clientInfo = analysisData.raw_data.clientInfo
+        // Extraire les infos client depuis raw_data
+        const rawData = analysisData.raw_data || {}
+
+        // Adresse depuis raw_data.address
+        if (!analysisData.client_address && rawData.address) {
+          analysisData.client_address = rawData.address
+        }
+
+        // Email et téléphones depuis raw_data.contacts
+        if (rawData.contacts && Array.isArray(rawData.contacts)) {
+          // Extraire l'email
+          if (!analysisData.client_email) {
+            const emailContact = rawData.contacts.find((c: any) => c.type === 'email')
+            if (emailContact?.contact) {
+              analysisData.client_email = emailContact.contact
+            }
+          }
+
+          // Extraire les téléphones
+          if (!analysisData.client_phones || analysisData.client_phones.length === 0) {
+            const phoneContacts = rawData.contacts.filter((c: any) => c.type === 'phone')
+            if (phoneContacts.length > 0) {
+              analysisData.client_phones = phoneContacts.map((c: any) => c.contact?.replace(/,$/, ''))
+            }
+          }
+        }
+
+        // Fallback: Extraire depuis raw_data.clientInfo si disponible (compatibilité Flinks)
+        if (rawData.clientInfo) {
+          const clientInfo = rawData.clientInfo
           analysisData.client_email = analysisData.client_email || clientInfo.email
           analysisData.client_address = analysisData.client_address || clientInfo.address
           analysisData.client_phones = analysisData.client_phones || (clientInfo.phone ? [clientInfo.phone] : [])
