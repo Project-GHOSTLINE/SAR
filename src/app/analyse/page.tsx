@@ -124,6 +124,15 @@ function AnalysePageContent() {
 
         // Extraire les comptes depuis raw_data
         const accountsData = analysisData.raw_data?.accounts || analysisData.accounts || []
+        console.log('📊 Comptes extraits:', {
+          length: accountsData.length,
+          first: accountsData[0] ? {
+            bank: accountsData[0].bank,
+            account: accountsData[0].account,
+            type: accountsData[0].type,
+            hasTransactions: !!accountsData[0].transactions
+          } : null
+        })
         setAccounts(accountsData)
 
         // Extraire les infos client depuis raw_data.clientInfo si disponible
@@ -407,6 +416,7 @@ function AnalysePageContent() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {accounts.map((account: any, index: number) => {
+                  console.log(`🏦 Rendering account ${index}:`, account.bank || account.title || `Compte ${index + 1}`)
                   const accountBalance = cleanValue(account.current_balance || account.balance)
                   const isSelected = selectedAccountIndex === index
 
