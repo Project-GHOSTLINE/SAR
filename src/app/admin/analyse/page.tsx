@@ -44,7 +44,6 @@ function AnalysePageContent() {
   const [filterType, setFilterType] = useState<'all' | 'credit' | 'debit'>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedMonth, setSelectedMonth] = useState<number>(0) // 0 = current month, 1 = -1 month, 2 = -2 months
-  const [isMonthsSticky, setIsMonthsSticky] = useState(false)
   const transactionsPerPage = 50
 
   // Format currency
@@ -253,9 +252,7 @@ function AnalysePageContent() {
   // Detect when months section becomes sticky
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY
-      // Adjust this value based on when the months section becomes sticky
-      setIsMonthsSticky(scrollPosition > 450)
+      // Scroll handler (reserved for future use)
     }
 
     window.addEventListener('scroll', handleScroll)
@@ -459,31 +456,19 @@ function AnalysePageContent() {
             </div>
           )}
 
-          {/* Monthly Tabs */}
+          {/* Monthly Tabs - Sidebar fixe à droite */}
           {selectedAccount && selectedAccount.transactions && selectedAccount.transactions.length > 0 && (
-            <div className={`sticky top-24 z-30 bg-white rounded-lg shadow-lg border border-gray-200 mb-4 backdrop-blur-sm transition-all duration-300 ${
-              isMonthsSticky ? 'p-3' : 'p-4'
-            }`}>
-              {!isMonthsSticky && (
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                    <BarChart3 size={16} className="text-blue-500" />
-                    Analyse par mois (90 derniers jours)
-                  </h2>
-                  <div className="flex items-center gap-2 text-xs">
-                    <ChevronLeft size={18} className="text-[#00874e] animate-pulse" />
-                    <span className="font-semibold text-gray-700">Naviguer</span>
-                    <ChevronRight size={18} className="text-[#00874e] animate-pulse" />
-                  </div>
-                </div>
-              )}
+            <div className="fixed right-6 top-32 z-40 w-64 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 backdrop-blur-sm max-h-[calc(100vh-200px)] overflow-y-auto"
+              style={{ maxWidth: 'calc(100vw - 800px)' }}
+            >
+              <div className="mb-3">
+                <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <BarChart3 size={14} className="text-blue-500" />
+                  Par mois
+                </h2>
+              </div>
 
-              <div className="relative">
-                {/* Gradient indicators for scroll */}
-                <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none z-10 md:hidden"></div>
-                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none z-10 md:hidden"></div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:overflow-visible overflow-x-auto pb-2 -mx-1 px-1">
+              <div className="space-y-3">
                 {monthsStats.map((month) => {
                   const isSelected = selectedMonth === month.index
 
@@ -491,73 +476,59 @@ function AnalysePageContent() {
                     <button
                       key={month.index}
                       onClick={() => setSelectedMonth(month.index)}
-                      className={`text-left rounded-lg border-2 transition-all ${
-                        isMonthsSticky ? 'p-2' : 'p-4'
-                      } ${
+                      className={`w-full text-left rounded-lg border-2 transition-all p-3 ${
                         isSelected
                           ? 'border-blue-500 bg-blue-50 shadow-sm'
-                          : 'border-gray-200 bg-white hover:border-blue-300'
+                          : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className={`font-semibold text-gray-900 capitalize ${
-                              isMonthsSticky ? 'text-xs' : 'text-sm'
-                            }`}>
-                              {isMonthsSticky ? month.shortName : month.name}
+                            <h3 className="font-semibold text-sm text-gray-900 capitalize">
+                              {month.name}
                             </h3>
                             {month.index === 0 && (
-                              <span className={`bg-blue-500 text-white rounded-full font-semibold ${
-                                isMonthsSticky ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-0.5 text-xs'
-                              }`}>
+                              <span className="bg-blue-500 text-white rounded-full font-semibold px-2 py-0.5 text-xs">
                                 Actuel
                               </span>
                             )}
                           </div>
-                          {!isMonthsSticky && (
-                            <p className="text-xs text-gray-500">
-                              {month.count} transactions
-                            </p>
-                          )}
+                          <p className="text-xs text-gray-500">
+                            {month.count} transactions
+                          </p>
                         </div>
                         {isSelected && (
                           <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0"></div>
                         )}
                       </div>
 
-                      {/* Entrées et Sorties - toujours visible */}
-                      <div className={isMonthsSticky ? 'space-y-1' : 'space-y-2'}>
+                      {/* Entrées et Sorties */}
+                      <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className={isMonthsSticky ? 'text-[10px] text-gray-600' : 'text-xs text-gray-600'}>
+                          <span className="text-xs text-gray-600">
                             Revenus
                           </span>
-                          <span className={`font-semibold text-green-600 tabular-nums ${
-                            isMonthsSticky ? 'text-xs' : 'text-sm'
-                          }`}>
+                          <span className="font-semibold text-green-600 tabular-nums text-sm">
                             +{formatCurrency(month.credits)}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className={isMonthsSticky ? 'text-[10px] text-gray-600' : 'text-xs text-gray-600'}>
+                          <span className="text-xs text-gray-600">
                             Dépenses
                           </span>
-                          <span className={`font-semibold text-red-600 tabular-nums ${
-                            isMonthsSticky ? 'text-xs' : 'text-sm'
-                          }`}>
+                          <span className="font-semibold text-red-600 tabular-nums text-sm">
                             -{formatCurrency(month.debits)}
                           </span>
                         </div>
-                        {!isMonthsSticky && (
-                          <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-                            <span className="text-xs font-medium text-gray-700">Net</span>
-                            <span className={`text-sm font-bold tabular-nums ${
-                              month.net >= 0 ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                              {formatCurrency(month.net)}
-                            </span>
-                          </div>
-                        )}
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                          <span className="text-xs font-medium text-gray-700">Net</span>
+                          <span className={`text-sm font-bold tabular-nums ${
+                            month.net >= 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {formatCurrency(month.net)}
+                          </span>
+                        </div>
                       </div>
                     </button>
                   )
