@@ -32,11 +32,28 @@ function AnalysePageContent() {
   const searchParams = useSearchParams()
   const analysisId = searchParams.get('id')
 
+  const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(true)
   const [analysis, setAnalysis] = useState<ClientAnalysis | null>(null)
   const [selectedAccountIndex, setSelectedAccountIndex] = useState<number>(0)
   const [error, setError] = useState<string | null>(null)
   const [accounts, setAccounts] = useState<any[]>([])
+
+  // Prevent hydration mismatch by only rendering after mount
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 size={40} className="animate-spin text-[#00874e] mx-auto mb-3" />
+          <p className="text-gray-600 text-sm font-medium">Initialisation...</p>
+        </div>
+      </div>
+    )
+  }
 
   // Filters and search
   const [searchTerm, setSearchTerm] = useState('')
