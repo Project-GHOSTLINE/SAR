@@ -430,8 +430,12 @@ function AnalysePageContent() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
               <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <CreditCard size={16} className="text-[#00874e]" />
-                Comptes bancaires ({accounts.length})
+                Comptes bancaires ({accounts.length}) - DEBUG: {accounts[0]?.title || 'NO TITLE'} / {accounts[0]?.type || 'NO TYPE'}
               </h2>
+
+              <p className="text-sm text-red-600 font-bold mb-3">
+                🐛 Accounts array length: {accounts.length} | Map about to execute | First account has {accounts[0]?.transactions?.length || 0} transactions
+              </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {accounts.map((account: any, index: number) => {
