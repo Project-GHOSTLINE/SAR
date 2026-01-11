@@ -438,64 +438,17 @@ function AnalysePageContent() {
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {accounts.map((account: any, index: number) => {
-                  console.log(`🏦 Rendering account ${index}:`, account.bank || account.title || `Compte ${index + 1}`)
-                  const accountBalance = cleanValue(account.current_balance || account.balance)
-                  const isSelected = selectedAccountIndex === index
-
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedAccountIndex(index)}
-                      className={`text-left p-3 rounded-lg border-2 transition-all ${
-                        isSelected
-                          ? 'border-[#00874e] bg-emerald-50 shadow-sm'
-                          : 'border-gray-200 bg-white hover:border-emerald-300'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1 min-w-0">
-                          {/* Institution name */}
-                          {account.institution && (
-                            <p className="text-xs text-gray-500 font-medium mb-1">
-                              {account.institution}
-                            </p>
-                          )}
-
-                          {/* Account title or number */}
-                          <h3 className="font-semibold text-sm text-gray-900 mb-1">
-                            {account.title || account.accountNumber || account.account_number || `Compte ${index + 1}`}
-                          </h3>
-
-                          {/* Account number if different from title */}
-                          {account.title && (account.accountNumber || account.account_number) && (
-                            <p className="text-xs text-gray-600 font-mono mb-1">
-                              {account.accountNumber || account.account_number}
-                            </p>
-                          )}
-
-                          {/* Account type badge */}
-                          {account.type && (
-                            <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">
-                              {account.type}
-                            </span>
-                          )}
-                        </div>
-                        {isSelected && (
-                          <div className="w-2 h-2 bg-[#00874e] rounded-full shrink-0 mt-1"></div>
-                        )}
-                      </div>
-
-                      <p className="text-xl font-bold text-gray-900 mb-0.5">
-                        {formatCurrency(accountBalance)}
-                      </p>
-
-                      <p className="text-xs text-gray-500">
-                        {account.transactions ? `${account.transactions.length} transactions` : 'Aucune transaction'}
-                      </p>
-                    </button>
-                  )
-                })}
+                {accounts.map((account: any, index: number) => (
+                  <div
+                    key={index}
+                    className="p-4 border-2 border-red-500 bg-yellow-100 rounded"
+                  >
+                    <p className="font-bold text-lg">COMPTE {index + 1}</p>
+                    <p>Title: {account.title || 'N/A'}</p>
+                    <p>Type: {account.type || 'N/A'}</p>
+                    <p>Transactions: {account.transactions?.length || 0}</p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
