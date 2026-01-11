@@ -608,10 +608,83 @@ function AnalysePageContent() {
                   <p className="text-xs text-gray-600 mt-1 ml-10">Sélectionnez un compte</p>
                 </div>
 
-                <div className="space-y-2 px-2">
+                <div className="space-y-3 px-2">
                   {accounts.map((account: any, index: number) => {
                     const isSelected = selectedAccountIndex === index
                     const accountBalance = cleanValue(account.current_balance || account.balance)
+                    const bankName = account.bank || account.institution || 'Banque'
+                    const accountNumber = account.account || account.accountNumber || '••••'
+                    const institutionNumber = account.institution_number || account.institutionNumber || '000'
+                    const transitNumber = account.transit_number || account.transitNumber || '00000'
+
+                    // Fonction pour obtenir la couleur et le logo de la banque
+                    const getBankStyle = (bank: string) => {
+                      const bankLower = bank.toLowerCase()
+
+                      if (bankLower.includes('desjardins')) {
+                        return {
+                          gradient: 'from-green-600 to-green-800',
+                          logo: 'D',
+                          color: '#059669'
+                        }
+                      }
+                      if (bankLower.includes('national')) {
+                        return {
+                          gradient: 'from-red-600 to-red-800',
+                          logo: 'BN',
+                          color: '#DC2626'
+                        }
+                      }
+                      if (bankLower.includes('royal') || bankLower.includes('rbc')) {
+                        return {
+                          gradient: 'from-blue-700 to-blue-900',
+                          logo: 'RBC',
+                          color: '#1D4ED8'
+                        }
+                      }
+                      if (bankLower.includes('td')) {
+                        return {
+                          gradient: 'from-green-700 to-green-900',
+                          logo: 'TD',
+                          color: '#15803D'
+                        }
+                      }
+                      if (bankLower.includes('scotiabank')) {
+                        return {
+                          gradient: 'from-red-700 to-red-900',
+                          logo: 'SB',
+                          color: '#B91C1C'
+                        }
+                      }
+                      if (bankLower.includes('bmo') || bankLower.includes('montreal')) {
+                        return {
+                          gradient: 'from-blue-600 to-blue-800',
+                          logo: 'BMO',
+                          color: '#2563EB'
+                        }
+                      }
+                      if (bankLower.includes('cibc')) {
+                        return {
+                          gradient: 'from-red-800 to-red-950',
+                          logo: 'CIBC',
+                          color: '#991B1B'
+                        }
+                      }
+                      if (bankLower.includes('tangerine')) {
+                        return {
+                          gradient: 'from-orange-500 to-orange-700',
+                          logo: 'T',
+                          color: '#F97316'
+                        }
+                      }
+                      return {
+                        gradient: 'from-gray-700 to-gray-900',
+                        logo: bank.substring(0, 2).toUpperCase(),
+                        color: '#374151'
+                      }
+                    }
+
+                    const bankStyle = getBankStyle(bankName)
 
                     return (
                       <button
@@ -620,54 +693,79 @@ function AnalysePageContent() {
                           setSelectedAccountIndex(index)
                           setSidebarOpen(false)
                         }}
-                        className={`w-full text-left p-3 rounded-xl transition-all duration-300 ${
+                        className={`w-full text-left rounded-2xl transition-all duration-300 overflow-hidden group ${
                           isSelected
-                            ? 'bg-gradient-to-br from-[#00874e] to-emerald-600 text-white shadow-lg scale-105'
-                            : 'bg-white/50 hover:bg-white/70 text-gray-900 shadow-sm hover:shadow-md'
+                            ? 'shadow-2xl scale-105'
+                            : 'shadow-md hover:shadow-xl hover:scale-102'
                         }`}
                         style={{
-                          border: isSelected ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(0, 0, 0, 0.05)'
+                          border: isSelected ? '2px solid rgba(255, 255, 255, 0.5)' : '1px solid rgba(0, 0, 0, 0.1)'
                         }}
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1 min-w-0">
-                            <p className={`text-xs font-medium mb-1 ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
-                              {account.bank || account.institution || 'Banque'}
-                            </p>
-                            <p className={`text-sm font-bold truncate ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                              {account.account || account.accountNumber || `Compte ${index + 1}`}
-                            </p>
-                            {account.type && (
-                              <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                                isSelected
-                                  ? 'bg-white/20 text-white'
-                                  : 'bg-blue-50 text-blue-700'
-                              }`}>
-                                {account.type}
-                              </span>
+                        {/* Carte bancaire design */}
+                        <div className={`bg-gradient-to-br ${bankStyle.gradient} p-4 relative`}
+                          style={{
+                            backgroundImage: isSelected
+                              ? 'radial-gradient(circle at top right, rgba(255, 255, 255, 0.2) 0%, transparent 60%)'
+                              : 'radial-gradient(circle at top right, rgba(255, 255, 255, 0.1) 0%, transparent 60%)'
+                          }}
+                        >
+                          {/* Header avec logo */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                              {/* Logo de la banque */}
+                              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-white/30">
+                                <span className="text-white font-black text-sm">{bankStyle.logo}</span>
+                              </div>
+                              <div>
+                                <p className="text-white/90 text-xs font-semibold leading-tight">{bankName}</p>
+                                {account.type && (
+                                  <p className="text-white/70 text-xs mt-0.5">{account.type}</p>
+                                )}
+                              </div>
+                            </div>
+                            {isSelected && (
+                              <div className="w-3 h-3 bg-white rounded-full shrink-0 animate-pulse shadow-lg"></div>
                             )}
                           </div>
-                          {isSelected && (
-                            <div className="w-2 h-2 bg-white rounded-full shrink-0 mt-1 animate-pulse"></div>
-                          )}
-                        </div>
 
-                        <div className="flex items-center justify-between pt-2 border-t" style={{
-                          borderColor: isSelected ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.05)'
-                        }}>
-                          <span className={`text-xs ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
-                            Solde
-                          </span>
-                          <span className={`text-base font-bold tabular-nums ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                            {formatCurrency(accountBalance)}
-                          </span>
-                        </div>
+                          {/* Numéro de compte */}
+                          <div className="mb-3">
+                            <p className="text-white/70 text-xs font-medium mb-1">Numéro de compte</p>
+                            <p className="text-white text-lg font-mono font-bold tracking-wider">
+                              {accountNumber}
+                            </p>
+                          </div>
 
-                        {account.transactions && (
-                          <p className={`text-xs mt-1 ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
-                            {account.transactions.length} transactions
-                          </p>
-                        )}
+                          {/* Institution et Transit */}
+                          <div className="flex items-center gap-4 mb-3">
+                            <div>
+                              <p className="text-white/60 text-xs font-medium">Institution</p>
+                              <p className="text-white text-sm font-mono font-bold">{institutionNumber}</p>
+                            </div>
+                            <div className="w-px h-8 bg-white/30"></div>
+                            <div>
+                              <p className="text-white/60 text-xs font-medium">Transit</p>
+                              <p className="text-white text-sm font-mono font-bold">{transitNumber}</p>
+                            </div>
+                          </div>
+
+                          {/* Solde */}
+                          <div className="pt-3 border-t border-white/20 flex items-center justify-between">
+                            <div>
+                              <p className="text-white/70 text-xs font-medium">Solde disponible</p>
+                              <p className="text-white text-xl font-bold tabular-nums">
+                                {formatCurrency(accountBalance)}
+                              </p>
+                            </div>
+                            {account.transactions && (
+                              <div className="text-right">
+                                <p className="text-white/60 text-xs">{account.transactions.length}</p>
+                                <p className="text-white/80 text-xs font-medium">transactions</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </button>
                     )
                   })}
