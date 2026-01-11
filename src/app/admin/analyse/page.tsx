@@ -7,7 +7,8 @@ import AdminNav from '@/components/admin/AdminNav'
 import {
   ArrowLeft, Building, DollarSign, TrendingUp, CreditCard,
   Calendar, User, Mail, Phone, MapPin, RefreshCw, Loader2,
-  Search, Filter, ChevronLeft, ChevronRight, FileText, Download, BarChart3
+  Search, Filter, ChevronLeft, ChevronRight, FileText, Download, BarChart3,
+  Tag, Flag
 } from 'lucide-react'
 
 interface ClientAnalysis {
@@ -643,8 +644,23 @@ function AnalysePageContent() {
                       <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wide">
                         Description
                       </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                        <div className="flex items-center gap-1">
+                          <Tag size={12} />
+                          Catégorie
+                        </div>
+                      </th>
+                      <th className="px-4 py-2 text-center text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                        <div className="flex items-center justify-center gap-1">
+                          <Flag size={12} />
+                          Flags
+                        </div>
+                      </th>
                       <th className="px-4 py-2 text-right text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                        Montant
+                        Crédit
+                      </th>
+                      <th className="px-4 py-2 text-right text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                        Débit
                       </th>
                       <th className="px-4 py-2 text-right text-xs font-semibold text-gray-700 uppercase tracking-wide">
                         Solde
@@ -653,11 +669,39 @@ function AnalysePageContent() {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {paginatedTransactions.map((tx: any, txIndex: number) => {
-                      const withdrawal = cleanValue(tx.withdrawals || tx.withdrawal || tx.debit)
-                      const deposit = cleanValue(tx.deposits || tx.deposit || tx.credit)
-                      const amount = tx.amount !== undefined ? cleanValue(tx.amount) : (deposit - withdrawal)
+                      const credit = cleanValue(tx.credit || tx.deposits || tx.deposit)
+                      const debit = cleanValue(tx.debit || tx.withdrawals || tx.withdrawal)
                       const balance = cleanValue(tx.balance || tx.solde)
-                      const isCredit = amount > 0
+                      const category = tx.category || null
+                      const flags = tx.flags || []
+
+                      // Get category color
+                      const getCategoryColor = (cat: string) => {
+                        const colors: any = {
+                          'groceries': 'bg-orange-100 text-orange-700',
+                          'transport': 'bg-blue-100 text-blue-700',
+                          'entertainment': 'bg-purple-100 text-purple-700',
+                          'bills': 'bg-red-100 text-red-700',
+                          'income': 'bg-green-100 text-green-700',
+                          'shopping': 'bg-pink-100 text-pink-700',
+                          'health': 'bg-teal-100 text-teal-700',
+                          'transfer': 'bg-gray-100 text-gray-700',
+                          'other': 'bg-gray-100 text-gray-700'
+                        }
+                        return colors[cat?.toLowerCase()] || 'bg-gray-100 text-gray-700'
+                      }
+
+                      // Get flag color
+                      const getFlagColor = (flag: string) => {
+                        const colors: any = {
+                          'duplicate': 'bg-yellow-100 text-yellow-700 border-yellow-300',
+                          'suspicious': 'bg-red-100 text-red-700 border-red-300',
+                          'recurring': 'bg-blue-100 text-blue-700 border-blue-300',
+                          'large': 'bg-orange-100 text-orange-700 border-orange-300',
+                          'verified': 'bg-green-100 text-green-700 border-green-300'
+                        }
+                        return colors[flag?.toLowerCase()] || 'bg-gray-100 text-gray-600 border-gray-300'
+                      }
 
                       return (
                         <tr key={txIndex} className="hover:bg-gray-50/50 transition-colors">
@@ -665,24 +709,62 @@ function AnalysePageContent() {
                             <div className="flex items-center gap-1.5">
                               <Calendar size={13} className="text-gray-400" />
                               <span className="text-sm text-gray-700 font-medium">
-                                {tx.date ? formatDateShort(tx.date) : 'Date inconnue'}
+                                {tx.date ? formatDateShort(tx.date) : 'N/A'}
                               </span>
                             </div>
                           </td>
-                          <td className="px-4 py-2.5">
-                            <p className="text-sm text-gray-900 leading-tight">
+                          <td className="px-4 py-2.5 max-w-xs">
+                            <p className="text-sm text-gray-900 leading-tight truncate" title={tx.description || tx.details}>
                               {tx.description || tx.details || 'Transaction'}
                             </p>
                           </td>
-                          <td className="px-4 py-2.5 whitespace-nowrap text-right">
-                            <span className={`text-sm font-semibold tabular-nums ${
-                              isCredit ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                              {isCredit ? '+' : ''}{formatCurrency(amount)}
-                            </span>
+                          <td className="px-4 py-2.5 whitespace-nowrap">
+                            {category ? (
+                              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(category)}`}>
+                                <Tag size={10} />
+                                {category}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-2.5">
+                            <div className="flex items-center justify-center gap-1 flex-wrap">
+                              {flags && flags.length > 0 ? (
+                                flags.map((flag: string, flagIndex: number) => (
+                                  <span
+                                    key={flagIndex}
+                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-xs font-medium ${getFlagColor(flag)}`}
+                                  >
+                                    <Flag size={10} />
+                                    {flag}
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-xs text-gray-400">-</span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-4 py-2.5 whitespace-nowrap text-right">
-                            <span className="text-sm text-gray-600 tabular-nums font-medium">
+                            {credit > 0 ? (
+                              <span className="text-sm font-semibold tabular-nums text-green-600">
+                                +{formatCurrency(credit)}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-2.5 whitespace-nowrap text-right">
+                            {debit > 0 ? (
+                              <span className="text-sm font-semibold tabular-nums text-red-600">
+                                -{formatCurrency(debit)}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-2.5 whitespace-nowrap text-right">
+                            <span className="text-sm text-gray-900 tabular-nums font-medium">
                               {balance !== 0 ? formatCurrency(balance) : '-'}
                             </span>
                           </td>
