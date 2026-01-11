@@ -16,3 +16,6 @@ export function getSupabase(): SupabaseClient | null {
   supabaseInstance = createClient(supabaseUrl, supabaseKey)
   return supabaseInstance
 }
+
+// Alias pour clarifier l'intention dans les routes admin
+export const getSupabaseAdmin = getSupabase

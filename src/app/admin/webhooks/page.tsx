@@ -6,6 +6,7 @@ import {
   RefreshCw, AlertTriangle, CheckCircle, XCircle, Clock,
   Send, Mail, ChevronLeft, Loader2, Filter, Calendar
 } from 'lucide-react'
+import AdminNav from '@/components/admin/AdminNav'
 
 interface VoPayWebhook {
   id: string
@@ -108,35 +109,34 @@ export default function WebhooksPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-      </div>
+      <>
+        <AdminNav currentPage="/admin/webhooks" />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+        </div>
+      </>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.push('/admin/dashboard')}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
+    <>
+      <AdminNav currentPage="/admin/webhooks" />
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Webhooks VoPay</h1>
-                <p className="text-sm text-gray-500">Gestion des notifications de transaction</p>
+                <h1 className="text-4xl font-bold text-gray-900">Webhooks VoPay</h1>
+                <p className="text-base text-gray-500">Gestion des notifications de transaction</p>
               </div>
             </div>
             <button
               onClick={fetchWebhooks}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-3 px-5 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="w-5 h-5" />
               Actualiser
             </button>
           </div>
@@ -146,59 +146,59 @@ export default function WebhooksPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-8">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Total</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                <p className="text-base text-gray-500">Total</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
               </div>
-              <Calendar className="w-8 h-8 text-gray-400" />
+              <Calendar className="w-10 h-10 text-gray-400" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-8">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Réussies</p>
-                <p className="text-2xl font-bold text-green-600">{stats.successful}</p>
+                <p className="text-base text-gray-500">Réussies</p>
+                <p className="text-3xl font-bold text-green-600">{stats.successful}</p>
               </div>
-              <CheckCircle className="w-8 h-8 text-green-400" />
+              <CheckCircle className="w-10 h-10 text-green-400" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-8">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Échouées</p>
-                <p className="text-2xl font-bold text-red-600">{stats.failed}</p>
+                <p className="text-base text-gray-500">Échouées</p>
+                <p className="text-3xl font-bold text-red-600">{stats.failed}</p>
               </div>
-              <XCircle className="w-8 h-8 text-red-400" />
+              <XCircle className="w-10 h-10 text-red-400" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-8">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">En attente</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+                <p className="text-base text-gray-500">En attente</p>
+                <p className="text-3xl font-bold text-yellow-600">{stats.pending}</p>
               </div>
-              <Clock className="w-8 h-8 text-yellow-400" />
+              <Clock className="w-10 h-10 text-yellow-400" />
             </div>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow mb-6">
-          <div className="p-4 border-b">
-            <div className="flex items-center gap-2 text-sm">
-              <Filter className="w-4 h-4 text-gray-400" />
+        <div className="bg-white rounded-lg shadow mb-8">
+          <div className="p-6 border-b">
+            <div className="flex items-center gap-3 text-base">
+              <Filter className="w-5 h-5 text-gray-400" />
               <span className="text-gray-500">Filtrer par statut:</span>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-3 flex-wrap">
                 {['all', 'successful', 'failed', 'pending', 'in progress', 'cancelled'].map((status) => (
                   <button
                     key={status}
                     onClick={() => setFilter(status)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                       filter === status
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -218,22 +218,22 @@ export default function WebhooksPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Transaction
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Type
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Montant
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Statut
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -241,7 +241,7 @@ export default function WebhooksPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredWebhooks.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={6} className="px-6 py-12 text-center text-base text-gray-500">
                       Aucun webhook trouvé
                     </td>
                   </tr>
@@ -250,54 +250,54 @@ export default function WebhooksPage() {
                     const StatusIcon = STATUS_ICONS[webhook.status as keyof typeof STATUS_ICONS] || Clock
                     return (
                       <tr key={webhook.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
+                        <td className="px-6 py-6 whitespace-nowrap">
+                          <div className="text-base font-medium text-gray-900">
                             {webhook.transaction_id}
                           </div>
-                          <div className="text-xs text-gray-500">{webhook.environment}</div>
+                          <div className="text-sm text-gray-500">{webhook.environment}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{webhook.transaction_type}</div>
+                        <td className="px-6 py-6 whitespace-nowrap">
+                          <div className="text-base text-gray-900">{webhook.transaction_type}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
+                        <td className="px-6 py-6 whitespace-nowrap">
+                          <div className="text-base font-medium text-gray-900">
                             {webhook.transaction_amount.toFixed(2)} {webhook.currency}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-6 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
                               STATUS_COLORS[webhook.status as keyof typeof STATUS_COLORS] || 'bg-gray-100 text-gray-800'
                             }`}
                           >
-                            <StatusIcon className="w-3 h-3" />
+                            <StatusIcon className="w-4 h-4" />
                             {webhook.status}
                           </span>
                           {webhook.failure_reason && (
-                            <div className="mt-1 text-xs text-red-600">
+                            <div className="mt-2 text-sm text-red-600">
                               {webhook.failure_reason}
                             </div>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
+                        <td className="px-6 py-6 whitespace-nowrap">
+                          <div className="text-base text-gray-900">
                             {new Date(webhook.received_at).toLocaleDateString('fr-CA')}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-sm text-gray-500">
                             {new Date(webhook.received_at).toLocaleTimeString('fr-CA')}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <td className="px-6 py-6 whitespace-nowrap text-base">
                           {webhook.status === 'failed' && (
                             <button
                               onClick={() => sendFailedAlert(webhook)}
                               disabled={sending === webhook.id}
-                              className="inline-flex items-center gap-1 px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {sending === webhook.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <Loader2 className="w-5 h-5 animate-spin" />
                               ) : (
-                                <Mail className="w-4 h-4" />
+                                <Mail className="w-5 h-5" />
                               )}
                               Envoyer Alerte
                             </button>
@@ -313,5 +313,6 @@ export default function WebhooksPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }
