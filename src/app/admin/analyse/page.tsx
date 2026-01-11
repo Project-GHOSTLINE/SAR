@@ -533,7 +533,6 @@ function AnalysePageContent() {
                     </button>
                   )
                 })}
-                </div>
               </div>
             </div>
           )}
