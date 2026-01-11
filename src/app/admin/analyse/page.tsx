@@ -8,7 +8,7 @@ import {
   ArrowLeft, Building, DollarSign, TrendingUp, CreditCard,
   Calendar, User, Mail, Phone, MapPin, RefreshCw, Loader2,
   Search, Filter, ChevronLeft, ChevronRight, FileText, Download, BarChart3,
-  Tag, Flag, Menu, X
+  Tag, Flag, Menu, X, Briefcase, Wallet, Landmark
 } from 'lucide-react'
 
 interface ClientAnalysis {
@@ -404,51 +404,157 @@ function AnalysePageContent() {
           </div>
 
           {/* Client Info Section */}
-          {(analysis.client_email || analysis.client_phones || analysis.client_address) && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mb-4">
-              <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mb-4">
+            {/* En-tête avec source et compagnie */}
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+              <h2 className="text-sm sm:text-base font-semibold text-gray-900 flex items-center gap-2">
                 <User size={14} className="sm:w-4 sm:h-4" />
                 Informations client
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {analysis.client_email && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                      <Mail size={14} className="text-gray-600" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs text-gray-500 font-medium">Email</p>
-                      <p className="text-sm text-gray-900 truncate">{analysis.client_email}</p>
-                    </div>
-                  </div>
-                )}
-
-                {analysis.client_phones && analysis.client_phones.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                      <Phone size={14} className="text-gray-600" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs text-gray-500 font-medium">Téléphone</p>
-                      <p className="text-sm text-gray-900 truncate">{analysis.client_phones.join(', ')}</p>
-                    </div>
-                  </div>
-                )}
-
-                {analysis.client_address && (
-                  <div className="flex items-center gap-2 col-span-2">
-                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                      <MapPin size={14} className="text-gray-600" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs text-gray-500 font-medium">Adresse</p>
-                      <p className="text-sm text-gray-900 truncate">{analysis.client_address}</p>
-                    </div>
-                  </div>
-                )}
+              <div className="flex items-center gap-2">
+                {/* Source IBV */}
+                <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${
+                  analysis.source === 'inverite'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-purple-500 text-white'
+                }`}>
+                  <Wallet size={12} />
+                  {analysis.source === 'inverite' ? 'Inverite' : 'Flinks'}
+                </span>
+                {/* Compagnie */}
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-800 text-white flex items-center gap-1.5">
+                  <Building size={12} />
+                  {analysis.source === 'flinks' ? 'Solution Argent Rapide' : 'Crédit Secours'}
+                </span>
               </div>
             </div>
-          )}
+
+            {/* Institution financière avec couleur distinctive */}
+            {(() => {
+              const institutionName = accounts[selectedAccountIndex]?.bank || accounts[selectedAccountIndex]?.institution || accounts[0]?.bank || accounts[0]?.institution || 'Institution inconnue'
+
+              // Couleurs par institution
+              const getInstitutionColor = (inst: string) => {
+                const instLower = inst.toLowerCase()
+                if (instLower.includes('desjardins')) return 'bg-green-600'
+                if (instLower.includes('national')) return 'bg-red-600'
+                if (instLower.includes('royal') || instLower.includes('rbc')) return 'bg-blue-700'
+                if (instLower.includes('td')) return 'bg-green-700'
+                if (instLower.includes('scotiabank')) return 'bg-red-700'
+                if (instLower.includes('bmo') || instLower.includes('montreal')) return 'bg-blue-600'
+                if (instLower.includes('cibc')) return 'bg-red-800'
+                if (instLower.includes('tangerine')) return 'bg-orange-500'
+                return 'bg-gray-700'
+              }
+
+              return (
+                <div className="mb-4">
+                  <div className={`${getInstitutionColor(institutionName)} text-white rounded-lg p-3 flex items-center gap-3`}>
+                    <Landmark size={24} className="shrink-0" />
+                    <div>
+                      <p className="text-xs opacity-90 font-medium">Institution financière</p>
+                      <p className="text-lg font-bold">{institutionName}</p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
+
+            {/* Informations de contact */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+              {analysis.client_email && (
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                    <Mail size={14} className="text-gray-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-500 font-medium">Email</p>
+                    <p className="text-sm text-gray-900 truncate">{analysis.client_email}</p>
+                  </div>
+                </div>
+              )}
+
+              {analysis.client_phones && analysis.client_phones.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                    <Phone size={14} className="text-gray-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-500 font-medium">Téléphone</p>
+                    <p className="text-sm text-gray-900 truncate">{analysis.client_phones.join(', ')}</p>
+                  </div>
+                </div>
+              )}
+
+              {analysis.client_address && (
+                <div className="flex items-center gap-2 sm:col-span-2">
+                  <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                    <MapPin size={14} className="text-gray-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-500 font-medium">Adresse</p>
+                    <p className="text-sm text-gray-900 truncate">{analysis.client_address}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 4 dernières paies */}
+            {(() => {
+              const paychecks = analysis.raw_data?.paychecks || []
+              const last4Paychecks = paychecks.slice(-4).reverse() // Prendre les 4 dernières et inverser pour avoir la plus récente en premier
+
+              if (last4Paychecks.length > 0) {
+                return (
+                  <div className="border-t border-gray-200 pt-4">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Briefcase size={14} />
+                      Dernières paies reçues
+                    </h3>
+                    <div className="space-y-2">
+                      {last4Paychecks.map((paycheck: any, index: number) => {
+                        const date = paycheck.date || paycheck.payDate
+                        const amount = cleanValue(paycheck.amount || paycheck.netPay || 0)
+                        const employer = paycheck.employer || paycheck.employerName || 'Employeur non spécifié'
+
+                        return (
+                          <div key={index} className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-lg p-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Calendar size={12} className="text-emerald-600 shrink-0" />
+                                  <p className="text-xs font-semibold text-emerald-800">
+                                    Paie du {date ? new Date(date).toLocaleDateString('fr-CA', {
+                                      day: 'numeric',
+                                      month: 'long',
+                                      year: 'numeric'
+                                    }) : 'Date inconnue'}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Briefcase size={12} className="text-gray-500 shrink-0" />
+                                  <p className="text-xs text-gray-700 truncate font-medium">{employer}</p>
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <p className="text-lg font-bold text-emerald-700">{formatCurrency(amount)}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    {paychecks.length > 4 && (
+                      <p className="text-xs text-gray-500 mt-2 text-center">
+                        {paychecks.length - 4} paie(s) supplémentaire(s) disponible(s)
+                      </p>
+                    )}
+                  </div>
+                )
+              }
+              return null
+            })()}
+          </div>
 
           {/* Bouton flottant pour ouvrir la sidebar sur mobile */}
           {accounts.length > 0 && (
