@@ -8,7 +8,7 @@ import {
   ArrowLeft, Building, DollarSign, TrendingUp, CreditCard,
   Calendar, User, Mail, Phone, MapPin, RefreshCw, Loader2,
   Search, Filter, ChevronLeft, ChevronRight, FileText, Download, BarChart3,
-  Tag, Flag
+  Tag, Flag, Menu, X
 } from 'lucide-react'
 
 interface ClientAnalysis {
@@ -45,6 +45,7 @@ function AnalysePageContent() {
   const [filterType, setFilterType] = useState<'all' | 'credit' | 'debit'>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedMonth, setSelectedMonth] = useState<number>(0) // 0 = current month, 1 = -1 month, 2 = -2 months
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const transactionsPerPage = 50
 
   // Format currency
@@ -296,26 +297,26 @@ function AnalysePageContent() {
   return (
     <>
       <AdminNav currentPage="/admin/analyse" />
-      <div className="min-h-screen bg-gray-50 py-6 px-4">
-        <div className="max-w-7xl mx-auto pr-80">
+      <div className="min-h-screen bg-gray-50 py-4 sm:py-6 px-2 sm:px-4 lg:px-6">
+        <div className="w-full lg:pr-[22rem]">
 
           {/* Header Section */}
-          <div className="bg-gradient-to-br from-[#00874e] to-emerald-700 rounded-xl shadow-lg p-6 text-white mb-6">
+          <div className="bg-gradient-to-br from-[#00874e] to-emerald-700 rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-white mb-4 sm:mb-6">
             <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <User size={24} />
-                  <h1 className="text-2xl font-bold">{analysis.client_name}</h1>
+                  <User size={20} className="sm:w-6 sm:h-6 shrink-0" />
+                  <h1 className="text-xl sm:text-2xl font-bold truncate">{analysis.client_name}</h1>
                 </div>
-                <p className="text-emerald-100 text-sm">
+                <p className="text-emerald-100 text-xs sm:text-sm">
                   Analyse bancaire {analysis.source === 'inverite' ? 'Inverite' : 'Flinks'}
                 </p>
-                <p className="text-emerald-200 text-xs mt-1">
+                <p className="text-emerald-200 text-xs mt-1 hidden sm:block">
                   Créée le {formatDateLong(analysis.created_at)}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+              <div className="flex items-center gap-2 shrink-0 ml-2">
+                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold ${
                   analysis.source === 'inverite'
                     ? 'bg-blue-500 text-white'
                     : 'bg-purple-500 text-white'
@@ -324,7 +325,7 @@ function AnalysePageContent() {
                 </span>
                 <button
                   onClick={() => router.push('/admin/dashboard?tab=analyses')}
-                  className="px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all"
+                  className="hidden sm:flex px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all"
                 >
                   <ArrowLeft size={18} />
                 </button>
@@ -332,41 +333,44 @@ function AnalysePageContent() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <Building size={16} />
-                  <p className="text-emerald-100 text-xs font-medium">Comptes</p>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
+                <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                  <Building size={14} className="sm:w-4 sm:h-4 shrink-0" />
+                  <p className="text-emerald-100 text-xs font-medium hidden sm:block">Comptes</p>
                 </div>
-                <p className="text-2xl font-bold">{analysis.total_accounts}</p>
+                <p className="text-xl sm:text-2xl font-bold">{analysis.total_accounts}</p>
+                <p className="text-emerald-100 text-xs font-medium sm:hidden mt-1">Comptes</p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <DollarSign size={16} />
-                  <p className="text-emerald-100 text-xs font-medium">Balance totale</p>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
+                <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                  <DollarSign size={14} className="sm:w-4 sm:h-4 shrink-0" />
+                  <p className="text-emerald-100 text-xs font-medium hidden sm:block">Balance</p>
                 </div>
-                <p className="text-2xl font-bold">{formatCurrency(analysis.total_balance)}</p>
+                <p className="text-base sm:text-2xl font-bold truncate">{formatCurrency(analysis.total_balance)}</p>
+                <p className="text-emerald-100 text-xs font-medium sm:hidden mt-1">Balance</p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <TrendingUp size={16} />
-                  <p className="text-emerald-100 text-xs font-medium">Transactions</p>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
+                <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                  <TrendingUp size={14} className="sm:w-4 sm:h-4 shrink-0" />
+                  <p className="text-emerald-100 text-xs font-medium hidden sm:block">Transactions</p>
                 </div>
-                <p className="text-2xl font-bold">{analysis.total_transactions}</p>
+                <p className="text-xl sm:text-2xl font-bold">{analysis.total_transactions}</p>
+                <p className="text-emerald-100 text-xs font-medium sm:hidden mt-1">Trans.</p>
               </div>
             </div>
           </div>
 
           {/* Client Info Section */}
           {(analysis.client_email || analysis.client_phones || analysis.client_address) && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-              <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <User size={16} />
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mb-4">
+              <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <User size={14} className="sm:w-4 sm:h-4" />
                 Informations client
               </h2>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {analysis.client_email && (
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
@@ -406,9 +410,33 @@ function AnalysePageContent() {
             </div>
           )}
 
+          {/* Bouton flottant pour ouvrir la sidebar sur mobile */}
+          {accounts.length > 0 && (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-[#00874e] to-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
+            >
+              <Menu size={24} />
+            </button>
+          )}
+
+          {/* Backdrop pour mobile */}
+          {sidebarOpen && (
+            <div
+              className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
+
           {/* Sidebar fixe à droite - Glassmorphism */}
           {accounts.length > 0 && (
-            <div className="fixed right-6 top-32 z-40 w-72 max-h-[calc(100vh-160px)] overflow-y-auto rounded-2xl"
+            <div className={`
+              fixed top-32 z-40 w-80 max-h-[calc(100vh-160px)] overflow-y-auto rounded-2xl
+              transition-transform duration-300 ease-in-out
+              lg:right-6 lg:translate-x-0
+              ${sidebarOpen ? 'right-4 translate-x-0' : 'right-4 translate-x-[calc(100%+2rem)]'}
+              lg:block
+            `}
               style={{
                 background: 'rgba(255, 255, 255, 0.85)',
                 backdropFilter: 'blur(20px) saturate(180%)',
@@ -417,6 +445,13 @@ function AnalysePageContent() {
                 boxShadow: '0 8px 32px 0 rgba(0, 135, 78, 0.15)'
               }}
             >
+              {/* Bouton fermer sur mobile */}
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden absolute top-4 right-4 z-10 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors"
+              >
+                <X size={18} className="text-gray-700" />
+              </button>
               {/* Comptes Section */}
               <div className="p-4">
                 <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -432,7 +467,10 @@ function AnalysePageContent() {
                     return (
                       <button
                         key={index}
-                        onClick={() => setSelectedAccountIndex(index)}
+                        onClick={() => {
+                          setSelectedAccountIndex(index)
+                          setSidebarOpen(false)
+                        }}
                         className={`w-full text-left p-3 rounded-xl transition-all duration-300 ${
                           isSelected
                             ? 'bg-gradient-to-br from-[#00874e] to-emerald-600 text-white shadow-lg scale-105'
@@ -507,7 +545,10 @@ function AnalysePageContent() {
                   return (
                     <button
                       key={month.index}
-                      onClick={() => setSelectedMonth(month.index)}
+                      onClick={() => {
+                        setSelectedMonth(month.index)
+                        setSidebarOpen(false)
+                      }}
                       className={`w-full text-left p-3 rounded-xl transition-all duration-300 ${
                         isSelected
                           ? 'bg-gradient-to-br from-[#00874e] to-emerald-600 text-white shadow-lg scale-105'
@@ -634,8 +675,8 @@ function AnalysePageContent() {
               </div>
 
               {/* Transactions Table */}
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                <table className="w-full min-w-[800px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
                       <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wide">
