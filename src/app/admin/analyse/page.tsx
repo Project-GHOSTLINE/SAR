@@ -606,14 +606,11 @@ function AnalysePageContent() {
               transition-transform duration-300 ease-in-out
               lg:right-6 lg:translate-x-0
               ${sidebarOpen ? 'right-4 translate-x-0' : 'right-4 translate-x-[calc(100%+2rem)]'}
-              lg:block
+              lg:block bg-white
             `}
               style={{
-                background: 'rgba(255, 255, 255, 0.85)',
-                backdropFilter: 'blur(20px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                boxShadow: '0 8px 32px 0 rgba(0, 135, 78, 0.15)'
+                border: '1px solid rgba(200, 200, 200, 0.4)',
+                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.1)'
               }}
             >
               {/* Bouton fermer sur mobile */}
@@ -625,22 +622,15 @@ function AnalysePageContent() {
               </button>
               {/* Comptes Section */}
               <div className="p-4">
-                {/* Header Comptes avec glassmorphism */}
-                <div className="mb-4 -mx-4 px-4 py-3"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(0, 135, 78, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                    borderBottom: '1px solid rgba(0, 135, 78, 0.2)'
-                  }}
-                >
-                  <h2 className="text-sm font-bold text-[#00874e] uppercase tracking-wide flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-[#00874e] to-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
+                {/* Header Comptes */}
+                <div className="mb-4 -mx-4 px-4 py-3 bg-gradient-to-r from-emerald-50 to-green-50 border-b-2 border-emerald-200">
+                  <h2 className="text-sm font-bold text-[#00653a] uppercase tracking-wide flex items-center gap-2">
+                    <div className="w-8 h-8 bg-gradient-to-br from-[#00874e] to-emerald-600 rounded-lg flex items-center justify-center shadow-md">
                       <CreditCard size={16} className="text-white" />
                     </div>
                     <span>Comptes Bancaires</span>
                   </h2>
-                  <p className="text-xs text-gray-600 mt-1 ml-10">Sélectionnez un compte</p>
+                  <p className="text-xs text-gray-700 mt-1 ml-10 font-medium">Sélectionnez un compte</p>
                 </div>
 
                 <div className="space-y-3 px-2">
@@ -739,22 +729,14 @@ function AnalysePageContent() {
                 </div>
               </div>
 
-              {/* Divider avec effet glass */}
+              {/* Divider */}
               <div className="my-4 relative">
                 <div className="absolute inset-0 flex items-center px-4">
-                  <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+                  <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
                 </div>
                 <div className="relative flex justify-center">
-                  <div className="px-4 py-1 rounded-full"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.9)',
-                      backdropFilter: 'blur(10px)',
-                      WebkitBackdropFilter: 'blur(10px)',
-                      border: '1px solid rgba(200, 200, 200, 0.3)',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
-                    }}
-                  >
-                    <span className="text-xs font-semibold text-gray-500">•••</span>
+                  <div className="px-4 py-1 rounded-full bg-white border-2 border-gray-300 shadow-sm">
+                    <span className="text-xs font-bold text-gray-600">•••</span>
                   </div>
                 </div>
               </div>
@@ -762,22 +744,15 @@ function AnalysePageContent() {
               {/* Mois Section */}
               {selectedAccount && selectedAccount.transactions && selectedAccount.transactions.length > 0 && (
                 <div className="p-4">
-                  {/* Header Mois avec glassmorphism */}
-                  <div className="mb-4 -mx-4 px-4 py-3"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%)',
-                      backdropFilter: 'blur(10px)',
-                      WebkitBackdropFilter: 'blur(10px)',
-                      borderBottom: '1px solid rgba(59, 130, 246, 0.2)'
-                    }}
-                  >
-                    <h2 className="text-sm font-bold text-blue-600 uppercase tracking-wide flex items-center gap-2">
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
+                  {/* Header Mois */}
+                  <div className="mb-4 -mx-4 px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 border-b-2 border-blue-200">
+                    <h2 className="text-sm font-bold text-blue-700 uppercase tracking-wide flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
                         <BarChart3 size={16} className="text-white" />
                       </div>
                       <span>Analyse Mensuelle</span>
                     </h2>
-                    <p className="text-xs text-gray-600 mt-1 ml-10">Filtrer par période</p>
+                    <p className="text-xs text-gray-700 mt-1 ml-10 font-medium">Filtrer par période</p>
                   </div>
 
                   <div className="space-y-2 px-2">
@@ -869,7 +844,7 @@ function AnalysePageContent() {
                 })}
               </div>
 
-              {/* Bouton Voir tous les mois avec glassmorphism */}
+              {/* Bouton Voir tous les mois */}
               <div className="mt-4 px-2">
                 <button
                   onClick={() => {
@@ -878,21 +853,14 @@ function AnalysePageContent() {
                       setSelectedMonth(0) // Reset to first month when showing all
                     }
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-medium group"
-                  style={{
-                    background: showAllMonths
-                      ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%)'
-                      : 'rgba(255, 255, 255, 0.6)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                    border: showAllMonths
-                      ? '1px solid rgba(59, 130, 246, 0.4)'
-                      : '1px solid rgba(200, 200, 200, 0.3)',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
-                  }}
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-medium border-2 ${
+                    showAllMonths
+                      ? 'bg-gradient-to-r from-blue-100 to-purple-100 border-blue-300 text-blue-700'
+                      : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-blue-300 hover:text-blue-600'
+                  }`}
                 >
-                  <Calendar size={16} className={showAllMonths ? 'text-blue-600' : 'text-gray-600 group-hover:text-blue-600'} />
-                  <span className={showAllMonths ? 'text-blue-600 font-semibold' : 'text-gray-700 group-hover:text-blue-600'}>
+                  <Calendar size={16} />
+                  <span className="font-semibold">
                     {showAllMonths ? 'Voir moins de mois' : 'Voir tous les mois'}
                   </span>
                 </button>
