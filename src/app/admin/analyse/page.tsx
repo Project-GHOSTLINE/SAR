@@ -47,7 +47,7 @@ function AnalysePageContent() {
   const [selectedMonth, setSelectedMonth] = useState<number>(0) // 0 = current month, 1 = -1 month, 2 = -2 months
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showAllMonths, setShowAllMonths] = useState(false)
-  const transactionsPerPage = 50
+  const transactionsPerPage = 2500
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -203,33 +203,51 @@ function AnalysePageContent() {
   }
 
   // Bank style helper - moved outside render for performance
+  // Using official brand colors researched from bank websites
   const getBankStyle = useCallback((bank: string) => {
     const bankLower = bank.toLowerCase()
 
+    // Desjardins - Official green #00874E
     if (bankLower.includes('desjardins')) {
-      return { gradientFrom: '#15803d', gradientTo: '#14532d', logo: 'D', color: '#059669' }
+      return { gradientFrom: '#00874E', gradientTo: '#005a33', logo: 'D', color: '#00874E' }
     }
+    // National Bank - Official red #e41c23
     if (bankLower.includes('national')) {
-      return { gradientFrom: '#b91c1c', gradientTo: '#450a0a', logo: 'BN', color: '#DC2626' }
+      return { gradientFrom: '#e41c23', gradientTo: '#a51419', logo: 'BN', color: '#e41c23' }
     }
+    // RBC - Official blue #0051A5
     if (bankLower.includes('royal') || bankLower.includes('rbc')) {
-      return { gradientFrom: '#1e40af', gradientTo: '#172554', logo: 'RBC', color: '#1D4ED8' }
+      return { gradientFrom: '#0051A5', gradientTo: '#003870', logo: 'RBC', color: '#0051A5' }
     }
+    // TD - Official green #54b848
     if (bankLower.includes('td')) {
-      return { gradientFrom: '#166534', gradientTo: '#14532d', logo: 'TD', color: '#15803D' }
+      return { gradientFrom: '#54b848', gradientTo: '#3a8032', logo: 'TD', color: '#54b848' }
     }
-    if (bankLower.includes('scotiabank')) {
-      return { gradientFrom: '#991b1b', gradientTo: '#450a0a', logo: 'SB', color: '#B91C1C' }
+    // Scotiabank - Official red #EC0712
+    if (bankLower.includes('scotiabank') || bankLower.includes('scotia')) {
+      return { gradientFrom: '#EC0712', gradientTo: '#a5050c', logo: 'SB', color: '#EC0712' }
     }
+    // BMO - Official blue #0079C1
     if (bankLower.includes('bmo') || bankLower.includes('montreal')) {
-      return { gradientFrom: '#1d4ed8', gradientTo: '#172554', logo: 'BMO', color: '#2563EB' }
+      return { gradientFrom: '#0079C1', gradientTo: '#005587', logo: 'BMO', color: '#0079C1' }
     }
+    // CIBC - Official cardinal red #C41F3E
     if (bankLower.includes('cibc')) {
-      return { gradientFrom: '#7f1d1d', gradientTo: '#450a0a', logo: 'CIBC', color: '#991B1B' }
+      return { gradientFrom: '#C41F3E', gradientTo: '#8a152b', logo: 'CIBC', color: '#C41F3E' }
     }
+    // Tangerine - Official orange #F28500
     if (bankLower.includes('tangerine')) {
-      return { gradientFrom: '#ea580c', gradientTo: '#7c2d12', logo: 'T', color: '#F97316' }
+      return { gradientFrom: '#F28500', gradientTo: '#a95d00', logo: 'T', color: '#F28500' }
     }
+    // Laurentian Bank - Official yellow #FDB913
+    if (bankLower.includes('laurentian') || bankLower.includes('laurentienne')) {
+      return { gradientFrom: '#FDB913', gradientTo: '#b5840d', logo: 'LB', color: '#FDB913' }
+    }
+    // Koho - Official electric lime #CCFF00
+    if (bankLower.includes('koho')) {
+      return { gradientFrom: '#CCFF00', gradientTo: '#99cc00', logo: 'K', color: '#CCFF00' }
+    }
+    // Default for unknown banks
     return {
       gradientFrom: '#1f2937',
       gradientTo: '#030712',
@@ -783,6 +801,124 @@ function AnalysePageContent() {
                     </div>
                   )}
                 </div>
+
+                {/* Additional Flinks/Inverite Metadata */}
+                {(() => {
+                  const rawData = analysis.raw_data || {}
+                  const paychecks = rawData.paychecks || []
+
+                  // Extract employer name from paychecks if available
+                  const employerName = rawData.employerName || rawData.employer ||
+                    (paychecks.length > 0 ? (paychecks[0].employer || paychecks[0].employerName) : null)
+
+                  const loginId = rawData.loginId || rawData.login_id
+                  const requestId = rawData.requestId || rawData.request_id
+                  const requestDateTime = rawData.requestDateTime || rawData.request_date_time
+                  const requestStatus = rawData.requestStatus || rawData.request_status
+                  const daysDetected = rawData.daysDetected || rawData.days_detected
+
+                  const hasAnyMetadata = employerName || loginId || requestId || requestDateTime || requestStatus || daysDetected
+
+                  if (hasAnyMetadata) {
+                    return (
+                      <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
+                        <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-2 mb-2">
+                          <FileText size={12} />
+                          Métadonnées {analysis.source === 'flinks' ? 'Flinks' : 'Inverite'}
+                        </h3>
+
+                        {employerName && (
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                              <Briefcase size={14} className="text-gray-600" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs text-gray-500 font-medium">Employeur</p>
+                              <p className="text-sm text-gray-900 truncate font-medium">{employerName}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {loginId && (
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                              <User size={14} className="text-gray-600" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs text-gray-500 font-medium">Login ID</p>
+                              <p className="text-xs text-gray-900 font-mono truncate">{loginId}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {requestId && (
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                              <FileText size={14} className="text-gray-600" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs text-gray-500 font-medium">Request ID</p>
+                              <p className="text-xs text-gray-900 font-mono truncate">{requestId}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {requestDateTime && (
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                              <Calendar size={14} className="text-gray-600" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs text-gray-500 font-medium">Date de la requête</p>
+                              <p className="text-sm text-gray-900">
+                                {typeof requestDateTime === 'string'
+                                  ? requestDateTime
+                                  : new Date(requestDateTime).toLocaleString('fr-CA', {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {requestStatus && (
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                              <FileText size={14} className="text-gray-600" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs text-gray-500 font-medium">Statut de la requête</p>
+                              <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                                requestStatus.toLowerCase() === 'completed'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {requestStatus}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {daysDetected && (
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                              <Calendar size={14} className="text-gray-600" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs text-gray-500 font-medium">Jours détectés</p>
+                              <p className="text-sm text-gray-900 font-medium">{daysDetected} jours</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  }
+                  return null
+                })()}
 
                 {/* 4 dernières paies */}
                 {(() => {
