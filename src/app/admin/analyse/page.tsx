@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import {
   ArrowLeft, Building, DollarSign, TrendingUp, CreditCard,
   Calendar, User, Mail, Phone, MapPin, RefreshCw, Loader2,
@@ -32,28 +33,11 @@ function AnalysePageContent() {
   const searchParams = useSearchParams()
   const analysisId = searchParams.get('id')
 
-  const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(true)
   const [analysis, setAnalysis] = useState<ClientAnalysis | null>(null)
   const [selectedAccountIndex, setSelectedAccountIndex] = useState<number>(0)
   const [error, setError] = useState<string | null>(null)
   const [accounts, setAccounts] = useState<any[]>([])
-
-  // Prevent hydration mismatch by only rendering after mount
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <Loader2 size={40} className="animate-spin text-[#00874e] mx-auto mb-3" />
-          <p className="text-gray-600 text-sm font-medium">Initialisation...</p>
-        </div>
-      </div>
-    )
-  }
 
   // Filters and search
   const [searchTerm, setSearchTerm] = useState('')
@@ -755,17 +739,15 @@ function AnalysePageContent() {
   )
 }
 
-export default function AnalysePage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <Loader2 size={40} className="animate-spin text-[#00874e] mx-auto mb-3" />
-          <p className="text-gray-600 text-sm font-medium">Chargement de l'analyse...</p>
-        </div>
+// Export with SSR disabled to prevent hydration errors
+export default dynamic(() => Promise.resolve(AnalysePageContent), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <Loader2 size={40} className="animate-spin text-[#00874e] mx-auto mb-3" />
+        <p className="text-gray-600 text-sm font-medium">Chargement de l'analyse...</p>
       </div>
-    }>
-      <AnalysePageContent />
-    </Suspense>
+    </div>
   )
-}
+})
