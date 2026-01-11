@@ -9,12 +9,14 @@ export async function middleware(request: NextRequest) {
   const isApiRoute = pathname.startsWith('/api/')
 
   // CHECK AUTHENTICATION FIRST - before any rewrite
-  // Protect ALL admin pages except login page
+  // Protect ALL admin pages except login page and public report page (/analyse)
+  const isPublicReportPage = pathname.startsWith('/analyse')
   const isAdminRoute = pathname.startsWith('/admin') && pathname !== '/admin'
   const isAdminSubdomainRoute = hostname.startsWith('admin.') &&
                                  pathname !== '/' &&
                                  !pathname.startsWith('/_next') &&
-                                 !isApiRoute
+                                 !isApiRoute &&
+                                 !isPublicReportPage
 
   if (isAdminRoute || isAdminSubdomainRoute) {
     const token = request.cookies.get('admin-session')?.value
