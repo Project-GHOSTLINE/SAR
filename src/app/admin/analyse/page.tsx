@@ -3,12 +3,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import AdminNav from '@/components/admin/AdminNav'
 import {
   ArrowLeft, Building, DollarSign, TrendingUp, CreditCard,
   Calendar, User, Mail, Phone, MapPin, RefreshCw, Loader2,
   Search, Filter, ChevronLeft, ChevronRight, FileText, Download, BarChart3
 } from 'lucide-react'
-// AdminNav retiré - La page doit être publique pour les rapports
 
 interface ClientAnalysis {
   id: string
@@ -294,13 +294,9 @@ function AnalysePageContent() {
 
   return (
     <>
+      <AdminNav currentPage="/admin/analyse" />
       <div className="min-h-screen bg-gray-50 py-6 px-4">
         <div className="max-w-7xl mx-auto">
-
-          {/* VERSION BANNER - WILL REMOVE AFTER DEBUG */}
-          <div className="mb-4 p-4 bg-orange-500 text-white font-bold text-center text-lg rounded-lg">
-            🚀 VERSION: 2026-01-11-15:52 | ACCOUNTS LOADED: {accounts.length} | HYDRATION FIX ACTIVE
-          </div>
 
           {/* Header Section */}
           <div className="bg-gradient-to-br from-[#00874e] to-emerald-700 rounded-xl shadow-lg p-6 text-white mb-6">
@@ -458,7 +454,7 @@ function AnalysePageContent() {
 
           {/* Monthly Tabs - Sidebar fixe à droite */}
           {selectedAccount && selectedAccount.transactions && selectedAccount.transactions.length > 0 && (
-            <div className="fixed right-6 top-32 z-40 w-64 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 backdrop-blur-sm max-h-[calc(100vh-200px)] overflow-y-auto"
+            <div className="fixed right-6 top-32 z-40 w-64 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 backdrop-blur-sm max-h-[calc(100vh-180px)] overflow-y-auto"
               style={{ maxWidth: 'calc(100vw - 800px)' }}
             >
               <div className="mb-3">
