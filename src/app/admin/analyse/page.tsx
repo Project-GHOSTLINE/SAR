@@ -207,31 +207,32 @@ function AnalysePageContent() {
     const bankLower = bank.toLowerCase()
 
     if (bankLower.includes('desjardins')) {
-      return { gradient: 'from-green-700 to-green-900', logo: 'D', color: '#059669' }
+      return { gradientFrom: '#15803d', gradientTo: '#14532d', logo: 'D', color: '#059669' }
     }
     if (bankLower.includes('national')) {
-      return { gradient: 'from-red-700 to-red-950', logo: 'BN', color: '#DC2626' }
+      return { gradientFrom: '#b91c1c', gradientTo: '#450a0a', logo: 'BN', color: '#DC2626' }
     }
     if (bankLower.includes('royal') || bankLower.includes('rbc')) {
-      return { gradient: 'from-blue-800 to-blue-950', logo: 'RBC', color: '#1D4ED8' }
+      return { gradientFrom: '#1e40af', gradientTo: '#172554', logo: 'RBC', color: '#1D4ED8' }
     }
     if (bankLower.includes('td')) {
-      return { gradient: 'from-green-800 to-green-950', logo: 'TD', color: '#15803D' }
+      return { gradientFrom: '#166534', gradientTo: '#14532d', logo: 'TD', color: '#15803D' }
     }
     if (bankLower.includes('scotiabank')) {
-      return { gradient: 'from-red-800 to-red-950', logo: 'SB', color: '#B91C1C' }
+      return { gradientFrom: '#991b1b', gradientTo: '#450a0a', logo: 'SB', color: '#B91C1C' }
     }
     if (bankLower.includes('bmo') || bankLower.includes('montreal')) {
-      return { gradient: 'from-blue-700 to-blue-950', logo: 'BMO', color: '#2563EB' }
+      return { gradientFrom: '#1d4ed8', gradientTo: '#172554', logo: 'BMO', color: '#2563EB' }
     }
     if (bankLower.includes('cibc')) {
-      return { gradient: 'from-red-900 to-red-950', logo: 'CIBC', color: '#991B1B' }
+      return { gradientFrom: '#7f1d1d', gradientTo: '#450a0a', logo: 'CIBC', color: '#991B1B' }
     }
     if (bankLower.includes('tangerine')) {
-      return { gradient: 'from-orange-600 to-orange-900', logo: 'T', color: '#F97316' }
+      return { gradientFrom: '#ea580c', gradientTo: '#7c2d12', logo: 'T', color: '#F97316' }
     }
     return {
-      gradient: 'from-gray-800 to-gray-950',
+      gradientFrom: '#1f2937',
+      gradientTo: '#030712',
       logo: bank && bank.length >= 2 ? bank.substring(0, 2).toUpperCase() : 'BK',
       color: '#374151'
     }
@@ -634,11 +635,6 @@ function AnalysePageContent() {
                 </div>
 
                 <div className="space-y-3 px-2 relative z-10">
-                  {(() => {
-                    console.log('🏦 COMPTES:', accounts);
-                    console.log('📊 Nombre de comptes:', accounts.length);
-                    return null;
-                  })()}
                   {accounts.map((account: any, index: number) => {
                     const isSelected = selectedAccountIndex === index
                     const accountBalance = cleanValue(account.current_balance || account.balance)
@@ -665,11 +661,12 @@ function AnalysePageContent() {
                         }}
                       >
                         {/* Carte bancaire design */}
-                        <div className={`bg-gradient-to-br ${bankStyle.gradient} p-4 relative`}
+                        <div className="p-4 relative"
                           style={{
+                            background: `linear-gradient(to bottom right, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo})`,
                             backgroundImage: isSelected
-                              ? 'radial-gradient(circle at top right, rgba(255, 255, 255, 0.2) 0%, transparent 60%)'
-                              : 'radial-gradient(circle at top right, rgba(255, 255, 255, 0.1) 0%, transparent 60%)'
+                              ? `linear-gradient(to bottom right, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo}), radial-gradient(circle at top right, rgba(255, 255, 255, 0.2) 0%, transparent 60%)`
+                              : `linear-gradient(to bottom right, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo}), radial-gradient(circle at top right, rgba(255, 255, 255, 0.1) 0%, transparent 60%)`
                           }}
                         >
                           {/* Header avec logo */}
