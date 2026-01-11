@@ -296,7 +296,7 @@ function AnalysePageContent() {
     <>
       <AdminNav currentPage="/admin/analyse" />
       <div className="min-h-screen bg-gray-50 py-6 px-4">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto pr-80">
 
           {/* Header Section */}
           <div className="bg-gradient-to-br from-[#00874e] to-emerald-700 rounded-xl shadow-lg p-6 text-white mb-6">
@@ -405,58 +405,93 @@ function AnalysePageContent() {
             </div>
           )}
 
-          {/* DEBUG BANNER */}
+          {/* Sidebar fixe à droite - Glassmorphism */}
           {accounts.length > 0 && (
-            <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 mb-4">
-              <h3 className="font-bold text-yellow-900 mb-2">🐛 DEBUG INFO</h3>
-              <pre className="text-xs text-yellow-800 whitespace-pre-wrap">
-                {JSON.stringify({
-                  accountsLength: accounts.length,
-                  firstAccount: accounts[0] ? {
-                    title: accounts[0].title,
-                    type: accounts[0].type,
-                    bank: accounts[0].bank,
-                    balance: accounts[0].balance || accounts[0].current_balance,
-                    transactionsCount: accounts[0].transactions?.length
-                  } : null
-                }, null, 2)}
-              </pre>
-            </div>
-          )}
-
-          {/* Accounts Navigation */}
-          {accounts.length > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-              <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <CreditCard size={16} className="text-[#00874e]" />
-                Comptes bancaires ({accounts.length}) - DEBUG: {accounts[0]?.title || 'NO TITLE'} / {accounts[0]?.type || 'NO TYPE'}
-              </h2>
-
-              <p className="text-sm text-red-600 font-bold mb-3">
-                🐛 Accounts array length: {accounts.length} | Map about to execute | First account has {accounts[0]?.transactions?.length || 0} transactions
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {accounts.map((account: any, index: number) => (
-                  <div
-                    key={index}
-                    className="p-4 border-2 border-red-500 bg-yellow-100 rounded"
-                  >
-                    <p className="font-bold text-lg">COMPTE {index + 1}</p>
-                    <p>Title: {account.title || 'N/A'}</p>
-                    <p>Type: {account.type || 'N/A'}</p>
-                    <p>Transactions: {account.transactions?.length || 0}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Monthly Tabs - Sidebar fixe à droite */}
-          {selectedAccount && selectedAccount.transactions && selectedAccount.transactions.length > 0 && (
-            <div className="fixed right-6 top-32 z-40 w-64 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 backdrop-blur-sm max-h-[calc(100vh-180px)] overflow-y-auto"
-              style={{ maxWidth: 'calc(100vw - 800px)' }}
+            <div className="fixed right-6 top-32 z-40 w-72 max-h-[calc(100vh-160px)] overflow-y-auto rounded-2xl"
+              style={{
+                background: 'rgba(255, 255, 255, 0.85)',
+                backdropFilter: 'blur(20px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 8px 32px 0 rgba(0, 135, 78, 0.15)'
+              }}
             >
+              {/* Comptes Section */}
+              <div className="p-4">
+                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <CreditCard size={14} />
+                  Comptes
+                </h2>
+
+                <div className="space-y-2">
+                  {accounts.map((account: any, index: number) => {
+                    const isSelected = selectedAccountIndex === index
+                    const accountBalance = cleanValue(account.current_balance || account.balance)
+
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedAccountIndex(index)}
+                        className={`w-full text-left p-3 rounded-xl transition-all duration-300 ${
+                          isSelected
+                            ? 'bg-gradient-to-br from-[#00874e] to-emerald-600 text-white shadow-lg scale-105'
+                            : 'bg-white/50 hover:bg-white/70 text-gray-900 shadow-sm hover:shadow-md'
+                        }`}
+                        style={{
+                          border: isSelected ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(0, 0, 0, 0.05)'
+                        }}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-xs font-medium mb-1 ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
+                              {account.bank || account.institution || 'Banque'}
+                            </p>
+                            <p className={`text-sm font-bold truncate ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                              {account.account || account.accountNumber || `Compte ${index + 1}`}
+                            </p>
+                            {account.type && (
+                              <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                isSelected
+                                  ? 'bg-white/20 text-white'
+                                  : 'bg-blue-50 text-blue-700'
+                              }`}>
+                                {account.type}
+                              </span>
+                            )}
+                          </div>
+                          {isSelected && (
+                            <div className="w-2 h-2 bg-white rounded-full shrink-0 mt-1 animate-pulse"></div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t" style={{
+                          borderColor: isSelected ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.05)'
+                        }}>
+                          <span className={`text-xs ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
+                            Solde
+                          </span>
+                          <span className={`text-base font-bold tabular-nums ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                            {formatCurrency(accountBalance)}
+                          </span>
+                        </div>
+
+                        {account.transactions && (
+                          <p className={`text-xs mt-1 ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
+                            {account.transactions.length} transactions
+                          </p>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="mx-4 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+
+              {/* Mois Section */}
+              {selectedAccount && selectedAccount.transactions && selectedAccount.transactions.length > 0 && (
+                <div className="p-4">
               <div className="mb-3">
                 <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                   <BarChart3 size={14} className="text-blue-500" />
@@ -464,7 +499,7 @@ function AnalysePageContent() {
                 </h2>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {monthsStats.map((month) => {
                   const isSelected = selectedMonth === month.index
 
@@ -472,55 +507,74 @@ function AnalysePageContent() {
                     <button
                       key={month.index}
                       onClick={() => setSelectedMonth(month.index)}
-                      className={`w-full text-left rounded-lg border-2 transition-all p-3 ${
+                      className={`w-full text-left p-3 rounded-xl transition-all duration-300 ${
                         isSelected
-                          ? 'border-blue-500 bg-blue-50 shadow-sm'
-                          : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
+                          ? 'bg-gradient-to-br from-[#00874e] to-emerald-600 text-white shadow-lg scale-105'
+                          : 'bg-white/50 hover:bg-white/70 text-gray-900 shadow-sm hover:shadow-md'
                       }`}
+                      style={{
+                        border: isSelected ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(0, 0, 0, 0.05)'
+                      }}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-sm text-gray-900 capitalize">
+                            <h3 className={`font-semibold text-sm capitalize ${
+                              isSelected ? 'text-white' : 'text-gray-900'
+                            }`}>
                               {month.name}
                             </h3>
                             {month.index === 0 && (
-                              <span className="bg-blue-500 text-white rounded-full font-semibold px-2 py-0.5 text-xs">
+                              <span className={`rounded-full font-semibold px-2 py-0.5 text-xs ${
+                                isSelected
+                                  ? 'bg-white/20 text-white'
+                                  : 'bg-emerald-100 text-emerald-700'
+                              }`}>
                                 Actuel
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-gray-500">
+                          <p className={`text-xs ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
                             {month.count} transactions
                           </p>
                         </div>
                         {isSelected && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0"></div>
+                          <div className="w-2 h-2 bg-white rounded-full shrink-0 animate-pulse"></div>
                         )}
                       </div>
 
                       {/* Entrées et Sorties */}
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-600">
+                          <span className={`text-xs ${isSelected ? 'text-emerald-100' : 'text-gray-600'}`}>
                             Revenus
                           </span>
-                          <span className="font-semibold text-green-600 tabular-nums text-sm">
+                          <span className={`font-semibold tabular-nums text-sm ${
+                            isSelected ? 'text-white' : 'text-green-600'
+                          }`}>
                             +{formatCurrency(month.credits)}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-600">
+                          <span className={`text-xs ${isSelected ? 'text-emerald-100' : 'text-gray-600'}`}>
                             Dépenses
                           </span>
-                          <span className="font-semibold text-red-600 tabular-nums text-sm">
+                          <span className={`font-semibold tabular-nums text-sm ${
+                            isSelected ? 'text-white' : 'text-red-600'
+                          }`}>
                             -{formatCurrency(month.debits)}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-                          <span className="text-xs font-medium text-gray-700">Net</span>
+                        <div className="flex items-center justify-between pt-2 border-t" style={{
+                          borderColor: isSelected ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.05)'
+                        }}>
+                          <span className={`text-xs font-medium ${isSelected ? 'text-emerald-100' : 'text-gray-700'}`}>
+                            Net
+                          </span>
                           <span className={`text-sm font-bold tabular-nums ${
-                            month.net >= 0 ? 'text-green-600' : 'text-red-600'
+                            isSelected
+                              ? 'text-white'
+                              : month.net >= 0 ? 'text-green-600' : 'text-red-600'
                           }`}>
                             {formatCurrency(month.net)}
                           </span>
@@ -530,6 +584,8 @@ function AnalysePageContent() {
                   )
                 })}
               </div>
+            </div>
+          )}
             </div>
           )}
 
