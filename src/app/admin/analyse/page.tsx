@@ -486,7 +486,13 @@ function AnalysePageContent() {
                   // Extraire les paychecks depuis les transactions
                   const allTransactions = accounts.flatMap((acc: any) => acc.transactions || [])
                   const paychecks = allTransactions
-                    .filter((tx: any) => tx.category === 'income/paycheck' && tx.flags?.includes('is_payroll'))
+                    .filter((tx: any) => {
+                      // Vérifier si c'est un paycheck
+                      if (tx.category === 'income/paycheck') return true
+                      // Aussi vérifier si les flags contiennent is_payroll
+                      if (Array.isArray(tx.flags) && tx.flags.includes('is_payroll')) return true
+                      return false
+                    })
                     .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
                     .slice(0, 5)
                     .map((tx: any) => ({
@@ -591,12 +597,12 @@ function AnalysePageContent() {
                   {accounts.map((account: any, index: number) => {
                     const isSelected = selectedAccountIndex === index
                     const accountBalance = cleanValue(account.current_balance || account.balance)
-                    const bankName = account.bank || account.institution || 'Banque inconnue'
-                    const accountNumber = account.account || account.accountNumber || account.number || '0000000'
-                    const institutionNumber = account.institution_number || account.institutionNumber || '000'
-                    const transitNumber = account.transit_number || account.transitNumber || '00000'
-                    const accountName = account.name || account.accountName || 'Compte'
-                    const accountType = account.type || account.accountType || ''
+                    const bankName = account.bank || 'Banque inconnue'
+                    const accountNumber = account.account || '0000000'
+                    const institutionNumber = account.institution || '000'
+                    const transitNumber = account.transit || account.routing_code || '00000'
+                    const accountName = account.account_description || account.name || 'Compte'
+                    const accountType = account.type || ''
                     const bankStyle = getBankStyle(bankName)
 
                     return (
