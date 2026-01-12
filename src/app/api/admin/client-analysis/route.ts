@@ -124,12 +124,61 @@ export async function POST(request: NextRequest) {
       existingAnalysis = existing
     }
 
+    // Extraire les informations client depuis raw_data
+    const rawData = body.raw_data || {}
+    let clientEmail = null
+    let clientPhones: string[] = []
+    let clientAddress = null
+
+    // Pour Inverite: extraire depuis contacts array
+    if (rawData.contacts && Array.isArray(rawData.contacts)) {
+      const emailContact = rawData.contacts.find((c: any) => c.type === 'email')
+      if (emailContact?.contact) {
+        clientEmail = emailContact.contact
+      }
+
+      const phoneContacts = rawData.contacts.filter((c: any) => c.type === 'phone')
+      if (phoneContacts.length > 0) {
+        clientPhones = phoneContacts.map((c: any) => c.contact?.replace(/,$/, '')).filter(Boolean)
+      }
+
+      clientAddress = rawData.address || null
+    }
+
+    // Pour Flinks: extraire depuis clientInfo
+    if (rawData.clientInfo) {
+      const clientInfo = rawData.clientInfo
+      clientEmail = clientEmail || clientInfo.email || null
+      clientAddress = clientAddress || clientInfo.address || null
+
+      if (clientInfo.phone) {
+        clientPhones = [clientInfo.phone]
+      }
+    }
+
+    // Calculer les totaux depuis les comptes
+    const accounts = rawData.accounts || []
+    const totalAccounts = accounts.length
+    const totalBalance = accounts.reduce((sum: number, acc: any) => {
+      const balance = parseFloat(acc.current_balance || acc.balance || 0)
+      return sum + balance
+    }, 0)
+    const totalTransactions = accounts.reduce((sum: number, acc: any) => {
+      return sum + (acc.transactions?.length || 0)
+    }, 0)
+
     // Préparer les données
     const analysisData: any = {
       client_name: body.client_name,
+      client_email: clientEmail,
+      client_phones: clientPhones.length > 0 ? clientPhones : null,
+      client_address: clientAddress,
       source: body.source || 'inverite', // 'inverite' ou 'flinks'
       inverite_guid: body.inverite_guid || null,
       raw_data: body.raw_data,
+      total_accounts: totalAccounts,
+      total_balance: totalBalance,
+      total_transactions: totalTransactions,
       status: 'pending',
       assigned_to: body.assigned_to || null
     }
@@ -142,8 +191,14 @@ export async function POST(request: NextRequest) {
         .from('client_analyses')
         .update({
           client_name: analysisData.client_name,
+          client_email: analysisData.client_email,
+          client_phones: analysisData.client_phones,
+          client_address: analysisData.client_address,
           raw_data: analysisData.raw_data,
           source: analysisData.source,
+          total_accounts: analysisData.total_accounts,
+          total_balance: analysisData.total_balance,
+          total_transactions: analysisData.total_transactions,
           updated_at: new Date().toISOString()
         })
         .eq('id', existingAnalysis.id)
