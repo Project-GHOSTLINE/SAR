@@ -862,17 +862,22 @@ function AnalysePageContent() {
                     </div>
                   )}
 
-                  {analysis.client_phones && analysis.client_phones.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                        <Phone size={14} className="text-gray-600" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs text-gray-500 font-medium">Téléphone</p>
-                        <p className="text-sm text-gray-900 truncate">{analysis.client_phones.join(', ')}</p>
-                      </div>
+                  {/* Téléphone - Afficher "Non disponible" pour Flinks si vide */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                      <Phone size={14} className="text-gray-600" />
                     </div>
-                  )}
+                    <div className="min-w-0">
+                      <p className="text-xs text-gray-500 font-medium">Téléphone</p>
+                      {analysis.client_phones && analysis.client_phones.length > 0 ? (
+                        <p className="text-sm text-gray-900 truncate">{analysis.client_phones.join(', ')}</p>
+                      ) : (
+                        <p className="text-sm text-gray-500 italic truncate">
+                          {analysis.source === 'flinks' ? 'Non disponible (Flinks)' : 'Non disponible'}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
                   {analysis.client_address && (
                     <div className="flex items-center gap-2">
