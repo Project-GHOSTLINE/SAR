@@ -469,98 +469,200 @@ function AnalysePageContent() {
       <div className="min-h-screen bg-gray-50 py-4 sm:py-6 px-2 sm:px-4 lg:px-6">
         <div className="w-full lg:pl-[22rem]">
 
-          {/* Header Section - Mini Chèques Horizontaux */}
+          {/* Header Section - Deux colonnes: Paies + Comptes */}
           <div className="bg-gradient-to-br from-[#00874e] to-emerald-700 rounded-lg shadow-lg p-3 mb-3">
-            <div className="flex items-center gap-2 mb-2">
-              <CreditCard size={16} className="text-white shrink-0" />
-              <h3 className="text-sm font-bold text-white">Comptes bancaires</h3>
-              <span className="text-xs text-emerald-200">({accounts.length})</span>
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-            {/* Grille de comptes - Max 2 par ligne */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {accounts.map((account: any, index: number) => {
-                const isSelected = selectedAccountIndex === index
-                const accountBalance = cleanValue(account.current_balance || account.balance)
-                const bankName = account.bank || account.institution || 'Banque inconnue'
-                const accountNumber = account.account || account.accountNumber || account.number || '0000000'
-                const institutionNumber = account.institution_number || account.institutionNumber || '000'
-                const transitNumber = account.transit_number || account.transitNumber || '00000'
-                const accountName = account.name || account.accountName || 'Compte'
-                const accountType = account.type || account.accountType || ''
-                const bankStyle = getBankStyle(bankName)
+              {/* COLONNE GAUCHE - Paies */}
+              <div className="bg-white/10 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Briefcase size={14} className="text-white shrink-0" />
+                  <h3 className="text-sm font-bold text-white">Dernières paies</h3>
+                </div>
 
-                return (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedAccountIndex(index)}
-                    className={`text-left rounded-lg overflow-hidden transition-all duration-200 ${
-                      isSelected
-                        ? 'ring-2 ring-white shadow-lg'
-                        : 'hover:shadow-md border border-white/20'
-                    }`}
-                    style={{
-                      background: isSelected
-                        ? `linear-gradient(135deg, ${bankStyle.gradientFrom} 0%, ${bankStyle.gradientTo} 100%)`
-                        : 'rgba(255, 255, 255, 0.15)'
-                    }}
-                  >
-                    <div className="relative p-2.5">
-                      {/* Badge transactions */}
-                      {account.transactions && (
-                        <div className="absolute top-1.5 right-1.5">
-                          <div className={`rounded-full px-1.5 py-0.5 border ${
-                            isSelected
-                              ? 'bg-white/90 border-white text-gray-900'
-                              : 'bg-white/20 border-white/30 text-white'
-                          }`}>
-                            <p className="text-[9px] font-bold">{account.transactions.length} tx</p>
+                {(() => {
+                  const rawData = analysis.raw_data || {}
+
+                  // Extraire les paychecks depuis les transactions
+                  const allTransactions = accounts.flatMap((acc: any) => acc.transactions || [])
+                  const paychecks = allTransactions
+                    .filter((tx: any) => tx.category === 'income/paycheck' && tx.flags?.includes('is_payroll'))
+                    .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .slice(0, 5)
+                    .map((tx: any) => ({
+                      date: tx.date,
+                      employer: tx.details?.replace(/^(SalaryPayroll\s*\/|Salary\/|Payroll\/)/i, '').trim() || 'Employeur',
+                      amount: parseFloat(tx.credit || tx.amount || 0)
+                    }))
+
+                  // Calculer la fréquence
+                  let frequency = 'N/A'
+                  let nextPayDate = null
+
+                  if (paychecks.length >= 2) {
+                    const dates = paychecks.map(p => new Date(p.date).getTime())
+                    const diffs = []
+                    for (let i = 0; i < dates.length - 1; i++) {
+                      diffs.push(Math.abs(dates[i] - dates[i + 1]) / (1000 * 60 * 60 * 24))
+                    }
+                    const avgDiff = diffs.reduce((a, b) => a + b, 0) / diffs.length
+
+                    if (avgDiff >= 6 && avgDiff <= 8) {
+                      frequency = 'Hebdomadaire'
+                      const lastDate = new Date(paychecks[0].date)
+                      nextPayDate = new Date(lastDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+                    } else if (avgDiff >= 13 && avgDiff <= 15) {
+                      frequency = 'Aux 2 semaines'
+                      const lastDate = new Date(paychecks[0].date)
+                      nextPayDate = new Date(lastDate.getTime() + 14 * 24 * 60 * 60 * 1000)
+                    } else if (avgDiff >= 28 && avgDiff <= 31) {
+                      frequency = 'Mensuelle'
+                      const lastDate = new Date(paychecks[0].date)
+                      nextPayDate = new Date(lastDate.getTime() + 30 * 24 * 60 * 60 * 1000)
+                    }
+                  }
+
+                  // Employeur principal
+                  const employerCounts: Record<string, number> = {}
+                  paychecks.forEach(p => {
+                    employerCounts[p.employer] = (employerCounts[p.employer] || 0) + 1
+                  })
+                  const mainEmployer = Object.keys(employerCounts).sort((a, b) => employerCounts[b] - employerCounts[a])[0] || 'N/A'
+
+                  return (
+                    <div>
+                      {/* Employeur et fréquence */}
+                      <div className="mb-2 pb-2 border-b border-white/20">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[10px] text-white/80 font-medium uppercase">Employeur principal</span>
+                          <span className="text-xs text-white font-bold">{mainEmployer}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-white/80 font-medium uppercase">Fréquence</span>
+                          <span className="text-xs text-white font-bold">{frequency}</span>
+                        </div>
+                      </div>
+
+                      {/* Liste des 5 dernières paies */}
+                      {paychecks.length > 0 ? (
+                        <div className="space-y-1 mb-2">
+                          {paychecks.map((pay, idx) => (
+                            <div key={idx} className="bg-white/5 rounded px-2 py-1 flex items-center justify-between">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[10px] text-white/90 truncate">{pay.employer}</p>
+                                <p className="text-[9px] text-white/70">
+                                  {new Date(pay.date).toLocaleDateString('fr-CA', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                </p>
+                              </div>
+                              <p className="text-xs font-bold text-white ml-2">{formatCurrency(pay.amount)}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-white/70 italic">Aucune paie détectée</p>
+                      )}
+
+                      {/* Prochaine paie prédite */}
+                      {nextPayDate && (
+                        <div className="bg-white/20 rounded px-2 py-1.5 border border-white/30">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-white/90 font-medium uppercase">Prochaine paie estimée</span>
+                            <span className="text-xs font-bold text-white">
+                              {nextPayDate.toLocaleDateString('fr-CA', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            </span>
                           </div>
                         </div>
                       )}
-
-                      {/* Institution */}
-                      <div className="mb-1">
-                        <p className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-white'}`}>
-                          {bankName}
-                        </p>
-                      </div>
-
-                      {/* Nom du compte et type */}
-                      <div className="mb-2">
-                        <p className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-white'}`}>
-                          {accountName}
-                        </p>
-                        {accountType && (
-                          <p className={`text-[10px] ${isSelected ? 'text-white/80' : 'text-white/70'}`}>
-                            {accountType}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Numéros */}
-                      <div className="mb-2">
-                        <p className={`text-[11px] font-mono font-bold ${
-                          isSelected ? 'text-white/95' : 'text-white/90'
-                        }`}>
-                          T: {transitNumber} • I: {institutionNumber} • C: {accountNumber}
-                        </p>
-                      </div>
-
-                      {/* Solde */}
-                      <div className={`py-1.5 px-2 rounded border border-dashed ${
-                        isSelected ? 'bg-white/20 border-white/40' : 'bg-white/10 border-white/20'
-                      }`}>
-                        <p className={`text-xl font-bold tabular-nums ${
-                          isSelected ? 'text-white' : 'text-white'
-                        }`}>
-                          {formatCurrency(accountBalance)}
-                        </p>
-                      </div>
                     </div>
-                  </button>
-                )
-              })}
+                  )
+                })()}
+              </div>
+
+              {/* COLONNE DROITE - Comptes bancaires */}
+              <div className="bg-white/10 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <CreditCard size={14} className="text-white shrink-0" />
+                  <h3 className="text-sm font-bold text-white">Comptes bancaires</h3>
+                  <span className="text-xs text-emerald-200">({accounts.length})</span>
+                </div>
+
+                {/* Grille de comptes - Max 2 par ligne */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                  {accounts.map((account: any, index: number) => {
+                    const isSelected = selectedAccountIndex === index
+                    const accountBalance = cleanValue(account.current_balance || account.balance)
+                    const bankName = account.bank || account.institution || 'Banque inconnue'
+                    const accountNumber = account.account || account.accountNumber || account.number || '0000000'
+                    const institutionNumber = account.institution_number || account.institutionNumber || '000'
+                    const transitNumber = account.transit_number || account.transitNumber || '00000'
+                    const accountName = account.name || account.accountName || 'Compte'
+                    const accountType = account.type || account.accountType || ''
+                    const bankStyle = getBankStyle(bankName)
+
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedAccountIndex(index)}
+                        className={`text-left rounded-lg overflow-hidden transition-all duration-200 ${
+                          isSelected
+                            ? 'ring-2 ring-white shadow-lg'
+                            : 'hover:shadow-md border border-white/20'
+                        }`}
+                        style={{
+                          background: isSelected
+                            ? `linear-gradient(135deg, ${bankStyle.gradientFrom} 0%, ${bankStyle.gradientTo} 100%)`
+                            : 'rgba(255, 255, 255, 0.15)'
+                        }}
+                      >
+                        <div className="relative p-2">
+                          {/* Badge transactions */}
+                          {account.transactions && (
+                            <div className="absolute top-1 right-1">
+                              <div className={`rounded-full px-1.5 py-0.5 border ${
+                                isSelected
+                                  ? 'bg-white/90 border-white text-gray-900'
+                                  : 'bg-white/20 border-white/30 text-white'
+                              }`}>
+                                <p className="text-[9px] font-bold">{account.transactions.length} tx</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Institution */}
+                          <p className={`text-xs font-bold mb-1 ${isSelected ? 'text-white' : 'text-white'}`}>
+                            {bankName}
+                          </p>
+
+                          {/* Nom du compte */}
+                          <p className={`text-[11px] font-semibold mb-1 truncate ${isSelected ? 'text-white' : 'text-white'}`}>
+                            {accountName}
+                          </p>
+
+                          {/* Numéros */}
+                          <p className={`text-[9px] font-mono font-bold mb-1 ${
+                            isSelected ? 'text-white/95' : 'text-white/90'
+                          }`}>
+                            T: {transitNumber} • I: {institutionNumber}<br/>
+                            C: {accountNumber}
+                          </p>
+
+                          {/* Solde */}
+                          <div className={`py-1 px-1.5 rounded border border-dashed ${
+                            isSelected ? 'bg-white/20 border-white/40' : 'bg-white/10 border-white/20'
+                          }`}>
+                            <p className={`text-base font-bold tabular-nums ${
+                              isSelected ? 'text-white' : 'text-white'
+                            }`}>
+                              {formatCurrency(accountBalance)}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
             </div>
           </div>
 
