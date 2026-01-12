@@ -471,6 +471,7 @@ function AnalysePageContent() {
 
           {/* Header Section */}
           <div className="bg-gradient-to-br from-[#00874e] to-emerald-700 rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-white mb-4 sm:mb-6">
+            {/* Top: Client Name & Actions */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
@@ -501,7 +502,70 @@ function AnalysePageContent() {
               </div>
             </div>
 
-            {/* Stats Cards */}
+            {/* Middle: Client Personal Information */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-4">
+              {/* Institution financière */}
+              {(() => {
+                const institutionName = accounts[selectedAccountIndex]?.bank || accounts[selectedAccountIndex]?.institution || accounts[0]?.bank || accounts[0]?.institution || 'Institution inconnue'
+
+                return (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
+                    <div className="flex items-center gap-2">
+                      <Landmark size={16} className="shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-emerald-100 text-xs font-medium">Institution financière</p>
+                        <p className="text-sm font-bold truncate">{institutionName}</p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+
+              {/* Email */}
+              {analysis.client_email && (
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
+                  <div className="flex items-center gap-2">
+                    <Mail size={16} className="shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-emerald-100 text-xs font-medium">Email</p>
+                      <p className="text-sm font-semibold truncate">{analysis.client_email}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Téléphone */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
+                <div className="flex items-center gap-2">
+                  <Phone size={16} className="shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-emerald-100 text-xs font-medium">Téléphone</p>
+                    {analysis.client_phones && analysis.client_phones.length > 0 ? (
+                      <p className="text-sm font-semibold truncate">{analysis.client_phones.join(', ')}</p>
+                    ) : (
+                      <p className="text-sm text-emerald-200 italic truncate">
+                        {analysis.source === 'flinks' ? 'Non disponible (Flinks)' : 'Non disponible'}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Adresse */}
+              {analysis.client_address && (
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
+                  <div className="flex items-center gap-2">
+                    <MapPin size={16} className="shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-emerald-100 text-xs font-medium">Adresse</p>
+                      <p className="text-sm font-semibold truncate">{analysis.client_address}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom: Stats Cards */}
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
                 <div className="flex items-center gap-1 sm:gap-2 mb-1">
