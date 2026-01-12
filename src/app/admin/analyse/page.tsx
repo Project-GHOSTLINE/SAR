@@ -837,13 +837,22 @@ function AnalysePageContent() {
 
               {/* Client Info Section - Nom et infos personnelles */}
               <div className="p-4">
-                {/* Nom du client */}
-                <div className="mb-4 pb-3 border-b border-gray-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <User size={18} className="text-[#00874e] shrink-0" />
-                    <h2 className="text-lg font-bold text-gray-900 truncate">{analysis.client_name}</h2>
+                {/* Nom du client - Glassmorphism */}
+                <div className="mb-4 rounded-xl p-4 relative overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(0, 135, 78, 0.08) 0%, rgba(16, 185, 129, 0.12) 100%)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(0, 135, 78, 0.2)',
+                    boxShadow: '0 4px 12px rgba(0, 135, 78, 0.1)'
+                  }}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#00874e] to-emerald-600 rounded-full flex items-center justify-center shrink-0 shadow-lg">
+                      <User size={20} className="text-white" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900 truncate">{analysis.client_name}</h2>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 ml-[52px]">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
                       analysis.source === 'inverite' ? 'bg-blue-500 text-white' : 'bg-purple-500 text-white'
                     }`}>
@@ -892,30 +901,44 @@ function AnalysePageContent() {
                   )
                 })()}
 
-                {/* Informations de contact */}
-                <div className="space-y-2 mb-3">
+                {/* Informations de contact - Glassmorphism */}
+                <div className="space-y-3 mb-3">
                   {analysis.client_email && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                        <Mail size={13} className="text-gray-600" />
+                    <div className="rounded-xl p-3 flex items-start gap-3"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(99, 102, 241, 0.12) 100%)',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(59, 130, 246, 0.2)',
+                        boxShadow: '0 2px 8px rgba(59, 130, 246, 0.1)'
+                      }}
+                    >
+                      <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shrink-0 shadow-md">
+                        <Mail size={16} className="text-white" />
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-[10px] text-gray-500 font-medium">Email</p>
-                        <p className="text-xs text-gray-900 truncate">{analysis.client_email}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[10px] text-blue-700 font-bold uppercase tracking-wide mb-0.5">Email</p>
+                        <p className="text-sm text-gray-900 font-medium truncate">{analysis.client_email}</p>
                       </div>
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                      <Phone size={13} className="text-gray-600" />
+                  <div className="rounded-xl p-3 flex items-start gap-3"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.12) 100%)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(16, 185, 129, 0.2)',
+                      boxShadow: '0 2px 8px rgba(16, 185, 129, 0.1)'
+                    }}
+                  >
+                    <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center shrink-0 shadow-md">
+                      <Phone size={16} className="text-white" />
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] text-gray-500 font-medium">Téléphone</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] text-emerald-700 font-bold uppercase tracking-wide mb-0.5">Téléphone</p>
                       {analysis.client_phones && analysis.client_phones.length > 0 ? (
-                        <p className="text-xs text-gray-900 truncate">{analysis.client_phones.join(', ')}</p>
+                        <p className="text-sm text-gray-900 font-medium truncate">{analysis.client_phones.join(', ')}</p>
                       ) : (
-                        <p className="text-xs text-gray-500 italic truncate">
+                        <p className="text-sm text-gray-500 italic">
                           {analysis.source === 'flinks' ? 'Non disponible (Flinks)' : 'Non disponible'}
                         </p>
                       )}
@@ -923,16 +946,54 @@ function AnalysePageContent() {
                   </div>
 
                   {analysis.client_address && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                        <MapPin size={13} className="text-gray-600" />
+                    <div className="rounded-xl p-3 flex items-start gap-3"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.12) 100%)',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(245, 158, 11, 0.2)',
+                        boxShadow: '0 2px 8px rgba(245, 158, 11, 0.1)'
+                      }}
+                    >
+                      <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center shrink-0 shadow-md">
+                        <MapPin size={16} className="text-white" />
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-[10px] text-gray-500 font-medium">Adresse</p>
-                        <p className="text-xs text-gray-900 truncate">{analysis.client_address}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[10px] text-amber-700 font-bold uppercase tracking-wide mb-0.5">Adresse</p>
+                        <p className="text-sm text-gray-900 font-medium leading-snug">{analysis.client_address}</p>
                       </div>
                     </div>
                   )}
+
+                  {/* Employeur */}
+                  {(() => {
+                    const rawData = analysis.raw_data || {}
+                    const clientInfo = rawData.clientInfo || {}
+                    const paychecks = rawData.paychecks || []
+                    const employerName = clientInfo.employer || rawData.employerName || rawData.employer ||
+                      (paychecks.length > 0 ? (paychecks[0].employer || paychecks[0].employerName) : null)
+
+                    if (employerName) {
+                      return (
+                        <div className="rounded-xl p-3 flex items-start gap-3"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(124, 58, 237, 0.12) 100%)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(139, 92, 246, 0.2)',
+                            boxShadow: '0 2px 8px rgba(139, 92, 246, 0.1)'
+                          }}
+                        >
+                          <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-violet-600 rounded-lg flex items-center justify-center shrink-0 shadow-md">
+                            <Briefcase size={16} className="text-white" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[10px] text-violet-700 font-bold uppercase tracking-wide mb-0.5">Employeur</p>
+                            <p className="text-sm text-gray-900 font-medium truncate">{employerName}</p>
+                          </div>
+                        </div>
+                      )
+                    }
+                    return null
+                  })()}
                 </div>
 
                 <div className="border-t border-gray-200 my-3"></div>
@@ -974,10 +1035,6 @@ function AnalysePageContent() {
                   const clientInfo = rawData.clientInfo || {} // Flinks stocke les infos ici
                   const paychecks = rawData.paychecks || []
 
-                  // Extract employer name - Flinks clientInfo ou paychecks
-                  const employerName = clientInfo.employer || rawData.employerName || rawData.employer ||
-                    (paychecks.length > 0 ? (paychecks[0].employer || paychecks[0].employerName) : null)
-
                   // Extract toutes les infos depuis clientInfo (Flinks) ou rawData (Inverite)
                   const loginId = clientInfo.loginId || rawData.loginId || rawData.login_id
                   const requestId = clientInfo.requestId || rawData.requestId || rawData.request_id
@@ -985,7 +1042,7 @@ function AnalysePageContent() {
                   const requestStatus = clientInfo.requestStatus || rawData.requestStatus || rawData.request_status
                   const daysDetected = clientInfo.daysDetected || rawData.daysDetected || rawData.days_detected
 
-                  const hasAnyMetadata = employerName || loginId || requestId || requestDateTime || requestStatus || daysDetected
+                  const hasAnyMetadata = loginId || requestId || requestDateTime || requestStatus || daysDetected
 
                   if (hasAnyMetadata) {
                     return (
@@ -994,18 +1051,6 @@ function AnalysePageContent() {
                           <FileText size={12} />
                           Métadonnées {analysis.source === 'flinks' ? 'Flinks' : 'Inverite'}
                         </h3>
-
-                        {employerName && (
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                              <Briefcase size={14} className="text-gray-600" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs text-gray-500 font-medium">Employeur</p>
-                              <p className="text-sm text-gray-900 truncate font-medium">{employerName}</p>
-                            </div>
-                          </div>
-                        )}
 
                         {loginId && (
                           <div className="flex items-center gap-2">
