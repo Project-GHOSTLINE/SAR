@@ -1250,15 +1250,41 @@ function AnalysePageContent() {
                   const rawData = analysis.raw_data || {}
                   const clientInfo = rawData.clientInfo || {}
 
-                  // Extraire les informations d'income
-                  const employerInfo = clientInfo.employerInfo || 'N/A'
-                  const employerIncome = clientInfo.employerIncome || 'N/A'
-                  const employerIncTrend = clientInfo.employerIncTrend || clientInfo.employerTrend || 'N/A'
-                  const nonEmployerInfo = clientInfo.nonEmployerInfo || 'N/A'
-                  const nonEmployerIncome = clientInfo.nonEmployerIncome || 'N/A'
-                  const governmentIncome = clientInfo.governmentIncome || 'N/A'
-                  const totalDepositsTrend = clientInfo.totalDepositsTrend || clientInfo.depositsTrend || 'N/A'
-                  const daysDetected = clientInfo.daysDetected || rawData.daysDetected || 'N/A'
+                  // Parser le texte daysDetected qui contient toutes les infos
+                  const daysDetectedText = clientInfo.daysDetected || rawData.daysDetected || ''
+
+                  // Fonction pour extraire les valeurs entre les labels
+                  const extractValue = (text: string, label: string, nextLabel?: string) => {
+                    const labelIndex = text.indexOf(label)
+                    if (labelIndex === -1) return 'N/A'
+
+                    const startIndex = labelIndex + label.length
+                    let endIndex = text.length
+
+                    // Trouver le prochain label pour délimiter
+                    if (nextLabel) {
+                      const nextIndex = text.indexOf(nextLabel, startIndex)
+                      if (nextIndex !== -1) endIndex = nextIndex
+                    }
+
+                    return text.substring(startIndex, endIndex).trim() || 'N/A'
+                  }
+
+                  // Extraire chaque valeur
+                  const employerInfo = extractValue(daysDetectedText, 'Employer Info', 'Employer Income')
+                  const employerIncome = extractValue(daysDetectedText, 'Employer Income(Average Monthly)', 'Employer Inc. Trend')
+                  const employerIncTrend = extractValue(daysDetectedText, 'Employer Inc. Trend', 'Non-Employer Info')
+                  const nonEmployerInfo = extractValue(daysDetectedText, 'Non-Employer Info', 'Non-Employer Income')
+                  const nonEmployerIncome = extractValue(daysDetectedText, 'Non-Employer Income(Average Monthly)', 'Government Income')
+                  const governmentIncome = extractValue(daysDetectedText, 'Government Income(Average Monthly)', 'Total Deposits Trend')
+                  const totalDepositsTrend = extractValue(daysDetectedText, 'Total Deposits Trend', null)
+
+                  // Extraire le nombre de jours détectés (avant "Employer Info")
+                  let daysDetected = 'N/A'
+                  const employerInfoIndex = daysDetectedText.indexOf('Employer Info')
+                  if (employerInfoIndex > 0) {
+                    daysDetected = daysDetectedText.substring(0, employerInfoIndex).trim()
+                  }
 
                   return (
                     <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
