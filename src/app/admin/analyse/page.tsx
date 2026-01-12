@@ -477,109 +477,90 @@ function AnalysePageContent() {
               <span className="text-xs text-emerald-200">({accounts.length})</span>
             </div>
 
-            {/* Scroll horizontal des mini chèques */}
-            <div className="overflow-x-auto pb-2 -mx-1 px-1">
-              <div className="flex gap-3 min-w-max">
-                {accounts.map((account: any, index: number) => {
-                  const isSelected = selectedAccountIndex === index
-                  const accountBalance = cleanValue(account.current_balance || account.balance)
-                  const bankName = account.bank || account.institution || 'Banque'
-                  const accountNumber = account.account || account.accountNumber || '••••'
-                  const institutionNumber = account.institution_number || account.institutionNumber || '000'
-                  const transitNumber = account.transit_number || account.transitNumber || '00000'
-                  const accountName = account.name || account.accountName || 'Compte'
-                  const accountType = account.type || ''
-                  const bankStyle = getBankStyle(bankName)
+            {/* Grille de comptes - Max 2 par ligne */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {accounts.map((account: any, index: number) => {
+                const isSelected = selectedAccountIndex === index
+                const accountBalance = cleanValue(account.current_balance || account.balance)
+                const bankName = account.bank || account.institution || 'Banque inconnue'
+                const accountNumber = account.account || account.accountNumber || account.number || '0000000'
+                const institutionNumber = account.institution_number || account.institutionNumber || '000'
+                const transitNumber = account.transit_number || account.transitNumber || '00000'
+                const accountName = account.name || account.accountName || 'Compte'
+                const accountType = account.type || account.accountType || ''
+                const bankStyle = getBankStyle(bankName)
 
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedAccountIndex(index)}
-                      className={`text-left rounded-lg overflow-hidden transition-all duration-200 shrink-0 ${
-                        isSelected
-                          ? 'ring-2 ring-white shadow-lg'
-                          : 'hover:shadow-md border border-white/20'
-                      }`}
-                      style={{
-                        background: isSelected
-                          ? `linear-gradient(135deg, ${bankStyle.gradientFrom} 0%, ${bankStyle.gradientTo} 100%)`
-                          : 'rgba(255, 255, 255, 0.15)'
-                      }}
-                    >
-                      <div className="relative p-2 flex items-center gap-3">
-                        {/* Logo */}
-                        <div
-                          className="w-10 h-10 rounded flex items-center justify-center text-white text-sm font-black shrink-0"
-                          style={{
-                            background: isSelected
-                              ? 'rgba(255, 255, 255, 0.2)'
-                              : `linear-gradient(135deg, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo})`
-                          }}
-                        >
-                          {bankStyle.logo}
-                        </div>
-
-                        {/* Infos principales */}
-                        <div className="flex-1 min-w-0">
-                          {/* Première ligne: Institution + Nom compte */}
-                          <div className="flex items-baseline gap-2 mb-1">
-                            <p className={`text-xs font-bold truncate ${isSelected ? 'text-white' : 'text-white'}`}>
-                              {bankName}
-                            </p>
-                            <span className={`text-[10px] ${isSelected ? 'text-white/60' : 'text-white/50'}`}>•</span>
-                            <p className={`text-xs font-semibold truncate ${isSelected ? 'text-white' : 'text-white'}`}>
-                              {accountName}
-                            </p>
+                return (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedAccountIndex(index)}
+                    className={`text-left rounded-lg overflow-hidden transition-all duration-200 ${
+                      isSelected
+                        ? 'ring-2 ring-white shadow-lg'
+                        : 'hover:shadow-md border border-white/20'
+                    }`}
+                    style={{
+                      background: isSelected
+                        ? `linear-gradient(135deg, ${bankStyle.gradientFrom} 0%, ${bankStyle.gradientTo} 100%)`
+                        : 'rgba(255, 255, 255, 0.15)'
+                    }}
+                  >
+                    <div className="relative p-2.5">
+                      {/* Badge transactions */}
+                      {account.transactions && (
+                        <div className="absolute top-1.5 right-1.5">
+                          <div className={`rounded-full px-1.5 py-0.5 border ${
+                            isSelected
+                              ? 'bg-white/90 border-white text-gray-900'
+                              : 'bg-white/20 border-white/30 text-white'
+                          }`}>
+                            <p className="text-[9px] font-bold">{account.transactions.length} tx</p>
                           </div>
-
-                          {/* Deuxième ligne: Numéros */}
-                          <p className={`text-[10px] font-mono font-bold mb-1 ${
-                            isSelected ? 'text-white/90' : 'text-white/80'
-                          }`}>
-                            Transit: {transitNumber} • Inst: {institutionNumber} • Compte: {accountNumber}
-                          </p>
-
-                          {/* Troisième ligne: Type si présent */}
-                          {accountType && (
-                            <p className={`text-[9px] ${isSelected ? 'text-white/70' : 'text-white/60'}`}>
-                              {accountType}
-                            </p>
-                          )}
                         </div>
+                      )}
 
-                        {/* Solde à droite */}
-                        <div className={`px-3 py-1.5 rounded border border-dashed shrink-0 ${
-                          isSelected ? 'bg-white/20 border-white/40' : 'bg-white/10 border-white/20'
-                        }`}>
-                          <p className={`text-[9px] font-medium uppercase text-center mb-0.5 ${
-                            isSelected ? 'text-white/80' : 'text-white/70'
-                          }`}>
-                            Solde
-                          </p>
-                          <p className={`text-lg font-bold tabular-nums leading-none text-center ${
-                            isSelected ? 'text-white' : 'text-white'
-                          }`}>
-                            {formatCurrency(accountBalance)}
-                          </p>
-                        </div>
+                      {/* Institution */}
+                      <div className="mb-1">
+                        <p className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-white'}`}>
+                          {bankName}
+                        </p>
+                      </div>
 
-                        {/* Badge transactions */}
-                        {account.transactions && (
-                          <div className="absolute top-1 right-1">
-                            <div className={`rounded-full px-1.5 py-0.5 border ${
-                              isSelected
-                                ? 'bg-white/90 border-white text-gray-900'
-                                : 'bg-white/20 border-white/30 text-white'
-                            }`}>
-                              <p className="text-[9px] font-bold">{account.transactions.length} tx</p>
-                            </div>
-                          </div>
+                      {/* Nom du compte et type */}
+                      <div className="mb-2">
+                        <p className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-white'}`}>
+                          {accountName}
+                        </p>
+                        {accountType && (
+                          <p className={`text-[10px] ${isSelected ? 'text-white/80' : 'text-white/70'}`}>
+                            {accountType}
+                          </p>
                         )}
                       </div>
-                    </button>
-                  )
-                })}
-              </div>
+
+                      {/* Numéros */}
+                      <div className="mb-2">
+                        <p className={`text-[11px] font-mono font-bold ${
+                          isSelected ? 'text-white/95' : 'text-white/90'
+                        }`}>
+                          T: {transitNumber} • I: {institutionNumber} • C: {accountNumber}
+                        </p>
+                      </div>
+
+                      {/* Solde */}
+                      <div className={`py-1.5 px-2 rounded border border-dashed ${
+                        isSelected ? 'bg-white/20 border-white/40' : 'bg-white/10 border-white/20'
+                      }`}>
+                        <p className={`text-xl font-bold tabular-nums ${
+                          isSelected ? 'text-white' : 'text-white'
+                        }`}>
+                          {formatCurrency(accountBalance)}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
