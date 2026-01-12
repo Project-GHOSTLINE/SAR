@@ -469,129 +469,81 @@ function AnalysePageContent() {
       <div className="min-h-screen bg-gray-50 py-4 sm:py-6 px-2 sm:px-4 lg:px-6">
         <div className="w-full lg:pr-[22rem]">
 
-          {/* Header Section */}
-          <div className="bg-gradient-to-br from-[#00874e] to-emerald-700 rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-white mb-4 sm:mb-6">
-            {/* Top: Client Name & Actions */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <User size={20} className="sm:w-6 sm:h-6 shrink-0" />
-                  <h1 className="text-xl sm:text-2xl font-bold truncate">{analysis.client_name}</h1>
-                </div>
-                <p className="text-emerald-100 text-xs sm:text-sm">
-                  Analyse bancaire {analysis.source === 'inverite' ? 'Inverite' : 'Flinks'}
-                </p>
-                <p className="text-emerald-200 text-xs mt-1 hidden sm:block">
-                  Créée le {formatDateLong(analysis.created_at)}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0 ml-2">
-                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold ${
-                  analysis.source === 'inverite'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-purple-500 text-white'
+          {/* Header Section - Compact */}
+          <div className="bg-gradient-to-br from-[#00874e] to-emerald-700 rounded-lg shadow-lg p-3 text-white mb-3">
+            {/* Client Name & Actions - Single Line */}
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <User size={18} className="shrink-0" />
+                <h1 className="text-lg sm:text-xl font-bold truncate">{analysis.client_name}</h1>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${
+                  analysis.source === 'inverite' ? 'bg-blue-500 text-white' : 'bg-purple-500 text-white'
                 }`}>
                   {analysis.source === 'inverite' ? 'Inverite' : 'Flinks'}
                 </span>
-                <button
-                  onClick={() => router.push('/admin/dashboard?tab=analyses')}
-                  className="hidden sm:flex px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all"
-                >
-                  <ArrowLeft size={18} />
-                </button>
               </div>
+              <button
+                onClick={() => router.push('/admin/dashboard?tab=analyses')}
+                className="hidden sm:flex px-2 py-1 bg-white/20 hover:bg-white/30 text-white rounded transition-all shrink-0"
+              >
+                <ArrowLeft size={16} />
+              </button>
             </div>
 
-            {/* Middle: Client Personal Information */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-4">
-              {/* Institution financière */}
+            {/* Client Info - Compact Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-2">
+              {/* Institution */}
               {(() => {
                 const institutionName = accounts[selectedAccountIndex]?.bank || accounts[selectedAccountIndex]?.institution || accounts[0]?.bank || accounts[0]?.institution || 'Institution inconnue'
-
                 return (
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
-                    <div className="flex items-center gap-2">
-                      <Landmark size={16} className="shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-emerald-100 text-xs font-medium">Institution financière</p>
-                        <p className="text-sm font-bold truncate">{institutionName}</p>
-                      </div>
-                    </div>
+                  <div className="bg-white/10 rounded px-2 py-1 flex items-center gap-1.5 min-w-0">
+                    <Landmark size={12} className="shrink-0 opacity-80" />
+                    <span className="text-xs font-semibold truncate">{institutionName}</span>
                   </div>
                 )
               })()}
 
               {/* Email */}
               {analysis.client_email && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
-                  <div className="flex items-center gap-2">
-                    <Mail size={16} className="shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-emerald-100 text-xs font-medium">Email</p>
-                      <p className="text-sm font-semibold truncate">{analysis.client_email}</p>
-                    </div>
-                  </div>
+                <div className="bg-white/10 rounded px-2 py-1 flex items-center gap-1.5 min-w-0">
+                  <Mail size={12} className="shrink-0 opacity-80" />
+                  <span className="text-xs truncate">{analysis.client_email}</span>
                 </div>
               )}
 
               {/* Téléphone */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
-                <div className="flex items-center gap-2">
-                  <Phone size={16} className="shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-emerald-100 text-xs font-medium">Téléphone</p>
-                    {analysis.client_phones && analysis.client_phones.length > 0 ? (
-                      <p className="text-sm font-semibold truncate">{analysis.client_phones.join(', ')}</p>
-                    ) : (
-                      <p className="text-sm text-emerald-200 italic truncate">
-                        {analysis.source === 'flinks' ? 'Non disponible (Flinks)' : 'Non disponible'}
-                      </p>
-                    )}
-                  </div>
-                </div>
+              <div className="bg-white/10 rounded px-2 py-1 flex items-center gap-1.5 min-w-0">
+                <Phone size={12} className="shrink-0 opacity-80" />
+                <span className="text-xs truncate">
+                  {analysis.client_phones && analysis.client_phones.length > 0
+                    ? analysis.client_phones.join(', ')
+                    : <span className="italic opacity-70">{analysis.source === 'flinks' ? 'N/A' : 'N/A'}</span>
+                  }
+                </span>
               </div>
 
               {/* Adresse */}
               {analysis.client_address && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
-                  <div className="flex items-center gap-2">
-                    <MapPin size={16} className="shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-emerald-100 text-xs font-medium">Adresse</p>
-                      <p className="text-sm font-semibold truncate">{analysis.client_address}</p>
-                    </div>
-                  </div>
+                <div className="bg-white/10 rounded px-2 py-1 flex items-center gap-1.5 min-w-0">
+                  <MapPin size={12} className="shrink-0 opacity-80" />
+                  <span className="text-xs truncate">{analysis.client_address}</span>
                 </div>
               )}
             </div>
 
-            {/* Bottom: Stats Cards */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
-                <div className="flex items-center gap-1 sm:gap-2 mb-1">
-                  <Building size={14} className="sm:w-4 sm:h-4 shrink-0" />
-                  <p className="text-emerald-100 text-xs font-medium hidden sm:block">Comptes</p>
-                </div>
-                <p className="text-xl sm:text-2xl font-bold">{analysis.total_accounts}</p>
-                <p className="text-emerald-100 text-xs font-medium sm:hidden mt-1">Comptes</p>
+            {/* Stats - Compact */}
+            <div className="flex gap-3 text-center">
+              <div className="flex-1 bg-white/10 rounded px-2 py-1.5">
+                <p className="text-xs opacity-80 mb-0.5">Comptes</p>
+                <p className="text-lg font-bold">{analysis.total_accounts}</p>
               </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
-                <div className="flex items-center gap-1 sm:gap-2 mb-1">
-                  <DollarSign size={14} className="sm:w-4 sm:h-4 shrink-0" />
-                  <p className="text-emerald-100 text-xs font-medium hidden sm:block">Balance</p>
-                </div>
-                <p className="text-base sm:text-2xl font-bold truncate">{formatCurrency(analysis.total_balance)}</p>
-                <p className="text-emerald-100 text-xs font-medium sm:hidden mt-1">Balance</p>
+              <div className="flex-1 bg-white/10 rounded px-2 py-1.5">
+                <p className="text-xs opacity-80 mb-0.5">Balance</p>
+                <p className="text-base sm:text-lg font-bold">{formatCurrency(analysis.total_balance)}</p>
               </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3">
-                <div className="flex items-center gap-1 sm:gap-2 mb-1">
-                  <TrendingUp size={14} className="sm:w-4 sm:h-4 shrink-0" />
-                  <p className="text-emerald-100 text-xs font-medium hidden sm:block">Transactions</p>
-                </div>
-                <p className="text-xl sm:text-2xl font-bold">{analysis.total_transactions}</p>
-                <p className="text-emerald-100 text-xs font-medium sm:hidden mt-1">Trans.</p>
+              <div className="flex-1 bg-white/10 rounded px-2 py-1.5">
+                <p className="text-xs opacity-80 mb-0.5">Trans.</p>
+                <p className="text-lg font-bold">{analysis.total_transactions}</p>
               </div>
             </div>
           </div>
