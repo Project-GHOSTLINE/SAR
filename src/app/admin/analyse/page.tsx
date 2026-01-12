@@ -485,21 +485,70 @@ function AnalysePageContent() {
 
                   // Extraire les paychecks depuis les transactions
                   const allTransactions = accounts.flatMap((acc: any) => acc.transactions || [])
+
+                  // Fonction pour détecter si c'est un paycheck (Inverite OU Flinks)
+                  const isPaycheck = (tx: any) => {
+                    // Inverite: category ou flags
+                    if (tx.category === 'income/paycheck') return true
+                    if (Array.isArray(tx.flags) && tx.flags.includes('is_payroll')) return true
+
+                    // Flinks: analyser la description avec mots-clés
+                    if (tx.description) {
+                      const desc = tx.description.toLowerCase()
+                      const paycheckKeywords = [
+                        'paie/payroll',
+                        'payroll',
+                        'paie',
+                        'salaire',
+                        'salary',
+                        'pay/pay',
+                        'remuneration',
+                        'traitement',
+                        'paye'
+                      ]
+                      return paycheckKeywords.some(keyword => desc.includes(keyword))
+                    }
+
+                    return false
+                  }
+
                   const paychecks = allTransactions
+                    .filter(isPaycheck)
                     .filter((tx: any) => {
-                      // Vérifier si c'est un paycheck
-                      if (tx.category === 'income/paycheck') return true
-                      // Aussi vérifier si les flags contiennent is_payroll
-                      if (Array.isArray(tx.flags) && tx.flags.includes('is_payroll')) return true
-                      return false
+                      // S'assurer qu'il y a un dépôt (deposits pour Flinks, credit pour Inverite)
+                      const amount = parseFloat(tx.deposits?.replace(/[^0-9.-]/g, '') || tx.credit || tx.amount || 0)
+                      return amount > 0
                     })
                     .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
                     .slice(0, 5)
-                    .map((tx: any) => ({
-                      date: tx.date,
-                      employer: tx.details?.replace(/^(SalaryPayroll\s*\/|Salary\/|Payroll\/)/i, '').trim() || 'Employeur',
-                      amount: parseFloat(tx.credit || tx.amount || 0)
-                    }))
+                    .map((tx: any) => {
+                      // Extraire l'employeur depuis la description (Flinks) ou details (Inverite)
+                      let employer = 'Employeur'
+
+                      if (tx.description) {
+                        // Flinks: extraire depuis description (ex: "PAIE/PAYROLL PAY/PAY")
+                        employer = tx.description
+                          .replace(/paie\/payroll/gi, '')
+                          .replace(/payroll/gi, '')
+                          .replace(/paie/gi, '')
+                          .replace(/pay\/pay/gi, '')
+                          .trim()
+
+                        // Si vide après nettoyage, utiliser "Employeur principal"
+                        if (!employer || employer.length < 2) {
+                          employer = 'Employeur principal'
+                        }
+                      } else if (tx.details) {
+                        // Inverite
+                        employer = tx.details.replace(/^(SalaryPayroll\s*\/|Salary\/|Payroll\/)/i, '').trim() || 'Employeur'
+                      }
+
+                      return {
+                        date: tx.date,
+                        employer: employer,
+                        amount: parseFloat(tx.deposits?.replace(/[^0-9.-]/g, '') || tx.credit || tx.amount || 0)
+                      }
+                    })
 
                   // Calculer la fréquence
                   let frequency = 'N/A'
