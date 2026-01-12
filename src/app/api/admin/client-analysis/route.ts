@@ -167,11 +167,10 @@ export async function POST(request: NextRequest) {
       return sum + (acc.transactions?.length || 0)
     }, 0)
 
-    // Préparer les données
+    // Préparer les données (client_phones sera géré dans table séparée)
     const analysisData: any = {
       client_name: body.client_name,
       client_email: clientEmail,
-      client_phones: clientPhones.length > 0 ? clientPhones : null,
       client_address: clientAddress,
       source: body.source || 'inverite', // 'inverite' ou 'flinks'
       inverite_guid: body.inverite_guid || null,
@@ -192,7 +191,6 @@ export async function POST(request: NextRequest) {
         .update({
           client_name: analysisData.client_name,
           client_email: analysisData.client_email,
-          client_phones: analysisData.client_phones,
           client_address: analysisData.client_address,
           raw_data: analysisData.raw_data,
           source: analysisData.source,
