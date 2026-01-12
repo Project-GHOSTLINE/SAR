@@ -1277,7 +1277,7 @@ function AnalysePageContent() {
                   const nonEmployerInfo = extractValue(daysDetectedText, 'Non-Employer Info', 'Non-Employer Income')
                   const nonEmployerIncome = extractValue(daysDetectedText, 'Non-Employer Income(Average Monthly)', 'Government Income')
                   const governmentIncome = extractValue(daysDetectedText, 'Government Income(Average Monthly)', 'Total Deposits Trend')
-                  const totalDepositsTrend = extractValue(daysDetectedText, 'Total Deposits Trend', null)
+                  const totalDepositsTrend = extractValue(daysDetectedText, 'Total Deposits Trend', undefined)
 
                   // Extraire le nombre de jours détectés (avant "Employer Info")
                   let daysDetected = 'N/A'
