@@ -231,7 +231,7 @@ export default function AnalysesView() {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <RefreshCw size={48} className="animate-spin text-[#00874e] mx-auto mb-4" />
+          <RefreshCw size={48} className="animate-spin text-[#10B981] mx-auto mb-4" />
           <p className="text-gray-600 font-medium">Chargement des analyses...</p>
         </div>
       </div>
@@ -394,7 +394,7 @@ export default function AnalysesView() {
             <select
               value={selectedAnalysis.status}
               onChange={(e) => updateAnalysis(selectedAnalysis.id, { status: e.target.value })}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00874e] focus:border-transparent"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
             >
               <option value="pending">En attente</option>
               <option value="reviewed">Révisé</option>
@@ -405,7 +405,7 @@ export default function AnalysesView() {
             <select
               value={selectedAnalysis.assigned_to || ''}
               onChange={(e) => updateAnalysis(selectedAnalysis.id, { assigned_to: e.target.value || null })}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00874e] focus:border-transparent"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
             >
               <option value="">Non assigné</option>
               <option value="Sandra">Sandra</option>
@@ -477,13 +477,13 @@ export default function AnalysesView() {
               placeholder="Rechercher..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00874e] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00874e] focus:border-transparent"
+            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
           >
             <option value="all">Tous les statuts</option>
             <option value="pending">En attente</option>
@@ -494,7 +494,7 @@ export default function AnalysesView() {
           <select
             value={assignedFilter}
             onChange={(e) => setAssignedFilter(e.target.value)}
-            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00874e] focus:border-transparent"
+            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
           >
             <option value="all">Tous les assignés</option>
             <option value="Sandra">Sandra</option>
@@ -504,7 +504,7 @@ export default function AnalysesView() {
           <select
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
-            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00874e] focus:border-transparent"
+            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
           >
             <option value="all">Toutes les sources</option>
             <option value="inverite">Inverite</option>
@@ -514,7 +514,7 @@ export default function AnalysesView() {
         <button
           onClick={fetchAnalyses}
           disabled={refreshing}
-          className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#00874e] text-white rounded-lg hover:bg-[#006d3f] transition-colors disabled:opacity-50"
+          className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#059669] transition-colors disabled:opacity-50"
         >
           <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
           Rafraîchir
@@ -570,7 +570,7 @@ export default function AnalysesView() {
                   <td className="px-6 py-4">
                     <button
                       onClick={() => router.push(`/analyse?id=${analysis.id}`)}
-                      className="px-4 py-2 bg-[#00874e] text-white rounded-lg hover:bg-[#006d3f] transition-colors text-sm font-medium"
+                      className="px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#059669] transition-colors text-sm font-medium"
                     >
                       Voir le rapport
                     </button>

@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import dynamic from 'next/dynamic'
-import AdminNav from '@/components/admin/AdminNav'
 import {
   ArrowLeft, Building, DollarSign, TrendingUp, CreditCard,
   Calendar, User, Mail, Phone, MapPin, RefreshCw, Loader2,
@@ -465,7 +463,6 @@ function AnalysePageContent() {
 
   return (
     <>
-      <AdminNav currentPage="/admin/analyse" />
       <div className="min-h-screen bg-gray-50 py-4 sm:py-6 px-2 sm:px-4 lg:px-6">
         <div className="w-full lg:pl-[22rem]">
 
@@ -576,24 +573,19 @@ function AnalysePageContent() {
                       diffs.push(Math.abs(dates[i] - dates[i + 1]) / (1000 * 60 * 60 * 24))
                     }
                     const avgDiff = diffs.reduce((a, b) => a + b, 0) / diffs.length
-                    const avgDiffRounded = Math.round(avgDiff)
-
-                    // Toujours afficher la fréquence en jours
-                    frequency = `~${avgDiffRounded} jours`
 
                     if (avgDiff >= 6 && avgDiff <= 8) {
+                      frequency = 'Hebdomadaire'
                       const lastDate = new Date(paychecks[0].date)
                       nextPayDate = new Date(lastDate.getTime() + 7 * 24 * 60 * 60 * 1000)
                     } else if (avgDiff >= 13 && avgDiff <= 15) {
+                      frequency = 'Aux 2 semaines'
                       const lastDate = new Date(paychecks[0].date)
                       nextPayDate = new Date(lastDate.getTime() + 14 * 24 * 60 * 60 * 1000)
                     } else if (avgDiff >= 28 && avgDiff <= 31) {
+                      frequency = 'Mensuelle'
                       const lastDate = new Date(paychecks[0].date)
                       nextPayDate = new Date(lastDate.getTime() + 30 * 24 * 60 * 60 * 1000)
-                    } else {
-                      // Pour les autres cas, utiliser la moyenne calculée
-                      const lastDate = new Date(paychecks[0].date)
-                      nextPayDate = new Date(lastDate.getTime() + avgDiffRounded * 24 * 60 * 60 * 1000)
                     }
                   }
 
@@ -622,18 +614,14 @@ function AnalysePageContent() {
                       {paychecks.length > 0 ? (
                         <div className="space-y-1 mb-2">
                           {paychecks.map((pay, idx) => (
-                            <div key={idx} className="bg-white/5 rounded px-3 py-2 grid grid-cols-3 gap-2 items-center hover:bg-white/20 transition-colors cursor-pointer">
-                              <div className="text-left">
-                                <p className="text-sm text-white/90 break-words leading-tight font-bold">{pay.employer}</p>
-                              </div>
-                              <div className="text-center">
-                                <p className="text-base text-white font-bold whitespace-nowrap">
+                            <div key={idx} className="bg-white/5 rounded px-2 py-1 flex items-center justify-between">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-white/90 truncate font-medium">{pay.employer}</p>
+                                <p className="text-xs text-white/70">
                                   {new Date(pay.date).toLocaleDateString('fr-CA', { day: '2-digit', month: 'short', year: 'numeric' })}
                                 </p>
                               </div>
-                              <div className="text-right">
-                                <p className="text-base font-bold text-white">{formatCurrency(pay.amount)}</p>
-                              </div>
+                              <p className="text-base font-bold text-white ml-2">{formatCurrency(pay.amount)}</p>
                             </div>
                           ))}
                         </div>
@@ -643,10 +631,10 @@ function AnalysePageContent() {
 
                       {/* Prochaine paie prédite */}
                       {nextPayDate && (
-                        <div className="bg-emerald-500/30 rounded px-2 py-2 border-2 border-emerald-300/50 shadow-lg">
+                        <div className="bg-white/20 rounded px-2 py-1.5 border border-white/30">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-white font-bold uppercase">Prochaine paie estimée</span>
-                            <span className="text-lg font-bold text-white">
+                            <span className="text-xs text-white/90 font-medium uppercase">Prochaine paie estimée</span>
+                            <span className="text-base font-bold text-white">
                               {nextPayDate.toLocaleDateString('fr-CA', { day: '2-digit', month: 'short', year: 'numeric' })}
                             </span>
                           </div>
@@ -722,10 +710,10 @@ function AnalysePageContent() {
                           )}
 
                           {/* Nom du compte */}
-                          <p className={`text-sm font-bold mb-2 break-words leading-tight ${isSelected ? 'text-white' : 'text-white'}`}>
+                          <p className={`text-base font-bold mb-2 truncate ${isSelected ? 'text-white' : 'text-white'}`}>
                             {bankName}
                           </p>
-                          <p className={`text-xs font-semibold mb-2 break-words leading-tight ${isSelected ? 'text-white/90' : 'text-white/90'}`}>
+                          <p className={`text-sm font-semibold mb-2 truncate ${isSelected ? 'text-white/90' : 'text-white/90'}`}>
                             {accountName}
                           </p>
 
@@ -956,7 +944,7 @@ function AnalysePageContent() {
                     <div className="w-10 h-10 bg-gradient-to-br from-[#10B981] to-emerald-600 rounded-full flex items-center justify-center shrink-0 shadow-lg">
                       <User size={20} className="text-white" />
                     </div>
-                    <h2 className="text-lg font-bold text-gray-900 break-words leading-tight">{analysis.client_name}</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 truncate">{analysis.client_name}</h2>
                   </div>
                   <div className="flex items-center gap-2 ml-[52px]">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
@@ -1023,7 +1011,7 @@ function AnalysePageContent() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] text-blue-700 font-bold uppercase tracking-wide mb-0.5">Email</p>
-                        <p className="text-sm text-gray-900 font-medium break-all leading-tight">{analysis.client_email}</p>
+                        <p className="text-base text-gray-900 font-medium truncate">{analysis.client_email}</p>
                       </div>
                     </div>
                   )}
@@ -1042,9 +1030,9 @@ function AnalysePageContent() {
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-emerald-700 font-bold uppercase tracking-wide mb-0.5">Téléphone</p>
                       {analysis.client_phones && analysis.client_phones.length > 0 ? (
-                        <p className="text-sm text-gray-900 font-medium break-words leading-tight">{analysis.client_phones.join(', ')}</p>
+                        <p className="text-base text-gray-900 font-medium truncate">{analysis.client_phones.join(', ')}</p>
                       ) : (
-                        <p className="text-sm text-gray-500 italic">
+                        <p className="text-base text-gray-500 italic">
                           {analysis.source === 'flinks' ? 'Non disponible (Flinks)' : 'Non disponible'}
                         </p>
                       )}
@@ -1065,7 +1053,7 @@ function AnalysePageContent() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] text-amber-700 font-bold uppercase tracking-wide mb-0.5">Adresse</p>
-                        <p className="text-xs text-gray-900 font-medium break-words leading-tight">{analysis.client_address}</p>
+                        <p className="text-base text-gray-900 font-medium leading-snug">{analysis.client_address}</p>
                       </div>
                     </div>
                   )}
@@ -1093,7 +1081,7 @@ function AnalysePageContent() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="text-[10px] text-violet-700 font-bold uppercase tracking-wide mb-0.5">Employeur</p>
-                            <p className="text-sm text-gray-900 font-medium break-words leading-tight">{employerName}</p>
+                            <p className="text-base text-gray-900 font-medium truncate">{employerName}</p>
                           </div>
                         </div>
                       )
@@ -1165,7 +1153,7 @@ function AnalysePageContent() {
                             </div>
                             <div className="min-w-0">
                               <p className="text-xs text-gray-500 font-medium">Login ID</p>
-                              <p className="text-[10px] text-gray-900 font-mono break-all leading-tight">{loginId}</p>
+                              <p className="text-xs text-gray-900 font-mono truncate">{loginId}</p>
                             </div>
                           </div>
                         )}
@@ -1177,7 +1165,7 @@ function AnalysePageContent() {
                             </div>
                             <div className="min-w-0">
                               <p className="text-xs text-gray-500 font-medium">Request ID</p>
-                              <p className="text-[10px] text-gray-900 font-mono break-all leading-tight">{requestId}</p>
+                              <p className="text-xs text-gray-900 font-mono truncate">{requestId}</p>
                             </div>
                           </div>
                         )}
@@ -1239,79 +1227,6 @@ function AnalysePageContent() {
                   return null
                 })()}
 
-                {/* Section Income Analysis pour Flinks */}
-                {analysis.source === 'flinks' && (() => {
-                  const rawData = analysis.raw_data || {}
-                  const clientInfo = rawData.clientInfo || {}
-
-                  // Extraire les informations d'income
-                  const employerInfo = clientInfo.employerInfo || 'N/A'
-                  const employerIncome = clientInfo.employerIncome || 'N/A'
-                  const employerIncTrend = clientInfo.employerIncTrend || clientInfo.employerTrend || 'N/A'
-                  const nonEmployerInfo = clientInfo.nonEmployerInfo || 'N/A'
-                  const nonEmployerIncome = clientInfo.nonEmployerIncome || 'N/A'
-                  const governmentIncome = clientInfo.governmentIncome || 'N/A'
-                  const totalDepositsTrend = clientInfo.totalDepositsTrend || clientInfo.depositsTrend || 'N/A'
-                  const daysDetected = clientInfo.daysDetected || rawData.daysDetected || 'N/A'
-
-                  return (
-                    <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
-                      <h3 className="text-xs font-semibold text-purple-700 uppercase tracking-wide flex items-center gap-2 mb-3">
-                        <TrendingUp size={12} />
-                        Analyse de revenus (Flinks)
-                      </h3>
-
-                      {/* Jours détectés */}
-                      <div className="bg-purple-50 rounded-lg p-2">
-                        <p className="text-[10px] text-purple-600 font-bold uppercase mb-0.5">Jours détectés</p>
-                        <p className="text-sm text-gray-900 font-semibold">{daysDetected}</p>
-                      </div>
-
-                      {/* Employer Info */}
-                      <div className="bg-blue-50 rounded-lg p-2">
-                        <p className="text-[10px] text-blue-600 font-bold uppercase mb-0.5">Employer Info</p>
-                        <p className="text-sm text-gray-900 font-medium">{employerInfo}</p>
-                      </div>
-
-                      {/* Employer Income */}
-                      <div className="bg-green-50 rounded-lg p-2">
-                        <p className="text-[10px] text-green-600 font-bold uppercase mb-0.5">Employer Income (Average Monthly)</p>
-                        <p className="text-sm text-gray-900 font-semibold">{employerIncome}</p>
-                      </div>
-
-                      {/* Employer Inc. Trend */}
-                      <div className="bg-emerald-50 rounded-lg p-2">
-                        <p className="text-[10px] text-emerald-600 font-bold uppercase mb-0.5">Employer Inc. Trend</p>
-                        <p className="text-sm text-gray-900 font-medium">{employerIncTrend}</p>
-                      </div>
-
-                      {/* Non-Employer Info */}
-                      <div className="bg-amber-50 rounded-lg p-2">
-                        <p className="text-[10px] text-amber-600 font-bold uppercase mb-0.5">Non-Employer Info</p>
-                        <p className="text-sm text-gray-900 font-medium">{nonEmployerInfo}</p>
-                      </div>
-
-                      {/* Non-Employer Income */}
-                      <div className="bg-orange-50 rounded-lg p-2">
-                        <p className="text-[10px] text-orange-600 font-bold uppercase mb-0.5">Non-Employer Income (Average Monthly)</p>
-                        <p className="text-sm text-gray-900 font-semibold">{nonEmployerIncome}</p>
-                      </div>
-
-                      {/* Government Income */}
-                      <div className="bg-red-50 rounded-lg p-2">
-                        <p className="text-[10px] text-red-600 font-bold uppercase mb-0.5">Government Income (Average Monthly)</p>
-                        <p className="text-sm text-gray-900 font-semibold">{governmentIncome}</p>
-                      </div>
-
-                      {/* Total Deposits Trend */}
-                      <div className="bg-indigo-50 rounded-lg p-2">
-                        <p className="text-[10px] text-indigo-600 font-bold uppercase mb-0.5">Total Deposits Trend</p>
-                        <p className="text-sm text-gray-900 font-medium">{totalDepositsTrend}</p>
-                      </div>
-                    </div>
-                  )
-                })()}
-
                 {/* 4 dernières paies */}
                 {(() => {
                   const paychecks = analysis.raw_data?.paychecks || []
@@ -1346,7 +1261,7 @@ function AnalysePageContent() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                       <Briefcase size={10} className="text-gray-500 shrink-0" />
-                                      <p className="text-xs text-gray-700 break-words leading-tight font-medium">{employer}</p>
+                                      <p className="text-sm text-gray-700 truncate font-medium">{employer}</p>
                                     </div>
                                   </div>
                                   <div className="text-right shrink-0">
@@ -1419,31 +1334,33 @@ function AnalysePageContent() {
                 <table className="w-full min-w-[800px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className={`${analysis.source === 'flinks' ? 'px-2 py-2 text-left w-[15%]' : 'px-3 py-3 text-center'} text-sm font-semibold text-gray-700 uppercase tracking-wide`}>
+                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 uppercase tracking-wide">
                         Date
                       </th>
-                      <th className={`${analysis.source === 'flinks' ? 'px-2 py-2 text-left w-[40%]' : 'px-3 py-3 text-center'} text-sm font-semibold text-gray-700 uppercase tracking-wide`}>
+                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 uppercase tracking-wide">
                         Description
                       </th>
-                      <th className={`${analysis.source === 'flinks' ? 'px-2 py-2 text-left w-[15%]' : 'px-3 py-3 text-center w-32'} text-sm font-semibold text-gray-700 uppercase tracking-wide`}>
+                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                        <div className="flex items-center gap-1">
+                          <Tag size={12} />
+                          Catégorie
+                        </div>
+                      </th>
+                      <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                        <div className="flex items-center justify-center gap-1">
+                          <Flag size={12} />
+                          Flags
+                        </div>
+                      </th>
+                      <th className="px-4 py-2 text-right text-sm font-semibold text-gray-700 uppercase tracking-wide">
                         Crédit
                       </th>
-                      <th className={`${analysis.source === 'flinks' ? 'px-2 py-2 text-left w-[15%]' : 'px-3 py-3 text-center w-32'} text-sm font-semibold text-gray-700 uppercase tracking-wide`}>
+                      <th className="px-4 py-2 text-right text-sm font-semibold text-gray-700 uppercase tracking-wide">
                         Débit
                       </th>
-                      <th className={`${analysis.source === 'flinks' ? 'px-2 py-2 text-left w-[15%]' : 'px-3 py-3 text-center w-32'} text-sm font-semibold text-gray-700 uppercase tracking-wide`}>
+                      <th className="px-4 py-2 text-right text-sm font-semibold text-gray-700 uppercase tracking-wide">
                         Solde
                       </th>
-                      {analysis.source === 'inverite' && (
-                        <>
-                          <th className="px-3 py-3 text-center text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                            <div className="flex items-center justify-center gap-1.5">
-                              <Tag size={14} />
-                              Catégorie
-                            </div>
-                          </th>
-                        </>
-                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -1454,171 +1371,20 @@ function AnalysePageContent() {
                       const category = tx.category || null
                       const flags = tx.flags || []
 
-                      // Get transaction type from description (for Flinks)
-                      const getTransactionType = (description: string) => {
-                        if (!description) return { emoji: '📄', color: 'text-gray-700', bg: 'bg-gray-50' }
-
-                        const desc = description.toLowerCase()
-
-                        // Income patterns
-                        if (desc.includes('deposit') || desc.includes('dépôt') || desc.includes('paie') ||
-                            desc.includes('salary') || desc.includes('salaire') || desc.includes('pay') ||
-                            desc.includes('virement reçu') || desc.includes('interac reçu')) {
-                          return { emoji: '💰', color: 'text-emerald-700', bg: 'bg-emerald-50' }
-                        }
-
-                        // Transfer patterns
-                        if (desc.includes('transfer') || desc.includes('virement') || desc.includes('e-transfer') ||
-                            desc.includes('interac') || desc.includes('etransfer')) {
-                          return { emoji: '🔄', color: 'text-blue-700', bg: 'bg-blue-50' }
-                        }
-
-                        // Bill payments
-                        if (desc.includes('bill') || desc.includes('facture') || desc.includes('hydro') ||
-                            desc.includes('electric') || desc.includes('électricité') || desc.includes('utilities')) {
-                          return { emoji: '💡', color: 'text-red-700', bg: 'bg-red-50' }
-                        }
-
-                        // Rent/Mortgage
-                        if (desc.includes('rent') || desc.includes('loyer') || desc.includes('mortgage') ||
-                            desc.includes('hypothèque')) {
-                          return { emoji: '🏠', color: 'text-indigo-700', bg: 'bg-indigo-50' }
-                        }
-
-                        // Shopping
-                        if (desc.includes('amazon') || desc.includes('walmart') || desc.includes('costco') ||
-                            desc.includes('store') || desc.includes('magasin')) {
-                          return { emoji: '🛍️', color: 'text-pink-700', bg: 'bg-pink-50' }
-                        }
-
-                        // Groceries
-                        if (desc.includes('grocery') || desc.includes('épicerie') || desc.includes('supermarket') ||
-                            desc.includes('iga') || desc.includes('metro') || desc.includes('provigo')) {
-                          return { emoji: '🛒', color: 'text-orange-700', bg: 'bg-orange-50' }
-                        }
-
-                        // Restaurants
-                        if (desc.includes('restaurant') || desc.includes('cafe') || desc.includes('coffee') ||
-                            desc.includes('tim hortons') || desc.includes('starbucks') || desc.includes('mcdonald')) {
-                          return { emoji: '🍔', color: 'text-amber-700', bg: 'bg-amber-50' }
-                        }
-
-                        // Gas/Transport
-                        if (desc.includes('gas') || desc.includes('essence') || desc.includes('petro') ||
-                            desc.includes('shell') || desc.includes('esso') || desc.includes('transport')) {
-                          return { emoji: '⛽', color: 'text-cyan-700', bg: 'bg-cyan-50' }
-                        }
-
-                        // ATM/Cash
-                        if (desc.includes('atm') || desc.includes('retrait') || desc.includes('withdrawal') ||
-                            desc.includes('cash')) {
-                          return { emoji: '🏧', color: 'text-gray-700', bg: 'bg-gray-50' }
-                        }
-
-                        // Fees
-                        if (desc.includes('fee') || desc.includes('frais') || desc.includes('charge')) {
-                          return { emoji: '💳', color: 'text-red-700', bg: 'bg-red-50' }
-                        }
-
-                        // Telecom
-                        if (desc.includes('bell') || desc.includes('rogers') || desc.includes('telus') ||
-                            desc.includes('videotron') || desc.includes('mobile') || desc.includes('internet')) {
-                          return { emoji: '📱', color: 'text-fuchsia-700', bg: 'bg-fuchsia-50' }
-                        }
-
-                        // Insurance
-                        if (desc.includes('insurance') || desc.includes('assurance')) {
-                          return { emoji: '🛡️', color: 'text-violet-700', bg: 'bg-violet-50' }
-                        }
-
-                        // Default
-                        return { emoji: '📄', color: 'text-gray-700', bg: 'bg-gray-50' }
-                      }
-
-                      // Get category emoji
-                      const getCategoryEmoji = (cat: string) => {
-                        const emojis: any = {
-                          'groceries': '🛒',
-                          'food': '🍔',
-                          'restaurant': '🍽️',
-                          'transport': '🚗',
-                          'gas': '⛽',
-                          'entertainment': '🎬',
-                          'bills': '💡',
-                          'utilities': '💡',
-                          'rent': '🏠',
-                          'mortgage': '🏠',
-                          'income': '💰',
-                          'salary': '💵',
-                          'shopping': '🛍️',
-                          'health': '⚕️',
-                          'pharmacy': '💊',
-                          'transfer': '🔄',
-                          'investment': '📈',
-                          'savings': '🏦',
-                          'insurance': '🛡️',
-                          'education': '📚',
-                          'telecom': '📱',
-                          'subscription': '📺',
-                          'clothing': '👕',
-                          'beauty': '💄',
-                          'pet': '🐾',
-                          'charity': '❤️',
-                          'travel': '✈️',
-                          'hotel': '🏨',
-                          'cash': '💵',
-                          'atm': '🏧',
-                          'fees': '💳',
-                          'tax': '📊',
-                          'loan': '🏦',
-                          'other': '📄'
-                        }
-                        return emojis[cat?.toLowerCase()] || '📄'
-                      }
-
                       // Get category color
                       const getCategoryColor = (cat: string) => {
-                        // Highlight loan in yellow
-                        if (cat?.toLowerCase().includes('loan')) {
-                          return 'bg-yellow-300 text-yellow-900 border-2 border-yellow-500 shadow-lg'
-                        }
-
                         const colors: any = {
-                          'groceries': 'bg-orange-100 text-orange-800 border border-orange-200',
-                          'food': 'bg-orange-100 text-orange-800 border border-orange-200',
-                          'restaurant': 'bg-amber-100 text-amber-800 border border-amber-200',
-                          'transport': 'bg-blue-100 text-blue-800 border border-blue-200',
-                          'gas': 'bg-cyan-100 text-cyan-800 border border-cyan-200',
-                          'entertainment': 'bg-purple-100 text-purple-800 border border-purple-200',
-                          'bills': 'bg-red-100 text-red-800 border border-red-200',
-                          'utilities': 'bg-red-100 text-red-800 border border-red-200',
-                          'rent': 'bg-indigo-100 text-indigo-800 border border-indigo-200',
-                          'mortgage': 'bg-indigo-100 text-indigo-800 border border-indigo-200',
-                          'income': 'bg-green-100 text-green-800 border border-green-200',
-                          'salary': 'bg-emerald-100 text-emerald-800 border border-emerald-200',
-                          'shopping': 'bg-pink-100 text-pink-800 border border-pink-200',
-                          'health': 'bg-teal-100 text-teal-800 border border-teal-200',
-                          'pharmacy': 'bg-teal-100 text-teal-800 border border-teal-200',
-                          'transfer': 'bg-gray-100 text-gray-800 border border-gray-200',
-                          'investment': 'bg-lime-100 text-lime-800 border border-lime-200',
-                          'savings': 'bg-green-100 text-green-800 border border-green-200',
-                          'insurance': 'bg-violet-100 text-violet-800 border border-violet-200',
-                          'education': 'bg-sky-100 text-sky-800 border border-sky-200',
-                          'telecom': 'bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-200',
-                          'subscription': 'bg-rose-100 text-rose-800 border border-rose-200',
-                          'clothing': 'bg-pink-100 text-pink-800 border border-pink-200',
-                          'beauty': 'bg-rose-100 text-rose-800 border border-rose-200',
-                          'pet': 'bg-amber-100 text-amber-800 border border-amber-200',
-                          'charity': 'bg-red-100 text-red-800 border border-red-200',
-                          'travel': 'bg-blue-100 text-blue-800 border border-blue-200',
-                          'hotel': 'bg-indigo-100 text-indigo-800 border border-indigo-200',
-                          'cash': 'bg-green-100 text-green-800 border border-green-200',
-                          'atm': 'bg-gray-100 text-gray-800 border border-gray-200',
-                          'fees': 'bg-red-100 text-red-800 border border-red-200',
-                          'tax': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-                          'other': 'bg-gray-100 text-gray-800 border border-gray-200'
+                          'groceries': 'bg-orange-100 text-orange-700',
+                          'transport': 'bg-blue-100 text-blue-700',
+                          'entertainment': 'bg-purple-100 text-purple-700',
+                          'bills': 'bg-red-100 text-red-700',
+                          'income': 'bg-green-100 text-green-700',
+                          'shopping': 'bg-pink-100 text-pink-700',
+                          'health': 'bg-teal-100 text-teal-700',
+                          'transfer': 'bg-gray-100 text-gray-700',
+                          'other': 'bg-gray-100 text-gray-700'
                         }
-                        return colors[cat?.toLowerCase()] || 'bg-gray-100 text-gray-800 border border-gray-200'
+                        return colors[cat?.toLowerCase()] || 'bg-gray-100 text-gray-700'
                       }
 
                       // Get flag color
@@ -1633,74 +1399,71 @@ function AnalysePageContent() {
                         return colors[flag?.toLowerCase()] || 'bg-gray-100 text-gray-600 border-gray-300'
                       }
 
-                      // Check if category contains loan
-                      const isLoan = category?.toLowerCase().includes('loan')
-
                       return (
-                        <tr key={txIndex} className={`hover:bg-emerald-50 transition-colors cursor-pointer ${isLoan ? 'bg-yellow-100' : ''}`}>
-                          <td className={`${analysis.source === 'flinks' ? 'px-2 py-2' : 'px-3 py-3'} whitespace-nowrap`}>
-                            {analysis.source === 'flinks' ? (
-                              <span className="text-sm text-gray-700 font-medium">
+                        <tr key={txIndex} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-4 py-2.5 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5">
+                              <Calendar size={13} className="text-gray-400" />
+                              <span className="text-base text-gray-700 font-medium">
                                 {tx.date ? formatDateShort(tx.date) : 'N/A'}
                               </span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2.5 max-w-xs">
+                            <p className="text-base text-gray-900 leading-tight truncate" title={tx.description || tx.details}>
+                              {tx.description || tx.details || 'Transaction'}
+                            </p>
+                          </td>
+                          <td className="px-4 py-2.5 whitespace-nowrap">
+                            {category ? (
+                              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm font-medium ${getCategoryColor(category)}`}>
+                                <Tag size={10} />
+                                {category}
+                              </span>
                             ) : (
-                              <div className="flex items-center gap-1.5">
-                                <Calendar size={13} className="text-gray-400" />
-                                <span className="text-base text-gray-700 font-medium">
-                                  {tx.date ? formatDateShort(tx.date) : 'N/A'}
-                                </span>
-                              </div>
+                              <span className="text-sm text-gray-400">-</span>
                             )}
                           </td>
-                          <td className={`${analysis.source === 'flinks' ? 'px-2 py-2' : 'px-3 py-3'}`}>
-                            {analysis.source === 'flinks' ? (
-                              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg ${getTransactionType(tx.description || tx.details).bg}`}>
-                                <span className="text-lg">{getTransactionType(tx.description || tx.details).emoji}</span>
-                                <p className={`text-sm font-medium leading-tight break-words ${getTransactionType(tx.description || tx.details).color}`} title={tx.description || tx.details}>
-                                  {tx.description || tx.details || 'Transaction'}
-                                </p>
-                              </div>
-                            ) : (
-                              <p className="text-sm text-gray-900 leading-tight break-words max-w-xs" title={tx.description || tx.details}>
-                                {tx.description || tx.details || 'Transaction'}
-                              </p>
-                            )}
+                          <td className="px-4 py-2.5">
+                            <div className="flex items-center justify-center gap-1 flex-wrap">
+                              {flags && flags.length > 0 ? (
+                                flags.map((flag: string, flagIndex: number) => (
+                                  <span
+                                    key={flagIndex}
+                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-sm font-medium ${getFlagColor(flag)}`}
+                                  >
+                                    <Flag size={10} />
+                                    {flag}
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-sm text-gray-400">-</span>
+                              )}
+                            </div>
                           </td>
-                          <td className={`${analysis.source === 'flinks' ? 'px-2 py-2' : 'px-3 py-3 text-right'} whitespace-nowrap`}>
+                          <td className="px-4 py-2.5 whitespace-nowrap text-right">
                             {credit > 0 ? (
-                              <span className="text-base font-bold tabular-nums text-green-600">
+                              <span className="text-lg font-semibold tabular-nums text-green-600">
                                 +{formatCurrency(credit)}
                               </span>
                             ) : (
                               <span className="text-sm text-gray-400">-</span>
                             )}
                           </td>
-                          <td className={`${analysis.source === 'flinks' ? 'px-2 py-2' : 'px-3 py-3 text-right'} whitespace-nowrap`}>
+                          <td className="px-4 py-2.5 whitespace-nowrap text-right">
                             {debit > 0 ? (
-                              <span className="text-base font-bold tabular-nums text-red-600">
+                              <span className="text-lg font-semibold tabular-nums text-red-600">
                                 -{formatCurrency(debit)}
                               </span>
                             ) : (
                               <span className="text-sm text-gray-400">-</span>
                             )}
                           </td>
-                          <td className={`${analysis.source === 'flinks' ? 'px-2 py-2' : 'px-3 py-3 text-right'} whitespace-nowrap`}>
-                            <span className="text-base text-gray-900 tabular-nums font-semibold">
+                          <td className="px-4 py-2.5 whitespace-nowrap text-right">
+                            <span className="text-lg text-gray-900 tabular-nums font-medium">
                               {balance !== 0 ? formatCurrency(balance) : '-'}
                             </span>
                           </td>
-                          {analysis.source === 'inverite' && (
-                            <td className="px-3 py-2.5 whitespace-nowrap">
-                              {category ? (
-                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium ${getCategoryColor(category)}`}>
-                                  <span className="text-base">{getCategoryEmoji(category)}</span>
-                                  {category}
-                                </span>
-                              ) : (
-                                <span className="text-sm text-gray-400">-</span>
-                              )}
-                            </td>
-                          )}
                         </tr>
                       )
                     })}
@@ -1873,15 +1636,4 @@ function AnalysePageContent() {
   )
 }
 
-// Export with SSR disabled to prevent hydration errors
-export default dynamic(() => Promise.resolve(AnalysePageContent), {
-  ssr: false,
-  loading: () => (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <Loader2 size={40} className="animate-spin text-[#10B981] mx-auto mb-3" />
-        <p className="text-gray-600 text-sm font-medium">Chargement de l'analyse...</p>
-      </div>
-    </div>
-  )
-})
+export default AnalysePageContent

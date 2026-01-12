@@ -223,7 +223,7 @@ export default function SupportView() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <Loader2 size={48} className="animate-spin text-[#00874e] mx-auto mb-4" />
+          <Loader2 size={48} className="animate-spin text-[#10B981] mx-auto mb-4" />
           <p className="text-gray-600 font-medium">Chargement des tickets...</p>
         </div>
       </div>
@@ -256,7 +256,7 @@ export default function SupportView() {
 
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-6 py-2 bg-gradient-to-r from-[#00874e] to-emerald-600 text-white rounded-xl hover:from-[#006d3f] hover:to-emerald-700 transition-all font-medium shadow-lg hover:shadow-xl flex items-center gap-2"
+              className="px-6 py-2 bg-gradient-to-r from-[#10B981] to-emerald-600 text-white rounded-xl hover:from-[#059669] hover:to-emerald-700 transition-all font-medium shadow-lg hover:shadow-xl flex items-center gap-2"
             >
               <Plus size={20} />
               Nouveau Ticket
@@ -311,7 +311,7 @@ export default function SupportView() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher par titre, numéro, employé..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00874e] focus:border-[#00874e]"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-[#10B981]"
             />
           </div>
         </div>
@@ -319,7 +319,7 @@ export default function SupportView() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00874e] focus:border-[#00874e]"
+          className="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-[#10B981]"
         >
           <option value="all">Tous les statuts</option>
           {TICKET_STATUSES.map((status) => (
@@ -332,7 +332,7 @@ export default function SupportView() {
         <select
           value={assignedFilter}
           onChange={(e) => setAssignedFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00874e] focus:border-[#00874e]"
+          className="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-[#10B981]"
         >
           <option value="all">Tous les assignés</option>
           <option value="unassigned">Non assigné</option>
@@ -360,7 +360,7 @@ export default function SupportView() {
                 onClick={() => fetchTicketDetails(ticket.id)}
                 className={`bg-white rounded-xl border-2 p-4 cursor-pointer transition-all hover:shadow-md ${
                   selectedTicket?.id === ticket.id
-                    ? 'border-[#00874e] shadow-md'
+                    ? 'border-[#10B981] shadow-md'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
@@ -391,7 +391,7 @@ export default function SupportView() {
 
                 {ticket.assigned_to && (
                   <div className="mt-2 flex items-center gap-2">
-                    <div className="w-6 h-6 bg-[#00874e] rounded-full flex items-center justify-center text-white text-xs font-bold">
+                    <div className="w-6 h-6 bg-[#10B981] rounded-full flex items-center justify-center text-white text-xs font-bold">
                       {getInitials(ticket.assigned_to)}
                     </div>
                     <span className="text-xs text-gray-600">{ticket.assigned_to}</span>
@@ -452,7 +452,7 @@ export default function SupportView() {
                   <select
                     value={selectedTicket.assigned_to || ''}
                     onChange={(e) => updateTicket(selectedTicket.id, { assigned_to: e.target.value || null })}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00874e] text-sm"
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981] text-sm"
                   >
                     <option value="">Non assigné</option>
                     {SUPPORT_ASSIGNEES.map((assignee) => (
@@ -560,12 +560,12 @@ export default function SupportView() {
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Écris une réponse..."
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00874e] resize-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981] resize-none"
                       />
                       <button
                         onClick={handleSendMessage}
                         disabled={!newMessage.trim() || sendingMessage}
-                        className="mt-2 px-6 py-2 bg-[#00874e] text-white rounded-lg hover:bg-[#006d3f] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="mt-2 px-6 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#059669] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         {sendingMessage ? (
                           <>

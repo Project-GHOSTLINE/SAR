@@ -506,7 +506,7 @@ function AdminDashboardContent() {
             {/* Welcome Section */}
             <div className="mb-5">
               <h1 className="text-3xl font-bold text-[#003d2c] flex items-center gap-3">
-                <div className="w-1 h-8 bg-gradient-to-b from-[#00874e] to-emerald-600 rounded-full"></div>
+                <div className="w-1 h-8 bg-gradient-to-b from-[#10B981] to-emerald-600 rounded-full"></div>
                 Tableau de bord
               </h1>
               <p className="text-gray-600 mt-2 ml-7 font-medium">Vue d'ensemble de votre activite</p>
@@ -519,7 +519,7 @@ function AdminDashboardContent() {
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-gray-600 text-base font-medium">Solde VoPay</span>
                   <div className="w-12 h-12 bg-gradient-to-br from-[#e8f5e9] to-emerald-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <DollarSign size={24} className="text-[#00874e]" />
+                    <DollarSign size={24} className="text-[#10B981]" />
                   </div>
                 </div>
                 <p className="text-4xl font-bold text-gray-900 mb-2">
@@ -548,8 +548,8 @@ function AdminDashboardContent() {
                   <div className="flex items-center gap-3">
                     {!vopayLoading && vopayData.todayInterac > 0 ? (
                       <>
-                        <TrendingUp size={18} className="text-[#00874e]" />
-                        <span className="text-sm font-semibold text-[#00874e]">
+                        <TrendingUp size={18} className="text-[#10B981]" />
+                        <span className="text-sm font-semibold text-[#10B981]">
                           Cliquer pour voir par type
                         </span>
                       </>
@@ -662,7 +662,7 @@ function AdminDashboardContent() {
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-gray-600 text-base font-medium">Taux de Succès 7j</span>
                   <div className="w-12 h-12 bg-gradient-to-br from-[#e8f5e9] to-emerald-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <CheckCircle size={24} className="text-[#00874e]" />
+                    <CheckCircle size={24} className="text-[#10B981]" />
                   </div>
                 </div>
                 <p className="text-4xl font-bold text-gray-900 mb-2">
@@ -670,7 +670,7 @@ function AdminDashboardContent() {
                 </p>
                 <div className="flex items-center gap-3">
                   {webhookStats && webhookStats.weekSuccessRate >= 90 ? (
-                    <span className="text-sm font-semibold text-[#00874e]">Excellent</span>
+                    <span className="text-sm font-semibold text-[#10B981]">Excellent</span>
                   ) : webhookStats && webhookStats.weekSuccessRate >= 75 ? (
                     <span className="text-sm font-semibold text-blue-600">Bon</span>
                   ) : (
@@ -797,12 +797,12 @@ function AdminDashboardContent() {
               <div className="col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex items-center justify-between">
                   <h2 className="font-bold text-gray-900 flex items-center gap-3">
-                    <Activity size={22} className="text-[#00874e]" />
+                    <Activity size={22} className="text-[#10B981]" />
                     Transactions recentes
                   </h2>
                   <button
                     onClick={fetchWebhookStats}
-                    className="text-gray-400 hover:text-[#00874e] transition-all hover:scale-110"
+                    className="text-gray-400 hover:text-[#10B981] transition-all hover:scale-110"
                   >
                     <RefreshCw size={20} className={webhookStatsLoading ? 'animate-spin' : ''} />
                   </button>
@@ -816,7 +816,7 @@ function AdminDashboardContent() {
                         onClick={() => setTxView('all')}
                         className={`px-5 py-3 rounded-xl text-base font-medium transition-all ${
                           txView === 'all'
-                            ? 'bg-[#00874e] text-white shadow-md'
+                            ? 'bg-[#10B981] text-white shadow-md'
                             : 'bg-white text-gray-700 hover:bg-gray-100'
                         }`}
                       >
@@ -849,7 +849,7 @@ function AdminDashboardContent() {
                 <div className="divide-y divide-gray-100">
                   {webhookStatsLoading ? (
                     <div className="px-6 py-8 text-center">
-                      <Loader2 size={28} className="animate-spin text-[#00874e] mx-auto" />
+                      <Loader2 size={28} className="animate-spin text-[#10B981] mx-auto" />
                     </div>
                   ) : webhookStats?.recentTransactions && webhookStats.recentTransactions.length > 0 ? (
                     (() => {
@@ -1084,7 +1084,7 @@ function AdminDashboardContent() {
                                   {/* Données brutes webhook */}
                                   {rawData && Object.keys(rawData).length > 0 && (
                                     <details className="bg-gray-50 rounded-xl p-3 border border-gray-200">
-                                      <summary className="text-sm font-bold text-gray-600 cursor-pointer hover:text-[#00874e] transition-colors">
+                                      <summary className="text-sm font-bold text-gray-600 cursor-pointer hover:text-[#10B981] transition-colors">
                                         Voir données brutes webhook
                                       </summary>
                                       <pre className="mt-2 text-sm text-gray-700 whitespace-pre-wrap break-all font-mono bg-white p-2 rounded border border-gray-200 max-h-40 overflow-auto">
@@ -1116,19 +1116,19 @@ function AdminDashboardContent() {
                 {/* Quick Stats */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
                   <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-3">
-                    <div className="w-2 h-2 bg-[#00874e] rounded-full"></div>
+                    <div className="w-2 h-2 bg-[#10B981] rounded-full"></div>
                     Statistiques rapides
                   </h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-500 text-base">Taux de succes 7j</span>
-                      <span className="font-semibold text-[#00874e]">
+                      <span className="font-semibold text-[#10B981]">
                         {webhookStatsLoading ? '...' : `${webhookStats?.weekSuccessRate || 0}%`}
                       </span>
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-[#00874e] to-emerald-600 rounded-full transition-all duration-500"
+                        className="h-full bg-gradient-to-r from-[#10B981] to-emerald-600 rounded-full transition-all duration-500"
                         style={{ width: `${webhookStats?.weekSuccessRate || 0}%` }}
                       />
                     </div>
@@ -1196,7 +1196,7 @@ function AdminDashboardContent() {
                     {messages.slice(0, 3).map((msg) => (
                       <div key={msg.id} className="px-6 py-4 hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all cursor-pointer group">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#e8f5e9] to-emerald-100 flex items-center justify-center text-base font-bold text-[#00874e] group-hover:scale-110 transition-transform">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#e8f5e9] to-emerald-100 flex items-center justify-center text-base font-bold text-[#10B981] group-hover:scale-110 transition-transform">
                             {msg.nom.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -1212,7 +1212,7 @@ function AdminDashboardContent() {
                   </div>
                   <button
                     onClick={() => router.push('/admin/dashboard?tab=messages')}
-                    className="w-full px-6 py-3 text-base font-semibold text-[#00874e] hover:bg-gradient-to-r hover:from-gray-50 hover:to-white transition-all border-t border-gray-100 flex items-center justify-center gap-1 group"
+                    className="w-full px-6 py-3 text-base font-semibold text-[#10B981] hover:bg-gradient-to-r hover:from-gray-50 hover:to-white transition-all border-t border-gray-100 flex items-center justify-center gap-1 group"
                   >
                     Voir tous les messages
                     <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
@@ -1231,7 +1231,7 @@ function AdminDashboardContent() {
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <h1 className="text-4xl font-bold text-[#003d2c] flex items-center gap-4">
-                    <div className="w-1 h-8 bg-gradient-to-b from-[#00874e] to-emerald-600 rounded-full"></div>
+                    <div className="w-1 h-8 bg-gradient-to-b from-[#10B981] to-emerald-600 rounded-full"></div>
                     Messages
                   </h1>
                   <p className="text-gray-600 mt-2 ml-7 font-medium">{stats.total} message(s) au total</p>
@@ -1433,7 +1433,7 @@ function AdminDashboardContent() {
                         onClick={() => setMessageSubFilter(null)}
                         className={`px-5 py-3 rounded-xl text-base font-medium transition-all ${
                           messageSubFilter === null
-                            ? 'bg-gradient-to-r from-[#00874e] to-emerald-600 text-white shadow-md'
+                            ? 'bg-gradient-to-r from-[#10B981] to-emerald-600 text-white shadow-md'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
@@ -1502,7 +1502,7 @@ function AdminDashboardContent() {
                                 messageFilter === 'michel' ? 'ring-indigo-500 bg-indigo-50/30' :
                                 messageFilter === 'none' ? 'ring-amber-500 bg-amber-50/30' :
                                 messageFilter === 'no_response' ? 'ring-red-500 bg-red-50/30' :
-                                'ring-[#00874e] bg-emerald-50/30',
+                                'ring-[#10B981] bg-emerald-50/30',
                       avatarBg: messageFilter === 'reponses' ? 'from-green-100 to-green-200' :
                                 messageFilter === 'sandra' ? 'from-pink-100 to-pink-200' :
                                 messageFilter === 'michel' ? 'from-indigo-100 to-indigo-200' :
@@ -1514,7 +1514,7 @@ function AdminDashboardContent() {
                                   messageFilter === 'michel' ? 'text-indigo-700' :
                                   messageFilter === 'none' ? 'text-amber-700' :
                                   messageFilter === 'no_response' ? 'text-red-700' :
-                                  'text-[#00874e]'
+                                  'text-[#10B981]'
                     }
 
                     return (
@@ -1687,7 +1687,7 @@ function AdminDashboardContent() {
                 {/* Header */}
                 <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex items-center justify-between sticky top-0 z-10 rounded-t-xl">
                   <h2 className="font-bold text-gray-900 flex items-center gap-3">
-                    <MessageSquare size={22} className="text-[#00874e]" />
+                    <MessageSquare size={22} className="text-[#10B981]" />
                     Details du message
                   </h2>
                   <button
@@ -1704,7 +1704,7 @@ function AdminDashboardContent() {
 
                 {detailLoading ? (
                   <div className="p-10 flex items-center justify-center">
-                    <Loader2 size={28} className="animate-spin text-[#00874e]" />
+                    <Loader2 size={28} className="animate-spin text-[#10B981]" />
                   </div>
                 ) : (
                   <div className="p-8 space-y-6">
@@ -1716,7 +1716,7 @@ function AdminDashboardContent() {
                       </h3>
                       <div className="space-y-3">
                         <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 rounded-full bg-[#00874e] flex items-center justify-center text-xl font-bold text-white">
+                          <div className="w-16 h-16 rounded-full bg-[#10B981] flex items-center justify-center text-xl font-bold text-white">
                             {selectedMessage.nom.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
                           <div>
@@ -1726,33 +1726,33 @@ function AdminDashboardContent() {
                         </div>
                         <div className="grid grid-cols-1 gap-4 mt-4">
                           <div className="flex items-center gap-4 p-3 bg-white rounded-xl">
-                            <Mail size={22} className="text-[#00874e]" />
+                            <Mail size={22} className="text-[#10B981]" />
                             <div>
                               <p className="text-sm text-gray-500">Courriel</p>
                               <a
                                 href={`mailto:${selectedMessage.email}`}
                                 onClick={(e) => e.stopPropagation()}
-                                className="text-gray-900 font-medium hover:text-[#00874e]"
+                                className="text-gray-900 font-medium hover:text-[#10B981]"
                               >
                                 {selectedMessage.email || 'Non fourni'}
                               </a>
                             </div>
                           </div>
                           <div className="flex items-center gap-4 p-3 bg-white rounded-xl">
-                            <Phone size={22} className="text-[#00874e]" />
+                            <Phone size={22} className="text-[#10B981]" />
                             <div>
                               <p className="text-sm text-gray-500">Telephone</p>
                               <a
                                 href={`tel:${selectedMessage.telephone}`}
                                 onClick={(e) => e.stopPropagation()}
-                                className="text-gray-900 font-medium hover:text-[#00874e]"
+                                className="text-gray-900 font-medium hover:text-[#10B981]"
                               >
                                 {selectedMessage.telephone || 'Non fourni'}
                               </a>
                             </div>
                           </div>
                           <div className="flex items-center gap-4 p-3 bg-white rounded-xl">
-                            <Clock size={22} className="text-[#00874e]" />
+                            <Clock size={22} className="text-[#10B981]" />
                             <div>
                               <p className="text-sm text-gray-500">Date de reception</p>
                               <p className="text-gray-900 font-medium">{new Date(selectedMessage.date).toLocaleString('fr-CA')}</p>
@@ -2057,7 +2057,7 @@ function AdminDashboardContent() {
                         {/* User-Agent Complet (Collapsible) */}
                         {selectedMessage.client_user_agent && (
                           <details className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-7 border border-gray-200">
-                            <summary className="text-base font-bold text-gray-700 cursor-pointer hover:text-[#00874e] transition-colors flex items-center gap-3">
+                            <summary className="text-base font-bold text-gray-700 cursor-pointer hover:text-[#10B981] transition-colors flex items-center gap-3">
                               <Activity size={18} />
                               Afficher User-Agent complet (données techniques avancées)
                             </summary>
@@ -2228,7 +2228,7 @@ function AdminDashboardContent() {
                                 </div>
                                 <button
                                   onClick={() => setPreviewEmail(email)}
-                                  className="text-sm px-4 py-2 bg-[#00874e] text-white rounded-xl hover:bg-[#006d3f] transition-colors font-medium flex items-center gap-1"
+                                  className="text-sm px-4 py-2 bg-[#10B981] text-white rounded-xl hover:bg-[#059669] transition-colors font-medium flex items-center gap-1"
                                 >
                                   <ExternalLink size={16} />
                                   Aperçu
@@ -2260,7 +2260,7 @@ function AdminDashboardContent() {
                     <div className="flex gap-4">
                       <a
                         href={`mailto:${selectedMessage.email}`}
-                        className="flex-1 py-3 bg-[#00874e] text-white rounded-xl text-base font-semibold hover:bg-[#006d3f] transition-colors flex items-center justify-center gap-3"
+                        className="flex-1 py-3 bg-[#10B981] text-white rounded-xl text-base font-semibold hover:bg-[#059669] transition-colors flex items-center justify-center gap-3"
                       >
                         <Mail size={20} />
                         Repondre par email
@@ -2300,7 +2300,7 @@ function AdminDashboardContent() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h1 className="text-3xl font-semibold text-[#003d2c] flex items-center gap-4">
-                    <div className="w-1 h-8 bg-gradient-to-b from-[#00874e] to-emerald-600 rounded-full"></div>
+                    <div className="w-1 h-8 bg-gradient-to-b from-[#10B981] to-emerald-600 rounded-full"></div>
                     VoPay - Mode Ingénieur
                   </h1>
                   <p className="text-gray-600 mt-2 ml-7 font-medium">
@@ -2320,7 +2320,7 @@ function AdminDashboardContent() {
                   <button
                     onClick={fetchVopayData}
                     disabled={vopayLoading}
-                    className="flex items-center gap-3 px-5 py-3 bg-[#00874e] text-white rounded-xl text-base font-medium hover:bg-[#006d3f] transition-colors disabled:opacity-50"
+                    className="flex items-center gap-3 px-5 py-3 bg-[#10B981] text-white rounded-xl text-base font-medium hover:bg-[#059669] transition-colors disabled:opacity-50"
                   >
                     <RefreshCw size={20} className={vopayLoading ? 'animate-spin' : ''} />
                     {vopayLoading ? 'Chargement...' : 'Rafraîchir'}
@@ -2350,7 +2350,7 @@ function AdminDashboardContent() {
               </div>
               <div className="bg-white rounded-xl border border-gray-200 p-8">
                 <span className="text-gray-500 text-base">Disponible</span>
-                <p className="text-3xl font-bold text-[#00874e] mt-2">
+                <p className="text-3xl font-bold text-[#10B981] mt-2">
                   {vopayLoading ? '...' : formatCurrency(vopayData.available)}
                 </p>
               </div>
@@ -2374,7 +2374,7 @@ function AdminDashboardContent() {
                 <details className="group bg-white rounded-xl border border-gray-200 shadow-sm">
                   <summary className="px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <Activity size={22} className="text-[#00874e]" />
+                      <Activity size={22} className="text-[#10B981]" />
                       <h2 className="text-xl font-bold text-gray-900">Balance Details Complets</h2>
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700">
                         9 Fields Disponibles
@@ -2724,7 +2724,7 @@ function AdminDashboardContent() {
               </div>
               <div className="bg-white rounded-xl border border-gray-200 p-8">
                 <span className="text-gray-500 text-base">Taux de succès</span>
-                <p className="text-3xl font-bold text-[#00874e] mt-2">
+                <p className="text-3xl font-bold text-[#10B981] mt-2">
                   {vopayLoading ? '...' : `${vopayData.successRate}%`}
                 </p>
               </div>
@@ -2934,7 +2934,7 @@ function AdminDashboardContent() {
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
                   <h2 className="font-semibold text-gray-900 flex items-center gap-3">
-                    <DollarSign size={22} className="text-[#00874e]" />
+                    <DollarSign size={22} className="text-[#10B981]" />
                     Transactions récentes VoPay
                   </h2>
                   <p className="text-sm text-gray-500 mt-1">Détails complets avec tous les 18 fields par transaction</p>
@@ -3314,7 +3314,7 @@ export default function AdminDashboard() {
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#00874e] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-[#10B981] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Chargement...</p>
         </div>
       </div>

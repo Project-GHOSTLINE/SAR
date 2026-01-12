@@ -152,7 +152,7 @@ export default function CreateTicketModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-[#00874e] to-emerald-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+        <div className="sticky top-0 bg-gradient-to-r from-[#10B981] to-emerald-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold">➕ Nouveau Ticket de Support</h2>
             <p className="text-emerald-100 mt-1">Décris ton problème, on va t'aider!</p>
@@ -197,7 +197,7 @@ export default function CreateTicketModal({
               value={createdBy}
               onChange={(e) => setCreatedBy(e.target.value)}
               placeholder="Ex: Frederic Rosa"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00874e] focus:border-[#00874e] transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-[#10B981] transition-all"
               required
               disabled={loading || success}
             />
@@ -213,7 +213,7 @@ export default function CreateTicketModal({
               value={createdByEmail}
               onChange={(e) => setCreatedByEmail(e.target.value)}
               placeholder="Ex: frederic@solutionargentrapide.ca"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00874e] focus:border-[#00874e] transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-[#10B981] transition-all"
               required
               disabled={loading || success}
             />
@@ -227,7 +227,7 @@ export default function CreateTicketModal({
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00874e] focus:border-[#00874e] transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-[#10B981] transition-all"
               required
               disabled={loading || success}
             >
@@ -274,7 +274,7 @@ export default function CreateTicketModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: Impossible de me connecter au dashboard"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00874e] focus:border-[#00874e] transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-[#10B981] transition-all"
               required
               maxLength={100}
               disabled={loading || success}
@@ -292,7 +292,7 @@ export default function CreateTicketModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Explique ce qui ne fonctionne pas, ce que tu as essayé, quand ça a commencé..."
               rows={5}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00874e] focus:border-[#00874e] transition-all resize-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-[#10B981] transition-all resize-none"
               required
               disabled={loading || success}
             />
@@ -312,7 +312,7 @@ export default function CreateTicketModal({
                   type="checkbox"
                   checked={captureDiagnostics}
                   onChange={(e) => setCaptureDiagnostics(e.target.checked)}
-                  className="w-5 h-5 text-[#00874e] rounded focus:ring-2 focus:ring-[#00874e]"
+                  className="w-5 h-5 text-[#10B981] rounded focus:ring-2 focus:ring-[#10B981]"
                   disabled={loading || success}
                 />
                 <span className="text-sm text-gray-700">
@@ -325,7 +325,7 @@ export default function CreateTicketModal({
                   type="checkbox"
                   checked={captureConsoleLogs}
                   onChange={(e) => setCaptureConsoleLogs(e.target.checked)}
-                  className="w-5 h-5 text-[#00874e] rounded focus:ring-2 focus:ring-[#00874e]"
+                  className="w-5 h-5 text-[#10B981] rounded focus:ring-2 focus:ring-[#10B981]"
                   disabled={loading || success}
                 />
                 <span className="text-sm text-gray-700">
@@ -338,7 +338,7 @@ export default function CreateTicketModal({
                   type="checkbox"
                   checked={runConnectionTests}
                   onChange={(e) => setRunConnectionTests(e.target.checked)}
-                  className="w-5 h-5 text-[#00874e] rounded focus:ring-2 focus:ring-[#00874e]"
+                  className="w-5 h-5 text-[#10B981] rounded focus:ring-2 focus:ring-[#10B981]"
                   disabled={loading || success}
                 />
                 <span className="text-sm text-gray-700">
@@ -360,7 +360,7 @@ export default function CreateTicketModal({
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-[#00874e] to-emerald-600 text-white rounded-xl hover:from-[#006d3f] hover:to-emerald-700 transition-all font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-[#10B981] to-emerald-600 text-white rounded-xl hover:from-[#059669] hover:to-emerald-700 transition-all font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               disabled={loading || success}
             >
               {loading ? (

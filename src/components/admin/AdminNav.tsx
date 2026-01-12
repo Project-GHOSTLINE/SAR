@@ -155,7 +155,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
               onClick={() => router.push('/admin/dashboard')}
               className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
-              <div className="w-12 h-12 bg-gradient-to-br from-[#00874e] to-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#10B981] to-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
                 <span className="text-white font-bold text-xl">$</span>
               </div>
               <div className="hidden sm:block">
@@ -168,7 +168,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
             {showAnalyseBreadcrumb && (
               <div className="hidden md:flex items-center gap-2 ml-4 text-sm text-gray-500">
                 <span>/</span>
-                <span className="text-[#00874e] font-medium">Analyse Client</span>
+                <span className="text-[#10B981] font-medium">Analyse Client</span>
               </div>
             )}
           </div>
@@ -187,7 +187,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                   className={`
                     relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
                     ${active
-                      ? 'bg-[#00874e] text-white shadow-md'
+                      ? 'bg-[#10B981] text-white shadow-md'
                       : item.disabled
                         ? 'text-gray-400 cursor-not-allowed'
                         : 'text-gray-700 hover:bg-gray-100'
@@ -200,7 +200,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                     <span className={`
                       absolute -top-1 -right-1 min-w-[18px] h-5 px-1.5 flex items-center justify-center
                       rounded-full text-xs font-bold
-                      ${active ? 'bg-white text-[#00874e]' : 'bg-red-500 text-white'}
+                      ${active ? 'bg-white text-[#10B981]' : 'bg-red-500 text-white'}
                     `}>
                       {item.badge}
                     </span>
@@ -267,7 +267,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                   className={`
                     w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all
                     ${active
-                      ? 'bg-[#00874e] text-white'
+                      ? 'bg-[#10B981] text-white'
                       : item.disabled
                         ? 'text-gray-400 cursor-not-allowed'
                         : 'text-gray-700 hover:bg-gray-100'
@@ -280,7 +280,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                     <span className={`
                       min-w-[24px] h-6 px-2 flex items-center justify-center
                       rounded-full text-xs font-bold
-                      ${active ? 'bg-white text-[#00874e]' : 'bg-red-500 text-white'}
+                      ${active ? 'bg-white text-[#10B981]' : 'bg-red-500 text-white'}
                     `}>
                       {item.badge}
                     </span>

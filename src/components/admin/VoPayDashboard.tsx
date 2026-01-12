@@ -144,7 +144,7 @@ export default function VoPayDashboard() {
           <button
             onClick={fetchVopayData}
             disabled={vopayLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-[#00874e] text-white rounded-lg text-sm font-medium hover:bg-[#006d3f] transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-[#10B981] text-white rounded-lg text-sm font-medium hover:bg-[#059669] transition-colors disabled:opacity-50"
           >
             <RefreshCw size={16} className={vopayLoading ? 'animate-spin' : ''} />
             {vopayLoading ? 'Chargement...' : 'Rafraîchir'}
@@ -179,9 +179,9 @@ export default function VoPayDashboard() {
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-gray-500 text-sm">Disponible</span>
-            <CheckCircle size={20} className="text-[#00874e]" />
+            <CheckCircle size={20} className="text-[#10B981]" />
           </div>
-          <p className="text-2xl font-bold text-[#00874e]">
+          <p className="text-2xl font-bold text-[#10B981]">
             {vopayLoading ? '...' : formatCurrency(vopayData.available)}
           </p>
         </div>
@@ -199,7 +199,7 @@ export default function VoPayDashboard() {
             <span className="text-gray-500 text-sm">Taux succès</span>
             <Users size={20} className="text-gray-400" />
           </div>
-          <p className="text-2xl font-bold text-[#00874e]">
+          <p className="text-2xl font-bold text-[#10B981]">
             {vopayLoading ? '...' : `${vopayData.successRate}%`}
           </p>
         </div>
@@ -218,7 +218,7 @@ export default function VoPayDashboard() {
                 onClick={() => setSelectedTab(tab.id as any)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   selectedTab === tab.id
-                    ? 'bg-[#00874e] text-white'
+                    ? 'bg-[#10B981] text-white'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
@@ -309,7 +309,7 @@ export default function VoPayDashboard() {
                     placeholder="Rechercher par nom, ID, référence..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00874e] focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -317,7 +317,7 @@ export default function VoPayDashboard() {
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00874e] focus:border-transparent"
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   >
                     <option value="all">Tous les statuts</option>
                     <option value="complete">Complété</option>
