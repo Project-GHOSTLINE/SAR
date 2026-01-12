@@ -467,7 +467,7 @@ function AnalysePageContent() {
     <>
       <AdminNav currentPage="/admin/analyse" />
       <div className="min-h-screen bg-gray-50 py-4 sm:py-6 px-2 sm:px-4 lg:px-6">
-        <div className="w-full lg:pr-[22rem]">
+        <div className="w-full lg:pl-[22rem]">
 
           {/* Header Section - Compact */}
           <div className="bg-gradient-to-br from-[#00874e] to-emerald-700 rounded-lg shadow-lg p-3 text-white mb-3">
@@ -675,7 +675,7 @@ function AnalysePageContent() {
           {accounts.length > 0 && (
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-[#00874e] to-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
+              className="lg:hidden fixed bottom-6 left-6 z-50 w-14 h-14 bg-gradient-to-br from-[#00874e] to-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
             >
               <Menu size={24} />
             </button>
@@ -689,13 +689,13 @@ function AnalysePageContent() {
             />
           )}
 
-          {/* Sidebar fixe à droite - Informations Client */}
+          {/* Sidebar fixe à gauche - Informations Client */}
           {accounts.length > 0 && (
             <div className={`
               fixed top-32 z-40 w-80 max-h-[calc(100vh-160px)] overflow-y-auto rounded-2xl
               transition-transform duration-300 ease-in-out
-              lg:right-6 lg:translate-x-0
-              ${sidebarOpen ? 'right-4 translate-x-0' : 'right-4 translate-x-[calc(100%+2rem)]'}
+              lg:left-6 lg:translate-x-0
+              ${sidebarOpen ? 'left-4 translate-x-0' : 'left-4 -translate-x-[calc(100%+2rem)]'}
               lg:block bg-white
             `}
               style={{
