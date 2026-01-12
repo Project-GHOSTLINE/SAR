@@ -482,73 +482,88 @@ function AnalysePageContent() {
 
                 {(() => {
                   const rawData = analysis.raw_data || {}
+                  const source = analysis.source // 'flinks' ou 'inverite'
 
                   // Extraire les paychecks depuis les transactions
                   const allTransactions = accounts.flatMap((acc: any) => acc.transactions || [])
 
-                  // Fonction pour détecter si c'est un paycheck (Inverite OU Flinks)
-                  const isPaycheck = (tx: any) => {
-                    // Inverite: category ou flags
-                    if (tx.category === 'income/paycheck') return true
-                    if (Array.isArray(tx.flags) && tx.flags.includes('is_payroll')) return true
+                  let paychecks: any[] = []
 
-                    // Flinks: analyser la description avec mots-clés
-                    if (tx.description) {
-                      const desc = tx.description.toLowerCase()
-                      const paycheckKeywords = [
-                        'paie/payroll',
-                        'payroll',
-                        'paie',
-                        'salaire',
-                        'salary',
-                        'pay/pay',
-                        'remuneration',
-                        'traitement',
-                        'paye'
-                      ]
-                      return paycheckKeywords.some(keyword => desc.includes(keyword))
-                    }
+                  if (source === 'flinks') {
+                    // RÈGLE FLINKS: Analyser la description avec mots-clés
+                    const paycheckKeywords = [
+                      'paie/payroll',
+                      'payroll',
+                      'paie',
+                      'salaire',
+                      'salary',
+                      'pay/pay',
+                      'remuneration',
+                      'traitement',
+                      'paye'
+                    ]
 
-                    return false
-                  }
-
-                  const paychecks = allTransactions
-                    .filter(isPaycheck)
-                    .filter((tx: any) => {
-                      // S'assurer qu'il y a un dépôt (deposits pour Flinks, credit pour Inverite)
-                      const amount = parseFloat(tx.deposits?.replace(/[^0-9.-]/g, '') || tx.credit || tx.amount || 0)
-                      return amount > 0
-                    })
-                    .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .slice(0, 5)
-                    .map((tx: any) => {
-                      // Extraire l'employeur depuis la description (Flinks) ou details (Inverite)
-                      let employer = 'Employeur'
-
-                      if (tx.description) {
-                        // Flinks: extraire depuis description (ex: "PAIE/PAYROLL PAY/PAY")
-                        employer = tx.description
+                    paychecks = allTransactions
+                      .filter((tx: any) => {
+                        if (!tx.description) return false
+                        const desc = tx.description.toLowerCase()
+                        return paycheckKeywords.some(keyword => desc.includes(keyword))
+                      })
+                      .filter((tx: any) => {
+                        // S'assurer qu'il y a un dépôt dans le champ deposits
+                        const amount = parseFloat(tx.deposits?.replace(/[^0-9.-]/g, '') || 0)
+                        return amount > 0
+                      })
+                      .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .slice(0, 5)
+                      .map((tx: any) => {
+                        // Extraire l'employeur depuis la description
+                        let employer = tx.description
                           .replace(/paie\/payroll/gi, '')
                           .replace(/payroll/gi, '')
                           .replace(/paie/gi, '')
                           .replace(/pay\/pay/gi, '')
+                          .replace(/paye/gi, '')
                           .trim()
 
                         // Si vide après nettoyage, utiliser "Employeur principal"
                         if (!employer || employer.length < 2) {
                           employer = 'Employeur principal'
                         }
-                      } else if (tx.details) {
-                        // Inverite
-                        employer = tx.details.replace(/^(SalaryPayroll\s*\/|Salary\/|Payroll\/)/i, '').trim() || 'Employeur'
-                      }
 
-                      return {
-                        date: tx.date,
-                        employer: employer,
-                        amount: parseFloat(tx.deposits?.replace(/[^0-9.-]/g, '') || tx.credit || tx.amount || 0)
-                      }
-                    })
+                        return {
+                          date: tx.date,
+                          employer: employer,
+                          amount: parseFloat(tx.deposits?.replace(/[^0-9.-]/g, '') || 0)
+                        }
+                      })
+
+                  } else {
+                    // RÈGLE INVERITE: Utiliser category et flags
+                    paychecks = allTransactions
+                      .filter((tx: any) => {
+                        if (tx.category === 'income/paycheck') return true
+                        if (Array.isArray(tx.flags) && tx.flags.includes('is_payroll')) return true
+                        return false
+                      })
+                      .filter((tx: any) => {
+                        // S'assurer qu'il y a un crédit
+                        const amount = parseFloat(tx.credit || tx.amount || 0)
+                        return amount > 0
+                      })
+                      .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .slice(0, 5)
+                      .map((tx: any) => {
+                        // Extraire l'employeur depuis details
+                        const employer = tx.details?.replace(/^(SalaryPayroll\s*\/|Salary\/|Payroll\/)/i, '').trim() || 'Employeur'
+
+                        return {
+                          date: tx.date,
+                          employer: employer,
+                          amount: parseFloat(tx.credit || tx.amount || 0)
+                        }
+                      })
+                  }
 
                   // Calculer la fréquence
                   let frequency = 'N/A'
