@@ -469,81 +469,117 @@ function AnalysePageContent() {
       <div className="min-h-screen bg-gray-50 py-4 sm:py-6 px-2 sm:px-4 lg:px-6">
         <div className="w-full lg:pl-[22rem]">
 
-          {/* Header Section - Compact */}
-          <div className="bg-gradient-to-br from-[#00874e] to-emerald-700 rounded-lg shadow-lg p-3 text-white mb-3">
-            {/* Client Name & Actions - Single Line */}
-            <div className="flex items-center justify-between gap-3 mb-2">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <User size={18} className="shrink-0" />
-                <h1 className="text-lg sm:text-xl font-bold truncate">{analysis.client_name}</h1>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${
-                  analysis.source === 'inverite' ? 'bg-blue-500 text-white' : 'bg-purple-500 text-white'
-                }`}>
-                  {analysis.source === 'inverite' ? 'Inverite' : 'Flinks'}
-                </span>
-              </div>
-              <button
-                onClick={() => router.push('/admin/dashboard?tab=analyses')}
-                className="hidden sm:flex px-2 py-1 bg-white/20 hover:bg-white/30 text-white rounded transition-all shrink-0"
-              >
-                <ArrowLeft size={16} />
-              </button>
+          {/* Header Section - Mini Chèques Horizontaux */}
+          <div className="bg-gradient-to-br from-[#00874e] to-emerald-700 rounded-lg shadow-lg p-3 mb-3">
+            <div className="flex items-center gap-2 mb-2">
+              <CreditCard size={16} className="text-white shrink-0" />
+              <h3 className="text-sm font-bold text-white">Comptes bancaires</h3>
+              <span className="text-xs text-emerald-200">({accounts.length})</span>
             </div>
 
-            {/* Client Info - Compact Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-2">
-              {/* Institution */}
-              {(() => {
-                const institutionName = accounts[selectedAccountIndex]?.bank || accounts[selectedAccountIndex]?.institution || accounts[0]?.bank || accounts[0]?.institution || 'Institution inconnue'
-                return (
-                  <div className="bg-white/10 rounded px-2 py-1 flex items-center gap-1.5 min-w-0">
-                    <Landmark size={12} className="shrink-0 opacity-80" />
-                    <span className="text-xs font-semibold truncate">{institutionName}</span>
-                  </div>
-                )
-              })()}
+            {/* Scroll horizontal des mini chèques */}
+            <div className="overflow-x-auto pb-2 -mx-1 px-1">
+              <div className="flex gap-2 min-w-max">
+                {accounts.map((account: any, index: number) => {
+                  const isSelected = selectedAccountIndex === index
+                  const accountBalance = cleanValue(account.current_balance || account.balance)
+                  const bankName = account.bank || account.institution || 'Banque'
+                  const accountNumber = account.account || account.accountNumber || '••••'
+                  const institutionNumber = account.institution_number || account.institutionNumber || '000'
+                  const transitNumber = account.transit_number || account.transitNumber || '00000'
+                  const bankStyle = getBankStyle(bankName)
 
-              {/* Email */}
-              {analysis.client_email && (
-                <div className="bg-white/10 rounded px-2 py-1 flex items-center gap-1.5 min-w-0">
-                  <Mail size={12} className="shrink-0 opacity-80" />
-                  <span className="text-xs truncate">{analysis.client_email}</span>
-                </div>
-              )}
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedAccountIndex(index)}
+                      className={`w-64 text-left rounded-lg overflow-hidden transition-all duration-200 shrink-0 ${
+                        isSelected
+                          ? 'ring-2 ring-white shadow-lg'
+                          : 'hover:shadow-md border border-white/20'
+                      }`}
+                      style={{
+                        background: isSelected
+                          ? `linear-gradient(135deg, ${bankStyle.gradientFrom} 0%, ${bankStyle.gradientTo} 100%)`
+                          : 'rgba(255, 255, 255, 0.15)'
+                      }}
+                    >
+                      <div className="relative p-2.5">
+                        {/* Header - Logo et Banque */}
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-6 h-6 rounded flex items-center justify-center text-white text-[10px] font-black"
+                              style={{
+                                background: isSelected
+                                  ? 'rgba(255, 255, 255, 0.2)'
+                                  : `linear-gradient(135deg, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo})`
+                              }}
+                            >
+                              {bankStyle.logo}
+                            </div>
+                            <div>
+                              <p className={`text-[11px] font-bold leading-tight ${isSelected ? 'text-white' : 'text-white'}`}>
+                                {bankName}
+                              </p>
+                              {account.type && (
+                                <p className={`text-[9px] ${isSelected ? 'text-white/80' : 'text-white/70'}`}>
+                                  {account.type}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          {isSelected && (
+                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                          )}
+                        </div>
 
-              {/* Téléphone */}
-              <div className="bg-white/10 rounded px-2 py-1 flex items-center gap-1.5 min-w-0">
-                <Phone size={12} className="shrink-0 opacity-80" />
-                <span className="text-xs truncate">
-                  {analysis.client_phones && analysis.client_phones.length > 0
-                    ? analysis.client_phones.join(', ')
-                    : <span className="italic opacity-70">{analysis.source === 'flinks' ? 'N/A' : 'N/A'}</span>
-                  }
-                </span>
-              </div>
+                        {/* Montant - Style chèque */}
+                        <div className={`mb-2 py-1.5 px-2 rounded border border-dashed ${
+                          isSelected ? 'bg-white/20 border-white/40' : 'bg-white/10 border-white/20'
+                        }`}>
+                          <p className={`text-[9px] font-medium uppercase mb-0.5 ${
+                            isSelected ? 'text-white/90' : 'text-white/80'
+                          }`}>
+                            Solde disponible
+                          </p>
+                          <p className={`text-lg font-bold tabular-nums leading-none ${
+                            isSelected ? 'text-white' : 'text-white'
+                          }`}>
+                            {formatCurrency(accountBalance)}
+                          </p>
+                        </div>
 
-              {/* Adresse */}
-              {analysis.client_address && (
-                <div className="bg-white/10 rounded px-2 py-1 flex items-center gap-1.5 min-w-0">
-                  <MapPin size={12} className="shrink-0 opacity-80" />
-                  <span className="text-xs truncate">{analysis.client_address}</span>
-                </div>
-              )}
-            </div>
+                        {/* Numéros - Style bas de chèque */}
+                        <div className={`flex items-center justify-between text-[9px] font-mono ${
+                          isSelected ? 'text-white/90' : 'text-white/80'
+                        }`}>
+                          <div className="flex items-center gap-1">
+                            <span className="font-semibold">⊏</span>
+                            <span>{transitNumber}</span>
+                            <span className="font-semibold">⊐</span>
+                            <span>{institutionNumber}</span>
+                            <span className="font-semibold">⊏</span>
+                          </div>
+                          <span className="font-bold">{accountNumber}</span>
+                        </div>
 
-            {/* Stats - Compact */}
-            <div className="flex gap-3 text-center">
-              <div className="flex-1 bg-white/10 rounded px-2 py-1.5">
-                <p className="text-xs opacity-80 mb-0.5">Comptes</p>
-                <p className="text-lg font-bold">{analysis.total_accounts}</p>
-              </div>
-              <div className="flex-1 bg-white/10 rounded px-2 py-1.5">
-                <p className="text-xs opacity-80 mb-0.5">Balance</p>
-                <p className="text-base sm:text-lg font-bold">{formatCurrency(analysis.total_balance)}</p>
-              </div>
-              <div className="flex-1 bg-white/10 rounded px-2 py-1.5">
-                <p className="text-xs opacity-80 mb-0.5">Trans.</p>
-                <p className="text-lg font-bold">{analysis.total_transactions}</p>
+                        {/* Nombre de transactions */}
+                        {account.transactions && (
+                          <div className="absolute top-2 right-2">
+                            <div className={`rounded-full px-1.5 py-0.5 border ${
+                              isSelected
+                                ? 'bg-white/90 border-white text-gray-900'
+                                : 'bg-white/20 border-white/30 text-white'
+                            }`}>
+                              <p className="text-[9px] font-bold">{account.transactions.length} tx</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -711,133 +747,29 @@ function AnalysePageContent() {
                 <X size={18} className="text-gray-700" />
               </button>
 
-              {/* Mini Chèques - Comptes Bancaires */}
-              <div className="p-4 pb-2">
-                <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-3 flex items-center gap-2">
-                  <CreditCard size={14} className="text-[#00874e]" />
-                  Comptes
-                </h3>
-                <div className="space-y-2">
-                  {accounts.map((account: any, index: number) => {
-                    const isSelected = selectedAccountIndex === index
-                    const accountBalance = cleanValue(account.current_balance || account.balance)
-                    const bankName = account.bank || account.institution || 'Banque'
-                    const accountNumber = account.account || account.accountNumber || '••••'
-                    const institutionNumber = account.institution_number || account.institutionNumber || '000'
-                    const transitNumber = account.transit_number || account.transitNumber || '00000'
-                    const bankStyle = getBankStyle(bankName)
-
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => {
-                          setSelectedAccountIndex(index)
-                          setSidebarOpen(false)
-                        }}
-                        className={`w-full text-left rounded-lg overflow-hidden transition-all duration-200 ${
-                          isSelected
-                            ? 'ring-2 ring-[#00874e] shadow-md'
-                            : 'hover:shadow-sm border border-gray-200'
-                        }`}
-                        style={{
-                          background: isSelected
-                            ? `linear-gradient(135deg, ${bankStyle.gradientFrom}05 0%, ${bankStyle.gradientTo}05 100%)`
-                            : '#ffffff'
-                        }}
-                      >
-                        {/* Mini Chèque Design */}
-                        <div className="relative p-2.5">
-                          {/* Header - Logo et Banque */}
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div
-                                className="w-6 h-6 rounded flex items-center justify-center text-white text-[10px] font-black"
-                                style={{
-                                  background: `linear-gradient(135deg, ${bankStyle.gradientFrom}, ${bankStyle.gradientTo})`
-                                }}
-                              >
-                                {bankStyle.logo}
-                              </div>
-                              <div>
-                                <p className="text-[11px] font-bold text-gray-900 leading-tight">{bankName}</p>
-                                {account.type && (
-                                  <p className="text-[9px] text-gray-500">{account.type}</p>
-                                )}
-                              </div>
-                            </div>
-                            {isSelected && (
-                              <div className="w-1.5 h-1.5 bg-[#00874e] rounded-full animate-pulse"></div>
-                            )}
-                          </div>
-
-                          {/* Montant - Style chèque */}
-                          <div className="mb-2 py-1.5 px-2 bg-gray-50 rounded border border-dashed border-gray-300">
-                            <p className="text-[9px] text-gray-500 font-medium uppercase mb-0.5">Solde disponible</p>
-                            <p className="text-lg font-bold text-gray-900 tabular-nums leading-none">
-                              {formatCurrency(accountBalance)}
-                            </p>
-                          </div>
-
-                          {/* Numéros - Style bas de chèque */}
-                          <div className="flex items-center justify-between text-[9px] font-mono text-gray-600">
-                            <div className="flex items-center gap-1">
-                              <span className="font-semibold text-gray-400">⊏</span>
-                              <span>{transitNumber}</span>
-                              <span className="font-semibold text-gray-400">⊐</span>
-                              <span>{institutionNumber}</span>
-                              <span className="font-semibold text-gray-400">⊏</span>
-                            </div>
-                            <span className="font-bold text-gray-700">{accountNumber}</span>
-                          </div>
-
-                          {/* Nombre de transactions */}
-                          {account.transactions && (
-                            <div className="absolute top-2 right-2">
-                              <div className="bg-white/90 backdrop-blur-sm rounded-full px-1.5 py-0.5 border border-gray-200">
-                                <p className="text-[9px] font-bold text-gray-600">{account.transactions.length} tx</p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div className="border-t border-gray-200 my-2"></div>
-
-              {/* Client Info Section - MOVED FROM MAIN CONTENT */}
-              <div className="p-4 pt-2">
-                {/* En-tête avec source et compagnie */}
-                <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
-                  <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                    <User size={14} />
-                    Informations client
-                  </h2>
-                  <div className="flex flex-col gap-1.5">
-                    {/* Source IBV */}
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${
-                      analysis.source === 'inverite'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-purple-500 text-white'
+              {/* Client Info Section - Nom et infos personnelles */}
+              <div className="p-4">
+                {/* Nom du client */}
+                <div className="mb-4 pb-3 border-b border-gray-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <User size={18} className="text-[#00874e] shrink-0" />
+                    <h2 className="text-lg font-bold text-gray-900 truncate">{analysis.client_name}</h2>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                      analysis.source === 'inverite' ? 'bg-blue-500 text-white' : 'bg-purple-500 text-white'
                     }`}>
-                      <Wallet size={10} />
                       {analysis.source === 'inverite' ? 'Inverite' : 'Flinks'}
                     </span>
-                    {/* Compagnie */}
-                    <span className="px-2 py-1 rounded-full text-xs font-bold bg-gray-800 text-white flex items-center gap-1.5">
-                      <Building size={10} />
+                    <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-gray-800 text-white">
                       {analysis.source === 'flinks' ? 'SAR' : 'CS'}
                     </span>
                   </div>
                 </div>
 
-                {/* Institution financière avec couleur distinctive */}
+                {/* Institution financière */}
                 {(() => {
                   const institutionName = accounts[selectedAccountIndex]?.bank || accounts[selectedAccountIndex]?.institution || accounts[0]?.bank || accounts[0]?.institution || 'Institution inconnue'
-
-                  // Couleurs par institution
                   const getInstitutionColor = (inst: string) => {
                     const instLower = inst.toLowerCase()
                     if (instLower.includes('desjardins')) return 'bg-green-600'
@@ -852,12 +784,12 @@ function AnalysePageContent() {
                   }
 
                   return (
-                    <div className="mb-4">
+                    <div className="mb-3">
                       <div className={`${getInstitutionColor(institutionName)} text-white rounded-lg p-3 flex items-center gap-3`}>
-                        <Landmark size={20} className="shrink-0" />
+                        <Landmark size={18} className="shrink-0" />
                         <div>
-                          <p className="text-xs opacity-90 font-medium">Institution financière</p>
-                          <p className="text-base font-bold">{institutionName}</p>
+                          <p className="text-[10px] opacity-90 font-medium uppercase">Institution financière</p>
+                          <p className="text-sm font-bold">{institutionName}</p>
                         </div>
                       </div>
                     </div>
@@ -865,30 +797,29 @@ function AnalysePageContent() {
                 })()}
 
                 {/* Informations de contact */}
-                <div className="space-y-3 mb-4">
+                <div className="space-y-2 mb-3">
                   {analysis.client_email && (
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                        <Mail size={14} className="text-gray-600" />
+                      <div className="w-7 h-7 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                        <Mail size={13} className="text-gray-600" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs text-gray-500 font-medium">Email</p>
-                        <p className="text-sm text-gray-900 truncate">{analysis.client_email}</p>
+                        <p className="text-[10px] text-gray-500 font-medium">Email</p>
+                        <p className="text-xs text-gray-900 truncate">{analysis.client_email}</p>
                       </div>
                     </div>
                   )}
 
-                  {/* Téléphone - Afficher "Non disponible" pour Flinks si vide */}
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                      <Phone size={14} className="text-gray-600" />
+                    <div className="w-7 h-7 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                      <Phone size={13} className="text-gray-600" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs text-gray-500 font-medium">Téléphone</p>
+                      <p className="text-[10px] text-gray-500 font-medium">Téléphone</p>
                       {analysis.client_phones && analysis.client_phones.length > 0 ? (
-                        <p className="text-sm text-gray-900 truncate">{analysis.client_phones.join(', ')}</p>
+                        <p className="text-xs text-gray-900 truncate">{analysis.client_phones.join(', ')}</p>
                       ) : (
-                        <p className="text-sm text-gray-500 italic truncate">
+                        <p className="text-xs text-gray-500 italic truncate">
                           {analysis.source === 'flinks' ? 'Non disponible (Flinks)' : 'Non disponible'}
                         </p>
                       )}
@@ -897,18 +828,51 @@ function AnalysePageContent() {
 
                   {analysis.client_address && (
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                        <MapPin size={14} className="text-gray-600" />
+                      <div className="w-7 h-7 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                        <MapPin size={13} className="text-gray-600" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs text-gray-500 font-medium">Adresse</p>
-                        <p className="text-sm text-gray-900 truncate">{analysis.client_address}</p>
+                        <p className="text-[10px] text-gray-500 font-medium">Adresse</p>
+                        <p className="text-xs text-gray-900 truncate">{analysis.client_address}</p>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Additional Flinks/Inverite Metadata */}
+                <div className="border-t border-gray-200 my-3"></div>
+
+                {/* Stats - Compact */}
+                <div className="space-y-2">
+                  <div className="bg-gray-50 rounded-lg p-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Building size={14} className="text-[#00874e]" />
+                      <span className="text-xs font-medium text-gray-600">Comptes</span>
+                    </div>
+                    <span className="text-lg font-bold text-gray-900">{analysis.total_accounts}</span>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <DollarSign size={14} className="text-[#00874e]" />
+                      <span className="text-xs font-medium text-gray-600">Balance totale</span>
+                    </div>
+                    <span className="text-base font-bold text-gray-900">{formatCurrency(analysis.total_balance)}</span>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp size={14} className="text-[#00874e]" />
+                      <span className="text-xs font-medium text-gray-600">Transactions</span>
+                    </div>
+                    <span className="text-lg font-bold text-gray-900">{analysis.total_transactions}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-200 mx-4"></div>
+
+              {/* Additional Flinks/Inverite Metadata */}
+              <div className="p-4 pt-3">
                 {(() => {
                   const rawData = analysis.raw_data || {}
                   const paychecks = rawData.paychecks || []
