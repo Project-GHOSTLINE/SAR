@@ -857,7 +857,15 @@ function AnalysePageContent() {
 
                 {/* Institution financière */}
                 {(() => {
-                  const institutionName = accounts[selectedAccountIndex]?.bank || accounts[selectedAccountIndex]?.institution || accounts[0]?.bank || accounts[0]?.institution || 'Institution inconnue'
+                  // Pour Flinks, utiliser clientInfo.institution directement
+                  const rawData = analysis.raw_data || {}
+                  const clientInfo = rawData.clientInfo || {}
+                  const institutionName = clientInfo.institution ||
+                    accounts[selectedAccountIndex]?.bank ||
+                    accounts[selectedAccountIndex]?.institution ||
+                    accounts[0]?.bank ||
+                    accounts[0]?.institution ||
+                    'Institution inconnue'
                   const getInstitutionColor = (inst: string) => {
                     const instLower = inst.toLowerCase()
                     if (instLower.includes('desjardins')) return 'bg-green-600'
@@ -963,17 +971,19 @@ function AnalysePageContent() {
               <div className="p-4 pt-3">
                 {(() => {
                   const rawData = analysis.raw_data || {}
+                  const clientInfo = rawData.clientInfo || {} // Flinks stocke les infos ici
                   const paychecks = rawData.paychecks || []
 
-                  // Extract employer name from paychecks if available
-                  const employerName = rawData.employerName || rawData.employer ||
+                  // Extract employer name - Flinks clientInfo ou paychecks
+                  const employerName = clientInfo.employer || rawData.employerName || rawData.employer ||
                     (paychecks.length > 0 ? (paychecks[0].employer || paychecks[0].employerName) : null)
 
-                  const loginId = rawData.loginId || rawData.login_id
-                  const requestId = rawData.requestId || rawData.request_id
-                  const requestDateTime = rawData.requestDateTime || rawData.request_date_time
-                  const requestStatus = rawData.requestStatus || rawData.request_status
-                  const daysDetected = rawData.daysDetected || rawData.days_detected
+                  // Extract toutes les infos depuis clientInfo (Flinks) ou rawData (Inverite)
+                  const loginId = clientInfo.loginId || rawData.loginId || rawData.login_id
+                  const requestId = clientInfo.requestId || rawData.requestId || rawData.request_id
+                  const requestDateTime = clientInfo.requestDate || rawData.requestDateTime || rawData.request_date_time
+                  const requestStatus = clientInfo.requestStatus || rawData.requestStatus || rawData.request_status
+                  const daysDetected = clientInfo.daysDetected || rawData.daysDetected || rawData.days_detected
 
                   const hasAnyMetadata = employerName || loginId || requestId || requestDateTime || requestStatus || daysDetected
 
