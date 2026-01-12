@@ -1042,7 +1042,13 @@ function AnalysePageContent() {
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-emerald-700 font-bold uppercase tracking-wide mb-0.5">Téléphone</p>
                       {analysis.client_phones && analysis.client_phones.length > 0 ? (
-                        <p className="text-sm text-gray-900 font-medium break-words leading-tight">{analysis.client_phones.join(', ')}</p>
+                        <div className="space-y-1">
+                          {analysis.client_phones.map((phone: string, idx: number) => (
+                            <p key={idx} className="text-sm text-gray-900 font-medium break-words leading-tight">
+                              {phone}
+                            </p>
+                          ))}
+                        </div>
                       ) : (
                         <p className="text-sm text-gray-500 italic">
                           {analysis.source === 'flinks' ? 'Non disponible (Flinks)' : 'Non disponible'}
