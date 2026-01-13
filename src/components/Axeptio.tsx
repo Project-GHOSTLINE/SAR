@@ -4,10 +4,7 @@ import { useEffect } from 'react'
 
 declare global {
   interface Window {
-    axeptioSettings?: {
-      clientId: string
-      cookiesVersion: string
-    }
+    axeptioSettings?: any
   }
 }
 
