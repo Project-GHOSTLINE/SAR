@@ -88,17 +88,22 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       badge: messagesCount > 0 ? messagesCount : null
     },
     {
+      name: 'Analyses',
+      href: '/admin/dashboard?tab=analyses',
+      icon: BarChart3,
+      badge: null
+    },
+    {
+      name: 'Downloads',
+      href: '/admin/downloads',
+      icon: Download,
+      badge: null
+    },
+    {
       name: 'VoPay',
       href: '/admin/dashboard?tab=vopay',
       icon: DollarSign,
       badge: null
-    },
-    {
-      name: 'Margill',
-      href: '/admin/dashboard?tab=margill',
-      icon: FileText,
-      badge: null,
-      disabled: true
     },
     {
       name: 'Support',
@@ -113,27 +118,15 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       badge: null
     },
     {
-      name: 'Analyses Client',
-      href: '/admin/dashboard?tab=analyses',
-      icon: BarChart3,
-      badge: null
-    },
-    {
-      name: 'Black Liste',
+      name: 'Blacklist',
       href: '/admin/blacklist',
       icon: Shield,
       badge: null
     },
     {
-      name: 'Data Explorer',
+      name: 'Explorer',
       href: '/admin/data-explorer',
       icon: Database,
-      badge: null
-    },
-    {
-      name: 'Téléchargements',
-      href: '/admin/downloads',
-      icon: Download,
       badge: null
     }
   ]
@@ -192,7 +185,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1.5 overflow-x-auto scrollbar-hide flex-1 max-w-fit mx-auto">
+          <div className="hidden lg:flex items-center gap-1 overflow-x-auto scrollbar-hide flex-1 mx-auto justify-center">
             {navItems.map((item) => {
               const Icon = item.icon
               const active = isActive(item.href)
@@ -203,7 +196,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                   onClick={() => !item.disabled && router.push(item.href)}
                   disabled={item.disabled}
                   className={`
-                    relative flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                    relative flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-all
                     whitespace-nowrap flex-shrink-0
                     ${active
                       ? 'bg-[#10B981] text-white shadow-md'
