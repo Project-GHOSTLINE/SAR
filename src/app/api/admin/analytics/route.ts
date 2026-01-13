@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { BetaAnalyticsDataClient } from '@google-analytics/data'
 import type { AnalyticsResponse, AnalyticsRow } from '@/types/analytics'
 
+// Force dynamic rendering (uses cookies for auth)
+export const dynamic = 'force-dynamic'
+
 // Vérifier l'authentification admin
 function isAuthenticated(request: NextRequest): boolean {
   const token = request.cookies.get('admin-session')?.value

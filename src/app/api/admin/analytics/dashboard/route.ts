@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { AnalyticsDashboardData, AnalyticsDeviceSummary, AnalyticsTopPage, AnalyticsTrafficSource, AnalyticsGeography } from '@/types/analytics'
 
+// Force dynamic rendering (uses cookies for auth)
+export const dynamic = 'force-dynamic'
+
 // Vérifier l'authentification admin
 function isAuthenticated(request: NextRequest): boolean {
   const token = request.cookies.get('admin-session')?.value
