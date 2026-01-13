@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Poppins } from 'next/font/google'
 import Script from 'next/script'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
 import './globals.css'
 
 const poppins = Poppins({
@@ -41,6 +42,7 @@ export default function RootLayout({
         />
       </head>
       <body className={poppins.className}>
+        <GoogleAnalytics />
         {children}
       </body>
     </html>

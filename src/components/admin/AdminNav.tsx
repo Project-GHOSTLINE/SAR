@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import {
   LayoutDashboard, MessageSquare, DollarSign, FileText,
   Wrench, Webhook, BarChart3, LogOut, Menu, X,
-  ChevronDown, User, Clock, Bell
+  ChevronDown, User, Clock, Bell, Shield
 } from 'lucide-react'
 
 interface AdminNavProps {
@@ -116,6 +116,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       name: 'Analyses Client',
       href: '/admin/dashboard?tab=analyses',
       icon: BarChart3,
+      badge: null
+    },
+    {
+      name: 'Black Liste',
+      href: '/admin/blacklist',
+      icon: Shield,
       badge: null
     }
   ]
