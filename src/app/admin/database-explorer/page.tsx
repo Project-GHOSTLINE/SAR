@@ -26,6 +26,7 @@ interface Column {
 interface TableInfo {
   table_name: string
   row_count: number
+  column_count: number
   columns: Column[]
   has_data: boolean
   error: string | null
@@ -298,7 +299,7 @@ export default function DatabaseExplorerPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-semibold text-gray-700">
-                            {table.columns.length}
+                            {table.column_count || table.columns.length}
                           </p>
                           <p className="text-xs text-gray-500">colonnes</p>
                         </div>
@@ -311,7 +312,7 @@ export default function DatabaseExplorerPage() {
                     <div className="border-t border-gray-200 bg-gray-50 p-4">
                       <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                         <FileText className="w-4 h-4" />
-                        Structure de la table ({table.columns.length} colonnes)
+                        Structure de la table ({table.column_count || table.columns.length} colonnes)
                       </h4>
 
                       {table.columns.length === 0 ? (

@@ -26,77 +26,39 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseClient()
 
-    // 2. Récupérer TOUTES les tables de la base de données
-    const { data: tables, error: tablesError } = await supabase.rpc('get_all_tables_with_counts')
+    // 2. Récupérer TOUTES les tables via la fonction RPC
+    const { data: tablesInfo, error: tablesError } = await supabase.rpc('get_all_tables_with_info')
 
     if (tablesError) {
-      // Si la fonction n'existe pas, utiliser une requête SQL directe
-      const { data: allTables, error: sqlError } = await supabase
-        .from('information_schema.tables')
-        .select('table_name')
-        .eq('table_schema', 'public')
-        .eq('table_type', 'BASE TABLE')
+      console.error('Erreur RPC get_all_tables_with_info:', tablesError)
+      throw new Error(`Fonction RPC manquante: ${tablesError.message}. Exécuter create_database_explorer_function.sql dans Supabase.`)
+    }
 
-      if (sqlError) {
-        throw new Error('Impossible de récupérer les tables')
-      }
+    // 3. Pour chaque table, récupérer les colonnes
+    const tablesWithColumns = []
 
-      // Récupérer le nombre de lignes pour chaque table
-      const tablesWithCounts = []
+    for (const tableInfo of tablesInfo || []) {
+      const tableName = tableInfo.table_name
 
-      for (const table of allTables || []) {
-        const tableName = table.table_name as string
+      // Récupérer les colonnes via RPC
+      const { data: columns, error: columnsError } = await supabase.rpc('get_table_columns', {
+        p_table_name: tableName
+      })
 
-        // Ignorer les tables système
-        if (tableName.startsWith('_') || tableName.startsWith('pg_')) {
-          continue
-        }
-
-        try {
-          // Compter les lignes
-          const { count, error: countError } = await supabase
-            .from(tableName)
-            .select('*', { count: 'exact', head: true })
-
-          // Récupérer les colonnes
-          const { data: columns } = await supabase
-            .from('information_schema.columns')
-            .select('column_name, data_type, is_nullable, column_default')
-            .eq('table_schema', 'public')
-            .eq('table_name', tableName)
-            .order('ordinal_position')
-
-          tablesWithCounts.push({
-            table_name: tableName,
-            row_count: count || 0,
-            columns: columns || [],
-            has_data: (count || 0) > 0,
-            error: countError ? 'RLS activé ou permission manquante' : null
-          })
-        } catch (err) {
-          // Table existe mais on ne peut pas y accéder (RLS)
-          tablesWithCounts.push({
-            table_name: tableName,
-            row_count: 0,
-            columns: [],
-            has_data: false,
-            error: 'Accès restreint (RLS)'
-          })
-        }
-      }
-
-      return NextResponse.json({
-        success: true,
-        tables: tablesWithCounts.sort((a, b) => b.row_count - a.row_count),
-        total_tables: tablesWithCounts.length,
-        timestamp: new Date().toISOString()
+      tablesWithColumns.push({
+        table_name: tableName,
+        row_count: tableInfo.row_count || 0,
+        column_count: tableInfo.column_count || 0,
+        columns: columns || [],
+        has_data: (tableInfo.row_count || 0) > 0,
+        error: columnsError ? 'Impossible de récupérer les colonnes' : null
       })
     }
 
     return NextResponse.json({
       success: true,
-      tables: tables || [],
-      total_tables: tables?.length || 0,
+      tables: tablesWithColumns,
+      total_tables: tablesWithColumns.length,
       timestamp: new Date().toISOString()
     })
 
