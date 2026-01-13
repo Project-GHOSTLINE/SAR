@@ -41,7 +41,7 @@ export default function DownloadsPage() {
     id: 'icjjhbknppfpnfiooooajaggbmlbeagh',
     downloadUrl: '/api/download/ibv-crawler-v2.15.zip',
     fileName: 'ibv-crawler-v2.15.zip',
-    fileSize: '12 KB',
+    fileSize: '75 KB',
     compatibility: 'Chrome, Edge, Brave (Chromium-based browsers)'
   }
 
