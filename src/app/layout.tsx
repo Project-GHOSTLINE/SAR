@@ -24,9 +24,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <head>
-        <Script
-          id="axeptio-settings"
-          strategy="beforeInteractive"
+        <script
           dangerouslySetInnerHTML={{
             __html: `
               window.axeptioSettings = {
@@ -36,10 +34,7 @@ export default function RootLayout({
             `
           }}
         />
-        <Script
-          src="https://static.axept.io/sdk.js"
-          strategy="beforeInteractive"
-        />
+        <script async src="https://static.axept.io/sdk.js"></script>
       </head>
       <body className={poppins.className}>
         <GoogleAnalytics />
