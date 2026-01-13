@@ -445,3 +445,20 @@ body {
   animation: none !important;
   transition-duration: 0s !important;
 }
+
+/* Responsive fixes for admin layout */
+@layer utilities {
+  /* Prevent horizontal overflow */
+  .no-overflow-x {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Touch-friendly buttons on mobile */
+  @media (max-width: 768px) {
+    .touch-target {
+      min-height: 44px !important;
+      min-width: 44px !important;
+    }
+  }
+}
