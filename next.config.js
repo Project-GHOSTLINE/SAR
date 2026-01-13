@@ -2,6 +2,9 @@
 const nextConfig = {
   // Disable static optimization to prevent prerender errors
   output: 'standalone',
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
   images: {
     domains: ['solutionargentrapide.ca'],
   },
