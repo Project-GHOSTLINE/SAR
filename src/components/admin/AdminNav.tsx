@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import {
   LayoutDashboard, MessageSquare, DollarSign, FileText,
   Wrench, Webhook, BarChart3, LogOut, Menu, X,
-  ChevronDown, User, Clock, Bell, Shield
+  ChevronDown, User, Clock, Bell, Shield, Database
 } from 'lucide-react'
 
 interface AdminNavProps {
@@ -122,6 +122,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       name: 'Black Liste',
       href: '/admin/blacklist',
       icon: Shield,
+      badge: null
+    },
+    {
+      name: 'Metric Inspector',
+      href: '/admin/metric-inspector',
+      icon: Database,
       badge: null
     }
   ]
