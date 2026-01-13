@@ -129,6 +129,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       href: '/admin/metric-inspector',
       icon: Database,
       badge: null
+    },
+    {
+      name: 'Database Explorer',
+      href: '/admin/database-explorer',
+      icon: Database,
+      badge: null
     }
   ]
 
