@@ -165,20 +165,20 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
 
   return (
     <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
-      <div className="w-full px-6 lg:px-12">
-        <div className="flex items-center justify-between h-20">
+      <div className="w-full px-4 lg:px-6">
+        <div className="flex items-center gap-3 h-20">
           {/* Logo & Brand */}
-          <div className="flex items-center">
+          <div className="flex items-center flex-shrink-0">
             <button
               onClick={() => router.push('/admin/dashboard')}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <div className="w-12 h-12 bg-gradient-to-br from-[#10B981] to-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
-                <span className="text-white font-bold text-xl">$</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-[#10B981] to-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
+                <span className="text-white font-bold text-lg">$</span>
               </div>
-              <div className="hidden sm:block">
-                <h1 className="text-lg font-bold text-gray-900 leading-tight">SAR Admin</h1>
-                <p className="text-xs text-gray-500">Solution Argent Rapide</p>
+              <div className="hidden xl:block">
+                <h1 className="text-base font-bold text-gray-900 leading-tight">SAR Admin</h1>
+                <p className="text-[10px] text-gray-500">Solution Argent Rapide</p>
               </div>
             </button>
 
@@ -192,7 +192,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-2">
+          <div className="hidden lg:flex items-center gap-1.5 overflow-x-auto scrollbar-hide flex-1 max-w-fit mx-auto">
             {navItems.map((item) => {
               const Icon = item.icon
               const active = isActive(item.href)
@@ -203,7 +203,8 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                   onClick={() => !item.disabled && router.push(item.href)}
                   disabled={item.disabled}
                   className={`
-                    relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                    relative flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                    whitespace-nowrap flex-shrink-0
                     ${active
                       ? 'bg-[#10B981] text-white shadow-md'
                       : item.disabled
@@ -212,8 +213,8 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                     }
                   `}
                 >
-                  <Icon size={18} />
-                  <span>{item.name}</span>
+                  <Icon size={16} className="flex-shrink-0" />
+                  <span className="text-xs">{item.name}</span>
                   {item.badge !== null && item.badge > 0 && (
                     <span className={`
                       absolute -top-1 -right-1 min-w-[18px] h-5 px-1.5 flex items-center justify-center
@@ -229,28 +230,28 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
           </div>
 
           {/* Right Section - Time & Logout */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 flex-shrink-0">
             {/* Time Display */}
-            <div className="hidden md:flex items-center gap-2 text-sm text-gray-700">
-              <Clock size={16} />
+            <div className="hidden xl:flex items-center gap-1.5 text-xs text-gray-700">
+              <Clock size={14} />
               <span className="font-medium">{formatTime()}</span>
             </div>
 
             {/* Notifications */}
-            <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-              <Bell size={20} />
+            <button className="relative p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+              <Bell size={18} />
               {(messagesCount + supportCount) > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full"></span>
               )}
             </button>
 
             {/* Logout */}
             <button
               onClick={handleLogout}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors text-sm font-medium"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors text-xs font-medium"
             >
-              <LogOut size={18} />
-              <span>Déconnexion</span>
+              <LogOut size={16} />
+              <span className="hidden xl:inline">Déconnexion</span>
             </button>
 
             {/* Mobile Menu Button */}

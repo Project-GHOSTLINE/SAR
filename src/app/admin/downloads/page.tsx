@@ -8,22 +8,59 @@ import {
   FileArchive,
   ExternalLink,
   Copy,
-  Info
+  Info,
+  TrendingUp,
+  Users,
+  Activity,
+  Calendar
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AdminNav from '@/components/admin/AdminNav'
+
+interface DownloadStats {
+  total_downloads: number
+  unique_users: number
+  unique_ips: number
+  downloads_today: number
+  downloads_this_week: number
+  downloads_this_month: number
+  last_download: string | null
+  first_download: string | null
+  avg_downloads_per_day: number
+}
 
 export default function DownloadsPage() {
   const [copied, setCopied] = useState(false)
+  const [stats, setStats] = useState<DownloadStats | null>(null)
+  const [loadingStats, setLoadingStats] = useState(true)
 
   const extensionInfo = {
     name: 'IBV Crawler V2.15 - SAR PRODUCTION',
     version: '2.1.5',
     description: 'Support Flinks + Inverite → admin.solutionargentrapide.ca - Robust findValue() for Customer Info',
     id: 'icjjhbknppfpnfiooooajaggbmlbeagh',
-    downloadUrl: '/downloads/ibv-crawler-v2.15.zip',
-    fileSize: '~ 500 KB',
+    downloadUrl: '/api/download/ibv-crawler-v2.15.zip',
+    fileName: 'ibv-crawler-v2.15.zip',
+    fileSize: '12 KB',
     compatibility: 'Chrome, Edge, Brave (Chromium-based browsers)'
+  }
+
+  useEffect(() => {
+    fetchStats()
+  }, [])
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch(`/api/admin/downloads/stats?fileName=${encodeURIComponent(extensionInfo.fileName)}`)
+      const data = await response.json()
+      if (data.success) {
+        setStats(data.stats)
+      }
+    } catch (error) {
+      console.error('Erreur chargement stats:', error)
+    } finally {
+      setLoadingStats(false)
+    }
   }
 
   const copyExtensionId = () => {
@@ -104,6 +141,22 @@ export default function DownloadsPage() {
                       Production
                     </span>
                   </div>
+
+                  {/* Stats rapides */}
+                  {!loadingStats && stats && (
+                    <div className="mt-4 flex items-center gap-4 text-sm">
+                      <div className="flex items-center gap-1.5">
+                        <Download className="w-4 h-4" />
+                        <span className="font-semibold">{stats.total_downloads}</span>
+                        <span className="text-blue-100">téléchargements</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Users className="w-4 h-4" />
+                        <span className="font-semibold">{stats.unique_users}</span>
+                        <span className="text-blue-100">utilisateurs</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -111,6 +164,47 @@ export default function DownloadsPage() {
 
           {/* Body */}
           <div className="p-6">
+            {/* Stats détaillées */}
+            {!loadingStats && stats && (
+              <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Download className="w-5 h-5 text-blue-600" />
+                    <p className="text-xs text-blue-600 font-medium">Total</p>
+                  </div>
+                  <p className="text-2xl font-bold text-blue-900">{stats.total_downloads}</p>
+                  <p className="text-xs text-blue-600 mt-1">téléchargements</p>
+                </div>
+
+                <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="w-5 h-5 text-green-600" />
+                    <p className="text-xs text-green-600 font-medium">Aujourd'hui</p>
+                  </div>
+                  <p className="text-2xl font-bold text-green-900">{stats.downloads_today}</p>
+                  <p className="text-xs text-green-600 mt-1">cette journée</p>
+                </div>
+
+                <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Activity className="w-5 h-5 text-purple-600" />
+                    <p className="text-xs text-purple-600 font-medium">Cette semaine</p>
+                  </div>
+                  <p className="text-2xl font-bold text-purple-900">{stats.downloads_this_week}</p>
+                  <p className="text-xs text-purple-600 mt-1">7 derniers jours</p>
+                </div>
+
+                <div className="p-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg border border-amber-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="w-5 h-5 text-amber-600" />
+                    <p className="text-xs text-amber-600 font-medium">Moyenne/jour</p>
+                  </div>
+                  <p className="text-2xl font-bold text-amber-900">{stats.avg_downloads_per_day.toFixed(1)}</p>
+                  <p className="text-xs text-amber-600 mt-1">depuis le début</p>
+                </div>
+              </div>
+            )}
+
             {/* Info Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="p-4 bg-gray-50 rounded-lg">
@@ -147,7 +241,6 @@ export default function DownloadsPage() {
             {/* Download Button */}
             <a
               href={extensionInfo.downloadUrl}
-              download
               className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-md hover:shadow-lg font-semibold text-lg"
             >
               <Download className="w-6 h-6" />
