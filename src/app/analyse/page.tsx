@@ -1908,7 +1908,7 @@ function AnalysePageContent() {
 }
 
 // Export with SSR disabled to prevent hydration errors
-export default dynamic(() => Promise.resolve(AnalysePageContent), {
+export default Dynamic(() => Promise.resolve(AnalysePageContent), {
   ssr: false,
   loading: () => (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
