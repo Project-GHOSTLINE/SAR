@@ -51,6 +51,7 @@ function AnalysePageContent() {
   const [showAllMonths, setShowAllMonths] = useState(false)
   const [showDebugModal, setShowDebugModal] = useState(false)
   const [debugCopied, setDebugCopied] = useState(false)
+  const [headerMinimized, setHeaderMinimized] = useState(false) // Toggle pour minimiser/agrandir la section header
   const transactionsPerPage = 2500
 
   // Format currency
@@ -472,8 +473,36 @@ function AnalysePageContent() {
         <div className="w-full lg:pl-[22rem]">
 
           {/* Header Section - Deux colonnes: Paies + Comptes */}
-          <div className="bg-gradient-to-br from-[#10B981] to-emerald-700 rounded-lg shadow-lg p-3 mb-3">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="bg-gradient-to-br from-[#10B981] to-emerald-700 rounded-lg shadow-lg mb-3 transition-all duration-300">
+            {/* Toggle Button */}
+            <div className="flex items-center justify-between p-3 border-b border-white/10">
+              <h2 className="text-white font-bold flex items-center gap-2">
+                <BarChart3 size={20} />
+                Aperçu Financier
+              </h2>
+              <button
+                onClick={() => setHeaderMinimized(!headerMinimized)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-white text-sm font-medium"
+                title={headerMinimized ? "Agrandir" : "Minimiser"}
+              >
+                {headerMinimized ? (
+                  <>
+                    <ChevronRight size={16} />
+                    <span className="hidden sm:inline">Agrandir</span>
+                  </>
+                ) : (
+                  <>
+                    <ChevronLeft size={16} />
+                    <span className="hidden sm:inline">Minimiser</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Content (conditionnellement affiché) */}
+            {!headerMinimized && (
+              <div className="p-3">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
               {/* COLONNE GAUCHE - Paies */}
               <div className="bg-white/10 rounded-lg p-3">
@@ -778,6 +807,8 @@ function AnalysePageContent() {
               </div>
 
             </div>
+              </div>
+            )}
           </div>
 
           {/* Comptes Bancaires removed - now in sidebar as mini checks */}
