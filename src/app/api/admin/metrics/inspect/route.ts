@@ -54,6 +54,51 @@ export async function GET(request: NextRequest) {
 
     if (metricsError) throw metricsError
 
+    // 2.5. Compter les données sources (tables réelles)
+    const sourceDataCounts: any = {}
+
+    // Analyses clients
+    const { count: analysesCount } = await supabase
+      .from('client_analyses')
+      .select('*', { count: 'exact', head: true })
+    sourceDataCounts.client_analyses = analysesCount || 0
+
+    // Transactions
+    const { count: transactionsCount } = await supabase
+      .from('client_transactions')
+      .select('*', { count: 'exact', head: true })
+    sourceDataCounts.client_transactions = transactionsCount || 0
+
+    // Comptes clients
+    const { count: accountsCount } = await supabase
+      .from('client_accounts')
+      .select('*', { count: 'exact', head: true })
+    sourceDataCounts.client_accounts = accountsCount || 0
+
+    // Cas de fraude
+    const { count: fraudCasesCount } = await supabase
+      .from('fraud_cases')
+      .select('*', { count: 'exact', head: true })
+    sourceDataCounts.fraud_cases = fraudCasesCount || 0
+
+    // Messages contact
+    const { count: messagesCount } = await supabase
+      .from('contact_messages')
+      .select('*', { count: 'exact', head: true })
+    sourceDataCounts.contact_messages = messagesCount || 0
+
+    // Support tickets
+    const { count: ticketsCount } = await supabase
+      .from('support_tickets')
+      .select('*', { count: 'exact', head: true })
+    sourceDataCounts.support_tickets = ticketsCount || 0
+
+    // VoPay webhooks
+    const { count: vopayCount } = await supabase
+      .from('vopay_webhook_logs')
+      .select('*', { count: 'exact', head: true })
+    sourceDataCounts.vopay_webhook_logs = vopayCount || 0
+
     // 3. Statistiques globales sur metric_values
     const { data: valueStats, error: statsError } = await supabase
       .rpc('get_metric_value_stats')
@@ -145,6 +190,7 @@ export async function GET(request: NextRequest) {
         total_sections: sections?.length || 0,
         total_metrics: metrics?.length || 0,
         stats,
+        source_data_counts: sourceDataCounts,
         recent_values: recentValues || [],
         timestamp: new Date().toISOString()
       }

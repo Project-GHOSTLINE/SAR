@@ -64,6 +64,15 @@ interface InspectionData {
     sections_count: number
     metrics_count: number
   }
+  source_data_counts: {
+    client_analyses: number
+    client_transactions: number
+    client_accounts: number
+    fraud_cases: number
+    contact_messages: number
+    support_tickets: number
+    vopay_webhook_logs: number
+  }
   recent_values: any[]
   timestamp: string
 }
@@ -274,6 +283,77 @@ export default function MetricInspectorPage() {
               <div className="text-center">
                 <p className="text-2xl font-bold text-gray-600">{data.stats.total_values}</p>
                 <p className="text-sm text-gray-600 mt-1">Total</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Données Sources (Tables Réelles) */}
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Database className="w-5 h-5 text-blue-600" />
+              <h2 className="text-xl font-bold text-gray-900">Données Sources (Tables)</h2>
+              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                EN TEMPS RÉEL
+              </span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+              <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-2xl font-bold text-blue-600">
+                  {data.source_data_counts?.client_analyses?.toLocaleString() || 0}
+                </p>
+                <p className="text-xs text-gray-600 mt-1 font-medium">Analyses</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">client_analyses</p>
+              </div>
+              <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
+                <p className="text-2xl font-bold text-purple-600">
+                  {data.source_data_counts?.client_transactions?.toLocaleString() || 0}
+                </p>
+                <p className="text-xs text-gray-600 mt-1 font-medium">Transactions</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">client_transactions</p>
+              </div>
+              <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
+                <p className="text-2xl font-bold text-green-600">
+                  {data.source_data_counts?.client_accounts?.toLocaleString() || 0}
+                </p>
+                <p className="text-xs text-gray-600 mt-1 font-medium">Comptes</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">client_accounts</p>
+              </div>
+              <div className="text-center p-3 bg-red-50 rounded-lg border border-red-200">
+                <p className="text-2xl font-bold text-red-600">
+                  {data.source_data_counts?.fraud_cases?.toLocaleString() || 0}
+                </p>
+                <p className="text-xs text-gray-600 mt-1 font-medium">Fraudes</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">fraud_cases</p>
+              </div>
+              <div className="text-center p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                <p className="text-2xl font-bold text-yellow-600">
+                  {data.source_data_counts?.contact_messages?.toLocaleString() || 0}
+                </p>
+                <p className="text-xs text-gray-600 mt-1 font-medium">Messages</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">contact_messages</p>
+              </div>
+              <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                <p className="text-2xl font-bold text-orange-600">
+                  {data.source_data_counts?.support_tickets?.toLocaleString() || 0}
+                </p>
+                <p className="text-xs text-gray-600 mt-1 font-medium">Support</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">support_tickets</p>
+              </div>
+              <div className="text-center p-3 bg-indigo-50 rounded-lg border border-indigo-200">
+                <p className="text-2xl font-bold text-indigo-600">
+                  {data.source_data_counts?.vopay_webhook_logs?.toLocaleString() || 0}
+                </p>
+                <p className="text-xs text-gray-600 mt-1 font-medium">VoPay</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">vopay_webhook_logs</p>
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-start gap-2">
+                <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="text-xs text-gray-600">
+                  <p className="font-medium text-gray-700 mb-1">Ces compteurs montrent le nombre de lignes dans chaque table source.</p>
+                  <p>Si une valeur est à <strong>0</strong>, cela signifie qu'aucune donnée n'existe pour calculer les métriques associées.</p>
+                </div>
               </div>
             </div>
           </div>
