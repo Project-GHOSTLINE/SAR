@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import {
   LayoutDashboard, MessageSquare, DollarSign, FileText,
   Wrench, Webhook, BarChart3, LogOut, Menu, X,
-  ChevronDown, User, Clock, Bell, Shield, Database
+  ChevronDown, User, Clock, Bell, Shield, Database, Download
 } from 'lucide-react'
 
 interface AdminNavProps {
@@ -125,15 +125,15 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       badge: null
     },
     {
-      name: 'Metric Inspector',
-      href: '/admin/metric-inspector',
+      name: 'Data Explorer',
+      href: '/admin/data-explorer',
       icon: Database,
       badge: null
     },
     {
-      name: 'Database Explorer',
-      href: '/admin/database-explorer',
-      icon: Database,
+      name: 'Téléchargements',
+      href: '/admin/downloads',
+      icon: Download,
       badge: null
     }
   ]
