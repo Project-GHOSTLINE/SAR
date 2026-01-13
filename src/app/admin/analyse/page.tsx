@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import dynamic from 'next/dynamic'
+import Dynamic from 'next/dynamic'
 import AdminNav from '@/components/admin/AdminNav'
 import {
   ArrowLeft, Building, DollarSign, TrendingUp, CreditCard,
