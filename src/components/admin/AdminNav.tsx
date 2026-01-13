@@ -193,16 +193,13 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
               return (
                 <button
                   key={item.name}
-                  onClick={() => !item.disabled && router.push(item.href)}
-                  disabled={item.disabled}
+                  onClick={() => router.push(item.href)}
                   className={`
                     relative flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-all
                     whitespace-nowrap flex-shrink-0
                     ${active
                       ? 'bg-[#10B981] text-white shadow-md'
-                      : item.disabled
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-gray-700 hover:bg-gray-100'
+                      : 'text-gray-700 hover:bg-gray-100'
                     }
                   `}
                 >
@@ -270,19 +267,14 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                 <button
                   key={item.name}
                   onClick={() => {
-                    if (!item.disabled) {
-                      router.push(item.href)
-                      setMobileMenuOpen(false)
-                    }
+                    router.push(item.href)
+                    setMobileMenuOpen(false)
                   }}
-                  disabled={item.disabled}
                   className={`
                     w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all
                     ${active
                       ? 'bg-[#10B981] text-white'
-                      : item.disabled
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-gray-700 hover:bg-gray-100'
+                      : 'text-gray-700 hover:bg-gray-100'
                     }
                   `}
                 >
