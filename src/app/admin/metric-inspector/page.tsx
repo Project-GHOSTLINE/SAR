@@ -18,7 +18,7 @@ import {
   Info,
   Loader2
 } from 'lucide-react'
-import AdminNav from '@/components/admin/AdminNav'
+// AdminNav removed - this page is now included in data-explorer
 
 interface Metric {
   id: string
@@ -147,7 +147,6 @@ export default function MetricInspectorPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        <AdminNav currentPage="metric-inspector" />
         <div className="flex items-center justify-center min-h-[80vh]">
           <div className="text-center">
             <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
@@ -161,7 +160,6 @@ export default function MetricInspectorPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        <AdminNav currentPage="metric-inspector" />
         <div className="p-6">
           <div className="max-w-7xl mx-auto">
             <div className="bg-red-50 border border-red-200 rounded-lg p-6">
@@ -193,8 +191,6 @@ export default function MetricInspectorPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <AdminNav currentPage="metric-inspector" />
-
       <div className="p-6">
         <div className="max-w-7xl mx-auto space-y-6">
 

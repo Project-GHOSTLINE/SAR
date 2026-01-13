@@ -11,6 +11,7 @@ import {
   Info
 } from 'lucide-react'
 import { useState } from 'react'
+import AdminNav from '@/components/admin/AdminNav'
 
 export default function DownloadsPage() {
   const [copied, setCopied] = useState(false)
@@ -65,10 +66,14 @@ export default function DownloadsPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
+    <div className="min-h-screen bg-gray-50">
+      {/* Menu Admin fixe en haut */}
+      <AdminNav currentPage="/admin/downloads" />
+
+      <div className="p-6">
+        <div className="max-w-5xl mx-auto">
+          {/* Header */}
+          <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <Download className="w-8 h-8 text-blue-600" />
             Téléchargements
@@ -251,6 +256,7 @@ export default function DownloadsPage() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   )
 }
