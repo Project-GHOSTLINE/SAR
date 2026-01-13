@@ -32,6 +32,8 @@ export default function GoogleAnalytics() {
     if (!GA_ID || typeof window === 'undefined') return
 
     let gaLoaded = false
+    let checkInterval: NodeJS.Timeout
+    let fallbackTimeout: NodeJS.Timeout
 
     const loadGA = () => {
       if (gaLoaded) return
@@ -57,37 +59,46 @@ export default function GoogleAnalytics() {
       })
     }
 
-    // Wait for Axeptio consent
-    const checkAxeptio = setInterval(() => {
-      if (window._axcb) {
-        clearInterval(checkAxeptio)
-        console.log('🍪 Axeptio detected - Waiting for consent')
+    // Wait for Axeptio SDK to be fully loaded
+    const waitForAxeptio = () => {
+      checkInterval = setInterval(() => {
+        // Check if Axeptio SDK is loaded AND widget is present
+        if (window._axcb && typeof window._axcb.push === 'function') {
+          clearInterval(checkInterval)
+          clearTimeout(fallbackTimeout)
 
-        window._axcb.push((axeptio: any) => {
-          axeptio.on('cookies:complete', (choices: any) => {
-            if (choices.google_analytics) {
-              console.log('✅ Analytics consent given')
-              loadGA()
-            } else {
-              console.log('❌ Analytics consent denied')
-            }
+          console.log('🍪 Axeptio SDK ready - Registering consent listener')
+
+          window._axcb.push((axeptio: any) => {
+            axeptio.on('cookies:complete', (choices: any) => {
+              console.log('🍪 Consent received:', choices)
+              if (choices.google_analytics) {
+                console.log('✅ Analytics consent given')
+                loadGA()
+              } else {
+                console.log('❌ Analytics consent denied')
+              }
+            })
           })
-        })
-      }
-    }, 100)
+        }
+      }, 200)
 
-    // Fallback: if Axeptio doesn't load in 5 seconds, load GA anyway
-    const fallback = setTimeout(() => {
-      clearInterval(checkAxeptio)
-      if (!gaLoaded) {
-        console.log('⚠️ Axeptio timeout - Loading GA anyway')
-        loadGA()
-      }
-    }, 5000)
+      // Fallback: if Axeptio doesn't initialize in 10 seconds, skip GA
+      fallbackTimeout = setTimeout(() => {
+        clearInterval(checkInterval)
+        if (!gaLoaded) {
+          console.log('⚠️ Axeptio timeout - GA will not load without consent')
+        }
+      }, 10000)
+    }
+
+    // Start waiting after a small delay to let Axeptio initialize first
+    const initDelay = setTimeout(waitForAxeptio, 500)
 
     return () => {
-      clearInterval(checkAxeptio)
-      clearTimeout(fallback)
+      clearInterval(checkInterval)
+      clearTimeout(fallbackTimeout)
+      clearTimeout(initDelay)
     }
   }, [GA_ID])
 
