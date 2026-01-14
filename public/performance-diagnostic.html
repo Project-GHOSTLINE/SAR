@@ -215,6 +215,94 @@
     .badge-good { background: #dbeafe; color: #1e40af; }
     .badge-warning { background: #fef3c7; color: #92400e; }
     .badge-critical { background: #fee2e2; color: #991b1b; }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(5px);
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 900px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .modal-close:hover { transform: scale(1.1); }
+    .timing-bar {
+      height: 30px;
+      border-radius: 8px;
+      margin: 8px 0;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .timing-segment {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .timing-segment:hover {
+      filter: brightness(1.2);
+      z-index: 10;
+    }
+    .timing-segment-dns { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .timing-segment-tcp { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .timing-segment-tls { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .timing-segment-request { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .timing-segment-response { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    .timing-legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .timing-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .timing-legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+    .clickable-card { cursor: pointer; transition: all 0.3s; }
+    .clickable-card:hover { transform: translateY(-6px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
   </style>
 </head>
 <body>
@@ -251,19 +339,21 @@
         <div class="card-value" id="avgTime">0ms</div>
         <div class="card-label">Temps de réponse moyen des API</div>
       </div>
-      <div class="card">
+      <div class="card clickable-card" id="fastestCard" style="cursor: pointer;" title="Cliquez pour voir les détails">
         <div class="card-header">
           <span class="card-title">🚀 API la Plus Rapide</span>
         </div>
         <div class="card-value" id="fastest">-</div>
         <div class="card-label" id="fastestApi">En attente...</div>
+        <div style="text-align: center; margin-top: 10px; font-size: 11px; color: #64748b;">🔍 Cliquez pour détails</div>
       </div>
-      <div class="card">
+      <div class="card clickable-card" id="slowestCard" style="cursor: pointer;" title="Cliquez pour voir les détails">
         <div class="card-header">
           <span class="card-title">🐌 API la Plus Lente</span>
         </div>
         <div class="card-value" id="slowest">-</div>
         <div class="card-label" id="slowestApi">En attente...</div>
+        <div style="text-align: center; margin-top: 10px; font-size: 11px; color: #64748b;">🔍 Cliquez pour détails</div>
       </div>
       <div class="card">
         <div class="card-header">
@@ -289,6 +379,14 @@
     </div>
   </div>
 
+  <!-- Modal pour les détails d'API -->
+  <div id="apiDetailModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
   <script>
     const endpoints = [
       { name: 'Messages', url: '/api/admin/messages/assign', critical: true },
@@ -305,14 +403,40 @@
 
     async function testEndpoint(endpoint) {
       const start = performance.now();
+      const perfMark = `api-test-${Date.now()}`;
+      performance.mark(perfMark);
+
       try {
-        const response = await fetch(`http://localhost:3000${endpoint.url}`, {
+        const response = await fetch(`${window.location.origin}${endpoint.url}`, {
           credentials: 'include',
           headers: { 'Accept': 'application/json' }
         });
         const end = performance.now();
         const time = Math.round(end - start);
         const data = await response.json();
+
+        // Obtenir les détails de timing de performance
+        await new Promise(resolve => setTimeout(resolve, 10)); // Petit délai pour laisser les perf entries se mettre à jour
+        const perfEntries = performance.getEntriesByType('resource');
+        const resourceEntry = perfEntries.reverse().find(entry =>
+          entry.name.includes(endpoint.url)
+        );
+
+        let timingDetails = null;
+        if (resourceEntry) {
+          timingDetails = {
+            dns: Math.round(resourceEntry.domainLookupEnd - resourceEntry.domainLookupStart),
+            tcp: Math.round(resourceEntry.connectEnd - resourceEntry.connectStart),
+            tls: resourceEntry.secureConnectionStart > 0 ?
+              Math.round(resourceEntry.connectEnd - resourceEntry.secureConnectionStart) : 0,
+            request: Math.round(resourceEntry.responseStart - resourceEntry.requestStart),
+            response: Math.round(resourceEntry.responseEnd - resourceEntry.responseStart),
+            total: Math.round(resourceEntry.duration),
+            transferSize: resourceEntry.transferSize || 0,
+            encodedBodySize: resourceEntry.encodedBodySize || 0,
+            decodedBodySize: resourceEntry.decodedBodySize || 0
+          };
+        }
 
         return {
           name: endpoint.name,
@@ -322,7 +446,8 @@
           success: response.ok,
           size: new Blob([JSON.stringify(data)]).size,
           critical: endpoint.critical,
-          data: data
+          data: data,
+          timing: timingDetails
         };
       } catch (error) {
         const end = performance.now();
@@ -333,7 +458,8 @@
           status: 0,
           success: false,
           error: error.message,
-          critical: endpoint.critical
+          critical: endpoint.critical,
+          timing: null
         };
       }
     }
@@ -370,11 +496,12 @@
       const resultsDiv = document.getElementById('results');
 
       const resultHtml = `
-        <div class="test-result ${perfClass}">
+        <div class="test-result ${perfClass}" style="cursor: pointer; transition: all 0.2s;" onclick="showApiDetails('${result.name}')" title="Cliquez pour voir les détails">
           <div class="test-header">
             <div>
               <span class="test-name">${result.critical ? '🔴 ' : ''}${result.name}</span>
               ${badge}
+              <span style="font-size: 11px; color: #64748b; margin-left: 8px;">🔍 Cliquez pour détails</span>
             </div>
             <span class="test-time" style="color: ${perfClass === 'fast' ? '#10b981' : perfClass === 'medium' ? '#f59e0b' : '#ef4444'}">
               ${result.time}ms
@@ -405,6 +532,10 @@
       document.getElementById('slowest').textContent = slowest.time + 'ms';
       document.getElementById('slowestApi').textContent = slowest.name;
       document.getElementById('testCount').textContent = results.length;
+
+      // Rendre les cartes cliquables
+      document.getElementById('fastestCard').onclick = () => showApiDetails(fastest.name);
+      document.getElementById('slowestCard').onclick = () => showApiDetails(slowest.name);
     }
 
     function generateRecommendations() {
@@ -525,6 +656,171 @@
       generateRecommendations();
       document.getElementById('downloadBtn').style.display = 'flex';
     }
+
+    function showApiDetails(apiName) {
+      const result = results.find(r => r.name === apiName);
+      if (!result) return;
+
+      const perfClass = getPerformanceClass(result.time, result.critical);
+      const badge = getPerformanceBadgeText(result.time, result.critical);
+
+      let timingHtml = '';
+      if (result.timing) {
+        const t = result.timing;
+        const total = t.dns + t.tcp + t.tls + t.request + t.response;
+
+        timingHtml = `
+          <h3 style="color: #1a202c; font-size: 20px; font-weight: 800; margin-top: 30px; margin-bottom: 15px;">
+            ⏱️ Breakdown Temporel
+          </h3>
+          <div class="timing-bar">
+            ${t.dns > 0 ? `<div class="timing-segment timing-segment-dns" style="width: ${(t.dns/total*100)}%" title="DNS Lookup: ${t.dns}ms">${t.dns}ms</div>` : ''}
+            ${t.tcp > 0 ? `<div class="timing-segment timing-segment-tcp" style="width: ${(t.tcp/total*100)}%" title="TCP Connection: ${t.tcp}ms">${t.tcp}ms</div>` : ''}
+            ${t.tls > 0 ? `<div class="timing-segment timing-segment-tls" style="width: ${(t.tls/total*100)}%" title="TLS Handshake: ${t.tls}ms">${t.tls}ms</div>` : ''}
+            ${t.request > 0 ? `<div class="timing-segment timing-segment-request" style="width: ${(t.request/total*100)}%" title="Request Sent: ${t.request}ms">${t.request}ms</div>` : ''}
+            ${t.response > 0 ? `<div class="timing-segment timing-segment-response" style="width: ${(t.response/total*100)}%" title="Response Received: ${t.response}ms">${t.response}ms</div>` : ''}
+          </div>
+          <div class="timing-legend">
+            ${t.dns > 0 ? '<div class="timing-legend-item"><div class="timing-legend-color timing-segment-dns"></div><span><strong>DNS Lookup:</strong> ' + t.dns + 'ms</span></div>' : ''}
+            ${t.tcp > 0 ? '<div class="timing-legend-item"><div class="timing-legend-color timing-segment-tcp"></div><span><strong>TCP Connection:</strong> ' + t.tcp + 'ms</span></div>' : ''}
+            ${t.tls > 0 ? '<div class="timing-legend-item"><div class="timing-legend-color timing-segment-tls"></div><span><strong>TLS Handshake:</strong> ' + t.tls + 'ms</span></div>' : ''}
+            ${t.request > 0 ? '<div class="timing-legend-item"><div class="timing-legend-color timing-segment-request"></div><span><strong>Request:</strong> ' + t.request + 'ms</span></div>' : ''}
+            ${t.response > 0 ? '<div class="timing-legend-item"><div class="timing-legend-color timing-segment-response"></div><span><strong>Response:</strong> ' + t.response + 'ms</span></div>' : ''}
+          </div>
+
+          <h3 style="color: #1a202c; font-size: 20px; font-weight: 800; margin-top: 30px; margin-bottom: 15px;">
+            📊 Métriques Détaillées
+          </h3>
+          <div style="background: #f8fafc; border-radius: 12px; padding: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div>
+                <div style="color: #64748b; font-size: 12px; margin-bottom: 5px;">TRANSFER SIZE</div>
+                <div style="font-size: 18px; font-weight: 700; color: #1a202c;">${(t.transferSize / 1024).toFixed(2)} KB</div>
+              </div>
+              <div>
+                <div style="color: #64748b; font-size: 12px; margin-bottom: 5px;">ENCODED BODY</div>
+                <div style="font-size: 18px; font-weight: 700; color: #1a202c;">${(t.encodedBodySize / 1024).toFixed(2)} KB</div>
+              </div>
+              <div>
+                <div style="color: #64748b; font-size: 12px; margin-bottom: 5px;">DECODED BODY</div>
+                <div style="font-size: 18px; font-weight: 700; color: #1a202c;">${(t.decodedBodySize / 1024).toFixed(2)} KB</div>
+              </div>
+              <div>
+                <div style="color: #64748b; font-size: 12px; margin-bottom: 5px;">COMPRESSION RATIO</div>
+                <div style="font-size: 18px; font-weight: 700; color: #10b981;">${t.encodedBodySize > 0 ? (((t.decodedBodySize - t.encodedBodySize) / t.decodedBodySize * 100).toFixed(1)) : 0}%</div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        timingHtml = `
+          <div style="background: #fee2e2; border-radius: 12px; padding: 20px; margin-top: 20px; border-left: 4px solid #ef4444;">
+            <p style="color: #991b1b; font-weight: 600;">⚠️ Détails de timing non disponibles</p>
+            <p style="color: #7f1d1d; font-size: 13px; margin-top: 8px;">Les métriques de performance détaillées ne sont pas accessibles pour cette requête.</p>
+          </div>
+        `;
+      }
+
+      const modalHtml = `
+        <h2 style="color: #1a202c; font-size: 28px; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+          🔍 ${result.name}
+          <span class="metric-badge badge-${perfClass === 'fast' ? 'excellent' : perfClass === 'medium' ? 'good' : 'critical'}">${badge}</span>
+        </h2>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 30px;">${result.url}</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 20px; color: white;">
+            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 5px;">TEMPS TOTAL</div>
+            <div style="font-size: 32px; font-weight: 800;">${result.time}ms</div>
+          </div>
+          <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 12px; padding: 20px; color: white;">
+            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 5px;">STATUS HTTP</div>
+            <div style="font-size: 32px; font-weight: 800;">${result.status}</div>
+          </div>
+          <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); border-radius: 12px; padding: 20px; color: white;">
+            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 5px;">TAILLE DONNÉES</div>
+            <div style="font-size: 32px; font-weight: 800;">${(result.size / 1024).toFixed(2)}KB</div>
+          </div>
+          <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); border-radius: 12px; padding: 20px; color: white;">
+            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 5px;">TYPE</div>
+            <div style="font-size: 20px; font-weight: 800;">${result.critical ? 'CRITIQUE' : 'STANDARD'}</div>
+          </div>
+        </div>
+
+        ${timingHtml}
+
+        <h3 style="color: #1a202c; font-size: 20px; font-weight: 800; margin-top: 30px; margin-bottom: 15px;">
+          💡 Analyse & Recommandations
+        </h3>
+        <div style="background: #fef3c7; border-radius: 12px; padding: 20px; border-left: 4px solid #f59e0b;">
+          ${analyzePerformance(result)}
+        </div>
+      `;
+
+      document.getElementById('modalBody').innerHTML = modalHtml;
+      document.getElementById('apiDetailModal').classList.add('active');
+    }
+
+    function analyzePerformance(result) {
+      let analysis = [];
+
+      if (result.time < 100) {
+        analysis.push('✅ <strong>Excellent:</strong> Temps de réponse optimal, aucune action requise.');
+      } else if (result.time < 300) {
+        analysis.push('✅ <strong>Bon:</strong> Performance acceptable.');
+      } else if (result.time < 500) {
+        analysis.push('⚠️ <strong>Lent:</strong> Optimisation recommandée.');
+      } else {
+        analysis.push('🔴 <strong>Critique:</strong> Optimisation URGENTE requise!');
+      }
+
+      if (result.timing) {
+        const t = result.timing;
+        if (t.dns > 50) {
+          analysis.push('⚠️ <strong>DNS Lookup lent</strong> (' + t.dns + 'ms): Considérer un CDN ou DNS caching.');
+        }
+        if (t.tcp > 100) {
+          analysis.push('⚠️ <strong>TCP Connection lent</strong> (' + t.tcp + 'ms): Problème réseau ou serveur distant.');
+        }
+        if (t.tls > 100) {
+          analysis.push('⚠️ <strong>TLS Handshake lent</strong> (' + t.tls + 'ms): Optimiser la configuration SSL/TLS.');
+        }
+        if (t.request > 100) {
+          analysis.push('⚠️ <strong>Temps d\'envoi long</strong> (' + t.request + 'ms): Vérifier la bande passante upload.');
+        }
+        if (t.response > 200) {
+          analysis.push('🔴 <strong>Réponse serveur lente</strong> (' + t.response + 'ms): Problème de performance backend - Optimiser les requêtes DB, ajouter du caching.');
+        }
+        if (t.decodedBodySize > 500000) {
+          analysis.push('⚠️ <strong>Payload volumineux</strong> (' + (t.decodedBodySize/1024).toFixed(0) + 'KB): Implémenter pagination ou réduire les données retournées.');
+        }
+        if (t.encodedBodySize > 0 && ((t.decodedBodySize - t.encodedBodySize) / t.decodedBodySize) < 0.5) {
+          analysis.push('💡 <strong>Compression faible</strong>: Améliorer la compression gzip/brotli côté serveur.');
+        }
+      }
+
+      if (result.size > 100000) {
+        analysis.push('📦 <strong>Données volumineuses</strong>: Envisager pagination, lazy loading ou GraphQL.');
+      }
+
+      if (analysis.length === 1) {
+        analysis.push('🎯 <strong>Conseil:</strong> Maintenir ce niveau de performance.');
+      }
+
+      return analysis.map(a => '<p style="margin: 10px 0; color: #92400e; font-size: 14px;">' + a + '</p>').join('');
+    }
+
+    function closeModal() {
+      document.getElementById('apiDetailModal').classList.remove('active');
+    }
+
+    // Fermer le modal en cliquant en dehors
+    document.addEventListener('click', (e) => {
+      const modal = document.getElementById('apiDetailModal');
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
 
     function downloadReport() {
       if (results.length === 0) {
