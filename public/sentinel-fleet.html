@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚀 SENTINEL FLEET SPECS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      background: linear-gradient(180deg, #0a0e27 0%, #000 100%);
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .fleet-container {
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 32px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(102, 126, 234, 0.5);
+      margin-bottom: 32px;
+    }
+
+    .title {
+      font-size: 42px;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #e0e0e0;
+      margin-top: 8px;
+      letter-spacing: 2px;
+    }
+
+    /* Fleet Grid */
+    .fleet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 24px;
+    }
+
+    /* Sentinel Card */
+    .sentinel-card {
+      background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+      border: 3px solid #667eea;
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s;
+    }
+
+    .sentinel-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 16px 48px rgba(102, 126, 234, 0.4);
+      border-color: #10b981;
+    }
+
+    .sentinel-card.active {
+      border-color: #10b981;
+      box-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
+    }
+
+    .sentinel-card.recharging {
+      border-color: #f59e0b;
+      opacity: 0.8;
+    }
+
+    .sentinel-card.offline {
+      border-color: #6b7280;
+      opacity: 0.6;
+    }
+
+    /* Card Header */
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #667eea;
+    }
+
+    .sentinel-icon {
+      font-size: 64px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .sentinel-info {
+      flex: 1;
+      margin-left: 20px;
+    }
+
+    .sentinel-name {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .sentinel-class {
+      font-size: 12px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 600;
+    }
+
+    .sentinel-id {
+      font-size: 10px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .status-idle {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+      border: 1px solid #3b82f6;
+    }
+
+    .status-active {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    .status-recharging {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid #f59e0b;
+    }
+
+    .status-offline {
+      background: rgba(107, 114, 128, 0.2);
+      color: #6b7280;
+      border: 1px solid #6b7280;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Level & XP */
+    .level-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .level-badge {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .level-label {
+      font-size: 9px;
+      color: #e0e0e0;
+      text-transform: uppercase;
+    }
+
+    .level-number {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .xp-container {
+      flex: 1;
+    }
+
+    .xp-label {
+      font-size: 11px;
+      color: #a78bfa;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .xp-bar {
+      height: 12px;
+      background: #1a1f3a;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #667eea;
+    }
+
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+      transition: width 1s ease;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-item {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid #667eea;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .stat-value-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .stat-bar {
+      flex: 1;
+      height: 6px;
+      background: #1a1f3a;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .stat-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.5s ease;
+    }
+
+    /* Resources */
+    .resources {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .resource {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid #10b981;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .resource-label {
+      font-size: 10px;
+      color: #10b981;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .resource-bar {
+      height: 8px;
+      background: #1a1f3a;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+
+    .resource-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+      transition: width 0.5s ease;
+    }
+
+    .resource-text {
+      font-size: 11px;
+      color: #e0e0e0;
+    }
+
+    /* Loadout */
+    .loadout {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid #667eea;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+
+    .loadout-title {
+      font-size: 11px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .loadout-items {
+      display: flex;
+      gap: 12px;
+    }
+
+    .loadout-item {
+      background: #1a1f3a;
+      border: 1px solid #667eea;
+      border-radius: 6px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    /* Powerups */
+    .powerups {
+      margin-bottom: 20px;
+    }
+
+    .powerups-title {
+      font-size: 11px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .powerup-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .powerup-badge {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid #f59e0b;
+      color: #f59e0b;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* Achievements */
+    .achievements {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .achievement {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid #667eea;
+      border-radius: 6px;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .achievement-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #10b981;
+      margin-bottom: 2px;
+    }
+
+    .achievement-label {
+      font-size: 9px;
+      color: #a78bfa;
+      text-transform: uppercase;
+    }
+
+    /* Power Rating */
+    .power-rating {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+    }
+  </style>
+</head>
+<body>
+
+<div class="fleet-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="title">🚀 SENTINEL FLEET SPECS</div>
+    <div class="subtitle">Complete Unit Analysis & Power Ratings</div>
+  </div>
+
+  <!-- Fleet Grid -->
+  <div class="fleet-grid" id="fleetGrid"></div>
+</div>
+
+<script>
+  async function loadFleet() {
+    try {
+      const response = await fetch('/api/sentinel/fleet');
+      const data = await response.json();
+
+      if (data.success) {
+        renderFleet(data.fleet);
+      }
+    } catch (error) {
+      console.error('Failed to load fleet:', error);
+    }
+  }
+
+  function renderFleet(fleet) {
+    const grid = document.getElementById('fleetGrid');
+
+    grid.innerHTML = fleet.map(sentinel => {
+      const xpPercent = (sentinel.xp / sentinel.xp_to_next) * 100;
+
+      return `
+        <div class="sentinel-card ${sentinel.status}">
+          <div class="power-rating">⚡ ${sentinel.power_rating}</div>
+
+          <!-- Header -->
+          <div class="card-header">
+            <div class="sentinel-icon">${sentinel.skin}</div>
+            <div class="sentinel-info">
+              <div class="sentinel-name">${sentinel.name}</div>
+              <div class="sentinel-class">${sentinel.class}</div>
+              <div class="sentinel-id">${sentinel.id}</div>
+            </div>
+            <div class="status-badge status-${sentinel.status}">
+              ${sentinel.status}
+            </div>
+          </div>
+
+          <!-- Level & XP -->
+          <div class="level-section">
+            <div class="level-badge">
+              <div class="level-label">Level</div>
+              <div class="level-number">${sentinel.level}</div>
+            </div>
+            <div class="xp-container">
+              <div class="xp-label">
+                <span>Experience</span>
+                <span>${sentinel.xp} / ${sentinel.xp_to_next}</span>
+              </div>
+              <div class="xp-bar">
+                <div class="xp-fill" style="width: ${xpPercent}%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resources -->
+          <div class="resources">
+            <div class="resource">
+              <div class="resource-label">❤️ Health</div>
+              <div class="resource-bar">
+                <div class="resource-bar-fill" style="width: ${(sentinel.health / sentinel.max_health) * 100}%"></div>
+              </div>
+              <div class="resource-text">${sentinel.health} / ${sentinel.max_health}</div>
+            </div>
+            <div class="resource">
+              <div class="resource-label">⚡ Energy</div>
+              <div class="resource-bar">
+                <div class="resource-bar-fill" style="width: ${(sentinel.energy / sentinel.max_energy) * 100}%"></div>
+              </div>
+              <div class="resource-text">${sentinel.energy} / ${sentinel.max_energy}</div>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-label">⚔️ Attack</div>
+              <div class="stat-value-container">
+                <div class="stat-value">${sentinel.attack}</div>
+                <div class="stat-bar">
+                  <div class="stat-bar-fill" style="width: ${(sentinel.attack / 150) * 100}%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">🛡️ Defense</div>
+              <div class="stat-value-container">
+                <div class="stat-value">${sentinel.defense}</div>
+                <div class="stat-bar">
+                  <div class="stat-bar-fill" style="width: ${(sentinel.defense / 150) * 100}%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">⚡ Speed</div>
+              <div class="stat-value-container">
+                <div class="stat-value">${sentinel.speed}</div>
+                <div class="stat-bar">
+                  <div class="stat-bar-fill" style="width: ${(sentinel.speed / 150) * 100}%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">🎯 Accuracy</div>
+              <div class="stat-value-container">
+                <div class="stat-value">${sentinel.accuracy}</div>
+                <div class="stat-bar">
+                  <div class="stat-bar-fill" style="width: ${(sentinel.accuracy / 100) * 100}%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loadout -->
+          <div class="loadout">
+            <div class="loadout-title">🔧 Loadout</div>
+            <div class="loadout-items">
+              <div class="loadout-item">
+                <span>🔫</span>
+                <span>${sentinel.weapon}</span>
+              </div>
+              <div class="loadout-item">
+                <span>${sentinel.skin}</span>
+                <span>Skin</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Powerups -->
+          <div class="powerups">
+            <div class="powerups-title">💎 Power-ups Active</div>
+            <div class="powerup-grid">
+              ${sentinel.powerups.map(p => `
+                <span class="powerup-badge">${p.replace(/_/g, ' ')}</span>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Achievements -->
+          <div class="achievements">
+            <div class="achievement">
+              <div class="achievement-value">${sentinel.missions_completed}</div>
+              <div class="achievement-label">Missions</div>
+            </div>
+            <div class="achievement">
+              <div class="achievement-value">${sentinel.threats_eliminated}</div>
+              <div class="achievement-label">Threats</div>
+            </div>
+            <div class="achievement">
+              <div class="achievement-value">${sentinel.builds_completed}</div>
+              <div class="achievement-label">Builds</div>
+            </div>
+            <div class="achievement">
+              <div class="achievement-value">${sentinel.tests_passed}</div>
+              <div class="achievement-label">Tests</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Load fleet on page load
+  loadFleet();
+
+  // Auto-refresh every 10 seconds
+  setInterval(loadFleet, 10000);
+</script>
+
+</body>
+</html>

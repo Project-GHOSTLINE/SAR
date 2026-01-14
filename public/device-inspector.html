@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Deep Device Inspector</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier New', monospace; background: #000; color: #0ff; padding: 20px; }
+        h1 { text-align: center; font-size: 2.5em; color: #0ff; text-shadow: 0 0 20px #0ff; margin-bottom: 20px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .btn { width: 100%; padding: 20px; background: #0ff; border: none; color: #000; font-size: 1.5em; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
+        .btn:hover { background: #0cc; box-shadow: 0 0 30px #0ff; }
+        .loading { text-align: center; padding: 60px; font-size: 2em; color: #0ff; }
+        .section { background: rgba(0, 50, 50, 0.3); border: 2px solid #0ff; padding: 20px; margin-bottom: 20px; }
+        .section-title { font-size: 1.5em; color: #0ff; margin-bottom: 15px; font-weight: bold; border-bottom: 2px solid #0ff; padding-bottom: 10px; }
+        .info-row { padding: 10px; margin-bottom: 5px; background: rgba(0, 30, 30, 0.5); border-left: 3px solid #0ff; }
+        .label { color: #0aa; font-weight: bold; display: inline-block; min-width: 200px; }
+        .value { color: #0ff; word-break: break-all; }
+        .critical { border-left-color: #f00; }
+        .critical .value { color: #f00; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat { background: rgba(0, 50, 50, 0.3); border: 2px solid #0ff; padding: 15px; text-align: center; }
+        .stat-value { font-size: 2em; font-weight: bold; color: #0ff; }
+        .stat-label { color: #0aa; margin-top: 5px; }
+        .message { background: rgba(0, 30, 30, 0.7); padding: 10px; margin-bottom: 5px; border-left: 3px solid; }
+        .message.sent { border-left-color: #0f0; }
+        .message.received { border-left-color: #0ff; }
+        .message-time { color: #0aa; font-size: 0.9em; }
+        .message-text { color: #0ff; margin-top: 5px; }
+        .history-item { background: rgba(0, 30, 30, 0.5); padding: 8px; margin-bottom: 3px; font-size: 0.9em; }
+        .url { color: #0ff; }
+        .time { color: #0aa; }
+        .command { color: #0f0; font-family: monospace; }
+        .error { color: #f00; }
+        .warning { background: #f90; color: #000; padding: 15px; margin-bottom: 20px; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>🔍 DEEP DEVICE INSPECTOR</h1>
+    <button class="btn" onclick="inspect()">🚀 INSPECT EVERYTHING</button>
+
+    <div class="warning">
+        ⚠️ Some data may require Full Disk Access permission
+    </div>
+
+    <div id="loading" class="loading" style="display: none;">Extracting all device data...</div>
+
+    <div id="results" style="display: none;">
+        <!-- Device Model -->
+        <div class="section">
+            <div class="section-title">💻 DEVICE MODEL</div>
+            <div id="device-model"></div>
+        </div>
+
+        <!-- Operating System -->
+        <div class="section">
+            <div class="section-title">🖥️ OPERATING SYSTEM</div>
+            <div id="operating-system"></div>
+        </div>
+
+        <!-- DNS Information -->
+        <div class="section">
+            <div class="section-title">🌐 DNS INFORMATION</div>
+            <div id="dns-info"></div>
+        </div>
+
+        <!-- Browser History -->
+        <div class="section">
+            <div class="section-title">🌍 BROWSER HISTORY</div>
+            <div id="browser-history"></div>
+        </div>
+
+        <!-- Command History -->
+        <div class="section">
+            <div class="section-title">⌨️ COMMAND HISTORY</div>
+            <div id="command-history"></div>
+        </div>
+
+        <!-- Messages/SMS -->
+        <div class="section">
+            <div class="section-title">💬 MESSAGES/SMS</div>
+            <div id="messages"></div>
+        </div>
+
+        <!-- App Usage -->
+        <div class="section">
+            <div class="section-title">📱 APP USAGE</div>
+            <div id="app-usage"></div>
+        </div>
+
+        <!-- System Logs -->
+        <div class="section">
+            <div class="section-title">📋 SYSTEM LOGS</div>
+            <div id="system-logs"></div>
+        </div>
+    </div>
+
+    <script>
+        async function inspect() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/device/deep-inspector');
+                const data = await response.json();
+
+                if (data.success) {
+                    display(data.results);
+                } else {
+                    alert('Inspection failed: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function display(data) {
+            document.getElementById('results').style.display = 'block';
+
+            // Device Model
+            const deviceModel = data.device_model;
+            document.getElementById('device-model').innerHTML = `
+                <div class="info-row critical">
+                    <span class="label">Product Name:</span>
+                    <span class="value">${deviceModel.product_name || 'N/A'}</span>
+                </div>
+                <div class="info-row critical">
+                    <span class="label">Model:</span>
+                    <span class="value">${deviceModel.model || 'N/A'}</span>
+                </div>
+                <div class="info-row critical">
+                    <span class="label">Model Identifier:</span>
+                    <span class="value">${deviceModel.model_identifier || 'N/A'}</span>
+                </div>
+                <div class="info-row critical">
+                    <span class="label">Serial Number:</span>
+                    <span class="value">${deviceModel.serial_number || 'N/A'}</span>
+                </div>
+                <div class="info-row critical">
+                    <span class="label">UUID:</span>
+                    <span class="value">${deviceModel.uuid || 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">CPU:</span>
+                    <span class="value">${deviceModel.cpu || 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">CPU Cores:</span>
+                    <span class="value">${deviceModel.cpu_cores || 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Memory:</span>
+                    <span class="value">${deviceModel.memory_gb || 'N/A'} GB</span>
+                </div>
+            `;
+
+            // Operating System
+            const os = data.operating_system;
+            document.getElementById('operating-system').innerHTML = `
+                <div class="info-row">
+                    <span class="label">Product:</span>
+                    <span class="value">${os.product || 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Version:</span>
+                    <span class="value">${os.version || 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Build:</span>
+                    <span class="value">${os.build || 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Kernel:</span>
+                    <span class="value">${os.kernel || 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Hostname:</span>
+                    <span class="value">${os.hostname || 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Current User:</span>
+                    <span class="value">${os.current_user || 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">All Users:</span>
+                    <span class="value">${os.all_users ? os.all_users.join(', ') : 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Uptime:</span>
+                    <span class="value">${os.uptime || 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Boot Time:</span>
+                    <span class="value">${os.boot_time || 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Timezone:</span>
+                    <span class="value">${os.timezone || 'N/A'}</span>
+                </div>
+            `;
+
+            // DNS Information
+            const dns = data.dns_info;
+            let dnsHtml = `
+                <div class="info-row">
+                    <span class="label">Current DNS Servers:</span>
+                    <span class="value">${dns.current_dns ? dns.current_dns.join(', ') : 'N/A'}</span>
+                </div>
+            `;
+            if (dns.dns_cache && dns.dns_cache.length > 0) {
+                dnsHtml += `<div style="margin-top: 15px; font-weight: bold; color: #0ff;">DNS Cache (${dns.dns_cache.length} entries):</div>`;
+                dns.dns_cache.slice(0, 20).forEach(entry => {
+                    dnsHtml += `<div class="history-item">${entry}</div>`;
+                });
+            }
+            if (dns.recent_queries && dns.recent_queries.length > 0) {
+                dnsHtml += `<div style="margin-top: 15px; font-weight: bold; color: #0ff;">Recent DNS Queries:</div>`;
+                dns.recent_queries.slice(0, 20).forEach(query => {
+                    dnsHtml += `<div class="history-item">${query}</div>`;
+                });
+            }
+            document.getElementById('dns-info').innerHTML = dnsHtml;
+
+            // Browser History
+            const history = data.browser_history;
+            let historyHtml = '';
+
+            // Safari
+            historyHtml += '<div style="margin-bottom: 20px;"><div style="font-weight: bold; color: #0ff; margin-bottom: 10px;">🧭 Safari History:</div>';
+            if (Array.isArray(history.safari) && history.safari.length > 0) {
+                history.safari.slice(0, 20).forEach(item => {
+                    historyHtml += `
+                        <div class="history-item">
+                            <div class="time">${item.visit_time}</div>
+                            <div class="url">${item.url}</div>
+                            <div>${item.title || 'No title'}</div>
+                        </div>
+                    `;
+                });
+            } else if (history.safari.error) {
+                historyHtml += `<div class="error">${history.safari.error}</div>`;
+            } else {
+                historyHtml += '<div class="error">No history found</div>';
+            }
+            historyHtml += '</div>';
+
+            // Chrome
+            historyHtml += '<div style="margin-bottom: 20px;"><div style="font-weight: bold; color: #0ff; margin-bottom: 10px;">🌐 Chrome History:</div>';
+            if (Array.isArray(history.chrome) && history.chrome.length > 0) {
+                history.chrome.slice(0, 20).forEach(item => {
+                    historyHtml += `
+                        <div class="history-item">
+                            <div class="time">${item.last_visit}</div>
+                            <div class="url">${item.url}</div>
+                            <div>${item.title || 'No title'}</div>
+                        </div>
+                    `;
+                });
+            } else if (history.chrome.error) {
+                historyHtml += `<div class="error">${history.chrome.error}</div>`;
+            } else {
+                historyHtml += '<div class="error">No history found</div>';
+            }
+            historyHtml += '</div>';
+
+            // Firefox
+            historyHtml += '<div style="margin-bottom: 20px;"><div style="font-weight: bold; color: #0ff; margin-bottom: 10px;">🦊 Firefox History:</div>';
+            if (Array.isArray(history.firefox) && history.firefox.length > 0) {
+                history.firefox.slice(0, 20).forEach(item => {
+                    historyHtml += `
+                        <div class="history-item">
+                            <div class="time">${item.last_visit}</div>
+                            <div class="url">${item.url}</div>
+                            <div>${item.title || 'No title'}</div>
+                        </div>
+                    `;
+                });
+            } else if (history.firefox.error) {
+                historyHtml += `<div class="error">${history.firefox.error}</div>`;
+            } else {
+                historyHtml += '<div class="error">No history found</div>';
+            }
+            historyHtml += '</div>';
+
+            document.getElementById('browser-history').innerHTML = historyHtml;
+
+            // Command History
+            const cmdHistory = data.command_history;
+            let cmdHtml = '';
+
+            if (Array.isArray(cmdHistory.zsh) && cmdHistory.zsh.length > 0) {
+                cmdHtml += '<div style="margin-bottom: 20px;"><div style="font-weight: bold; color: #0ff; margin-bottom: 10px;">Zsh History (last 50):</div>';
+                cmdHistory.zsh.slice(-50).forEach(cmd => {
+                    cmdHtml += `<div class="history-item"><span class="command">${cmd}</span></div>`;
+                });
+                cmdHtml += '</div>';
+            }
+
+            if (Array.isArray(cmdHistory.bash) && cmdHistory.bash.length > 0) {
+                cmdHtml += '<div style="margin-bottom: 20px;"><div style="font-weight: bold; color: #0ff; margin-bottom: 10px;">Bash History (last 50):</div>';
+                cmdHistory.bash.slice(-50).forEach(cmd => {
+                    cmdHtml += `<div class="history-item"><span class="command">${cmd}</span></div>`;
+                });
+                cmdHtml += '</div>';
+            }
+
+            if (!cmdHtml) {
+                cmdHtml = '<div class="error">No command history found</div>';
+            }
+
+            document.getElementById('command-history').innerHTML = cmdHtml;
+
+            // Messages
+            const messages = data.messages;
+            let msgHtml = `
+                <div class="info-row">
+                    <span class="label">Total Conversations:</span>
+                    <span class="value">${messages.total_conversations || 0}</span>
+                </div>
+            `;
+
+            if (messages.contacts && messages.contacts.length > 0) {
+                msgHtml += `
+                    <div style="margin-top: 15px;">
+                        <div style="font-weight: bold; color: #0ff; margin-bottom: 10px;">Contacts (${messages.contacts.length}):</div>
+                        <div class="value">${messages.contacts.join(', ')}</div>
+                    </div>
+                `;
+            }
+
+            if (Array.isArray(messages.recent_messages) && messages.recent_messages.length > 0) {
+                msgHtml += '<div style="margin-top: 20px;"><div style="font-weight: bold; color: #0ff; margin-bottom: 10px;">Recent Messages:</div>';
+                messages.recent_messages.slice(0, 30).forEach(msg => {
+                    const msgClass = msg.is_from_me === 'Sent' ? 'sent' : 'received';
+                    msgHtml += `
+                        <div class="message ${msgClass}">
+                            <div class="message-time">${msg.date} - ${msg.is_from_me}</div>
+                            <div class="message-text">${msg.text}</div>
+                        </div>
+                    `;
+                });
+                msgHtml += '</div>';
+            } else if (messages.recent_messages && messages.recent_messages.error) {
+                msgHtml += `<div class="error" style="margin-top: 15px;">${messages.recent_messages.error}</div>`;
+            } else if (messages.error) {
+                msgHtml += `<div class="error" style="margin-top: 15px;">${messages.error}</div>`;
+            }
+
+            document.getElementById('messages').innerHTML = msgHtml;
+
+            // App Usage
+            const apps = data.app_usage;
+            let appsHtml = '';
+
+            if (apps.running_apps && apps.running_apps.length > 0) {
+                appsHtml += '<div style="margin-bottom: 20px;"><div style="font-weight: bold; color: #0ff; margin-bottom: 10px;">Running Apps:</div>';
+                apps.running_apps.forEach(app => {
+                    appsHtml += `<div class="info-row"><span class="value">${app}</span></div>`;
+                });
+                appsHtml += '</div>';
+            }
+
+            if (apps.recent_apps && apps.recent_apps.length > 0) {
+                appsHtml += '<div style="margin-bottom: 20px;"><div style="font-weight: bold; color: #0ff; margin-bottom: 10px;">Recent App Activity:</div>';
+                apps.recent_apps.forEach(log => {
+                    appsHtml += `<div class="history-item">${log}</div>`;
+                });
+                appsHtml += '</div>';
+            }
+
+            if (!appsHtml) {
+                appsHtml = '<div class="error">No app usage data found</div>';
+            }
+
+            document.getElementById('app-usage').innerHTML = appsHtml;
+
+            // System Logs
+            const logs = data.system_logs;
+            let logsHtml = '';
+
+            if (logs.recent_errors && logs.recent_errors.length > 0) {
+                logsHtml += '<div style="margin-bottom: 20px;"><div style="font-weight: bold; color: #f00; margin-bottom: 10px;">Recent Errors:</div>';
+                logs.recent_errors.slice(0, 15).forEach(err => {
+                    logsHtml += `<div class="history-item"><span class="error">${err}</span></div>`;
+                });
+                logsHtml += '</div>';
+            }
+
+            if (logs.security_events && logs.security_events.length > 0) {
+                logsHtml += '<div style="margin-bottom: 20px;"><div style="font-weight: bold; color: #f90; margin-bottom: 10px;">Security Events:</div>';
+                logs.security_events.slice(0, 15).forEach(event => {
+                    logsHtml += `<div class="history-item">${event}</div>`;
+                });
+                logsHtml += '</div>';
+            }
+
+            if (logs.network_events && logs.network_events.length > 0) {
+                logsHtml += '<div style="margin-bottom: 20px;"><div style="font-weight: bold; color: #0ff; margin-bottom: 10px;">Network Events:</div>';
+                logs.network_events.slice(0, 15).forEach(event => {
+                    logsHtml += `<div class="history-item">${event}</div>`;
+                });
+                logsHtml += '</div>';
+            }
+
+            if (!logsHtml) {
+                logsHtml = '<div class="error">No system logs accessible</div>';
+            }
+
+            document.getElementById('system-logs').innerHTML = logsHtml;
+        }
+
+        // Auto-inspect on load
+        window.addEventListener('load', () => {
+            setTimeout(inspect, 500);
+        });
+    </script>
+</body>
+</html>

@@ -39,7 +39,6 @@ export default function GoogleAnalytics() {
       if (gaLoaded) return
       gaLoaded = true
 
-      console.log('✅ Loading Google Analytics')
 
       // Load gtag.js script
       const script1 = document.createElement('script')
@@ -67,16 +66,12 @@ export default function GoogleAnalytics() {
           clearInterval(checkInterval)
           clearTimeout(fallbackTimeout)
 
-          console.log('🍪 Axeptio SDK ready - Registering consent listener')
 
           window._axcb.push((axeptio: any) => {
             axeptio.on('cookies:complete', (choices: any) => {
-              console.log('🍪 Consent received:', choices)
               if (choices.google_analytics) {
-                console.log('✅ Analytics consent given')
                 loadGA()
               } else {
-                console.log('❌ Analytics consent denied')
               }
             })
           })
@@ -87,7 +82,6 @@ export default function GoogleAnalytics() {
       fallbackTimeout = setTimeout(() => {
         clearInterval(checkInterval)
         if (!gaLoaded) {
-          console.log('⚠️ Axeptio timeout - GA will not load without consent')
         }
       }, 10000)
     }

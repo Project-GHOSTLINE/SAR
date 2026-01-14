@@ -55,19 +55,10 @@ function validateWebhookSignature(
  * Reçoit et enregistre les webhooks VoPay
  */
 export async function POST(request: NextRequest) {
-  console.log('[VoPay Webhook] Received webhook')
 
   try {
     // 1. Parser le payload
     const payload: VoPayWebhookPayload = await request.json()
-
-    console.log('[VoPay Webhook] Payload:', {
-      transactionId: payload.TransactionID,
-      status: payload.Status,
-      amount: payload.TransactionAmount,
-      type: payload.TransactionType,
-      environment: payload.Environment,
-    })
 
     // 2. Vérifier les champs requis
     if (!payload.TransactionID || !payload.Status || !payload.ValidationKey) {
@@ -94,7 +85,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('[VoPay Webhook] Signature validated ✓')
 
     // 4. Connexion Supabase
     const supabase = getSupabase()
@@ -133,31 +123,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('[VoPay Webhook] Saved to database:', data.id)
 
     // 6. Traitement selon le statut
     switch (payload.Status.toLowerCase()) {
       case 'successful':
-        console.log(`[VoPay Webhook] ✅ Transaction ${payload.TransactionID} réussie`)
         // TODO: Mettre à jour le statut dans la table des prêts/remboursements
         break
 
       case 'failed':
-        console.log(`[VoPay Webhook] ❌ Transaction ${payload.TransactionID} échouée: ${payload.FailureReason}`)
         // TODO: Notifier l'admin et le client
         break
 
       case 'pending':
       case 'in progress':
-        console.log(`[VoPay Webhook] ⏳ Transaction ${payload.TransactionID} en cours`)
         break
 
       case 'cancelled':
-        console.log(`[VoPay Webhook] 🚫 Transaction ${payload.TransactionID} annulée`)
         break
 
       default:
-        console.log(`[VoPay Webhook] ❓ Statut inconnu: ${payload.Status}`)
     }
 
     // 7. Retourner succès (VoPay attend une réponse 200)

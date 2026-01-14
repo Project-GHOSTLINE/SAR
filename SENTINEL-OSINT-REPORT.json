@@ -1,0 +1,432 @@
+{
+  "metadata": {
+    "generated": "2026-01-13T23:40:11.136Z",
+    "sentinel_version": "1.0.0",
+    "project": "SAR",
+    "uptime": 4,
+    "total_scans": 4
+  },
+  "worker": {
+    "status": "WAITING",
+    "last_update": "2026-01-13 18:15:00",
+    "statistics": {
+      "files_created": 19,
+      "files_modified": 0,
+      "lines_added": 5531,
+      "commits": 0,
+      "total_files": 19
+    }
+  },
+  "files": [
+    {
+      "name": "CLAUDE-MEMORY-GUIDE.md",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/CLAUDE-MEMORY-GUIDE.md",
+      "extension": ".md",
+      "size": 11672,
+      "lines": 476,
+      "modified": "2026-01-13T23:11:00.880Z",
+      "hash": "6ed24aa65796cc69...",
+      "preview": "# 🧠 Guide du Système de Mémoire Longue Durée de Claude\n\n**Créé le**: 13 janvier 2026\n**Version**: 1.0.0\n**Status**: ✅ Prêt à l'emploi\n\n---\n\n## 🎯 Vue d'Ensemble\n\nCe système permet à Claude de:\n- **Se"
+    },
+    {
+      "name": "COORDINATION-SYSTEM-README.md",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/COORDINATION-SYSTEM-README.md",
+      "extension": ".md",
+      "size": 9881,
+      "lines": 364,
+      "modified": "2026-01-13T23:12:37.277Z",
+      "hash": "509cae1428e42bbb...",
+      "preview": "# 🎯 SYSTÈME DE COORDINATION SENTINEL ↔ WORKER\n\n**Version**: 1.0.0\n**Créé**: 2026-01-13\n**Statut**: ✅ OPÉRATIONNEL\n\n---\n\n## 🏗️ ARCHITECTURE DU SYSTÈME\n\n```\n┌──────────────────────────────────────────"
+    },
+    {
+      "name": "INSTALLATION-RAPIDE-MEMOIRE.md",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/INSTALLATION-RAPIDE-MEMOIRE.md",
+      "extension": ".md",
+      "size": 3128,
+      "lines": 143,
+      "modified": "2026-01-13T23:14:19.046Z",
+      "hash": "07f53559e633e326...",
+      "preview": "# ⚡ Installation Rapide - Système de Mémoire\n\n## 🎯 Étape 1: Créer les Tables dans Supabase (5 minutes)\n\n### Action à faire MAINTENANT:\n\n1. **Ouvrir Supabase SQL Editor:**\n\n   👉 https://supabase.com/"
+    },
+    {
+      "name": "MEMOIRE-AUTOMATIQUE.md",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/MEMOIRE-AUTOMATIQUE.md",
+      "extension": ".md",
+      "size": 6881,
+      "lines": 314,
+      "modified": "2026-01-13T23:36:53.797Z",
+      "hash": "cbb988ff94926d4a...",
+      "preview": "# 🤖 Système de Mémoire Automatique - Guide Rapide\n\n**Créé le**: 13 janvier 2026\n**Status**: ✅ OPÉRATIONNEL\n\n---\n\n## 🎯 Ce qui a été automatisé\n\n### 1. **Chargement Automatique au Démarrage**\n\n```bash"
+    },
+    {
+      "name": "SENTINEL-COMMANDS.json",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/SENTINEL-COMMANDS.json",
+      "extension": ".json",
+      "size": 1898,
+      "lines": 57,
+      "modified": "2026-01-13T23:30:42.905Z",
+      "hash": "d18c5c6493c60276...",
+      "preview": "{\n  \"version\": \"1.0.0\",\n  \"last_updated\": \"2026-01-13T18:20:00Z\",\n  \"sentinel\": {\n    \"status\": \"ACTIVE\",\n    \"monitoring\": true\n  },\n  \"worker\": {\n    \"status\": \"ASSIGNED\",\n    \"can_act\": true\n  },\n "
+    },
+    {
+      "name": "SENTINEL-CONTROL-PANEL.md",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/SENTINEL-CONTROL-PANEL.md",
+      "extension": ".md",
+      "size": 6388,
+      "lines": 299,
+      "modified": "2026-01-13T23:11:44.896Z",
+      "hash": "656b4e1a5a4cd605...",
+      "preview": "# 🎮 SENTINEL CONTROL PANEL - Guide de Contrôle\n\n**Guide pour contrôler le Worker Claude depuis le Sentinel**\n\n---\n\n## 🚀 DÉMARRAGE RAPIDE\n\n### Pour donner une instruction au Worker:\n\n1. **Modifie** `"
+    },
+    {
+      "name": "SENTINEL-INSTRUCTIONS.md",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/SENTINEL-INSTRUCTIONS.md",
+      "extension": ".md",
+      "size": 3141,
+      "lines": 114,
+      "modified": "2026-01-13T23:30:42.812Z",
+      "hash": "d0450c3a0c2e184e...",
+      "preview": "# 🛡️ SENTINEL → WORKER - Instructions\n\n**Date**: 2026-01-13\n**Statut**: ✅ ACTIF\n**Mode**: Coordination\n\n---\n\n## 📋 INSTRUCTIONS ACTUELLES\n\n### 🎯 Tâche en cours:\n**ATTENTE** - En attente d'instructio"
+    },
+    {
+      "name": "SENTINEL-MESSAGE-TO-WORKER.md",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/SENTINEL-MESSAGE-TO-WORKER.md",
+      "extension": ".md",
+      "size": 4054,
+      "lines": 175,
+      "modified": "2026-01-13T23:30:42.994Z",
+      "hash": "756f89c1f2b9342d...",
+      "preview": "# 📨 MESSAGE DU SENTINEL AU WORKER\n\n**Date**: 2026-01-13 18:20\n**De**: Sentinel SAR\n**À**: Worker Claude\n**Priorité**: 🔴 HAUTE\n\n---\n\n## 🎯 NOUVELLE TÂCHE ASSIGNÉE\n\n**Tâche #1**: Tester le Système de "
+    },
+    {
+      "name": "WORKER-CHANGELOG.md",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/WORKER-CHANGELOG.md",
+      "extension": ".md",
+      "size": 2514,
+      "lines": 85,
+      "modified": "2026-01-13T23:11:08.092Z",
+      "hash": "dab17ff89e9de59c...",
+      "preview": "# 📜 WORKER CHANGELOG - Historique des Actions\n\nHistorique complet de toutes les actions du Worker, supervisé par Sentinel.\n\n---\n\n## 2026-01-13\n\n### Session 1 - Système de Mémoire Claude\n**Heure**: 18"
+    },
+    {
+      "name": "WORKER-STATUS.md",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/WORKER-STATUS.md",
+      "extension": ".md",
+      "size": 1383,
+      "lines": 81,
+      "modified": "2026-01-13T23:11:08.035Z",
+      "hash": "4587d50c276d7a49...",
+      "preview": "# 👷 WORKER STATUS - Rapport en Temps Réel\n\n**Date**: 2026-01-13\n**Worker**: Claude Worker\n**Sentinel**: Actif et en surveillance\n\n---\n\n## 🚦 STATUT ACTUEL\n\n```\nStatus: ⏳ WAITING\nCurrent Task: Aucune "
+    },
+    {
+      "name": "claude-memory-system.sql",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/database/claude-memory-system.sql",
+      "extension": ".sql",
+      "size": 13158,
+      "lines": 374,
+      "modified": "2026-01-13T23:07:12.925Z",
+      "hash": "621b233251458c01...",
+      "preview": "-- =====================================================\n-- SYSTÈME DE MÉMOIRE À LONG TERME POUR CLAUDE\n-- =====================================================\n-- Créé le: 2026-01-13\n-- Description: "
+    },
+    {
+      "name": "test-memory.html",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/public/test-memory.html",
+      "extension": ".html",
+      "size": 17185,
+      "lines": 532,
+      "modified": "2026-01-13T23:35:34.750Z",
+      "hash": "2dfe1af2e8242718...",
+      "preview": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Test Système de Mémoire - SAR</title>\n  <style>\n    *"
+    },
+    {
+      "name": "sentinel-live-tracker.html",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/sentinel-live-tracker.html",
+      "extension": ".html",
+      "size": 22427,
+      "lines": 814,
+      "modified": "2026-01-13T23:35:22.870Z",
+      "hash": "aec5d99762e636bb...",
+      "preview": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>🛡️ SENTINEL Live Tracker - SAR</title>\n  <style>\n   "
+    },
+    {
+      "name": "sentinel-osint-dashboard.html",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/sentinel-osint-dashboard.html",
+      "extension": ".html",
+      "size": 17992,
+      "lines": 629,
+      "modified": "2026-01-13T23:39:21.041Z",
+      "hash": "ae33c1ec4f075b4b...",
+      "preview": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>🛡️ SENTINEL OSINT - Surveillance Temps Réel</title>\n"
+    },
+    {
+      "name": "sentinel-osint-monitor.mjs",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/sentinel-osint-monitor.mjs",
+      "extension": ".mjs",
+      "size": 11817,
+      "lines": 416,
+      "modified": "2026-01-13T23:40:06.862Z",
+      "hash": "1203c965d5021310...",
+      "preview": "#!/usr/bin/env node\n/**\n * 🛡️ SENTINEL OSINT Monitor\n * Surveillance en temps réel du Worker Claude\n */\n\nimport { watch } from 'fs';\nimport { readFileSync, statSync, readdirSync } from 'fs';\nimport {"
+    },
+    {
+      "name": "claude-memory-loader.ts",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/src/lib/claude-memory-loader.ts",
+      "extension": ".ts",
+      "size": 5070,
+      "lines": 191,
+      "modified": "2026-01-13T23:35:19.227Z",
+      "hash": "24d1f720c479a10e...",
+      "preview": "/**\n * Système automatique de chargement de mémoire pour Claude\n * Charge automatiquement le contexte au démarrage\n */\n\nexport interface ClaudeMemory {\n  category: string;\n  key: string;\n  content: an"
+    },
+    {
+      "name": "supabase-memory.ts",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/src/lib/supabase-memory.ts",
+      "extension": ".ts",
+      "size": 458,
+      "lines": 15,
+      "modified": "2026-01-13T23:13:44.547Z",
+      "hash": "a10a3386c649c65f...",
+      "preview": "// Helper pour la connexion Supabase utilisée par le système de mémoire\nimport { createClient } from '@supabase/supabase-js';\n\nexport function getMemorySupabase() {\n  const url = process.env.NEXT_PUBL"
+    },
+    {
+      "name": "package.json",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/package.json",
+      "extension": ".json",
+      "size": 935,
+      "lines": 38,
+      "modified": "2026-01-13T23:36:02.744Z",
+      "hash": "cae64e50f0b8874b...",
+      "preview": "{\n  \"name\": \"sar\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"dev\": \"next dev\",\n    \"build\": \"next build\",\n    \"start\": \"next start\",\n    \"lint\": \"next lint\",\n    \"memory:load\": \"nod"
+    },
+    {
+      "name": "SENTINEL-OSINT-REPORT.json",
+      "path": "/Users/xunit/Desktop/📁 Projets/sar/SENTINEL-OSINT-REPORT.json",
+      "extension": ".json",
+      "size": 15548,
+      "lines": 414,
+      "modified": "2026-01-13T23:40:09.165Z",
+      "hash": "9341b3e134039d58...",
+      "preview": "{\n  \"metadata\": {\n    \"generated\": \"2026-01-13T23:40:09.135Z\",\n    \"sentinel_version\": \"1.0.0\",\n    \"project\": \"SAR\",\n    \"uptime\": 2,\n    \"total_scans\": 2\n  },\n  \"worker\": {\n    \"status\": \"WAITING\",\n"
+    }
+  ],
+  "activities": [
+    {
+      "time": "2026-01-13T23:40:09.715Z",
+      "type": "created",
+      "file": "SENTINEL-OSINT-REPORT.json",
+      "size": 15548,
+      "lines": 414,
+      "fileType": "🛡️ SENTINEL"
+    },
+    {
+      "time": "2026-01-13T23:40:07.112Z",
+      "type": "created",
+      "file": "package.json",
+      "size": 935,
+      "lines": 38,
+      "fileType": "⚙️ JSON"
+    },
+    {
+      "time": "2026-01-13T23:40:07.112Z",
+      "type": "created",
+      "file": "src/lib/supabase-memory.ts",
+      "size": 458,
+      "lines": 15,
+      "fileType": "💻 TypeScript"
+    },
+    {
+      "time": "2026-01-13T23:40:07.112Z",
+      "type": "created",
+      "file": "src/lib/claude-memory-loader.ts",
+      "size": 5070,
+      "lines": 191,
+      "fileType": "💻 TypeScript"
+    },
+    {
+      "time": "2026-01-13T23:40:07.111Z",
+      "type": "created",
+      "file": "sentinel-osint-monitor.mjs",
+      "size": 11817,
+      "lines": 416,
+      "fileType": "📜 JavaScript"
+    },
+    {
+      "time": "2026-01-13T23:40:07.111Z",
+      "type": "created",
+      "file": "sentinel-osint-dashboard.html",
+      "size": 17992,
+      "lines": 629,
+      "fileType": "🌐 HTML"
+    },
+    {
+      "time": "2026-01-13T23:40:07.111Z",
+      "type": "created",
+      "file": "sentinel-live-tracker.html",
+      "size": 22427,
+      "lines": 814,
+      "fileType": "🌐 HTML"
+    },
+    {
+      "time": "2026-01-13T23:40:07.111Z",
+      "type": "created",
+      "file": "public/test-memory.html",
+      "size": 17185,
+      "lines": 532,
+      "fileType": "🌐 HTML"
+    },
+    {
+      "time": "2026-01-13T23:40:07.111Z",
+      "type": "created",
+      "file": "database/claude-memory-system.sql",
+      "size": 13158,
+      "lines": 374,
+      "fileType": "💾 SQL"
+    },
+    {
+      "time": "2026-01-13T23:40:07.110Z",
+      "type": "created",
+      "file": "WORKER-STATUS.md",
+      "size": 1383,
+      "lines": 81,
+      "fileType": "👷 WORKER"
+    },
+    {
+      "time": "2026-01-13T23:40:07.110Z",
+      "type": "created",
+      "file": "WORKER-CHANGELOG.md",
+      "size": 2514,
+      "lines": 85,
+      "fileType": "👷 WORKER"
+    },
+    {
+      "time": "2026-01-13T23:40:07.110Z",
+      "type": "created",
+      "file": "SENTINEL-MESSAGE-TO-WORKER.md",
+      "size": 4054,
+      "lines": 175,
+      "fileType": "👷 WORKER"
+    },
+    {
+      "time": "2026-01-13T23:40:07.110Z",
+      "type": "created",
+      "file": "SENTINEL-INSTRUCTIONS.md",
+      "size": 3141,
+      "lines": 114,
+      "fileType": "🛡️ SENTINEL"
+    },
+    {
+      "time": "2026-01-13T23:40:07.110Z",
+      "type": "created",
+      "file": "SENTINEL-CONTROL-PANEL.md",
+      "size": 6388,
+      "lines": 299,
+      "fileType": "🛡️ SENTINEL"
+    },
+    {
+      "time": "2026-01-13T23:40:07.110Z",
+      "type": "created",
+      "file": "SENTINEL-COMMANDS.json",
+      "size": 1898,
+      "lines": 57,
+      "fileType": "🛡️ SENTINEL"
+    },
+    {
+      "time": "2026-01-13T23:40:07.110Z",
+      "type": "created",
+      "file": "MEMOIRE-AUTOMATIQUE.md",
+      "size": 6881,
+      "lines": 314,
+      "fileType": "📄 Markdown"
+    },
+    {
+      "time": "2026-01-13T23:40:07.110Z",
+      "type": "created",
+      "file": "INSTALLATION-RAPIDE-MEMOIRE.md",
+      "size": 3128,
+      "lines": 143,
+      "fileType": "📄 Markdown"
+    },
+    {
+      "time": "2026-01-13T23:40:07.109Z",
+      "type": "created",
+      "file": "COORDINATION-SYSTEM-README.md",
+      "size": 9881,
+      "lines": 364,
+      "fileType": "📄 Markdown"
+    },
+    {
+      "time": "2026-01-13T23:40:07.109Z",
+      "type": "created",
+      "file": "CLAUDE-MEMORY-GUIDE.md",
+      "size": 11672,
+      "lines": 476,
+      "fileType": "📄 Markdown"
+    }
+  ],
+  "alerts": [
+    {
+      "level": "info",
+      "time": "2026-01-13T23:40:09.715Z",
+      "message": "Nouveau fichier créé: SENTINEL-OSINT-REPORT.json",
+      "file": "SENTINEL-OSINT-REPORT.json"
+    },
+    {
+      "level": "danger",
+      "time": "2026-01-13T23:40:07.112Z",
+      "message": "⚠️ Worker n'a pas lu les nouvelles instructions!",
+      "file": "SENTINEL-INSTRUCTIONS.md"
+    },
+    {
+      "level": "info",
+      "time": "2026-01-13T23:40:07.112Z",
+      "message": "Nouveau fichier créé: package.json",
+      "file": "package.json"
+    },
+    {
+      "level": "info",
+      "time": "2026-01-13T23:40:07.112Z",
+      "message": "Nouveau fichier créé: src/lib/supabase-memory.ts",
+      "file": "src/lib/supabase-memory.ts"
+    },
+    {
+      "level": "info",
+      "time": "2026-01-13T23:40:07.112Z",
+      "message": "Nouveau fichier créé: src/lib/claude-memory-loader.ts",
+      "file": "src/lib/claude-memory-loader.ts"
+    },
+    {
+      "level": "info",
+      "time": "2026-01-13T23:40:07.111Z",
+      "message": "Nouveau fichier créé: sentinel-osint-monitor.mjs",
+      "file": "sentinel-osint-monitor.mjs"
+    },
+    {
+      "level": "info",
+      "time": "2026-01-13T23:40:07.111Z",
+      "message": "Nouveau fichier créé: sentinel-osint-dashboard.html",
+      "file": "sentinel-osint-dashboard.html"
+    },
+    {
+      "level": "info",
+      "time": "2026-01-13T23:40:07.111Z",
+      "message": "Nouveau fichier créé: sentinel-live-tracker.html",
+      "file": "sentinel-live-tracker.html"
+    },
+    {
+      "level": "info",
+      "time": "2026-01-13T23:40:07.111Z",
+      "message": "Nouveau fichier créé: public/test-memory.html",
+      "file": "public/test-memory.html"
+    },
+    {
+      "level": "info",
+      "time": "2026-01-13T23:40:07.111Z",
+      "message": "Nouveau fichier créé: database/claude-memory-system.sql",
+      "file": "database/claude-memory-system.sql"
+    }
+  ],
+  "git": {
+    "uncommitted_files": 21,
+    "diff_summary": " package.json | 4 +++-\n 1 file changed, 3 insertions(+), 1 deletion(-)\n"
+  }
+}

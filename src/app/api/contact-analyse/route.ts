@@ -157,7 +157,6 @@ export async function POST(request: NextRequest) {
       } else {
         messageId = data.id
         reference = generateReference(data.id)
-        console.log('Message sauvegarde dans Supabase, ID:', messageId)
 
         // Enregistrer l'email envoye a l'equipe
         await supabase.from('emails_envoyes').insert({
@@ -586,7 +585,6 @@ L'equipe Solution Argent Rapide`,
         })
       }
 
-      console.log('Emails envoyes avec succes')
       return NextResponse.json({
         success: true,
         method: 'resend+supabase',
@@ -596,11 +594,6 @@ L'equipe Solution Argent Rapide`,
     }
 
     // Mode dev: log seulement
-    console.log('=== CONTACT ANALYSE (DEV MODE) ===')
-    console.log('To:', destinataire)
-    console.log('Reference:', reference)
-    console.log('Message sauvegarde dans Supabase')
-    console.log('==================================')
 
     return NextResponse.json({
       success: true,

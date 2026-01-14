@@ -74,7 +74,16 @@ export default function VoPayDashboard() {
   }
 
   useEffect(() => {
+    // Chargement initial
     fetchVopayData()
+
+    // Auto-refresh toutes les 30 secondes
+    const interval = setInterval(() => {
+      fetchVopayData()
+    }, 30000) // 30 secondes
+
+    // Cleanup à la destruction du composant
+    return () => clearInterval(interval)
   }, [])
 
   const getStatusIcon = (status: string) => {

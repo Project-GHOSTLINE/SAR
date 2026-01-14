@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAR - Network Architecture - Engineer View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #00ff00;
+            overflow: hidden;
+        }
+
+        #canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .layer-label {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 5px 10px;
+            border: 1px solid #00ff00;
+            font-size: 10px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .controls {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            padding: 15px;
+            max-width: 300px;
+            z-index: 100;
+        }
+
+        .controls h3 {
+            color: #00ff00;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .control-btn {
+            background: #001100;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 8px 15px;
+            margin: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 11px;
+        }
+
+        .control-btn:hover {
+            background: #003300;
+        }
+
+        .control-btn.active {
+            background: #00ff00;
+            color: #000;
+        }
+
+        .stats {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            padding: 15px;
+            max-width: 350px;
+            max-height: 90vh;
+            overflow-y: auto;
+            z-index: 100;
+            font-size: 11px;
+        }
+
+        .stats h3 {
+            color: #00ff00;
+            margin-bottom: 10px;
+            font-size: 14px;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 5px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+            padding: 2px 0;
+        }
+
+        .stat-label {
+            color: #00aa00;
+        }
+
+        .stat-value {
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .endpoint-list {
+            margin-top: 10px;
+        }
+
+        .endpoint-item {
+            background: #001100;
+            border-left: 3px solid #00ff00;
+            padding: 5px;
+            margin: 3px 0;
+            font-size: 9px;
+            cursor: pointer;
+        }
+
+        .endpoint-item:hover {
+            background: #003300;
+        }
+
+        .endpoint-item.active {
+            border-left-color: #00ffff;
+            background: #002200;
+        }
+
+        .legend {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            padding: 10px;
+            font-size: 10px;
+            z-index: 100;
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: center;
+            margin: 3px 0;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 8px;
+            border: 1px solid #00ff00;
+        }
+
+        .packet-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            padding: 10px;
+            font-size: 9px;
+            z-index: 100;
+            max-width: 300px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #001100;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div class="controls">
+        <h3>⚙️ NETWORK CONTROLS</h3>
+        <button class="control-btn active" onclick="toggleLayer('physical')">Layer 1: Physical</button>
+        <button class="control-btn active" onclick="toggleLayer('datalink')">Layer 2: Data Link</button>
+        <button class="control-btn active" onclick="toggleLayer('network')">Layer 3: Network</button>
+        <button class="control-btn active" onclick="toggleLayer('transport')">Layer 4: Transport</button>
+        <button class="control-btn active" onclick="toggleLayer('application')">Layer 7: Application</button>
+        <button class="control-btn" onclick="simulatePacket()">📦 Send Packet</button>
+        <button class="control-btn" onclick="scanNetwork()">🔍 Scan Network</button>
+    </div>
+
+    <div class="stats">
+        <h3>📊 NETWORK STATISTICS</h3>
+        <div class="stat-row">
+            <span class="stat-label">Local IP:</span>
+            <span class="stat-value" id="local-ip">Loading...</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Gateway:</span>
+            <span class="stat-value" id="gateway">192.168.1.1</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">DNS:</span>
+            <span class="stat-value" id="dns">8.8.8.8</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Total Endpoints:</span>
+            <span class="stat-value" id="endpoint-count">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Active Connections:</span>
+            <span class="stat-value" id="active-connections">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Packets/sec:</span>
+            <span class="stat-value" id="packets-sec">0</span>
+        </div>
+
+        <h3 style="margin-top: 15px;">🎯 API ENDPOINTS</h3>
+        <div class="endpoint-list" id="endpoint-list">
+            Loading...
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-row">
+            <div class="legend-color" style="background: #0066ff;"></div>
+            <span>Physical Layer (Cables/WiFi)</span>
+        </div>
+        <div class="legend-row">
+            <div class="legend-color" style="background: #00ff00;"></div>
+            <span>Network Layer (IP/Routing)</span>
+        </div>
+        <div class="legend-row">
+            <div class="legend-color" style="background: #ffff00;"></div>
+            <span>Transport Layer (TCP/UDP)</span>
+        </div>
+        <div class="legend-row">
+            <div class="legend-color" style="background: #ff00ff;"></div>
+            <span>Application Layer (HTTP/API)</span>
+        </div>
+        <div class="legend-row">
+            <div class="legend-color" style="background: #ff0000;"></div>
+            <span>External Services</span>
+        </div>
+    </div>
+
+    <div class="packet-info">
+        <strong>PACKET FLOW:</strong>
+        <div id="packet-flow" style="margin-top: 5px; color: #00ff00;">
+            Idle - Click "Send Packet" to trace
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        let routes = [];
+        let packets = [];
+        let activeEndpoint = null;
+        let packetsPerSec = 0;
+
+        const layers = {
+            physical: true,
+            datalink: true,
+            network: true,
+            transport: true,
+            application: true
+        };
+
+        // Network Architecture Nodes (positions détaillées)
+        const nodes = {
+            // LAYER 1-2: Physical & Data Link
+            macbook: {
+                x: width * 0.05,
+                y: height * 0.5,
+                radius: 25,
+                color: '#0066ff',
+                label: 'MacBook Pro',
+                sublabel: 'en0: WiFi',
+                layer: 'physical',
+                info: { mac: 'xx:xx:xx:xx:xx:xx', interface: 'en0' }
+            },
+
+            wifiInterface: {
+                x: width * 0.12,
+                y: height * 0.5,
+                radius: 20,
+                color: '#0088ff',
+                label: 'WiFi NIC',
+                sublabel: '802.11ac',
+                layer: 'datalink',
+                info: { speed: '1.3 Gbps', channel: '149 (5GHz)' }
+            },
+
+            wifiAP: {
+                x: width * 0.2,
+                y: height * 0.5,
+                radius: 22,
+                color: '#00aaff',
+                label: 'WiFi AP',
+                sublabel: 'Access Point',
+                layer: 'physical',
+                info: { ssid: 'Network', bssid: 'xx:xx:xx:xx:xx:xx' }
+            },
+
+            // LAYER 3: Network
+            router: {
+                x: width * 0.3,
+                y: height * 0.5,
+                radius: 28,
+                color: '#00ff00',
+                label: 'Gateway',
+                sublabel: '192.168.1.1',
+                layer: 'network',
+                info: { ip: '192.168.1.1', nat: 'enabled' }
+            },
+
+            firewall: {
+                x: width * 0.38,
+                y: height * 0.5,
+                radius: 20,
+                color: '#00dd00',
+                label: 'Firewall',
+                sublabel: 'iptables',
+                layer: 'network',
+                info: { rules: '47 active' }
+            },
+
+            // ISP Layer
+            isp: {
+                x: width * 0.48,
+                y: height * 0.5,
+                radius: 25,
+                color: '#00ff00',
+                label: 'ISP',
+                sublabel: 'Internet Provider',
+                layer: 'network',
+                info: { public_ip: 'xxx.xxx.xxx.xxx' }
+            },
+
+            // DNS
+            dns: {
+                x: width * 0.48,
+                y: height * 0.35,
+                radius: 18,
+                color: '#00ff88',
+                label: 'DNS',
+                sublabel: '8.8.8.8',
+                layer: 'application',
+                info: { type: 'Resolver', cache: '2847 entries' }
+            },
+
+            // Internet Core
+            internet: {
+                x: width * 0.58,
+                y: height * 0.5,
+                radius: 35,
+                color: '#00ff00',
+                label: 'INTERNET',
+                sublabel: 'Backbone',
+                layer: 'network',
+                info: { latency: '12ms', bgp_routes: '900k+' }
+            },
+
+            // CDN / Load Balancer
+            cdn: {
+                x: width * 0.68,
+                y: height * 0.45,
+                radius: 22,
+                color: '#ffff00',
+                label: 'CDN',
+                sublabel: 'Cloudflare',
+                layer: 'transport',
+                info: { edge: 'YUL', tls: 'TLS 1.3' }
+            },
+
+            // localhost Server
+            localhost: {
+                x: width * 0.75,
+                y: height * 0.5,
+                radius: 30,
+                color: '#ffff00',
+                label: 'Next.js Server',
+                sublabel: 'localhost:3000',
+                layer: 'transport',
+                info: { port: '3000', protocol: 'HTTP/1.1' }
+            },
+
+            // External Services
+            supabase: {
+                x: width * 0.68,
+                y: height * 0.65,
+                radius: 20,
+                color: '#ff0000',
+                label: 'Supabase',
+                sublabel: 'PostgreSQL',
+                layer: 'application',
+                info: { host: 'dllyzfuqjzuhvshrlmuq.supabase.co', ssl: true }
+            },
+
+            vopay: {
+                x: width * 0.68,
+                y: height * 0.75,
+                radius: 18,
+                color: '#ff0000',
+                label: 'VoPay',
+                sublabel: 'Payment API',
+                layer: 'application',
+                info: { endpoint: 'api.vopay.com', auth: 'Bearer' }
+            }
+        };
+
+        // API Route endpoints (à droite)
+        const routeStartX = width * 0.83;
+        const routeStartY = height * 0.15;
+        const routeSpacing = 22;
+
+        // Packet class
+        class Packet {
+            constructor(path, color, protocol) {
+                this.path = path; // array of node keys
+                this.currentIndex = 0;
+                this.progress = 0;
+                this.speed = 0.02;
+                this.color = color;
+                this.protocol = protocol;
+                this.size = 4;
+            }
+
+            update() {
+                this.progress += this.speed;
+
+                if (this.progress >= 1) {
+                    this.progress = 0;
+                    this.currentIndex++;
+
+                    if (this.currentIndex >= this.path.length - 1) {
+                        return false; // packet complete
+                    }
+                }
+
+                return true;
+            }
+
+            draw() {
+                const start = nodes[this.path[this.currentIndex]];
+                const end = nodes[this.path[this.currentIndex + 1]];
+
+                if (!start || !end) return;
+
+                const x = start.x + (end.x - start.x) * this.progress;
+                const y = start.y + (end.y - start.y) * this.progress;
+
+                // Packet
+                ctx.beginPath();
+                ctx.arc(x, y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Protocol label
+                ctx.fillStyle = this.color;
+                ctx.font = '8px Courier New';
+                ctx.fillText(this.protocol, x + 8, y - 8);
+            }
+
+            getCurrentSegment() {
+                return `${this.path[this.currentIndex]} → ${this.path[this.currentIndex + 1]}`;
+            }
+        }
+
+        // Draw connection
+        function drawConnection(start, end, color, width, dashed = false) {
+            ctx.beginPath();
+            if (dashed) {
+                ctx.setLineDash([5, 5]);
+            }
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(end.x, end.y);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // Draw node
+        function drawNode(node, showInfo = false) {
+            if (!layers[node.layer]) return;
+
+            // Node circle
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+            ctx.fillStyle = node.color;
+            ctx.fill();
+
+            // Border
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Label
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 11px Courier New';
+            ctx.textAlign = 'center';
+            ctx.fillText(node.label, node.x, node.y - node.radius - 8);
+
+            // Sublabel
+            ctx.font = '9px Courier New';
+            ctx.fillStyle = '#aaaaaa';
+            ctx.fillText(node.sublabel, node.x, node.y - node.radius - 20);
+
+            // Info on hover (simplified)
+            if (showInfo && node.info) {
+                ctx.fillStyle = '#00ff00';
+                ctx.font = '8px Courier New';
+                let infoY = node.y + node.radius + 15;
+                Object.entries(node.info).forEach(([key, val]) => {
+                    ctx.fillText(`${key}: ${val}`, node.x, infoY);
+                    infoY += 10;
+                });
+            }
+        }
+
+        // Draw route endpoints
+        function drawRouteEndpoints() {
+            if (!layers.application) return;
+
+            routes.forEach((route, i) => {
+                const x = routeStartX;
+                const y = routeStartY + (i * routeSpacing);
+                const isActive = activeEndpoint === route.path;
+                const color = isActive ? '#00ffff' : '#ff00ff';
+                const radius = isActive ? 6 : 4;
+
+                // Connection to localhost
+                if (isActive) {
+                    drawConnection(nodes.localhost, { x, y }, color, 2);
+                }
+
+                // Endpoint
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+
+                // Route label
+                ctx.fillStyle = isActive ? '#00ffff' : '#ff00ff';
+                ctx.font = '8px Courier New';
+                ctx.textAlign = 'left';
+                const label = route.path.length > 30 ? route.path.substring(0, 30) + '...' : route.path;
+                ctx.fillText(label, x + 10, y + 3);
+
+                // Method badges
+                ctx.font = '7px Courier New';
+                route.methods.forEach((method, idx) => {
+                    ctx.fillText(method, x + 10, y + 12 + (idx * 8));
+                });
+            });
+        }
+
+        // Animation loop
+        let frameCount = 0;
+        function animate() {
+            frameCount++;
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw all connections (based on layers)
+            if (layers.physical) {
+                drawConnection(nodes.macbook, nodes.wifiInterface, '#0066ff', 2);
+                drawConnection(nodes.wifiInterface, nodes.wifiAP, '#0088ff', 2, true);
+            }
+            if (layers.datalink) {
+                drawConnection(nodes.wifiAP, nodes.router, '#00aaff', 2);
+            }
+            if (layers.network) {
+                drawConnection(nodes.router, nodes.firewall, '#00ff00', 2);
+                drawConnection(nodes.firewall, nodes.isp, '#00ff00', 2);
+                drawConnection(nodes.isp, nodes.internet, '#00ff00', 3);
+                drawConnection(nodes.isp, nodes.dns, '#00ff88', 1, true);
+            }
+            if (layers.transport) {
+                drawConnection(nodes.internet, nodes.cdn, '#ffff00', 2);
+                drawConnection(nodes.cdn, nodes.localhost, '#ffff00', 2);
+            }
+            if (layers.application) {
+                drawConnection(nodes.localhost, nodes.supabase, '#ff0000', 1, true);
+                drawConnection(nodes.localhost, nodes.vopay, '#ff0000', 1, true);
+            }
+
+            // Draw all nodes
+            Object.values(nodes).forEach(node => drawNode(node));
+
+            // Draw route endpoints
+            drawRouteEndpoints();
+
+            // Update and draw packets
+            packets = packets.filter(p => {
+                const alive = p.update();
+                if (alive) p.draw();
+                return alive;
+            });
+
+            // Update stats
+            document.getElementById('active-connections').textContent = packets.length;
+            if (frameCount % 60 === 0) {
+                document.getElementById('packets-sec').textContent = packetsPerSec;
+                packetsPerSec = 0;
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Load routes from API
+        async function loadRoutes() {
+            try {
+                const response = await fetch('/api/routes/discover');
+                const data = await response.json();
+
+                if (data.success) {
+                    routes = data.routes.slice(0, 30);
+                    document.getElementById('endpoint-count').textContent = data.stats.total_routes;
+
+                    // Display in sidebar
+                    const list = document.getElementById('endpoint-list');
+                    list.innerHTML = routes.map(r => `
+                        <div class="endpoint-item" onclick="activateEndpoint('${r.path.replace(/'/g, "\\'")}')">
+                            <strong>${r.path}</strong><br>
+                            <span style="color: #888;">${r.methods.join(' | ')}</span>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading routes:', error);
+            }
+        }
+
+        // Get network info
+        async function getNetworkInfo() {
+            try {
+                const response = await fetch('/api/osint/network-scan');
+                const data = await response.json();
+                if (data.localIP) {
+                    document.getElementById('local-ip').textContent = data.localIP;
+                    nodes.macbook.info.ip = data.localIP;
+                }
+                if (data.gateway) {
+                    document.getElementById('gateway').textContent = data.gateway;
+                }
+            } catch (error) {
+                document.getElementById('local-ip').textContent = '127.0.0.1';
+            }
+        }
+
+        // Toggle layer visibility
+        window.toggleLayer = function(layer) {
+            layers[layer] = !layers[layer];
+            event.target.classList.toggle('active');
+        };
+
+        // Simulate packet flow
+        window.simulatePacket = function() {
+            // HTTP Request path
+            const requestPath = [
+                'macbook', 'wifiInterface', 'wifiAP', 'router', 'firewall',
+                'isp', 'internet', 'cdn', 'localhost'
+            ];
+
+            // DNS lookup (parallel)
+            const dnsPath = ['macbook', 'wifiInterface', 'wifiAP', 'router', 'isp', 'dns'];
+
+            packets.push(new Packet(dnsPath, '#00ff88', 'DNS'));
+
+            setTimeout(() => {
+                packets.push(new Packet(requestPath, '#ffff00', 'HTTP'));
+                packetsPerSec++;
+            }, 500);
+
+            // If Supabase call
+            if (activeEndpoint && activeEndpoint.includes('admin')) {
+                setTimeout(() => {
+                    packets.push(new Packet(['localhost', 'supabase'], '#ff0000', 'SQL'));
+                    packetsPerSec++;
+                }, 1000);
+            }
+
+            updatePacketInfo();
+        };
+
+        // Activate endpoint
+        window.activateEndpoint = function(path) {
+            activeEndpoint = path;
+
+            document.querySelectorAll('.endpoint-item').forEach(el => {
+                el.classList.remove('active');
+                if (el.textContent.includes(path)) {
+                    el.classList.add('active');
+                }
+            });
+
+            // Auto-send packet
+            simulatePacket();
+        };
+
+        // Scan network
+        window.scanNetwork = function() {
+            // Burst of packets
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => simulatePacket(), i * 200);
+            }
+        };
+
+        // Update packet flow info
+        function updatePacketInfo() {
+            const flow = packets.map(p => p.getCurrentSegment()).join('<br>');
+            document.getElementById('packet-flow').innerHTML = flow || 'Idle';
+        }
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            // Recalculate positions...
+        });
+
+        // Start
+        loadRoutes();
+        getNetworkInfo();
+        animate();
+
+        // Auto-send packets periodically
+        setInterval(() => {
+            if (Math.random() < 0.3) {
+                simulatePacket();
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

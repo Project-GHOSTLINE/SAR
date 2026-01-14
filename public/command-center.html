@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎛️ SENTINEL Command Center - Contrôle Total</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      background: #0a0e27;
+      color: #e0e0e0;
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #667eea;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      color: #000;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-indicator {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .status-dot {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #000;
+      font-weight: 600;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #667eea;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 10px #667eea; }
+      50% { opacity: 0.5; box-shadow: 0 0 20px #667eea; }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 300px 1fr 350px;
+      grid-template-rows: 1fr 250px 250px;
+      height: calc(100vh - 60px);
+      gap: 2px;
+      background: #0a0e27;
+    }
+
+    .panel {
+      background: #1a1f3a;
+      border: 1px solid #667eea;
+      padding: 16px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(102, 126, 234, 0.03) 2px, rgba(102, 126, 234, 0.03) 4px);
+      pointer-events: none;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      color: #667eea;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #667eea;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sys-info {
+      margin-bottom: 16px;
+      background: rgba(102, 126, 234, 0.05);
+      border: 1px solid #667eea;
+      padding: 12px;
+      border-radius: 4px;
+    }
+
+    .sys-label {
+      font-size: 10px;
+      color: #a78bfa;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .sys-value {
+      font-size: 13px;
+      color: #667eea;
+      font-weight: 600;
+      font-family: 'Monaco', monospace;
+    }
+
+    .metric-bar {
+      margin-bottom: 16px;
+    }
+
+    .metric-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 6px;
+      color: #667eea;
+    }
+
+    .bar-container {
+      width: 100%;
+      height: 20px;
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid #667eea;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #a78bfa, #764ba2);
+      transition: width 0.5s;
+      position: relative;
+    }
+
+    .bar-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .device-item {
+      background: rgba(102, 126, 234, 0.05);
+      border: 1px solid #667eea;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    .device-name {
+      color: #667eea;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .device-status {
+      color: #a78bfa;
+      opacity: 0.7;
+      font-size: 10px;
+    }
+
+    .mcp-server {
+      background: rgba(102, 126, 234, 0.05);
+      border-left: 3px solid #667eea;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .mcp-name {
+      font-size: 13px;
+      color: #667eea;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .mcp-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .mcp-tool {
+      background: rgba(102, 126, 234, 0.2);
+      border: 1px solid #667eea;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 9px;
+      color: #667eea;
+    }
+
+    .terminal {
+      background: #0a0e27;
+      border: 2px solid #667eea;
+      padding: 12px;
+      font-family: 'Monaco', monospace;
+      font-size: 12px;
+      height: 200px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .terminal::before {
+      content: '> SENTINEL TERMINAL';
+      display: block;
+      color: #667eea;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #667eea;
+      padding-bottom: 4px;
+    }
+
+    .terminal-line {
+      color: #667eea;
+      margin-bottom: 4px;
+      animation: typewriter 0.3s;
+    }
+
+    @keyframes typewriter {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .command-input {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: #0a0e27;
+      border: 2px solid #667eea;
+      color: #e0e0e0;
+      padding: 12px;
+      font-family: 'Monaco', monospace;
+      font-size: 13px;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      box-shadow: 0 0 10px #667eea;
+    }
+
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background: #a78bfa;
+      box-shadow: 0 0 20px #667eea;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    .quick-commands {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .quick-btn {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid #667eea;
+      color: #667eea;
+      padding: 10px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .quick-btn:hover {
+      background: rgba(102, 126, 234, 0.2);
+      box-shadow: 0 0 10px #667eea;
+    }
+
+    .network-viz {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .network-diagram {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 20px;
+      position: relative;
+      border: 2px solid #667eea;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .network-icon {
+      font-size: 60px;
+    }
+
+    .network-ring {
+      position: absolute;
+      border: 1px solid #667eea;
+      border-radius: 50%;
+      opacity: 0.3;
+    }
+
+    .ring-1 { width: 150%; height: 150%; }
+    .ring-2 { width: 200%; height: 200%; }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0a0e27;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 4px;
+    }
+
+    .log-entry {
+      font-size: 11px;
+      padding: 6px;
+      margin-bottom: 4px;
+      border-left: 2px solid #667eea;
+      padding-left: 8px;
+    }
+
+    .log-success { color: #10b981; }
+    .log-error { color: #ef4444; }
+    .log-info { color: #a78bfa; opacity: 0.7; }
+
+    .grid-main {
+      grid-column: 2;
+      grid-row: 1 / 4;
+    }
+
+    .osint-device {
+      background: rgba(102, 126, 234, 0.05);
+      border: 1px solid #667eea;
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .osint-device:hover {
+      background: rgba(102, 126, 234, 0.1);
+      box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+    }
+
+    .osint-device.local {
+      border-left: 4px solid #a78bfa;
+      background: rgba(167, 139, 250, 0.1);
+    }
+
+    .osint-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .osint-hostname {
+      font-size: 13px;
+      color: #667eea;
+      font-weight: 700;
+    }
+
+    .osint-type {
+      background: rgba(102, 126, 234, 0.2);
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 9px;
+      color: #667eea;
+      border: 1px solid #667eea;
+    }
+
+    .osint-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      font-size: 10px;
+    }
+
+    .osint-field {
+      color: #a78bfa;
+      opacity: 0.7;
+    }
+
+    .osint-value {
+      color: #667eea;
+      font-family: 'Monaco', monospace;
+      margin-top: 2px;
+    }
+
+    .scan-button {
+      width: 100%;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      animation: pulse-btn 2s infinite;
+      color: white;
+    }
+
+    @keyframes pulse-btn {
+      0%, 100% { box-shadow: 0 0 10px #667eea; }
+      50% { box-shadow: 0 0 20px #667eea, 0 0 30px #764ba2; }
+    }
+
+    .sentinel-control {
+      background: rgba(102, 126, 234, 0.05);
+      border: 2px solid #667eea;
+      padding: 16px;
+      margin-bottom: 16px;
+      border-radius: 4px;
+    }
+
+    .control-title {
+      font-size: 16px;
+      color: #667eea;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    .mission-status {
+      text-align: center;
+      padding: 20px;
+      background: rgba(102, 126, 234, 0.1);
+      border: 2px solid #667eea;
+      margin-bottom: 16px;
+    }
+
+    .mission-text {
+      font-size: 18px;
+      color: #667eea;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .mission-sub {
+      font-size: 12px;
+      color: #a78bfa;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎛️ SENTINEL COMMAND CENTER</h1>
+    <div class="status-indicator">
+      <div class="status-dot">
+        <div class="dot"></div>
+        SENTINEL ONLINE
+      </div>
+      <div class="status-dot">
+        <div class="dot"></div>
+        ALL SYSTEMS GO
+      </div>
+      <div class="status-dot" id="clock">00:00:00</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT: System Info -->
+    <div class="panel">
+      <div class="panel-title">💻 SYSTEM INFO</div>
+
+      <div class="sys-info">
+        <div class="sys-label">Computer Name</div>
+        <div class="sys-value">MacBook Pro de Frederic</div>
+      </div>
+
+      <div class="sys-info">
+        <div class="sys-label">Processor</div>
+        <div class="sys-value">Apple M4 Max</div>
+      </div>
+
+      <div class="sys-info">
+        <div class="sys-label">Cores</div>
+        <div class="sys-value">16 (12 Performance + 4 Efficiency)</div>
+      </div>
+
+      <div class="sys-info">
+        <div class="sys-label">Memory</div>
+        <div class="sys-value">128 GB</div>
+      </div>
+
+      <div class="sys-info">
+        <div class="sys-label">OS Version</div>
+        <div class="sys-value">macOS 26.1 (25B78)</div>
+      </div>
+
+      <div class="sys-info">
+        <div class="sys-label">Kernel</div>
+        <div class="sys-value">Darwin 25.1.0</div>
+      </div>
+
+      <div class="panel-title" style="margin-top: 24px;">📊 METRICS</div>
+
+      <div class="metric-bar">
+        <div class="metric-label">
+          <span>CPU USAGE</span>
+          <span id="cpuValue">27%</span>
+        </div>
+        <div class="bar-container">
+          <div class="bar-fill" id="cpuBar" style="width: 27%;"></div>
+        </div>
+      </div>
+
+      <div class="metric-bar">
+        <div class="metric-label">
+          <span>MEMORY</span>
+          <span id="memValue">37 GB / 128 GB</span>
+        </div>
+        <div class="bar-container">
+          <div class="bar-fill" id="memBar" style="width: 29%;"></div>
+        </div>
+      </div>
+
+      <div class="metric-bar">
+        <div class="metric-label">
+          <span>DISK</span>
+          <span id="diskValue">11 GB / 926 GB</span>
+        </div>
+        <div class="bar-container">
+          <div class="bar-fill" id="diskBar" style="width: 2%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER: Main Control -->
+    <div class="panel grid-main">
+      <div class="mission-status">
+        <div class="mission-text">🤖 SENTINEL ACTIVE</div>
+        <div class="mission-sub">Awaiting Orders • All Systems Operational</div>
+      </div>
+
+      <div class="sentinel-control">
+        <div class="control-title">⚡ SENTINEL CONTROL PANEL</div>
+
+        <div class="quick-commands">
+          <button class="quick-btn" onclick="executeCommand('scan project')">🔍 SCAN PROJECT</button>
+          <button class="quick-btn" onclick="executeCommand('analyze codebase')">📊 ANALYZE CODE</button>
+          <button class="quick-btn" onclick="executeCommand('run tests')">🧪 RUN TESTS</button>
+          <button class="quick-btn" onclick="executeCommand('build project')">🔨 BUILD</button>
+          <button class="quick-btn" onclick="executeCommand('check health')">💚 HEALTH CHECK</button>
+          <button class="quick-btn" onclick="executeCommand('update dependencies')">📦 UPDATE DEPS</button>
+          <button class="quick-btn" onclick="executeCommand('git status')">📂 GIT STATUS</button>
+          <button class="quick-btn" onclick="executeCommand('deploy')">🚀 DEPLOY</button>
+        </div>
+
+        <div class="terminal" id="terminal"></div>
+
+        <div class="command-input">
+          <input type="text" id="commandInput" placeholder="Enter command for Sentinel..." onkeypress="handleKeyPress(event)">
+          <button onclick="sendCommand()">EXECUTE</button>
+        </div>
+      </div>
+
+      <div class="panel-title">📋 EXECUTION LOG</div>
+      <div id="executionLog" style="max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <!-- RIGHT TOP: Network & Devices -->
+    <div class="panel">
+      <div class="panel-title">📡 NETWORK</div>
+
+      <div class="network-viz">
+        <div class="network-diagram">
+          <div class="network-ring ring-1"></div>
+          <div class="network-ring ring-2"></div>
+          <div class="network-icon">🌐</div>
+        </div>
+      </div>
+
+      <div class="device-item">
+        <div class="device-name">🔌 en0 (Ethernet)</div>
+        <div class="device-status">Status: UP • MTU: 1500</div>
+      </div>
+
+      <div class="device-item">
+        <div class="device-name">📶 WiFi (en1/en2/en3)</div>
+        <div class="device-status">Status: UP • Bridge Mode</div>
+      </div>
+
+      <div class="device-item">
+        <div class="device-name">🔒 VPN (utun0-3)</div>
+        <div class="device-status">Tunnels: 4 Active</div>
+      </div>
+
+      <div class="device-item">
+        <div class="device-name">🔁 Loopback (lo0)</div>
+        <div class="device-status">127.0.0.1 • Local</div>
+      </div>
+    </div>
+
+    <!-- RIGHT BOTTOM: MCP Servers -->
+    <div class="panel">
+      <div class="panel-title">🔌 MCP SERVERS</div>
+
+      <div class="mcp-server">
+        <div class="mcp-name">📁 filesystem</div>
+        <div class="device-status">File operations & directory management</div>
+        <div class="mcp-tools">
+          <span class="mcp-tool">read_file</span>
+          <span class="mcp-tool">write_file</span>
+          <span class="mcp-tool">list_dir</span>
+        </div>
+      </div>
+
+      <div class="mcp-server">
+        <div class="mcp-name">🌐 fetch</div>
+        <div class="device-status">HTTP requests & web scraping</div>
+        <div class="mcp-tools">
+          <span class="mcp-tool">fetch_url</span>
+          <span class="mcp-tool">get_html</span>
+        </div>
+      </div>
+
+      <div class="mcp-server">
+        <div class="mcp-name">🗄️ postgres</div>
+        <div class="device-status">Database operations via Supabase</div>
+        <div class="mcp-tools">
+          <span class="mcp-tool">query</span>
+          <span class="mcp-tool">insert</span>
+          <span class="mcp-tool">update</span>
+        </div>
+      </div>
+
+      <div class="mcp-server">
+        <div class="mcp-name">⚙️ bash</div>
+        <div class="device-status">Shell command execution</div>
+        <div class="mcp-tools">
+          <span class="mcp-tool">exec</span>
+          <span class="mcp-tool">script</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM LEFT: Devices -->
+    <div class="panel">
+      <div class="panel-title">🖥️ CONNECTED DEVICES</div>
+
+      <div class="device-item">
+        <div class="device-name">💻 MacBook Pro M4 Max</div>
+        <div class="device-status">Primary Workstation • 128GB RAM</div>
+      </div>
+
+      <div class="device-item">
+        <div class="device-name">🖱️ Input Devices</div>
+        <div class="device-status">Keyboard • Trackpad • Active</div>
+      </div>
+
+      <div class="device-item">
+        <div class="device-name">🖥️ Display</div>
+        <div class="device-status">Built-in Retina • Active</div>
+      </div>
+
+      <div class="device-item">
+        <div class="device-name">🎧 Audio</div>
+        <div class="device-status">Speakers • Microphone • Ready</div>
+      </div>
+    </div>
+
+    <!-- NEW: OSINT Network Scanner -->
+    <div class="panel">
+      <div class="panel-title">🔍 OSINT NETWORK SCAN</div>
+
+      <button class="scan-button" onclick="scanNetwork()">
+        🎯 SCAN CONNECTED DEVICES
+      </button>
+
+      <div id="osintStatus" style="text-align: center; margin-bottom: 16px; color: #a78bfa; opacity: 0.7; font-size: 11px;">
+        Click scan to discover devices on WiFi
+      </div>
+
+      <div id="osintDevices"></div>
+    </div>
+  </div>
+
+  <script>
+    // Clock
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('fr-FR');
+    }, 1000);
+
+    // Update metrics (simulation)
+    setInterval(() => {
+      const cpu = 20 + Math.random() * 30;
+      const mem = 25 + Math.random() * 10;
+
+      document.getElementById('cpuValue').textContent = cpu.toFixed(0) + '%';
+      document.getElementById('cpuBar').style.width = cpu + '%';
+
+      const memGB = (mem / 100 * 128).toFixed(0);
+      document.getElementById('memValue').textContent = memGB + ' GB / 128 GB';
+      document.getElementById('memBar').style.width = mem + '%';
+    }, 2000);
+
+    // Terminal
+    function addTerminalLine(text, type = 'info') {
+      const terminal = document.getElementById('terminal');
+      const line = document.createElement('div');
+      line.className = 'terminal-line';
+      line.textContent = '> ' + text;
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+
+      // Keep only last 20 lines
+      while (terminal.children.length > 20) {
+        terminal.removeChild(terminal.firstChild);
+      }
+    }
+
+    // Execute command
+    async function executeCommand(cmd) {
+      addTerminalLine(`Executing: ${cmd}`);
+      addLog(`Command: ${cmd}`, 'info');
+
+      // Send to API
+      try {
+        const response = await fetch('/api/sentinel/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: cmd })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          addTerminalLine(`✓ ${data.message || 'Command executed'}`);
+          addLog(`Success: ${cmd}`, 'success');
+        } else {
+          addTerminalLine(`✗ Error: ${data.error}`);
+          addLog(`Error: ${cmd} - ${data.error}`, 'error');
+        }
+      } catch (error) {
+        addTerminalLine(`✗ Error: ${error.message}`);
+        addLog(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function sendCommand() {
+      const input = document.getElementById('commandInput');
+      const cmd = input.value.trim();
+
+      if (cmd) {
+        executeCommand(cmd);
+        input.value = '';
+      }
+    }
+
+    function handleKeyPress(e) {
+      if (e.key === 'Enter') {
+        sendCommand();
+      }
+    }
+
+    // Execution log
+    function addLog(text, type = 'info') {
+      const log = document.getElementById('executionLog');
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
+      const time = new Date().toLocaleTimeString('fr-FR');
+      entry.textContent = `[${time}] ${text}`;
+      log.insertBefore(entry, log.firstChild);
+
+      // Keep only last 50 entries
+      while (log.children.length > 50) {
+        log.removeChild(log.lastChild);
+      }
+    }
+
+    // OSINT Network Scanner
+    async function scanNetwork() {
+      const statusDiv = document.getElementById('osintStatus');
+      const devicesDiv = document.getElementById('osintDevices');
+
+      statusDiv.innerHTML = '🔄 Scanning network... Please wait...';
+      devicesDiv.innerHTML = '';
+
+      addTerminalLine('Initiating OSINT network scan...');
+      addLog('OSINT: Network scan started', 'info');
+
+      try {
+        const response = await fetch('/api/osint/network-scan');
+        const data = await response.json();
+
+        if (data.success && data.devices) {
+          const localDevices = data.devices.filter(d => d.isLocal);
+          const otherDevices = data.devices.filter(d => !d.isLocal);
+
+          statusDiv.innerHTML = `✅ Scan complete: ${data.devices.length} device(s) found`;
+          addTerminalLine(`✓ Found ${data.devices.length} devices on network`);
+          addLog(`OSINT: Scan complete - ${data.devices.length} devices`, 'success');
+
+          devicesDiv.innerHTML = '';
+
+          // Show local device first
+          localDevices.forEach(device => {
+            const div = document.createElement('div');
+            div.className = 'osint-device local';
+            div.innerHTML = `
+              <div class="osint-header">
+                <div class="osint-hostname">💻 ${device.hostname} (THIS DEVICE)</div>
+                <div class="osint-type">${device.deviceType}</div>
+              </div>
+              <div class="osint-details">
+                <div>
+                  <div class="osint-field">IP Address</div>
+                  <div class="osint-value">${device.ip}</div>
+                </div>
+                <div>
+                  <div class="osint-field">MAC Address</div>
+                  <div class="osint-value">${device.mac}</div>
+                </div>
+                <div>
+                  <div class="osint-field">Vendor</div>
+                  <div class="osint-value">${device.vendor}</div>
+                </div>
+                <div>
+                  <div class="osint-field">Status</div>
+                  <div class="osint-value">🟢 ${device.status.toUpperCase()}</div>
+                </div>
+              </div>
+            `;
+            devicesDiv.appendChild(div);
+          });
+
+          // Show other devices
+          otherDevices.forEach(device => {
+            const icon = getDeviceIcon(device.deviceType);
+            const div = document.createElement('div');
+            div.className = 'osint-device';
+            div.innerHTML = `
+              <div class="osint-header">
+                <div class="osint-hostname">${icon} ${device.hostname}</div>
+                <div class="osint-type">${device.deviceType}</div>
+              </div>
+              <div class="osint-details">
+                <div>
+                  <div class="osint-field">IP Address</div>
+                  <div class="osint-value">${device.ip}</div>
+                </div>
+                <div>
+                  <div class="osint-field">MAC Address</div>
+                  <div class="osint-value">${device.mac}</div>
+                </div>
+                <div>
+                  <div class="osint-field">Vendor</div>
+                  <div class="osint-value">${device.vendor}</div>
+                </div>
+                <div>
+                  <div class="osint-field">Last Seen</div>
+                  <div class="osint-value">${new Date(device.lastSeen).toLocaleTimeString()}</div>
+                </div>
+              </div>
+            `;
+            devicesDiv.appendChild(div);
+          });
+
+        } else {
+          statusDiv.innerHTML = '❌ Scan failed: ' + (data.error || 'Unknown error');
+          addTerminalLine(`✗ Network scan failed`);
+          addLog('OSINT: Scan failed', 'error');
+        }
+      } catch (error) {
+        statusDiv.innerHTML = '❌ Error: ' + error.message;
+        addTerminalLine(`✗ OSINT scan error: ${error.message}`);
+        addLog('OSINT: Error - ' + error.message, 'error');
+      }
+    }
+
+    function getDeviceIcon(type) {
+      const icons = {
+        'iPhone': '📱',
+        'iPad': '📱',
+        'Mac Computer': '💻',
+        'Apple Device': '🍎',
+        'Samsung Device': '📱',
+        'Amazon Echo': '🔊',
+        'Roku Streaming': '📺',
+        'Smart Light': '💡',
+        'Router/Switch': '🌐',
+        'Computer': '💻',
+        'Mobile Phone': '📱',
+        'Smart TV': '📺',
+        'Smart Watch': '⌚',
+        'Desktop Computer': '🖥️',
+        'Laptop': '💻',
+        'Printer': '🖨️',
+        'Unknown Device': '❓'
+      };
+      return icons[type] || '🔷';
+    }
+
+    // Welcome message
+    addTerminalLine('SENTINEL Command Center Initialized');
+    addTerminalLine('All systems operational. Awaiting orders...');
+    addLog('System initialized', 'success');
+  </script>
+</body>
+</html>

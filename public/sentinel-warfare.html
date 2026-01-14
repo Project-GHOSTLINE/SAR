@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎮 SENTINEL WARFARE 2026 - AR Combat Mode</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+
+    /* 3D Battlefield */
+    #battlefield {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+        linear-gradient(180deg, #0a0e27 0%, #000 100%);
+      perspective: 1000px;
+    }
+
+    #canvas3d {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* HUD Principal */
+    .hud-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .hud-top {
+      display: flex;
+      justify-content: space-between;
+      padding: 20px;
+      background: linear-gradient(180deg, rgba(10, 14, 39, 0.9) 0%, transparent 100%);
+      pointer-events: all;
+    }
+
+    .datacenter-status {
+      background: rgba(10, 14, 39, 0.95);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 16px 24px;
+      backdrop-filter: blur(10px);
+    }
+
+    .status-title {
+      font-size: 11px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .status-value {
+      font-size: 28px;
+      color: #667eea;
+      font-weight: 700;
+      text-shadow: 0 0 10px #667eea;
+    }
+
+    .threat-level {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .threat-bar {
+      width: 200px;
+      height: 24px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid #ef4444;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .threat-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ef4444, #fbbf24);
+      transition: width 0.5s;
+      box-shadow: 0 0 20px #ef4444;
+    }
+
+    /* Crosshair */
+    .crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      pointer-events: none;
+    }
+
+    .crosshair::before,
+    .crosshair::after {
+      content: '';
+      position: absolute;
+      background: #667eea;
+      box-shadow: 0 0 10px #667eea;
+    }
+
+    .crosshair::before {
+      width: 2px;
+      height: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .crosshair::after {
+      width: 100%;
+      height: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* Sentinel Tuning Panel */
+    .tuning-panel {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 350px;
+      background: rgba(10, 14, 39, 0.98);
+      border: 2px solid #667eea;
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      pointer-events: all;
+      max-height: 80vh;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .tuning-panel.active {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-50%) translateX(50px); }
+      to { opacity: 1; transform: translateY(-50%) translateX(0); }
+    }
+
+    .panel-header {
+      font-size: 16px;
+      color: #667eea;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #667eea;
+      font-weight: 700;
+    }
+
+    .tuning-section {
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .weapon-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .weapon-card {
+      background: rgba(102, 126, 234, 0.1);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .weapon-card:hover {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .weapon-card.selected {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.2);
+    }
+
+    .weapon-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .weapon-name {
+      font-size: 11px;
+      color: #e0e0e0;
+      font-weight: 600;
+    }
+
+    .weapon-desc {
+      font-size: 9px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .skin-selector {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .skin-option {
+      width: 50px;
+      height: 50px;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .skin-option:hover {
+      border-color: #667eea;
+      transform: scale(1.1);
+    }
+
+    .skin-option.selected {
+      border-color: #10b981;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .stat-item {
+      background: rgba(102, 126, 234, 0.1);
+      padding: 8px;
+      border-radius: 6px;
+    }
+
+    .stat-label {
+      font-size: 9px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 14px;
+      color: #667eea;
+      font-weight: 700;
+    }
+
+    .action-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 12px;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    /* Microbes mécaniques */
+    .microbe {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      pointer-events: all;
+      cursor: crosshair;
+      transition: all 0.3s;
+    }
+
+    .microbe-body {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      border: 2px solid #fbbf24;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      animation: microbe-pulse 1.5s ease-in-out infinite;
+      box-shadow: 0 0 20px #ef4444;
+    }
+
+    @keyframes microbe-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    .microbe-label {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      color: #ef4444;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .microbe.dying {
+      animation: explode 0.5s forwards;
+    }
+
+    @keyframes explode {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(2); opacity: 0.5; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+
+    /* Bottom HUD */
+    .hud-bottom {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+      pointer-events: all;
+    }
+
+    .quick-action {
+      background: rgba(10, 14, 39, 0.95);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 16px 24px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .quick-action:hover {
+      border-color: #10b981;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+    }
+
+    .quick-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .quick-label {
+      font-size: 11px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .quick-key {
+      font-size: 9px;
+      color: #667eea;
+      margin-top: 4px;
+    }
+
+    /* Combat Log */
+    .combat-log {
+      position: absolute;
+      bottom: 120px;
+      left: 20px;
+      width: 400px;
+      max-height: 300px;
+      background: rgba(10, 14, 39, 0.95);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(10px);
+      pointer-events: all;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      font-size: 11px;
+      padding: 6px;
+      margin-bottom: 4px;
+      border-left: 3px solid #667eea;
+      padding-left: 10px;
+      animation: logIn 0.3s ease-out;
+    }
+
+    @keyframes logIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .log-kill { color: #10b981; border-color: #10b981; }
+    .log-damage { color: #fbbf24; border-color: #fbbf24; }
+    .log-system { color: #667eea; border-color: #667eea; }
+    .log-error { color: #ef4444; border-color: #ef4444; }
+
+    /* Sentinel in battlefield */
+    .sentinel-unit {
+      position: absolute;
+      width: 60px;
+      height: 80px;
+      pointer-events: all;
+      cursor: pointer;
+      transition: all 0.5s;
+    }
+
+    .sentinel-model {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: 2px solid #a78bfa;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
+      position: relative;
+    }
+
+    .sentinel-hp {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70px;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .sentinel-hp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #10b981);
+      transition: width 0.3s;
+    }
+
+    .sentinel-weapon {
+      position: absolute;
+      bottom: -12px;
+      font-size: 16px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0a0e27;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div id="battlefield">
+    <canvas id="canvas3d"></canvas>
+
+    <!-- HUD Overlay -->
+    <div class="hud-overlay">
+      <!-- Top HUD -->
+      <div class="hud-top">
+        <div class="datacenter-status">
+          <div class="status-title">007 DATACENTER</div>
+          <div class="status-value" id="datacenterStatus">SECURE</div>
+        </div>
+
+        <div class="datacenter-status">
+          <div class="status-title">Active Sentinels</div>
+          <div class="status-value" id="sentinelCount">0</div>
+        </div>
+
+        <div class="datacenter-status">
+          <div class="status-title">Microbes Détectés</div>
+          <div class="status-value" style="color: #ef4444;" id="microbeCount">0</div>
+        </div>
+
+        <div class="datacenter-status">
+          <div class="status-title">Threat Level</div>
+          <div class="threat-level">
+            <div class="threat-bar">
+              <div class="threat-fill" id="threatFill" style="width: 0%;"></div>
+            </div>
+            <div class="status-value" style="font-size: 18px;" id="threatPercent">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crosshair -->
+      <div class="crosshair"></div>
+
+      <!-- Bottom HUD -->
+      <div class="hud-bottom">
+        <div class="quick-action" onclick="tuneMode()">
+          <div class="quick-icon">🔧</div>
+          <div class="quick-label">Tune Sentinel</div>
+          <div class="quick-key">[T]</div>
+        </div>
+
+        <div class="quick-action" onclick="deploySentinel()">
+          <div class="quick-icon">🚀</div>
+          <div class="quick-label">Deploy Unit</div>
+          <div class="quick-key">[D]</div>
+        </div>
+
+        <div class="quick-action" onclick="scanMicrobes()">
+          <div class="quick-icon">🔍</div>
+          <div class="quick-label">Scan Threats</div>
+          <div class="quick-key">[S]</div>
+        </div>
+
+        <div class="quick-action" onclick="commandCenter()">
+          <div class="quick-icon">🎛️</div>
+          <div class="quick-label">Command Center</div>
+          <div class="quick-key">[C]</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Combat Log -->
+    <div class="combat-log">
+      <div class="status-title" style="margin-bottom: 12px;">COMBAT LOG</div>
+      <div id="combatLog"></div>
+    </div>
+
+    <!-- Tuning Panel -->
+    <div class="tuning-panel" id="tuningPanel">
+      <div class="panel-header">⚙️ SENTINEL TUNING</div>
+
+      <div class="tuning-section">
+        <div class="section-title">🎨 SKIN / LOOK</div>
+        <div class="skin-selector" id="skinSelector"></div>
+      </div>
+
+      <div class="tuning-section">
+        <div class="section-title">🔫 WEAPON LOADOUT</div>
+        <div class="weapon-grid" id="weaponGrid"></div>
+      </div>
+
+      <div class="tuning-section">
+        <div class="section-title">📊 SENTINEL STATS</div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-label">Attack</div>
+            <div class="stat-value" id="statAttack">100</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Defense</div>
+            <div class="stat-value" id="statDefense">80</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Speed</div>
+            <div class="stat-value" id="statSpeed">120</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Range</div>
+            <div class="stat-value" id="statRange">150</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="action-btn" onclick="applyTuning()">✅ APPLY & SAVE CONFIG</button>
+      <button class="action-btn" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);" onclick="closeTuning()">❌ CANCEL</button>
+    </div>
+  </div>
+
+  <script>
+    // Game state
+    let sentinels = [];
+    let microbes = [];
+    let selectedSentinel = null;
+    let config = {
+      skin: '🤖',
+      weapon: 'scanner',
+      attack: 100,
+      defense: 80,
+      speed: 120,
+      range: 150
+    };
+
+    // Weapons database (REAL Claude tools)
+    const weapons = [
+      { id: 'scanner', icon: '🔍', name: 'Scanner', desc: 'Read Tool', tool: 'Read', damage: 50 },
+      { id: 'builder', icon: '🔨', name: 'Builder', desc: 'Write Tool', tool: 'Write', damage: 80 },
+      { id: 'editor', icon: '✂️', name: 'Editor', desc: 'Edit Tool', tool: 'Edit', damage: 70 },
+      { id: 'destroyer', icon: '💥', name: 'Destroyer', desc: 'Bash Tool', tool: 'Bash', damage: 100 },
+      { id: 'seeker', icon: '🎯', name: 'Seeker', desc: 'Grep Tool', tool: 'Grep', damage: 60 },
+      { id: 'finder', icon: '📁', name: 'Finder', desc: 'Glob Tool', tool: 'Glob', damage: 55 }
+    ];
+
+    // Skins
+    const skins = ['🤖', '👾', '🦾', '⚡', '🔷', '💎', '🌟', '🔥'];
+
+    // Initialize
+    function init() {
+      renderWeapons();
+      renderSkins();
+      loadConfig();
+      addLog('system', '🎮 Sentinel Warfare initialized');
+      addLog('system', '🏢 007 Datacenter online');
+      addLog('system', '⚡ All systems operational');
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 't' || e.key === 'T') tuneMode();
+        if (e.key === 'd' || e.key === 'D') deploySentinel();
+        if (e.key === 's' || e.key === 'S') scanMicrobes();
+        if (e.key === 'c' || e.key === 'C') commandCenter();
+      });
+    }
+
+    // Render weapons
+    function renderWeapons() {
+      const grid = document.getElementById('weaponGrid');
+      grid.innerHTML = '';
+
+      weapons.forEach(weapon => {
+        const card = document.createElement('div');
+        card.className = 'weapon-card' + (config.weapon === weapon.id ? ' selected' : '');
+        card.onclick = () => selectWeapon(weapon.id);
+        card.innerHTML = `
+          <div class="weapon-icon">${weapon.icon}</div>
+          <div class="weapon-name">${weapon.name}</div>
+          <div class="weapon-desc">${weapon.desc}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Render skins
+    function renderSkins() {
+      const selector = document.getElementById('skinSelector');
+      selector.innerHTML = '';
+
+      skins.forEach(skin => {
+        const option = document.createElement('div');
+        option.className = 'skin-option' + (config.skin === skin ? ' selected' : '');
+        option.textContent = skin;
+        option.onclick = () => selectSkin(skin);
+        selector.appendChild(option);
+      });
+    }
+
+    // Select weapon
+    function selectWeapon(weaponId) {
+      config.weapon = weaponId;
+      const weapon = weapons.find(w => w.id === weaponId);
+      config.attack = weapon.damage;
+      updateStats();
+      renderWeapons();
+    }
+
+    // Select skin
+    function selectSkin(skin) {
+      config.skin = skin;
+      renderSkins();
+    }
+
+    // Update stats
+    function updateStats() {
+      document.getElementById('statAttack').textContent = config.attack;
+      document.getElementById('statDefense').textContent = config.defense;
+      document.getElementById('statSpeed').textContent = config.speed;
+      document.getElementById('statRange').textContent = config.range;
+    }
+
+    // Apply tuning (REAL API call to save config)
+    async function applyTuning() {
+      addLog('system', '💾 Saving sentinel configuration...');
+
+      try {
+        // Save to database
+        const response = await fetch('/api/memory/store', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            project_name: 'sar',
+            category: 'sentinel-config',
+            key: 'loadout-' + Date.now(),
+            content: config,
+            importance: 8
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          addLog('system', '✅ Configuration saved to database');
+          closeTuning();
+        } else {
+          addLog('error', '❌ Failed to save configuration');
+        }
+      } catch (error) {
+        addLog('error', '❌ Error: ' + error.message);
+      }
+    }
+
+    // Load config from database
+    async function loadConfig() {
+      try {
+        const response = await fetch('/api/memory/recall?project=sar&category=sentinel-config');
+        const data = await response.json();
+
+        if (data.success && data.memories && data.memories.length > 0) {
+          const lastConfig = data.memories[0].content;
+          config = { ...config, ...lastConfig };
+          updateStats();
+          addLog('system', '📥 Configuration loaded from database');
+        }
+      } catch (error) {
+        console.error('Config load error:', error);
+      }
+    }
+
+    // Deploy sentinel (REAL action logged)
+    async function deploySentinel() {
+      const x = Math.random() * (window.innerWidth - 200) + 100;
+      const y = Math.random() * (window.innerHeight - 300) + 150;
+
+      const sentinel = {
+        id: Date.now(),
+        x, y,
+        hp: 100,
+        maxHp: 100,
+        skin: config.skin,
+        weapon: config.weapon,
+        target: null
+      };
+
+      sentinels.push(sentinel);
+      renderSentinel(sentinel);
+      updateCounts();
+
+      addLog('system', `🚀 Sentinel #${sentinels.length} deployed`);
+
+      // Log to database
+      await fetch('/api/activity/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_name: 'sar',
+          action_type: 'Deploy',
+          target: 'Sentinel-' + sentinel.id,
+          thought: 'User deployed sentinel from warfare interface',
+          status: 'success'
+        })
+      });
+    }
+
+    // Render sentinel
+    function renderSentinel(sentinel) {
+      const el = document.createElement('div');
+      el.className = 'sentinel-unit';
+      el.id = 'sentinel-' + sentinel.id;
+      el.style.left = sentinel.x + 'px';
+      el.style.top = sentinel.y + 'px';
+      el.onclick = () => selectSentinelUnit(sentinel);
+
+      const weapon = weapons.find(w => w.id === sentinel.weapon);
+
+      el.innerHTML = `
+        <div class="sentinel-hp">
+          <div class="sentinel-hp-fill" style="width: ${(sentinel.hp / sentinel.maxHp) * 100}%;"></div>
+        </div>
+        <div class="sentinel-model">
+          ${sentinel.skin}
+        </div>
+        <div class="sentinel-weapon">${weapon.icon}</div>
+      `;
+
+      document.getElementById('battlefield').appendChild(el);
+    }
+
+    // Scan for microbes (REAL scanning)
+    async function scanMicrobes() {
+      addLog('system', '🔍 Scanning project for threats...');
+
+      try {
+        // Real project scan
+        const response = await fetch('/api/sentinel/scan-project', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ project: 'sar' })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.threats) {
+          data.threats.forEach(threat => spawnMicrobe(threat));
+          addLog('damage', `⚠️ Found ${data.threats.length} threat(s)`);
+        } else {
+          addLog('system', '✅ No threats detected');
+        }
+      } catch (error) {
+        // Fallback: spawn demo microbes
+        for (let i = 0; i < 5; i++) {
+          spawnMicrobe({
+            type: 'bug',
+            name: 'Error-' + Math.floor(Math.random() * 1000),
+            severity: Math.random() > 0.5 ? 'high' : 'medium'
+          });
+        }
+        addLog('damage', '⚠️ Found 5 demo threat(s)');
+      }
+
+      updateCounts();
+    }
+
+    // Spawn microbe
+    function spawnMicrobe(threat) {
+      const x = Math.random() * (window.innerWidth - 200) + 100;
+      const y = Math.random() * (window.innerHeight - 300) + 150;
+
+      const microbe = {
+        id: Date.now() + Math.random(),
+        x, y,
+        type: threat.type || 'bug',
+        name: threat.name || 'Unknown',
+        hp: threat.severity === 'high' ? 100 : 50
+      };
+
+      microbes.push(microbe);
+      renderMicrobe(microbe);
+    }
+
+    // Render microbe
+    function renderMicrobe(microbe) {
+      const el = document.createElement('div');
+      el.className = 'microbe';
+      el.id = 'microbe-' + microbe.id;
+      el.style.left = microbe.x + 'px';
+      el.style.top = microbe.y + 'px';
+      el.onclick = () => attackMicrobe(microbe);
+
+      el.innerHTML = `
+        <div class="microbe-label">${microbe.name}</div>
+        <div class="microbe-body">🦠</div>
+      `;
+
+      document.getElementById('battlefield').appendChild(el);
+    }
+
+    // Attack microbe
+    async function attackMicrobe(microbe) {
+      if (sentinels.length === 0) {
+        addLog('error', '❌ No sentinels available!');
+        return;
+      }
+
+      const sentinel = sentinels[0];
+      const weapon = weapons.find(w => w.id === sentinel.weapon);
+
+      microbe.hp -= config.attack;
+
+      addLog('damage', `💥 ${weapon.name} hits ${microbe.name} for ${config.attack} damage`);
+
+      if (microbe.hp <= 0) {
+        killMicrobe(microbe);
+
+        // Log kill to database
+        await fetch('/api/activity/log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            project_name: 'sar',
+            action_type: weapon.tool,
+            target: microbe.name,
+            thought: `Eliminated threat using ${weapon.name}`,
+            status: 'success',
+            duration_ms: 500
+          })
+        });
+      }
+    }
+
+    // Kill microbe
+    function killMicrobe(microbe) {
+      const el = document.getElementById('microbe-' + microbe.id);
+      if (el) {
+        el.classList.add('dying');
+        setTimeout(() => el.remove(), 500);
+      }
+
+      microbes = microbes.filter(m => m.id !== microbe.id);
+      addLog('kill', `✅ ${microbe.name} eliminated!`);
+      updateCounts();
+    }
+
+    // Update counts
+    function updateCounts() {
+      document.getElementById('sentinelCount').textContent = sentinels.length;
+      document.getElementById('microbeCount').textContent = microbes.length;
+
+      const threat = Math.min((microbes.length / 10) * 100, 100);
+      document.getElementById('threatFill').style.width = threat + '%';
+      document.getElementById('threatPercent').textContent = Math.round(threat) + '%';
+
+      if (threat > 70) {
+        document.getElementById('datacenterStatus').textContent = 'CRITICAL';
+        document.getElementById('datacenterStatus').style.color = '#ef4444';
+      } else if (threat > 30) {
+        document.getElementById('datacenterStatus').textContent = 'WARNING';
+        document.getElementById('datacenterStatus').style.color = '#fbbf24';
+      } else {
+        document.getElementById('datacenterStatus').textContent = 'SECURE';
+        document.getElementById('datacenterStatus').style.color = '#10b981';
+      }
+    }
+
+    // Tuning mode
+    function tuneMode() {
+      document.getElementById('tuningPanel').classList.toggle('active');
+    }
+
+    function closeTuning() {
+      document.getElementById('tuningPanel').classList.remove('active');
+    }
+
+    // Command center
+    function commandCenter() {
+      window.location.href = '/command-center.html';
+    }
+
+    // Add log
+    function addLog(type, text) {
+      const log = document.getElementById('combatLog');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry log-' + type;
+      entry.textContent = text;
+
+      log.insertBefore(entry, log.firstChild);
+
+      if (log.children.length > 30) {
+        log.removeChild(log.lastChild);
+      }
+    }
+
+    // Initialize on load
+    init();
+  </script>
+</body>
+</html>

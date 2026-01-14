@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAR - Network Topology & Route Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', 'Monaco', monospace;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+
+        #canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .hud {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            max-width: 300px;
+            z-index: 1000;
+        }
+
+        .hud h2 {
+            color: #a78bfa;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .stat-line {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        .stat-label {
+            color: #9ca3af;
+        }
+
+        .stat-value {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .route-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            max-width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .route-info h2 {
+            color: #a78bfa;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .route-item {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .route-item:hover {
+            background: rgba(102, 126, 234, 0.3);
+            transform: translateX(5px);
+        }
+
+        .route-item.active {
+            border-left-color: #10b981;
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        .legend {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            z-index: 1000;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        .legend-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+
+        .scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollbar::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div class="hud">
+        <h2>🖥️ NETWORK STATUS</h2>
+        <div class="stat-line">
+            <span class="stat-label">Device:</span>
+            <span class="stat-value" id="device-name">MacBook Pro</span>
+        </div>
+        <div class="stat-line">
+            <span class="stat-label">WiFi:</span>
+            <span class="stat-value pulse" id="wifi-status">Connected</span>
+        </div>
+        <div class="stat-line">
+            <span class="stat-label">IP Local:</span>
+            <span class="stat-value" id="local-ip">Loading...</span>
+        </div>
+        <div class="stat-line">
+            <span class="stat-label">Routes:</span>
+            <span class="stat-value" id="route-count">0</span>
+        </div>
+        <div class="stat-line">
+            <span class="stat-label">Active:</span>
+            <span class="stat-value" id="active-count">0</span>
+        </div>
+    </div>
+
+    <div class="route-info scrollbar">
+        <h2>📡 API ROUTES</h2>
+        <div id="routes-list">
+            <div style="color: #9ca3af;">Loading routes...</div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-icon" style="background: #667eea;"></div>
+            <span>Mac / Device</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-icon" style="background: #10b981;"></div>
+            <span>Active Route</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-icon" style="background: #f59e0b;"></div>
+            <span>Router / Gateway</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-icon" style="background: #ef4444;"></div>
+            <span>Internet Cloud</span>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        let routes = [];
+        let particles = [];
+        let activeRoute = null;
+
+        // Network nodes
+        const nodes = {
+            mac: { x: width * 0.1, y: height * 0.5, radius: 40, color: '#667eea', label: '💻 MacBook' },
+            wifi: { x: width * 0.25, y: height * 0.5, radius: 30, color: '#10b981', label: '📡 WiFi' },
+            router: { x: width * 0.4, y: height * 0.5, radius: 35, color: '#f59e0b', label: '🌐 Router' },
+            internet: { x: width * 0.6, y: height * 0.5, radius: 50, color: '#ef4444', label: '☁️ Internet' }
+        };
+
+        // Particle for data flow animation
+        class Particle {
+            constructor(start, end, color = '#a78bfa') {
+                this.start = start;
+                this.end = end;
+                this.x = start.x;
+                this.y = start.y;
+                this.progress = 0;
+                this.speed = 0.01 + Math.random() * 0.02;
+                this.color = color;
+                this.size = 3;
+            }
+
+            update() {
+                this.progress += this.speed;
+                this.x = this.start.x + (this.end.x - this.start.x) * this.progress;
+                this.y = this.start.y + (this.end.y - this.start.y) * this.progress;
+                return this.progress < 1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // Draw WiFi waves
+        function drawWiFiWaves(x, y, time) {
+            for (let i = 1; i <= 3; i++) {
+                const radius = 20 + i * 15;
+                const alpha = 0.5 - (Math.sin(time * 0.005 + i) * 0.3);
+
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(16, 185, 129, ${alpha})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+
+        // Draw connection line
+        function drawConnection(start, end, color = '#667eea', width = 2) {
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(end.x, end.y);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.stroke();
+        }
+
+        // Draw node
+        function drawNode(node, pulse = false) {
+            // Glow effect
+            if (pulse) {
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.radius + 10, 0, Math.PI * 2);
+                ctx.fillStyle = node.color + '20';
+                ctx.fill();
+            }
+
+            // Main circle
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+            ctx.fillStyle = node.color;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = node.color;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Border
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Label
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '14px SF Mono';
+            ctx.textAlign = 'center';
+            ctx.fillText(node.label, node.x, node.y + node.radius + 20);
+        }
+
+        // Draw route endpoints
+        function drawRoutes() {
+            const startX = width * 0.75;
+            const startY = height * 0.2;
+            const spacing = 40;
+
+            routes.forEach((route, i) => {
+                const x = startX;
+                const y = startY + (i * spacing);
+                const isActive = activeRoute === route.path;
+                const color = isActive ? '#10b981' : '#a78bfa';
+                const radius = isActive ? 8 : 6;
+
+                // Connection from internet
+                if (isActive) {
+                    drawConnection(nodes.internet, { x, y }, color, 3);
+                }
+
+                // Endpoint
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.shadowBlur = isActive ? 15 : 5;
+                ctx.shadowColor = color;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Label
+                ctx.fillStyle = isActive ? '#10b981' : '#9ca3af';
+                ctx.font = '10px SF Mono';
+                ctx.textAlign = 'left';
+                ctx.fillText(route.path.substring(0, 25), x + 15, y + 4);
+            });
+        }
+
+        // Main animation loop
+        let time = 0;
+        function animate() {
+            time++;
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw connections
+            drawConnection(nodes.mac, nodes.wifi, '#667eea', 3);
+            drawConnection(nodes.wifi, nodes.router, '#10b981', 3);
+            drawConnection(nodes.router, nodes.internet, '#f59e0b', 3);
+
+            // Draw WiFi waves
+            drawWiFiWaves(nodes.wifi.x, nodes.wifi.y, time);
+
+            // Draw nodes
+            drawNode(nodes.mac, time % 60 < 30);
+            drawNode(nodes.wifi, true);
+            drawNode(nodes.router);
+            drawNode(nodes.internet, time % 120 < 60);
+
+            // Draw routes
+            drawRoutes();
+
+            // Update and draw particles
+            particles = particles.filter(p => {
+                const alive = p.update();
+                if (alive) p.draw();
+                return alive;
+            });
+
+            // Spawn particles randomly
+            if (Math.random() < 0.1) {
+                particles.push(new Particle(nodes.mac, nodes.wifi, '#667eea'));
+            }
+            if (Math.random() < 0.08) {
+                particles.push(new Particle(nodes.wifi, nodes.router, '#10b981'));
+            }
+            if (Math.random() < 0.06) {
+                particles.push(new Particle(nodes.router, nodes.internet, '#f59e0b'));
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Load routes
+        async function loadRoutes() {
+            try {
+                const response = await fetch('/api/routes/discover');
+                const data = await response.json();
+
+                if (data.success) {
+                    routes = data.routes.slice(0, 15); // Show first 15
+                    document.getElementById('route-count').textContent = data.stats.total_routes;
+
+                    // Display routes list
+                    const routesList = document.getElementById('routes-list');
+                    routesList.innerHTML = routes.map(r => `
+                        <div class="route-item" onclick="activateRoute('${r.path}')">
+                            ${r.path}
+                            <div style="font-size: 0.7em; color: #9ca3af; margin-top: 3px;">
+                                ${r.methods.join(', ')}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading routes:', error);
+            }
+        }
+
+        // Activate route (show data flow)
+        window.activateRoute = function(path) {
+            activeRoute = path;
+
+            // Update UI
+            document.querySelectorAll('.route-item').forEach(el => {
+                el.classList.remove('active');
+                if (el.textContent.includes(path)) {
+                    el.classList.add('active');
+                }
+            });
+
+            document.getElementById('active-count').textContent = '1';
+
+            // Spawn burst of particles
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    particles.push(new Particle(nodes.mac, nodes.wifi, '#667eea'));
+                    particles.push(new Particle(nodes.wifi, nodes.router, '#10b981'));
+                    particles.push(new Particle(nodes.router, nodes.internet, '#f59e0b'));
+                }, i * 50);
+            }
+
+            // Clear after 3 seconds
+            setTimeout(() => {
+                if (activeRoute === path) {
+                    activeRoute = null;
+                    document.getElementById('active-count').textContent = '0';
+                    document.querySelectorAll('.route-item').forEach(el => {
+                        el.classList.remove('active');
+                    });
+                }
+            }, 3000);
+        };
+
+        // Get local IP
+        async function getLocalIP() {
+            try {
+                const response = await fetch('/api/osint/network-scan');
+                const data = await response.json();
+                if (data.localIP) {
+                    document.getElementById('local-ip').textContent = data.localIP;
+                }
+            } catch (error) {
+                document.getElementById('local-ip').textContent = 'localhost';
+            }
+        }
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+
+            // Recalculate node positions
+            nodes.mac.x = width * 0.1;
+            nodes.mac.y = height * 0.5;
+            nodes.wifi.x = width * 0.25;
+            nodes.wifi.y = height * 0.5;
+            nodes.router.x = width * 0.4;
+            nodes.router.y = height * 0.5;
+            nodes.internet.x = width * 0.6;
+            nodes.internet.y = height * 0.5;
+        });
+
+        // Start
+        loadRoutes();
+        getLocalIP();
+        animate();
+    </script>
+</body>
+</html>

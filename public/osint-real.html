@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSINT - Real Network Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #00aa00;
+        }
+
+        .scan-btn {
+            display: block;
+            width: 200px;
+            margin: 0 auto 30px;
+            padding: 15px;
+            background: #00ff00;
+            color: #000;
+            border: none;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .scan-btn:hover {
+            background: #00aa00;
+        }
+
+        .section {
+            background: #111;
+            border: 2px solid #00ff00;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #00ff00;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #00ff00;
+        }
+
+        th {
+            background: #00ff00;
+            color: #000;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background: #0a0a0a;
+        }
+
+        tr:nth-child(odd) {
+            background: #111;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: #111;
+            border: 2px solid #00ff00;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: #00aa00;
+            margin-top: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .badge-public {
+            background: #ff0000;
+            color: #fff;
+        }
+
+        .badge-private {
+            background: #00aa00;
+            color: #000;
+        }
+
+        .badge-router { background: #ffff00; color: #000; }
+        .badge-apple { background: #00aaff; color: #000; }
+        .badge-smart { background: #ff00ff; color: #fff; }
+
+        .loading {
+            text-align: center;
+            font-size: 1.5em;
+            color: #00ff00;
+            padding: 40px;
+        }
+
+        .timestamp {
+            text-align: center;
+            color: #00aa00;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .error {
+            background: #ff0000;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        code {
+            background: #000;
+            padding: 2px 6px;
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 OSINT NETWORK SCANNER</h1>
+        <p class="subtitle">Real-time Network Intelligence - Working Version</p>
+
+        <button class="scan-btn" onclick="scanNetwork()">▶ SCAN NETWORK</button>
+
+        <div id="loading" class="loading" style="display: none;">
+            Scanning network...
+        </div>
+
+        <div id="timestamp" class="timestamp"></div>
+
+        <div id="results" style="display: none;">
+            <!-- Summary Stats -->
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <div class="stat-value" id="total-devices">0</div>
+                    <div class="stat-label">DEVICES FOUND</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="total-ports">0</div>
+                    <div class="stat-label">OPEN PORTS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="public-ports">0</div>
+                    <div class="stat-label">PUBLIC PORTS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="latency">0ms</div>
+                    <div class="stat-label">GATEWAY LATENCY</div>
+                </div>
+            </div>
+
+            <!-- Local Machine -->
+            <div class="section">
+                <div class="section-title">💻 LOCAL MACHINE</div>
+                <table>
+                    <tr>
+                        <th>Property</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>IP Address</td>
+                        <td id="local-ip">-</td>
+                    </tr>
+                    <tr>
+                        <td>MAC Address</td>
+                        <td id="local-mac">-</td>
+                    </tr>
+                    <tr>
+                        <td>Hostname</td>
+                        <td id="local-hostname">-</td>
+                    </tr>
+                    <tr>
+                        <td>Gateway</td>
+                        <td id="gateway">-</td>
+                    </tr>
+                    <tr>
+                        <td>DNS Servers</td>
+                        <td id="dns">-</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Network Devices -->
+            <div class="section">
+                <div class="section-title">🌐 NETWORK DEVICES</div>
+                <table id="devices-table">
+                    <thead>
+                        <tr>
+                            <th>Hostname</th>
+                            <th>IP Address</th>
+                            <th>MAC Address</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody id="devices-body">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Open Ports -->
+            <div class="section">
+                <div class="section-title">🔓 OPEN PORTS</div>
+                <table id="ports-table">
+                    <thead>
+                        <tr>
+                            <th>Port</th>
+                            <th>Service</th>
+                            <th>Description</th>
+                            <th>Visibility</th>
+                            <th>Address</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ports-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="error" style="display: none;"></div>
+
+        <div class="section" style="margin-top: 40px;">
+            <div class="section-title">📡 API ENDPOINT</div>
+            <p>
+                <code>GET /api/osint/scan</code>
+            </p>
+            <p style="margin-top: 10px; color: #00aa00;">
+                This API performs real network scanning using system commands (ifconfig, arp, netstat, ping).
+            </p>
+        </div>
+    </div>
+
+    <script>
+        async function scanNetwork() {
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/osint/scan');
+                const result = await response.json();
+
+                if (result.success) {
+                    displayResults(result.data);
+                } else {
+                    showError('Scan failed: ' + result.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function displayResults(data) {
+            // Show results
+            document.getElementById('results').style.display = 'block';
+
+            // Timestamp
+            document.getElementById('timestamp').textContent =
+                'Last scan: ' + new Date(data.timestamp).toLocaleString();
+
+            // Summary stats
+            document.getElementById('total-devices').textContent = data.summary.total_devices;
+            document.getElementById('total-ports').textContent = data.summary.total_ports;
+            document.getElementById('public-ports').textContent = data.summary.public_ports;
+
+            if (data.network_info.latency) {
+                document.getElementById('latency').textContent =
+                    data.network_info.latency.avg.toFixed(1) + 'ms';
+            }
+
+            // Local machine
+            document.getElementById('local-ip').textContent = data.local_machine.ip;
+            document.getElementById('local-mac').textContent = data.local_machine.mac;
+            document.getElementById('local-hostname').textContent = data.local_machine.hostname;
+            document.getElementById('gateway').textContent = data.network_info.gateway;
+            document.getElementById('dns').textContent = data.network_info.dns_servers.join(', ');
+
+            // Devices
+            const devicesBody = document.getElementById('devices-body');
+            devicesBody.innerHTML = '';
+
+            data.network_devices.forEach(device => {
+                const row = document.createElement('tr');
+
+                let typeBadge = '';
+                if (device.type === 'Router') typeBadge = '<span class="badge badge-router">ROUTER</span>';
+                else if (device.type === 'Apple Device') typeBadge = '<span class="badge badge-apple">APPLE</span>';
+                else if (device.type === 'Smart Home') typeBadge = '<span class="badge badge-smart">SMART HOME</span>';
+                else typeBadge = device.type;
+
+                row.innerHTML = `
+                    <td>${device.hostname}</td>
+                    <td><strong>${device.ip}</strong></td>
+                    <td>${device.mac}</td>
+                    <td>${typeBadge}</td>
+                `;
+                devicesBody.appendChild(row);
+            });
+
+            // Ports
+            const portsBody = document.getElementById('ports-body');
+            portsBody.innerHTML = '';
+
+            data.open_ports.forEach(port => {
+                const row = document.createElement('tr');
+
+                const visibilityBadge = port.public
+                    ? '<span class="badge badge-public">PUBLIC</span>'
+                    : '<span class="badge badge-private">PRIVATE</span>';
+
+                row.innerHTML = `
+                    <td><strong>${port.port}</strong></td>
+                    <td>${port.service}</td>
+                    <td>${port.description}</td>
+                    <td>${visibilityBadge}</td>
+                    <td><code>${port.address}</code></td>
+                `;
+                portsBody.appendChild(row);
+            });
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Auto-scan on load
+        window.addEventListener('load', () => {
+            scanNetwork();
+        });
+    </script>
+</body>
+</html>

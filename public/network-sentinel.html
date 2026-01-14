@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Sentinel - Wireshark + AI Monitoring</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1920px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            color: #00ff00;
+            text-shadow: 0 0 20px #00ff00;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #00cc00;
+            font-size: 1em;
+        }
+
+        .controls {
+            background: rgba(0, 50, 0, 0.3);
+            border: 2px solid #00ff00;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            color: #00cc00;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        input, select {
+            padding: 10px;
+            background: #000;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            font-family: inherit;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            background: #00ff00;
+            border: none;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: #00cc00;
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        .btn:disabled {
+            background: #006600;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .btn-danger {
+            background: #ff0000;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #cc0000;
+            box-shadow: 0 0 20px #ff0000;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: rgba(0, 50, 0, 0.3);
+            border: 2px solid #00ff00;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #00cc00;
+            font-size: 0.85em;
+        }
+
+        .alert-critical { color: #ff0000; animation: blink 1s infinite; }
+        .alert-high { color: #ff9900; }
+        .alert-medium { color: #ffff00; }
+        .alert-low { color: #00ffff; }
+        .alert-info { color: #00ff00; }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .sentinel-status {
+            background: rgba(0, 50, 0, 0.3);
+            border: 2px solid #00ff00;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .sentinel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .sentinel-name {
+            font-size: 1.5em;
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .sentinel-badge {
+            background: #00ff00;
+            color: #000;
+            padding: 5px 15px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .threats-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            padding: 20px;
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .threat-item {
+            background: rgba(0, 50, 0, 0.3);
+            border-left: 5px solid;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .threat-critical { border-left-color: #ff0000; }
+        .threat-high { border-left-color: #ff9900; }
+        .threat-medium { border-left-color: #ffff00; }
+        .threat-low { border-left-color: #00ffff; }
+
+        .threat-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .threat-type {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #00ff00;
+        }
+
+        .threat-score {
+            background: #000;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .threat-details {
+            margin-top: 10px;
+            padding: 10px;
+            background: #000;
+            border: 1px solid #003300;
+        }
+
+        .detail-row {
+            padding: 3px 0;
+            font-size: 0.9em;
+        }
+
+        .detail-label {
+            color: #00cc00;
+            font-weight: bold;
+            display: inline-block;
+            width: 150px;
+        }
+
+        .packets-table {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            padding: 20px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #003300;
+        }
+
+        th {
+            background: #001100;
+            color: #00ff00;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .protocol-tcp { color: #00ffff; }
+        .protocol-udp { color: #ffff00; }
+        .protocol-icmp { color: #ff00ff; }
+        .protocol-http { color: #00ff00; }
+        .protocol-dns { color: #ff9900; }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.5em;
+            color: #00ff00;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .recommendations {
+            background: rgba(0, 50, 0, 0.3);
+            border: 2px solid #00ff00;
+            padding: 20px;
+        }
+
+        .rec-title {
+            font-size: 1.3em;
+            color: #00ff00;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .rec-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 3px solid #00ff00;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ NETWORK SENTINEL</h1>
+        <p class="subtitle">AI-Powered Packet Analysis with Sentinel Monitoring</p>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Interface</label>
+                <select id="interface">
+                    <option value="any">Any</option>
+                    <option value="en0">en0 (WiFi)</option>
+                    <option value="en1">en1 (Ethernet)</option>
+                    <option value="lo0">lo0 (Loopback)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Duration (seconds)</label>
+                <input type="number" id="duration" value="10" min="5" max="60">
+            </div>
+
+            <div class="control-group">
+                <label>Packet Count</label>
+                <input type="number" id="packet-count" value="100" min="10" max="1000">
+            </div>
+
+            <div class="control-group">
+                <label>Filter (BPF syntax)</label>
+                <input type="text" id="filter" placeholder="tcp port 80">
+            </div>
+
+            <div class="control-group">
+                <label>Auto-Respond</label>
+                <select id="auto-respond">
+                    <option value="false">Manual Review</option>
+                    <option value="true">Auto Block Threats</option>
+                </select>
+            </div>
+
+            <div class="control-group" style="display: flex; align-items: flex-end;">
+                <button class="btn" id="start-btn" onclick="startCapture()">
+                    ▶ START CAPTURE
+                </button>
+            </div>
+
+            <div class="control-group" style="display: flex; align-items: flex-end;">
+                <button class="btn btn-danger" id="stop-btn" onclick="stopCapture()" disabled>
+                    ⏹ STOP
+                </button>
+            </div>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            Capturing packets and analyzing with Sentinels
+        </div>
+
+        <div id="results" style="display: none;">
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-packets">0</div>
+                    <div class="stat-label">PACKETS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-threats">0</div>
+                    <div class="stat-label">THREATS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-alert" class="alert-info">NONE</div>
+                    <div class="stat-label">ALERT LEVEL</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-dropped">0</div>
+                    <div class="stat-label">DROPPED</div>
+                </div>
+            </div>
+
+            <div id="sentinel-status" class="sentinel-status" style="display: none;">
+                <div class="sentinel-header">
+                    <div class="sentinel-name" id="sentinel-name">No Sentinel Assigned</div>
+                    <div class="sentinel-badge" id="sentinel-level">LVL 0</div>
+                </div>
+                <div id="sentinel-actions"></div>
+            </div>
+
+            <div id="threats-section" style="display: none;">
+                <div class="threats-container">
+                    <h2 style="color: #00ff00; margin-bottom: 15px;">🚨 THREATS DETECTED</h2>
+                    <div id="threats-list"></div>
+                </div>
+            </div>
+
+            <div id="recommendations-section" style="display: none;" class="recommendations">
+                <div class="rec-title">💡 SENTINEL RECOMMENDATIONS</div>
+                <div id="recommendations-list"></div>
+            </div>
+
+            <div class="packets-table">
+                <h2 style="color: #00ff00; margin-bottom: 15px;">📦 PACKET CAPTURE</h2>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table id="packets-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Timestamp</th>
+                                <th>Protocol</th>
+                                <th>Source</th>
+                                <th>Destination</th>
+                                <th>Length</th>
+                                <th>Info</th>
+                            </tr>
+                        </thead>
+                        <tbody id="packets-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let captureActive = false;
+
+        async function startCapture() {
+            const iface = document.getElementById('interface').value;
+            const duration = parseInt(document.getElementById('duration').value);
+            const packetCount = parseInt(document.getElementById('packet-count').value);
+            const filter = document.getElementById('filter').value.trim();
+            const autoRespond = document.getElementById('auto-respond').value === 'true';
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = false;
+            captureActive = true;
+
+            try {
+                // Step 1: Capture packets
+                const captureResponse = await fetch('/api/network/packet-capture', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        interface: iface,
+                        duration,
+                        packet_count: packetCount,
+                        filter: filter || undefined
+                    })
+                });
+
+                const captureResult = await captureResponse.json();
+
+                if (!captureResult.success) {
+                    alert('Capture failed: ' + captureResult.error);
+                    return;
+                }
+
+                // Display capture results
+                displayCaptureResults(captureResult.results);
+
+                // Step 2: Analyze with Sentinel
+                if (captureResult.results.threats_detected.length > 0) {
+                    const monitorResponse = await fetch('/api/sentinel/network-monitor', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            capture_data: captureResult.results,
+                            auto_respond: autoRespond
+                        })
+                    });
+
+                    const monitorResult = await monitorResponse.json();
+
+                    if (monitorResult.success) {
+                        displaySentinelAnalysis(monitorResult.results);
+                    }
+                }
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('stop-btn').disabled = true;
+                captureActive = false;
+            }
+        }
+
+        function stopCapture() {
+            captureActive = false;
+            document.getElementById('stop-btn').disabled = true;
+        }
+
+        function displayCaptureResults(data) {
+            document.getElementById('results').style.display = 'block';
+
+            // Update stats
+            document.getElementById('stat-packets').textContent = data.statistics.packets_captured || 0;
+            document.getElementById('stat-threats').textContent = data.threats_detected.length;
+            document.getElementById('stat-dropped').textContent = data.statistics.packets_dropped || 0;
+
+            // Display packets
+            const tbody = document.getElementById('packets-tbody');
+            tbody.innerHTML = data.packets.slice(0, 100).map(packet => `
+                <tr>
+                    <td>${packet.id}</td>
+                    <td>${packet.timestamp ? packet.timestamp.toFixed(6) : 'N/A'}</td>
+                    <td class="protocol-${packet.protocol.toLowerCase()}">${packet.protocol}</td>
+                    <td>${packet.source ? `${packet.source.ip}${packet.source.port ? ':' + packet.source.port : ''}` : 'N/A'}</td>
+                    <td>${packet.destination ? `${packet.destination.ip}${packet.destination.port ? ':' + packet.destination.port : ''}` : 'N/A'}</td>
+                    <td>${packet.length}</td>
+                    <td style="font-size: 0.85em; max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(packet.info.substring(0, 100))}</td>
+                </tr>
+            `).join('');
+
+            // Display threats
+            if (data.threats_detected.length > 0) {
+                document.getElementById('threats-section').style.display = 'block';
+                const threatsList = document.getElementById('threats-list');
+                threatsList.innerHTML = data.threats_detected.map(threat => `
+                    <div class="threat-item threat-${threat.severity.toLowerCase()}">
+                        <div class="threat-header">
+                            <div class="threat-type">⚠️ ${threat.type}</div>
+                            <div class="threat-score" style="color: ${getSeverityColor(threat.severity)};">
+                                ${threat.severity}
+                            </div>
+                        </div>
+                        <div class="threat-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Description:</span>
+                                ${threat.description}
+                            </div>
+                            ${threat.source ? `
+                                <div class="detail-row">
+                                    <span class="detail-label">Source:</span>
+                                    ${threat.source}
+                                </div>
+                            ` : ''}
+                            ${threat.destination ? `
+                                <div class="detail-row">
+                                    <span class="detail-label">Destination:</span>
+                                    ${threat.destination}
+                                </div>
+                            ` : ''}
+                            ${threat.port ? `
+                                <div class="detail-row">
+                                    <span class="detail-label">Port:</span>
+                                    ${threat.port}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function displaySentinelAnalysis(data) {
+            // Update alert level
+            const alertElement = document.getElementById('stat-alert');
+            alertElement.textContent = data.alert_level;
+            alertElement.className = 'stat-value alert-' + data.alert_level.toLowerCase();
+
+            // Display sentinel
+            if (data.sentinel_assigned) {
+                document.getElementById('sentinel-status').style.display = 'block';
+                document.getElementById('sentinel-name').textContent = '🤖 ' + data.sentinel_assigned.name;
+                document.getElementById('sentinel-level').textContent = 'LVL ' + data.sentinel_assigned.level;
+
+                const actionsHtml = data.actions_taken.map(action =>
+                    `<div style="padding: 5px 0; color: #00cc00;">✓ ${action}</div>`
+                ).join('');
+                document.getElementById('sentinel-actions').innerHTML = actionsHtml;
+            }
+
+            // Display recommendations
+            if (data.recommendations.length > 0) {
+                document.getElementById('recommendations-section').style.display = 'block';
+                const recList = document.getElementById('recommendations-list');
+                recList.innerHTML = data.recommendations.map((rec, idx) => `
+                    <div class="rec-item">
+                        <strong>${idx + 1}.</strong> ${rec}
+                    </div>
+                `).join('');
+            }
+        }
+
+        function getSeverityColor(severity) {
+            switch (severity) {
+                case 'CRITICAL': return '#ff0000';
+                case 'HIGH': return '#ff9900';
+                case 'MEDIUM': return '#ffff00';
+                case 'LOW': return '#00ffff';
+                default: return '#00ff00';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Console info
+        console.log('%c🛡️ NETWORK SENTINEL ACTIVE', 'font-size: 20px; color: #00ff00; font-weight: bold;');
+        console.log('AI-powered network monitoring with real-time threat detection');
+    </script>
+</body>
+</html>

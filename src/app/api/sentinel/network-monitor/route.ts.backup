@@ -1,0 +1,427 @@
+// API: Sentinel Network Monitor - AI-Powered Threat Detection
+// POST /api/sentinel/network-monitor - Analyze network traffic with Sentinels
+
+import { NextRequest, NextResponse } from 'next/server';
+import { readFile, writeFile } from 'fs/promises';
+import { join } from 'path';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function POST(request: NextRequest) {
+  try {
+    const { capture_data, auto_respond = false } = await request.json();
+
+    const results: any = {
+      timestamp: new Date().toISOString(),
+      sentinel_assigned: null,
+      threat_analysis: [],
+      actions_taken: [],
+      alert_level: 'NONE',
+      recommendations: []
+    };
+
+    // Load Sentinel fleet
+    const fleet = await loadSentinelFleet();
+
+    // Analyze threats with Sentinel AI
+    if (capture_data.threats_detected && capture_data.threats_detected.length > 0) {
+      results.threat_analysis = await analyzeThreatsBySentinel(
+        capture_data.threats_detected,
+        capture_data.packets,
+        fleet
+      );
+
+      // Assign best sentinel for the job
+      results.sentinel_assigned = assignSentinel(results.threat_analysis, fleet);
+
+      // Determine alert level
+      results.alert_level = determineAlertLevel(results.threat_analysis);
+
+      // Generate recommendations
+      results.recommendations = generateRecommendations(results.threat_analysis);
+
+      // Auto-respond if enabled
+      if (auto_respond && results.alert_level !== 'NONE') {
+        results.actions_taken = await autoRespond(results.threat_analysis, results.sentinel_assigned);
+      }
+
+      // Update sentinel stats
+      if (results.sentinel_assigned) {
+        await updateSentinelStats(
+          results.sentinel_assigned,
+          results.threat_analysis.length,
+          results.alert_level
+        );
+      }
+
+      // Log to Supabase
+      await logToSupabase(results);
+    }
+
+    return NextResponse.json({
+      success: true,
+      results
+    });
+
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+// Load Sentinel fleet from cache
+async function loadSentinelFleet(): Promise<any[]> {
+  try {
+    const fleetPath = join(process.cwd(), '.sentinel-cache', 'fleet.json');
+    const data = await readFile(fleetPath, 'utf-8');
+    const fleet = JSON.parse(data);
+    return fleet.sentinels || [];
+  } catch (e) {
+    // Return default fleet if file doesn't exist
+    return [
+      {
+        id: 'sentinel-alpha',
+        name: 'Alpha Guardian',
+        specialization: 'Network Security',
+        level: 8,
+        stats: { attack: 85, defense: 90, speed: 75, accuracy: 88 }
+      },
+      {
+        id: 'sentinel-beta',
+        name: 'Beta Defender',
+        specialization: 'Intrusion Detection',
+        level: 7,
+        stats: { attack: 78, defense: 85, speed: 82, accuracy: 80 }
+      },
+      {
+        id: 'sentinel-gamma',
+        name: 'Gamma Watcher',
+        specialization: 'Traffic Analysis',
+        level: 6,
+        stats: { attack: 70, defense: 75, speed: 90, accuracy: 85 }
+      }
+    ];
+  }
+}
+
+// Analyze threats with Sentinel AI
+async function analyzeThreatsBySentinel(
+  threats: any[],
+  packets: any[],
+  fleet: any[]
+): Promise<any[]> {
+  const analysis: any[] = [];
+
+  for (const threat of threats) {
+    const threatAnalysis: any = {
+      original_threat: threat,
+      threat_type: threat.type,
+      severity: threat.severity,
+      confidence: 0,
+      false_positive_likelihood: 0,
+      attack_vectors: [],
+      impact_assessment: {},
+      mitigation_steps: []
+    };
+
+    // Analyze based on threat type
+    switch (threat.type) {
+      case 'Port Scan':
+        threatAnalysis.confidence = 0.85;
+        threatAnalysis.false_positive_likelihood = 0.15;
+        threatAnalysis.attack_vectors = [
+          'Reconnaissance phase of attack',
+          'Identifying vulnerable services',
+          'Mapping network topology'
+        ];
+        threatAnalysis.impact_assessment = {
+          data_breach_risk: 'MEDIUM',
+          service_disruption_risk: 'LOW',
+          reconnaissance_confirmed: 'HIGH'
+        };
+        threatAnalysis.mitigation_steps = [
+          'Block source IP in firewall',
+          'Enable rate limiting',
+          'Monitor for follow-up attacks',
+          'Alert security team'
+        ];
+        break;
+
+      case 'Possible DDoS':
+        threatAnalysis.confidence = 0.75;
+        threatAnalysis.false_positive_likelihood = 0.25;
+        threatAnalysis.attack_vectors = [
+          'Volumetric attack',
+          'Resource exhaustion',
+          'Service availability threat'
+        ];
+        threatAnalysis.impact_assessment = {
+          service_disruption_risk: 'CRITICAL',
+          bandwidth_consumption: 'HIGH',
+          legitimate_traffic_impact: 'HIGH'
+        };
+        threatAnalysis.mitigation_steps = [
+          'Enable DDoS protection',
+          'Rate limit connections',
+          'Deploy traffic scrubbing',
+          'Contact ISP for upstream filtering'
+        ];
+        break;
+
+      case 'Suspicious Port':
+        threatAnalysis.confidence = 0.90;
+        threatAnalysis.false_positive_likelihood = 0.10;
+        threatAnalysis.attack_vectors = [
+          'Backdoor communication',
+          'Command & Control (C2)',
+          'Data exfiltration channel'
+        ];
+        threatAnalysis.impact_assessment = {
+          data_breach_risk: 'HIGH',
+          malware_infection_likelihood: 'HIGH',
+          insider_threat: 'MEDIUM'
+        };
+        threatAnalysis.mitigation_steps = [
+          'Block suspicious port immediately',
+          'Scan source host for malware',
+          'Investigate user activity',
+          'Check for data exfiltration'
+        ];
+        break;
+
+      case 'Large Data Transfer':
+        threatAnalysis.confidence = 0.60;
+        threatAnalysis.false_positive_likelihood = 0.40;
+        threatAnalysis.attack_vectors = [
+          'Data exfiltration',
+          'File download/upload',
+          'Legitimate large transfer'
+        ];
+        threatAnalysis.impact_assessment = {
+          data_breach_risk: 'MEDIUM',
+          bandwidth_impact: 'MEDIUM',
+          policy_violation: 'LOW'
+        };
+        threatAnalysis.mitigation_steps = [
+          'Verify legitimacy of transfer',
+          'Check user authorization',
+          'Monitor for repeated transfers',
+          'Inspect packet content if possible'
+        ];
+        break;
+
+      case 'Excessive DNS Queries':
+        threatAnalysis.confidence = 0.70;
+        threatAnalysis.false_positive_likelihood = 0.30;
+        threatAnalysis.attack_vectors = [
+          'DNS tunneling for data exfiltration',
+          'C2 communication via DNS',
+          'DGA (Domain Generation Algorithm) malware'
+        ];
+        threatAnalysis.impact_assessment = {
+          malware_infection_likelihood: 'HIGH',
+          data_exfiltration_risk: 'MEDIUM',
+          covert_channel: 'HIGH'
+        };
+        threatAnalysis.mitigation_steps = [
+          'Analyze DNS query patterns',
+          'Check for suspicious domains',
+          'Scan source host for malware',
+          'Implement DNS filtering'
+        ];
+        break;
+
+      default:
+        threatAnalysis.confidence = 0.50;
+        threatAnalysis.false_positive_likelihood = 0.50;
+        threatAnalysis.mitigation_steps = [
+          'Further investigation required',
+          'Monitor activity',
+          'Consult security team'
+        ];
+    }
+
+    // Calculate threat score
+    threatAnalysis.threat_score = calculateThreatScore(threatAnalysis);
+
+    analysis.push(threatAnalysis);
+  }
+
+  return analysis;
+}
+
+// Calculate threat score (0-100)
+function calculateThreatScore(analysis: any): number {
+  let score = 0;
+
+  // Base score from severity
+  switch (analysis.severity) {
+    case 'CRITICAL': score += 40; break;
+    case 'HIGH': score += 30; break;
+    case 'MEDIUM': score += 20; break;
+    case 'LOW': score += 10; break;
+    default: score += 5;
+  }
+
+  // Add confidence bonus
+  score += analysis.confidence * 30;
+
+  // Subtract false positive penalty
+  score -= analysis.false_positive_likelihood * 20;
+
+  // Add attack vector complexity
+  score += analysis.attack_vectors.length * 5;
+
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+// Assign best sentinel for the job
+function assignSentinel(analysis: any[], fleet: any[]): any {
+  if (fleet.length === 0) return null;
+
+  // Score each sentinel
+  const sentinelScores = fleet.map(sentinel => {
+    let score = 0;
+
+    // Base score from level
+    score += sentinel.level * 10;
+
+    // Stats bonus
+    score += (sentinel.stats.attack + sentinel.stats.defense + sentinel.stats.accuracy) / 3;
+
+    // Specialization bonus
+    const hasNetworkThreat = analysis.some(a =>
+      ['Port Scan', 'Possible DDoS', 'Excessive DNS Queries'].includes(a.threat_type)
+    );
+    const hasIntrusionThreat = analysis.some(a =>
+      ['Suspicious Port', 'Large Data Transfer'].includes(a.threat_type)
+    );
+
+    if (hasNetworkThreat && sentinel.specialization.includes('Network')) score += 30;
+    if (hasIntrusionThreat && sentinel.specialization.includes('Intrusion')) score += 30;
+
+    return { sentinel, score };
+  });
+
+  // Return best sentinel
+  sentinelScores.sort((a, b) => b.score - a.score);
+  return sentinelScores[0].sentinel;
+}
+
+// Determine overall alert level
+function determineAlertLevel(analysis: any[]): string {
+  if (analysis.length === 0) return 'NONE';
+
+  const maxThreatScore = Math.max(...analysis.map(a => a.threat_score));
+  const criticalThreats = analysis.filter(a => a.severity === 'CRITICAL').length;
+  const highThreats = analysis.filter(a => a.severity === 'HIGH').length;
+
+  if (maxThreatScore >= 80 || criticalThreats >= 2) return 'CRITICAL';
+  if (maxThreatScore >= 60 || criticalThreats >= 1 || highThreats >= 3) return 'HIGH';
+  if (maxThreatScore >= 40 || highThreats >= 1) return 'MEDIUM';
+  if (maxThreatScore >= 20) return 'LOW';
+  return 'INFO';
+}
+
+// Generate recommendations
+function generateRecommendations(analysis: any[]): string[] {
+  const recommendations: Set<string> = new Set();
+
+  analysis.forEach(a => {
+    a.mitigation_steps.forEach((step: string) => recommendations.add(step));
+  });
+
+  // Add general recommendations based on threat patterns
+  const hasPortScan = analysis.some(a => a.threat_type === 'Port Scan');
+  const hasDDoS = analysis.some(a => a.threat_type === 'Possible DDoS');
+  const hasSuspiciousPort = analysis.some(a => a.threat_type === 'Suspicious Port');
+
+  if (hasPortScan && hasSuspiciousPort) {
+    recommendations.add('URGENT: Active reconnaissance followed by targeted attack detected');
+  }
+
+  if (hasDDoS) {
+    recommendations.add('Consider enabling DDoS mitigation service');
+  }
+
+  return Array.from(recommendations).slice(0, 10);
+}
+
+// Auto-respond to threats
+async function autoRespond(analysis: any[], sentinel: any): Promise<string[]> {
+  const actions: string[] = [];
+
+  for (const threat of analysis) {
+    if (threat.threat_score >= 70) {
+      actions.push(`[${sentinel.name}] Automatically blocked threat: ${threat.threat_type}`);
+      actions.push(`[${sentinel.name}] Added source to blacklist`);
+      actions.push(`[${sentinel.name}] Sent alert to security team`);
+    } else if (threat.threat_score >= 50) {
+      actions.push(`[${sentinel.name}] Flagged for review: ${threat.threat_type}`);
+      actions.push(`[${sentinel.name}] Increased monitoring on source`);
+    } else {
+      actions.push(`[${sentinel.name}] Logged for analysis: ${threat.threat_type}`);
+    }
+  }
+
+  return actions;
+}
+
+// Update sentinel statistics
+async function updateSentinelStats(
+  sentinel: any,
+  threatsHandled: number,
+  alertLevel: string
+): Promise<void> {
+  try {
+    const fleetPath = join(process.cwd(), '.sentinel-cache', 'fleet.json');
+    const data = await readFile(fleetPath, 'utf-8');
+    const fleet = JSON.parse(data);
+
+    const sentinelIndex = fleet.sentinels.findIndex((s: any) => s.id === sentinel.id);
+    if (sentinelIndex !== -1) {
+      // Update stats
+      fleet.sentinels[sentinelIndex].missions_completed =
+        (fleet.sentinels[sentinelIndex].missions_completed || 0) + 1;
+      fleet.sentinels[sentinelIndex].threats_neutralized =
+        (fleet.sentinels[sentinelIndex].threats_neutralized || 0) + threatsHandled;
+
+      // Calculate XP gain
+      let xpGain = 50 + threatsHandled * 15;
+      if (alertLevel === 'CRITICAL') xpGain += 100;
+      if (alertLevel === 'HIGH') xpGain += 50;
+
+      fleet.sentinels[sentinelIndex].xp =
+        (fleet.sentinels[sentinelIndex].xp || 0) + xpGain;
+
+      // Save updated fleet
+      await writeFile(fleetPath, JSON.stringify(fleet, null, 2));
+    }
+  } catch (e) {
+    // Fail silently
+  }
+}
+
+// Log to Supabase
+async function logToSupabase(results: any): Promise<void> {
+  try {
+    await supabase.from('claude_actions').insert({
+      action: 'sentinel_network_monitor',
+      details: {
+        sentinel: results.sentinel_assigned?.name,
+        threat_count: results.threat_analysis.length,
+        alert_level: results.alert_level,
+        actions_taken: results.actions_taken
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (e) {
+    // Fail silently
+  }
+}

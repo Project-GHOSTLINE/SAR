@@ -1,0 +1,416 @@
+// API: Sentinel Command Executor
+// POST /api/sentinel/execute-command
+// Exécute de VRAIES commandes basées sur des prompts en langage naturel
+
+import { NextRequest, NextResponse } from 'next/server';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import { readFile, writeFile } from 'fs/promises';
+import { osintAuthMiddleware } from '@/middleware/osint-auth'
+
+const execAsync = promisify(exec);
+
+interface CommandResult {
+  success: boolean;
+  action: string;
+  output: string;
+  duration: number;
+  error?: string;
+}
+
+export async function POST(request: NextRequest) {
+  // 🔐 Security: Check authentication
+  const authError = await osintAuthMiddleware(request)
+  if (authError) return authError
+
+  const startTime = Date.now();
+
+  try {
+    const { prompt, config } = await request.json();
+
+    if (!prompt) {
+      return NextResponse.json(
+        { success: false, error: 'Prompt requis' },
+        { status: 400 }
+      );
+    }
+
+    const promptLower = prompt.toLowerCase();
+    let result: CommandResult;
+
+    // ============================================
+    // BUILD COMMANDS
+    // ============================================
+    if (promptLower.includes('build')) {
+      result = await executeBuild();
+    }
+
+    // ============================================
+    // TEST COMMANDS
+    // ============================================
+    else if (promptLower.includes('test')) {
+      result = await executeTests();
+    }
+
+    // ============================================
+    // LINT COMMANDS
+    // ============================================
+    else if (promptLower.includes('lint') || promptLower.includes('eslint')) {
+      result = await executeLint();
+    }
+
+    // ============================================
+    // TYPESCRIPT CHECK
+    // ============================================
+    else if (promptLower.includes('typescript') || promptLower.includes('type check') || promptLower.includes('tsc')) {
+      result = await executeTypeCheck();
+    }
+
+    // ============================================
+    // SCAN PROJECT
+    // ============================================
+    else if (promptLower.includes('scan') || promptLower.includes('analyze')) {
+      result = await scanProject();
+    }
+
+    // ============================================
+    // INSTALL DEPENDENCIES
+    // ============================================
+    else if (promptLower.includes('install') || promptLower.includes('npm i')) {
+      result = await installDependencies();
+    }
+
+    // ============================================
+    // GIT STATUS
+    // ============================================
+    else if (promptLower.includes('git status') || promptLower.includes('status')) {
+      result = await gitStatus();
+    }
+
+    // ============================================
+    // DELETE BACKUP FILES
+    // ============================================
+    else if (promptLower.includes('delete backup') || promptLower.includes('clean backup')) {
+      result = await deleteBackupFiles();
+    }
+
+    // ============================================
+    // UNKNOWN COMMAND
+    // ============================================
+    else {
+      return NextResponse.json({
+        success: false,
+        error: 'Commande non reconnue',
+        suggestions: [
+          'build the project',
+          'run tests',
+          'check typescript',
+          'scan project',
+          'install dependencies',
+          'git status',
+          'delete backup files'
+        ]
+      }, { status: 400 });
+    }
+
+    result.duration = Date.now() - startTime;
+
+    // Notify orchestrator
+    const sentinelIds = ['sentinel-001', 'sentinel-002', 'sentinel-003'];
+    const assignedSentinel = sentinelIds[Math.floor(Math.random() * sentinelIds.length)];
+
+    try {
+      const actionType = result.action.toLowerCase().includes('build') ? 'build' :
+                        result.action.toLowerCase().includes('test') ? 'test' :
+                        result.action.toLowerCase().includes('fix') ? 'fix' : 'command';
+
+      await fetch('http://localhost:3001/api/sentinel/orchestrator', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: actionType,
+          sentinel_id: assignedSentinel,
+          result: {
+            success: result.success,
+            duration_ms: result.duration
+          }
+        })
+      });
+    } catch (err) {
+      // Ignore orchestrator errors
+    }
+
+    return NextResponse.json({
+      success: true,
+      result,
+      config,
+      assigned_sentinel: assignedSentinel
+    });
+
+  } catch (error: any) {
+    console.error('Command execution error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message,
+        duration: Date.now() - startTime
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// ============================================
+// COMMAND IMPLEMENTATIONS
+// ============================================
+
+async function executeBuild(): Promise<CommandResult> {
+  try {
+    const { stdout, stderr } = await execAsync('npm run build', {
+      cwd: process.cwd(),
+      timeout: 60000
+    });
+
+    return {
+      success: true,
+      action: 'Build',
+      output: stdout + (stderr ? '\n' + stderr : ''),
+      duration: 0
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      action: 'Build',
+      output: error.stdout || '',
+      error: error.stderr || error.message,
+      duration: 0
+    };
+  }
+}
+
+async function executeTests(): Promise<CommandResult> {
+  try {
+    const { stdout, stderr } = await execAsync('npm test', {
+      cwd: process.cwd(),
+      timeout: 30000
+    });
+
+    return {
+      success: true,
+      action: 'Tests',
+      output: stdout,
+      duration: 0
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      action: 'Tests',
+      output: error.stdout || 'No test script found',
+      error: error.message,
+      duration: 0
+    };
+  }
+}
+
+async function executeLint(): Promise<CommandResult> {
+  try {
+    const { stdout } = await execAsync('npm run lint', {
+      cwd: process.cwd(),
+      timeout: 20000
+    });
+
+    return {
+      success: true,
+      action: 'Lint',
+      output: stdout || 'No lint errors found',
+      duration: 0
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      action: 'Lint',
+      output: error.stdout || '',
+      error: 'Lint errors found',
+      duration: 0
+    };
+  }
+}
+
+async function executeTypeCheck(): Promise<CommandResult> {
+  try {
+    const { stdout, stderr } = await execAsync('npx tsc --noEmit', {
+      cwd: process.cwd(),
+      timeout: 20000
+    });
+
+    return {
+      success: true,
+      action: 'TypeScript Check',
+      output: 'No TypeScript errors found',
+      duration: 0
+    };
+  } catch (error: any) {
+    const errors = (error.stdout || '').split('\n').filter((line: string) => line.includes('error TS'));
+    return {
+      success: false,
+      action: 'TypeScript Check',
+      output: `Found ${errors.length} TypeScript errors`,
+      error: errors.slice(0, 5).join('\n'),
+      duration: 0
+    };
+  }
+}
+
+async function cleanConsoleLogs(): Promise<CommandResult> {
+  try {
+    const { stdout } = await execAsync(
+      'find src -type f \\( -name "*.ts" -o -name "*.tsx" \\) -exec grep -l "console\\.log" {} \\;',
+      { cwd: process.cwd(), timeout: 5000 }
+    );
+
+    const files = stdout.trim().split('\n').filter(Boolean);
+
+    if (files.length === 0) {
+      return {
+        success: true,
+        action: 'Clean Console.logs',
+        output: 'No console.log statements found. All files are clean.',
+        duration: 0
+      };
+    }
+
+    let removedCount = 0;
+    for (const file of files.slice(0, 10)) { // Limite à 10 fichiers
+      try {
+        const content = await readFile(file, 'utf-8');
+        const newContent = content
+          .split('\n')
+          .filter(line => !line.trim().match(/console\.log\(/))
+          .join('\n');
+
+        if (content !== newContent) {
+          await writeFile(file, newContent, 'utf-8');
+          removedCount++;
+        }
+      } catch (err) {
+        // Skip file on error
+      }
+    }
+
+    return {
+      success: true,
+      action: 'Clean Console.logs',
+      output: `Removed console.log from ${removedCount} file(s).`,
+      duration: 0
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      action: 'Clean Console.logs',
+      output: '',
+      error: error.message,
+      duration: 0
+    };
+  }
+}
+
+async function scanProject(): Promise<CommandResult> {
+  try {
+    // Execute the scan API internally
+    const { stdout } = await execAsync('npx tsc --noEmit 2>&1 | grep -c "error TS" || echo 0', {
+      cwd: process.cwd(),
+      timeout: 15000
+    });
+
+    const errorCount = parseInt(stdout.trim());
+
+    return {
+      success: true,
+      action: 'Project Scan',
+      output: `Found ${errorCount} TypeScript errors`,
+      duration: 0
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      action: 'Project Scan',
+      output: '',
+      error: error.message,
+      duration: 0
+    };
+  }
+}
+
+async function installDependencies(): Promise<CommandResult> {
+  try {
+    const { stdout } = await execAsync('npm install', {
+      cwd: process.cwd(),
+      timeout: 120000
+    });
+
+    return {
+      success: true,
+      action: 'Install Dependencies',
+      output: 'Dependencies installed successfully',
+      duration: 0
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      action: 'Install Dependencies',
+      output: error.stdout || '',
+      error: error.message,
+      duration: 0
+    };
+  }
+}
+
+async function gitStatus(): Promise<CommandResult> {
+  try {
+    const { stdout } = await execAsync('git status --short', {
+      cwd: process.cwd(),
+      timeout: 5000
+    });
+
+    return {
+      success: true,
+      action: 'Git Status',
+      output: stdout || 'Working tree clean',
+      duration: 0
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      action: 'Git Status',
+      output: '',
+      error: error.message,
+      duration: 0
+    };
+  }
+}
+
+async function deleteBackupFiles(): Promise<CommandResult> {
+  try {
+    const { stdout } = await execAsync(
+      'find src -type f \\( -name "*.backup*" -o -name "*-backup-*" \\) -delete -print',
+      { cwd: process.cwd(), timeout: 5000 }
+    );
+
+    const deletedFiles = stdout.trim().split('\n').filter(Boolean);
+
+    return {
+      success: true,
+      action: 'Delete Backups',
+      output: `Deleted ${deletedFiles.length} backup files`,
+      duration: 0
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      action: 'Delete Backups',
+      output: '',
+      error: error.message,
+      duration: 0
+    };
+  }
+}

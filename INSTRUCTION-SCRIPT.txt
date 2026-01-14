@@ -1,0 +1,45 @@
+═══════════════════════════════════════════════════════════════
+  🚨 LE SCRIPT EST EN COURS D'EXÉCUTION!
+═══════════════════════════════════════════════════════════════
+
+Le script attend VOTRE INPUT dans le terminal!
+
+REGARDEZ VOTRE TERMINAL - Il affiche:
+
+  "Collez le mot de passe ici (caché): _"
+
+───────────────────────────────────────────────────────────────
+  ÉTAPES À SUIVRE:
+───────────────────────────────────────────────────────────────
+
+1. 📱 ONGLET NAVIGATEUR ouvert automatiquement
+   URL: https://supabase.com/dashboard/project/.../settings/database
+
+2. 🔍 Trouvez la section "Database Password"
+   - Soit vous voyez: ●●●●●●●● (cliquez pour révéler)
+   - Soit cliquez: "Reset database password" (nouveau password)
+
+3. 📋 COPIEZ le mot de passe (Cmd+C)
+
+4. ⌨️  RETOURNEZ AU TERMINAL
+   - Le script attend: "Collez le mot de passe ici (caché): _"
+   - COLLEZ le mot de passe (Cmd+V)
+   - Appuyez ENTER
+
+5. ✨ LE SCRIPT FAIT LE RESTE:
+   - Connexion à PostgreSQL
+   - Exécution du SQL
+   - Création des tables
+   - Lancement des tests
+   - Affichage des résultats
+
+───────────────────────────────────────────────────────────────
+  ⏰ TEMPS ESTIMÉ: 2 MINUTES
+───────────────────────────────────────────────────────────────
+
+Le mot de passe sera masqué quand vous le tapez (sécurité).
+
+Après avoir collé le password et appuyé ENTER,
+tout s'exécute automatiquement! 🚀
+
+═══════════════════════════════════════════════════════════════

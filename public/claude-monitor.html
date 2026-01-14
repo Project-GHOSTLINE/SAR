@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🤖 Claude Monitor - Dashboard en Temps Réel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      background: #0a0e27;
+      color: #e0e0e0;
+      overflow: hidden;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto 1fr 1fr;
+      height: 100vh;
+      gap: 2px;
+      background: #000;
+      padding: 2px;
+    }
+
+    .panel {
+      background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+      padding: 20px;
+      overflow: auto;
+      border: 1px solid #2a3f5f;
+      position: relative;
+    }
+
+    .panel::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .panel::-webkit-scrollbar-track {
+      background: #0a0e27;
+    }
+
+    .panel::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 4px;
+    }
+
+    .header {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: white;
+    }
+
+    .pulse {
+      width: 12px;
+      height: 12px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    .panel-title {
+      font-size: 16px;
+      color: #667eea;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .brain-viz {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .brain-circle {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      animation: brainPulse 3s infinite;
+      box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
+    }
+
+    @keyframes brainPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(102, 126, 234, 0.6); }
+      50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(102, 126, 234, 0.8); }
+    }
+
+    .thought {
+      background: rgba(102, 126, 234, 0.1);
+      border-left: 3px solid #667eea;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      line-height: 1.6;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .action-item {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid #10b981;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .action-type {
+      color: #10b981;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+    }
+
+    .tool {
+      background: rgba(102, 126, 234, 0.15);
+      border: 1px solid #667eea;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tool:hover {
+      background: rgba(102, 126, 234, 0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .tool-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .tool-name {
+      font-size: 11px;
+      color: #a0aec0;
+    }
+
+    .file-tree {
+      font-size: 12px;
+    }
+
+    .file-item {
+      padding: 6px 8px;
+      margin: 4px 0;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+
+    .file-item:hover {
+      background: rgba(102, 126, 234, 0.1);
+    }
+
+    .file-created {
+      background: rgba(16, 185, 129, 0.2);
+      border-left: 2px solid #10b981;
+    }
+
+    .file-modified {
+      background: rgba(251, 191, 36, 0.2);
+      border-left: 2px solid #fbbf24;
+    }
+
+    .log-item {
+      font-size: 11px;
+      padding: 6px 10px;
+      margin: 4px 0;
+      border-radius: 4px;
+      font-family: 'Monaco', monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .log-success {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+
+    .log-error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+
+    .log-info {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+    }
+
+    .memory-card {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid #8b5cf6;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .memory-title {
+      color: #a78bfa;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .memory-content {
+      color: #cbd5e0;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .badge-high {
+      background: #ef4444;
+      color: white;
+    }
+
+    .badge-medium {
+      background: #fbbf24;
+      color: #0a0e27;
+    }
+
+    .badge-low {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .stat-box {
+      background: rgba(102, 126, 234, 0.1);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      color: #667eea;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #a0aec0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, #667eea, transparent);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+      padding-left: 10px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 6px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #667eea;
+      box-shadow: 0 0 10px #667eea;
+    }
+
+    .timeline-time {
+      font-size: 10px;
+      color: #667eea;
+      margin-bottom: 4px;
+    }
+
+    .timeline-content {
+      font-size: 12px;
+      color: #cbd5e0;
+    }
+
+    .control-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    button:hover {
+      background: #5a67d8;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="grid">
+    <!-- Header -->
+    <div class="header">
+      <h1>🤖 Claude Monitor</h1>
+      <div class="status">
+        <div class="status-item">
+          <div class="pulse"></div>
+          <span>ACTIF</span>
+        </div>
+        <div class="status-item">
+          <span id="timeDisplay">00:00:00</span>
+        </div>
+        <div class="status-item">
+          <span id="actionCount">0 actions</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 1: Cerveau / Pensées -->
+    <div class="panel">
+      <div class="panel-title">🧠 CERVEAU & PENSÉES</div>
+      <div class="brain-viz">
+        <div class="brain-circle">🧠</div>
+        <div id="brainStatus">En train de penser...</div>
+      </div>
+      <div id="thoughtsContainer"></div>
+    </div>
+
+    <!-- Panel 2: Actions en cours -->
+    <div class="panel">
+      <div class="panel-title">⚡ ACTIONS EN COURS</div>
+      <div class="control-bar">
+        <button onclick="loadAllData()">🔄 Rafraîchir</button>
+      </div>
+      <div id="actionsContainer"></div>
+    </div>
+
+    <!-- Panel 3: Outils Disponibles -->
+    <div class="panel">
+      <div class="panel-title">🛠️ OUTILS DISPONIBLES</div>
+      <div class="tool-grid">
+        <div class="tool" onclick="showToolInfo('Read')">
+          <div class="tool-icon">📖</div>
+          <div class="tool-name">Read</div>
+        </div>
+        <div class="tool" onclick="showToolInfo('Write')">
+          <div class="tool-icon">✏️</div>
+          <div class="tool-name">Write</div>
+        </div>
+        <div class="tool" onclick="showToolInfo('Edit')">
+          <div class="tool-icon">✂️</div>
+          <div class="tool-name">Edit</div>
+        </div>
+        <div class="tool" onclick="showToolInfo('Bash')">
+          <div class="tool-icon">⚙️</div>
+          <div class="tool-name">Bash</div>
+        </div>
+        <div class="tool" onclick="showToolInfo('Glob')">
+          <div class="tool-icon">🔍</div>
+          <div class="tool-name">Glob</div>
+        </div>
+        <div class="tool" onclick="showToolInfo('Grep')">
+          <div class="tool-icon">🔎</div>
+          <div class="tool-name">Grep</div>
+        </div>
+        <div class="tool" onclick="showToolInfo('Task')">
+          <div class="tool-icon">🤖</div>
+          <div class="tool-name">Task</div>
+        </div>
+        <div class="tool" onclick="showToolInfo('WebFetch')">
+          <div class="tool-icon">🌐</div>
+          <div class="tool-name">WebFetch</div>
+        </div>
+        <div class="tool" onclick="showToolInfo('Memory')">
+          <div class="tool-icon">🧠</div>
+          <div class="tool-name">Memory</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 4: Fichiers Créés/Modifiés -->
+    <div class="panel">
+      <div class="panel-title">📁 FICHIERS</div>
+      <div class="file-tree" id="filesContainer"></div>
+    </div>
+
+    <!-- Panel 5: Mémoire Active -->
+    <div class="panel">
+      <div class="panel-title">💾 MÉMOIRE ACTIVE</div>
+      <div id="memoryContainer">Chargement...</div>
+    </div>
+
+    <!-- Panel 6: Timeline & Logs -->
+    <div class="panel">
+      <div class="panel-title">📊 TIMELINE & LOGS</div>
+      <div class="timeline" id="timelineContainer"></div>
+    </div>
+  </div>
+
+  <script>
+    let actionCounter = 0;
+    let startTime = Date.now();
+
+    // Update time display
+    setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const hours = Math.floor(elapsed / 3600000);
+      const minutes = Math.floor((elapsed % 3600000) / 60000);
+      const seconds = Math.floor((elapsed % 60000) / 1000);
+      document.getElementById('timeDisplay').textContent =
+        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }, 1000);
+
+    // Load activity stats
+    async function loadActivityStats() {
+      try {
+        const res = await fetch('/api/activity/stats?project=sar');
+        const data = await res.json();
+
+        if (data.success && data.stats) {
+          actionCounter = data.stats.total_actions || 0;
+          document.getElementById('actionCount').textContent = `${actionCounter} actions`;
+
+          // Update brain status
+          const brainStatus = document.getElementById('brainStatus');
+          if (data.stats.actions_today > 0) {
+            brainStatus.textContent = `${data.stats.actions_today} actions aujourd'hui`;
+          } else {
+            brainStatus.textContent = 'Aucune activité';
+          }
+
+          // Display recent thoughts
+          if (data.stats.recent_thoughts && data.stats.recent_thoughts.length > 0) {
+            const thoughtsContainer = document.getElementById('thoughtsContainer');
+            thoughtsContainer.innerHTML = '';
+            data.stats.recent_thoughts.slice(0, 10).forEach(thought => {
+              if (thought) {
+                const div = document.createElement('div');
+                div.className = 'thought';
+                div.textContent = thought;
+                thoughtsContainer.appendChild(div);
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Erreur chargement stats:', error);
+        document.getElementById('brainStatus').textContent = 'Erreur chargement stats';
+      }
+    }
+
+    // Load recent activity
+    async function loadRecentActivity() {
+      try {
+        const res = await fetch('/api/activity/recent?project=sar&limit=20');
+        const data = await res.json();
+
+        if (data.success && data.actions) {
+          // Display actions
+          const actionsContainer = document.getElementById('actionsContainer');
+          actionsContainer.innerHTML = '';
+
+          if (data.actions.length === 0) {
+            actionsContainer.innerHTML = '<div style="text-align: center; color: #667eea; padding: 20px;">Aucune action enregistrée</div>';
+          } else {
+            data.actions.slice(0, 20).forEach(action => {
+              const div = document.createElement('div');
+              div.className = 'action-item';
+              const statusIcon = action.status === 'success' ? '✓' : '✗';
+              const statusColor = action.status === 'success' ? '#10b981' : '#ef4444';
+
+              div.innerHTML = `
+                <div>
+                  <div class="action-type">${action.action_type || 'Action'}</div>
+                  <div style="color: #cbd5e0; font-size: 11px;">${action.target || 'N/A'}</div>
+                </div>
+                <div style="color: ${statusColor};">${statusIcon}</div>
+              `;
+              actionsContainer.appendChild(div);
+            });
+          }
+
+          // Display timeline
+          const timelineContainer = document.getElementById('timelineContainer');
+          timelineContainer.innerHTML = '';
+
+          if (data.actions.length === 0) {
+            timelineContainer.innerHTML = '<div style="text-align: center; color: #667eea; padding: 20px;">Aucun événement</div>';
+          } else {
+            data.actions.slice(0, 15).forEach(action => {
+              const div = document.createElement('div');
+              div.className = 'timeline-item';
+
+              const date = new Date(action.created_at);
+              const timeStr = date.toLocaleTimeString('fr-FR');
+
+              div.innerHTML = `
+                <div class="timeline-time">${timeStr}</div>
+                <div class="timeline-content">${action.action_type}: ${action.target}</div>
+              `;
+              timelineContainer.appendChild(div);
+            });
+          }
+
+          // Display files (extract from actions)
+          const filesContainer = document.getElementById('filesContainer');
+          filesContainer.innerHTML = '';
+
+          const fileActions = data.actions.filter(a =>
+            a.action_type === 'Write' || a.action_type === 'Edit' || a.action_type === 'Read'
+          );
+
+          if (fileActions.length === 0) {
+            filesContainer.innerHTML = '<div style="text-align: center; color: #667eea; padding: 20px;">Aucun fichier</div>';
+          } else {
+            fileActions.slice(0, 20).forEach(action => {
+              const div = document.createElement('div');
+              const isCreate = action.action_type === 'Write';
+              div.className = `file-item file-${isCreate ? 'created' : 'modified'}`;
+
+              const icon = action.action_type === 'Read' ? '👁️' : (isCreate ? '📄' : '📝');
+              const badge = action.action_type === 'Read' ? 'LU' : (isCreate ? 'CRÉÉ' : 'MODIFIÉ');
+              const badgeClass = action.action_type === 'Read' ? 'badge-low' : (isCreate ? 'badge-high' : 'badge-medium');
+
+              div.innerHTML = `
+                <span>${icon}</span>
+                <span style="flex: 1;">${action.target}</span>
+                <span class="badge ${badgeClass}">${badge}</span>
+              `;
+              filesContainer.appendChild(div);
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Erreur chargement activité:', error);
+        document.getElementById('actionsContainer').innerHTML = '<div style="color: #ef4444; padding: 20px;">Erreur chargement activité</div>';
+      }
+    }
+
+    // Show tool info
+    function showToolInfo(tool) {
+      const descriptions = {
+        'Read': 'Lit le contenu des fichiers',
+        'Write': 'Crée de nouveaux fichiers',
+        'Edit': 'Modifie des fichiers existants',
+        'Bash': 'Exécute des commandes shell',
+        'Glob': 'Recherche des fichiers par pattern',
+        'Grep': 'Recherche dans le contenu',
+        'Task': 'Lance des agents spécialisés',
+        'WebFetch': 'Récupère du contenu web',
+        'Memory': 'Gère la mémoire longue durée'
+      };
+
+      alert(`Outil: ${tool}\n\n${descriptions[tool]}`);
+    }
+
+    // Load memory
+    async function loadMemory() {
+      try {
+        const res = await fetch('/api/memory/context?project=sar');
+        const data = await res.json();
+
+        if (data.success) {
+          const container = document.getElementById('memoryContainer');
+          container.innerHTML = '';
+
+          // Stats
+          const statsDiv = document.createElement('div');
+          statsDiv.className = 'stats-grid';
+          statsDiv.innerHTML = `
+            <div class="stat-box">
+              <div class="stat-value">${data.context.top_memories?.length || 0}</div>
+              <div class="stat-label">Mémoires</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">${data.context.docs_count || 0}</div>
+              <div class="stat-label">Documents</div>
+            </div>
+          `;
+          container.appendChild(statsDiv);
+
+          // Memories
+          if (data.context.top_memories && data.context.top_memories.length > 0) {
+            data.context.top_memories.slice(0, 5).forEach(mem => {
+              const card = document.createElement('div');
+              card.className = 'memory-card';
+              card.innerHTML = `
+                <div class="memory-title">
+                  ${mem.category} / ${mem.key}
+                  <span class="badge badge-high">★ ${mem.importance}</span>
+                </div>
+                <div class="memory-content">${mem.context || 'Pas de contexte'}</div>
+              `;
+              container.appendChild(card);
+            });
+          } else {
+            container.innerHTML += '<div style="text-align: center; color: #667eea; padding: 20px;">Aucune mémoire enregistrée</div>';
+          }
+        }
+      } catch (error) {
+        console.error('Erreur chargement mémoire:', error);
+        document.getElementById('memoryContainer').innerHTML = '<div style="color: #ef4444; padding: 20px;">Erreur chargement mémoire</div>';
+      }
+    }
+
+    // Load all data
+    function loadAllData() {
+      loadActivityStats();
+      loadRecentActivity();
+      loadMemory();
+    }
+
+    // Initialize
+    loadAllData();
+
+    // Auto-refresh every 30 seconds
+    setInterval(loadAllData, 30000);
+  </script>
+</body>
+</html>

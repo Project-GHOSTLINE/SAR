@@ -76,7 +76,6 @@ export async function POST(request: NextRequest) {
 
       // TODO: Integrer un vrai service d'envoi d'email (Resend, SendGrid, etc.)
       // Pour l'instant on simule l'envoi
-      console.log(`Email envoye a ${to}: ${subject}`)
 
       return NextResponse.json({
         success: true,

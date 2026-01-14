@@ -89,7 +89,6 @@ export async function GET(
         referrer: referrer
       })
 
-    console.log('✅ Download tracked:', filename)
 
     // Redirect vers le fichier statique (marche sur Vercel)
     const fileUrl = `/downloads/${filename}`

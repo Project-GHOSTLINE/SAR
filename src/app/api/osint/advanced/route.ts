@@ -1,0 +1,376 @@
+// API: OSINT Advanced Scanner - Kung Fu Edition
+// POST /api/osint/advanced - Deep network reconnaissance
+
+import { NextRequest, NextResponse } from 'next/server';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import { osintAuthMiddleware } from '@/middleware/osint-auth'
+
+const execAsync = promisify(exec);
+
+export async function POST(request: NextRequest) {
+  // 🔐 Security: Check authentication
+  const authError = await osintAuthMiddleware(request)
+  if (authError) return authError
+
+  try {
+    const { target, scan_type } = await request.json();
+
+    const results: any = {
+      timestamp: new Date().toISOString(),
+      target,
+      scan_type,
+      data: {}
+    };
+
+    switch (scan_type) {
+      case 'port_scan':
+        results.data = await portScan(target);
+        break;
+
+      case 'service_detection':
+        results.data = await serviceDetection(target);
+        break;
+
+      case 'traceroute':
+        results.data = await traceroute(target);
+        break;
+
+      case 'dns_lookup':
+        results.data = await dnsLookup(target);
+        break;
+
+      case 'whois':
+        results.data = await whoisLookup(target);
+        break;
+
+      case 'ssl_check':
+        results.data = await sslCheck(target);
+        break;
+
+      case 'headers':
+        results.data = await httpHeaders(target);
+        break;
+
+      case 'subdomain_enum':
+        results.data = await subdomainEnum(target);
+        break;
+
+      default:
+        return NextResponse.json(
+          { success: false, error: 'Invalid scan type' },
+          { status: 400 }
+        );
+    }
+
+    return NextResponse.json({
+      success: true,
+      results
+    });
+
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+// Port Scan (common ports)
+async function portScan(target: string): Promise<any> {
+  const commonPorts = [21, 22, 23, 25, 53, 80, 110, 143, 443, 445, 3306, 3389, 5432, 8080, 8443];
+  const results: any[] = [];
+
+  for (const port of commonPorts) {
+    try {
+      const { stdout } = await execAsync(
+        `nc -zv -w 1 ${target} ${port} 2>&1`,
+        { timeout: 2000 }
+      );
+
+      if (stdout.includes('succeeded') || stdout.includes('open')) {
+        results.push({
+          port,
+          status: 'open',
+          service: getServiceName(port)
+        });
+      }
+    } catch (e) {
+      // Port closed or filtered
+      results.push({
+        port,
+        status: 'closed',
+        service: getServiceName(port)
+      });
+    }
+  }
+
+  return {
+    total_scanned: commonPorts.length,
+    open_ports: results.filter(r => r.status === 'open').length,
+    ports: results
+  };
+}
+
+// Service Detection
+async function serviceDetection(target: string): Promise<any> {
+  const services: any[] = [];
+
+  // Check HTTP
+  try {
+    const { stdout } = await execAsync(`curl -sI http://${target} --max-time 5`);
+    const serverMatch = stdout.match(/Server: (.+)/i);
+    const poweredByMatch = stdout.match(/X-Powered-By: (.+)/i);
+
+    services.push({
+      port: 80,
+      protocol: 'HTTP',
+      server: serverMatch ? serverMatch[1].trim() : 'Unknown',
+      powered_by: poweredByMatch ? poweredByMatch[1].trim() : null
+    });
+  } catch (e) {
+    // HTTP not available
+  }
+
+  // Check HTTPS
+  try {
+    const { stdout } = await execAsync(`curl -sI https://${target} --max-time 5`);
+    const serverMatch = stdout.match(/Server: (.+)/i);
+
+    services.push({
+      port: 443,
+      protocol: 'HTTPS',
+      server: serverMatch ? serverMatch[1].trim() : 'Unknown'
+    });
+  } catch (e) {
+    // HTTPS not available
+  }
+
+  // Check SSH
+  try {
+    const { stdout } = await execAsync(`timeout 2 ssh -V ${target} 2>&1 || echo "timeout"`);
+    if (!stdout.includes('timeout')) {
+      services.push({
+        port: 22,
+        protocol: 'SSH',
+        version: stdout.trim()
+      });
+    }
+  } catch (e) {
+    // SSH not available
+  }
+
+  return {
+    services_found: services.length,
+    services
+  };
+}
+
+// Traceroute
+async function traceroute(target: string): Promise<any> {
+  try {
+    const { stdout } = await execAsync(`traceroute -m 15 -w 2 ${target}`, { timeout: 30000 });
+    const lines = stdout.split('\n').filter(Boolean);
+
+    const hops = lines.slice(1).map((line, idx) => {
+      const match = line.match(/^\s*\d+\s+(.+?)(?:\s+\((.+?)\))?\s+([\d.]+\s+ms)/);
+      if (match) {
+        return {
+          hop: idx + 1,
+          hostname: match[1].trim(),
+          ip: match[2] || null,
+          rtt: match[3]
+        };
+      }
+      return {
+        hop: idx + 1,
+        hostname: line.trim(),
+        ip: null,
+        rtt: null
+      };
+    });
+
+    return {
+      total_hops: hops.length,
+      hops
+    };
+  } catch (e: any) {
+    return {
+      error: e.message,
+      total_hops: 0,
+      hops: []
+    };
+  }
+}
+
+// DNS Lookup
+async function dnsLookup(target: string): Promise<any> {
+  const results: any = {};
+
+  // A Records
+  try {
+    const { stdout } = await execAsync(`dig +short A ${target}`);
+    results.a_records = stdout.trim().split('\n').filter(Boolean);
+  } catch (e) {
+    results.a_records = [];
+  }
+
+  // AAAA Records (IPv6)
+  try {
+    const { stdout } = await execAsync(`dig +short AAAA ${target}`);
+    results.aaaa_records = stdout.trim().split('\n').filter(Boolean);
+  } catch (e) {
+    results.aaaa_records = [];
+  }
+
+  // MX Records
+  try {
+    const { stdout } = await execAsync(`dig +short MX ${target}`);
+    results.mx_records = stdout.trim().split('\n').filter(Boolean);
+  } catch (e) {
+    results.mx_records = [];
+  }
+
+  // NS Records
+  try {
+    const { stdout } = await execAsync(`dig +short NS ${target}`);
+    results.ns_records = stdout.trim().split('\n').filter(Boolean);
+  } catch (e) {
+    results.ns_records = [];
+  }
+
+  // TXT Records
+  try {
+    const { stdout } = await execAsync(`dig +short TXT ${target}`);
+    results.txt_records = stdout.trim().split('\n').filter(Boolean);
+  } catch (e) {
+    results.txt_records = [];
+  }
+
+  return results;
+}
+
+// WHOIS Lookup
+async function whoisLookup(target: string): Promise<any> {
+  try {
+    const { stdout } = await execAsync(`whois ${target}`);
+
+    const registrar = stdout.match(/Registrar:\s*(.+)/i);
+    const created = stdout.match(/Creation Date:\s*(.+)/i);
+    const expires = stdout.match(/Expir(?:y|ation) Date:\s*(.+)/i);
+    const nameservers = stdout.match(/Name Server:\s*(.+)/gi);
+
+    return {
+      registrar: registrar ? registrar[1].trim() : null,
+      created_date: created ? created[1].trim() : null,
+      expiry_date: expires ? expires[1].trim() : null,
+      nameservers: nameservers ? nameservers.map(ns => ns.split(':')[1].trim()) : [],
+      raw: stdout.substring(0, 1000) // First 1000 chars
+    };
+  } catch (e: any) {
+    return { error: e.message };
+  }
+}
+
+// SSL Certificate Check
+async function sslCheck(target: string): Promise<any> {
+  try {
+    const { stdout } = await execAsync(
+      `echo | openssl s_client -connect ${target}:443 -servername ${target} 2>/dev/null | openssl x509 -noout -dates -subject -issuer`
+    );
+
+    const notBefore = stdout.match(/notBefore=(.+)/);
+    const notAfter = stdout.match(/notAfter=(.+)/);
+    const subject = stdout.match(/subject=(.+)/);
+    const issuer = stdout.match(/issuer=(.+)/);
+
+    return {
+      valid_from: notBefore ? notBefore[1].trim() : null,
+      valid_until: notAfter ? notAfter[1].trim() : null,
+      subject: subject ? subject[1].trim() : null,
+      issuer: issuer ? issuer[1].trim() : null
+    };
+  } catch (e: any) {
+    return { error: 'SSL certificate not available or invalid' };
+  }
+}
+
+// HTTP Headers
+async function httpHeaders(target: string): Promise<any> {
+  try {
+    const { stdout } = await execAsync(`curl -sI https://${target} --max-time 5`);
+    const headers: any = {};
+
+    const lines = stdout.split('\n');
+    for (const line of lines) {
+      const colonIdx = line.indexOf(':');
+      if (colonIdx > 0) {
+        const key = line.substring(0, colonIdx).trim();
+        const value = line.substring(colonIdx + 1).trim();
+        headers[key] = value;
+      }
+    }
+
+    // Security headers check
+    const securityHeaders = {
+      'Strict-Transport-Security': !!headers['Strict-Transport-Security'],
+      'Content-Security-Policy': !!headers['Content-Security-Policy'],
+      'X-Frame-Options': !!headers['X-Frame-Options'],
+      'X-Content-Type-Options': !!headers['X-Content-Type-Options'],
+      'X-XSS-Protection': !!headers['X-XSS-Protection']
+    };
+
+    return {
+      headers,
+      security_headers: securityHeaders,
+      security_score: Object.values(securityHeaders).filter(Boolean).length
+    };
+  } catch (e: any) {
+    return { error: e.message };
+  }
+}
+
+// Subdomain Enumeration (basic)
+async function subdomainEnum(target: string): Promise<any> {
+  const commonSubdomains = ['www', 'mail', 'ftp', 'admin', 'api', 'dev', 'staging', 'test', 'blog', 'shop'];
+  const found: string[] = [];
+
+  for (const sub of commonSubdomains) {
+    try {
+      const { stdout } = await execAsync(`dig +short ${sub}.${target}`, { timeout: 2000 });
+      if (stdout.trim()) {
+        found.push(`${sub}.${target}`);
+      }
+    } catch (e) {
+      // Subdomain doesn't exist
+    }
+  }
+
+  return {
+    total_checked: commonSubdomains.length,
+    found: found.length,
+    subdomains: found
+  };
+}
+
+// Helper function
+function getServiceName(port: number): string {
+  const services: { [key: number]: string } = {
+    21: 'FTP',
+    22: 'SSH',
+    23: 'Telnet',
+    25: 'SMTP',
+    53: 'DNS',
+    80: 'HTTP',
+    110: 'POP3',
+    143: 'IMAP',
+    443: 'HTTPS',
+    445: 'SMB',
+    3306: 'MySQL',
+    3389: 'RDP',
+    5432: 'PostgreSQL',
+    8080: 'HTTP-Alt',
+    8443: 'HTTPS-Alt'
+  };
+  return services[port] || 'Unknown';
+}

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 SENTINEL SCORING DASHBOARD</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      background: linear-gradient(180deg, #0a0e27 0%, #000 100%);
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .dashboard {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 32px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(102, 126, 234, 0.5);
+      margin-bottom: 32px;
+    }
+
+    .title {
+      font-size: 36px;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #e0e0e0;
+      margin-top: 8px;
+      letter-spacing: 2px;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 48px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .stat-subtitle {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 8px;
+    }
+
+    .trend {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .trend-improving {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid #10b981;
+    }
+
+    .trend-stable {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+      border: 1px solid #3b82f6;
+    }
+
+    .trend-declining {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid #ef4444;
+    }
+
+    /* Health Score Circle */
+    .health-circle {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .circle-bg {
+      fill: none;
+      stroke: #1a1f3a;
+      stroke-width: 15;
+    }
+
+    .circle-progress {
+      fill: none;
+      stroke-width: 15;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s ease;
+      transform: rotate(-90deg);
+      transform-origin: center;
+    }
+
+    .circle-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Scan History */
+    .scan-history {
+      background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      font-weight: 700;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 12px;
+    }
+
+    .scan-item {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid #667eea;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 16px;
+      align-items: center;
+      transition: all 0.3s;
+    }
+
+    .scan-item:hover {
+      background: rgba(102, 126, 234, 0.2);
+      transform: translateX(8px);
+    }
+
+    .scan-time {
+      font-size: 12px;
+      color: #a78bfa;
+      font-weight: 600;
+    }
+
+    .scan-threats {
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .threat-badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .threat-high {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid #ef4444;
+    }
+
+    .threat-medium {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid #f59e0b;
+    }
+
+    .threat-low {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+      border: 1px solid #3b82f6;
+    }
+
+    .scan-score {
+      font-size: 32px;
+      font-weight: 700;
+      color: #10b981;
+    }
+
+    .scan-duration {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    /* Scan Button */
+    .scan-button {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: none;
+      color: #fff;
+      padding: 16px 32px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+      width: 100%;
+      margin-bottom: 32px;
+    }
+
+    .scan-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(16, 185, 129, 0.5);
+    }
+
+    .scan-button:disabled {
+      background: #374151;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .loading {
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Chart */
+    .chart-container {
+      background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .chart {
+      display: flex;
+      align-items: flex-end;
+      height: 200px;
+      gap: 8px;
+      padding: 20px 0;
+    }
+
+    .chart-bar {
+      flex: 1;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .chart-bar:hover {
+      opacity: 0.8;
+      transform: translateY(-4px);
+    }
+
+    .chart-label {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: #a78bfa;
+      white-space: nowrap;
+    }
+
+    .chart-value {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      font-weight: 700;
+      color: #10b981;
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard">
+  <!-- Header -->
+  <div class="header">
+    <div class="title">📊 SENTINEL SCORING DASHBOARD</div>
+    <div class="subtitle">Real-Time Analysis & Health Monitoring</div>
+  </div>
+
+  <!-- Scan Button -->
+  <button class="scan-button" id="scanBtn" onclick="runScan()">
+    🔍 RUN NEW SCAN
+  </button>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <!-- Health Score -->
+    <div class="stat-card">
+      <div class="stat-label">🏥 Health Score</div>
+      <div class="health-circle">
+        <svg width="180" height="180">
+          <circle class="circle-bg" cx="90" cy="90" r="75"></circle>
+          <circle class="circle-progress" id="healthCircle" cx="90" cy="90" r="75"></circle>
+        </svg>
+        <div class="circle-text" id="healthScore">--</div>
+      </div>
+      <div class="stat-subtitle" id="healthTrend"></div>
+    </div>
+
+    <!-- Total Scans -->
+    <div class="stat-card">
+      <div class="stat-label">🔍 Total Scans</div>
+      <div class="stat-value" id="totalScans">0</div>
+      <div class="stat-subtitle">Total analyses effectuées</div>
+    </div>
+
+    <!-- Avg Duration -->
+    <div class="stat-card">
+      <div class="stat-label">⏱️ Avg Duration</div>
+      <div class="stat-value" id="avgDuration">0<span style="font-size: 20px;">ms</span></div>
+      <div class="stat-subtitle">Temps moyen d'analyse</div>
+    </div>
+
+    <!-- Total Threats -->
+    <div class="stat-card">
+      <div class="stat-label">⚠️ Total Threats</div>
+      <div class="stat-value" id="totalThreats">0</div>
+      <div class="stat-subtitle">Menaces détectées au total</div>
+    </div>
+
+    <!-- Time Between -->
+    <div class="stat-card">
+      <div class="stat-label">⏰ Time Between Scans</div>
+      <div class="stat-value" id="timeBetween">--</div>
+      <div class="stat-subtitle">Temps moyen entre analyses</div>
+    </div>
+
+    <!-- Best Score -->
+    <div class="stat-card">
+      <div class="stat-label">🏆 Best Score</div>
+      <div class="stat-value" id="bestScore">--</div>
+      <div class="stat-subtitle">Meilleur score obtenu</div>
+    </div>
+  </div>
+
+  <!-- Health Chart -->
+  <div class="chart-container">
+    <div class="section-title">📈 Health Score History</div>
+    <div class="chart" id="healthChart"></div>
+  </div>
+
+  <!-- Scan History -->
+  <div class="scan-history">
+    <div class="section-title">📋 Recent Scans</div>
+    <div id="scanHistory"></div>
+  </div>
+</div>
+
+<script>
+  let isScanning = false;
+
+  async function loadData() {
+    try {
+      const response = await fetch('/api/sentinel/scoring?limit=20');
+      const data = await response.json();
+
+      if (data.success) {
+        updateStats(data.stats);
+        updateHistory(data.scans);
+        updateChart(data.scans);
+      }
+    } catch (error) {
+      console.error('Failed to load data:', error);
+    }
+  }
+
+  function updateStats(stats) {
+    // Health Score
+    const health = stats.average_health || 0;
+    document.getElementById('healthScore').textContent = health;
+    updateHealthCircle(health);
+
+    // Trend
+    const trendClass = `trend-${stats.current_trend}`;
+    const trendIcon = stats.current_trend === 'improving' ? '📈' :
+                      stats.current_trend === 'declining' ? '📉' : '➡️';
+    document.getElementById('healthTrend').innerHTML =
+      `<span class="trend ${trendClass}">${trendIcon} ${stats.current_trend.toUpperCase()}</span>`;
+
+    // Other stats
+    document.getElementById('totalScans').textContent = stats.total_scans;
+    document.getElementById('avgDuration').innerHTML =
+      `${stats.average_duration}<span style="font-size: 20px;">ms</span>`;
+    document.getElementById('totalThreats').textContent = stats.total_threats_found;
+
+    const timeBetween = stats.time_between_scans;
+    if (timeBetween > 0) {
+      const minutes = Math.floor(timeBetween / 60);
+      const seconds = timeBetween % 60;
+      document.getElementById('timeBetween').innerHTML =
+        `${minutes}<span style="font-size: 20px;">m</span> ${seconds}<span style="font-size: 20px;">s</span>`;
+    }
+
+    document.getElementById('bestScore').textContent = stats.best_score || '--';
+  }
+
+  function updateHealthCircle(score) {
+    const circle = document.getElementById('healthCircle');
+    const circumference = 2 * Math.PI * 75;
+    const offset = circumference - (score / 100) * circumference;
+
+    circle.style.strokeDasharray = circumference;
+    circle.style.strokeDashoffset = offset;
+
+    // Color based on score
+    if (score >= 80) circle.style.stroke = '#10b981';
+    else if (score >= 60) circle.style.stroke = '#3b82f6';
+    else if (score >= 40) circle.style.stroke = '#f59e0b';
+    else circle.style.stroke = '#ef4444';
+  }
+
+  function updateHistory(scans) {
+    const container = document.getElementById('scanHistory');
+
+    if (!scans || scans.length === 0) {
+      container.innerHTML = '<p style="color: #9ca3af; text-align: center;">No scans yet</p>';
+      return;
+    }
+
+    container.innerHTML = scans.slice(0, 10).map(scan => {
+      const time = new Date(scan.scanned_at).toLocaleString();
+      return `
+        <div class="scan-item">
+          <div class="scan-time">${time}</div>
+          <div class="scan-threats">
+            ${scan.high_severity > 0 ? `<span class="threat-badge threat-high">HIGH: ${scan.high_severity}</span>` : ''}
+            ${scan.medium_severity > 0 ? `<span class="threat-badge threat-medium">MED: ${scan.medium_severity}</span>` : ''}
+            ${scan.low_severity > 0 ? `<span class="threat-badge threat-low">LOW: ${scan.low_severity}</span>` : ''}
+          </div>
+          <div class="scan-score">${scan.health_score}</div>
+          <div class="scan-duration">${scan.duration_ms}ms</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateChart(scans) {
+    const container = document.getElementById('healthChart');
+
+    if (!scans || scans.length === 0) {
+      container.innerHTML = '<p style="color: #9ca3af; text-align: center;">No data</p>';
+      return;
+    }
+
+    const recentScans = scans.slice(0, 10).reverse();
+    const maxScore = 100;
+
+    container.innerHTML = recentScans.map(scan => {
+      const height = (scan.health_score / maxScore) * 100;
+      const time = new Date(scan.scanned_at).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      return `
+        <div class="chart-bar" style="height: ${height}%">
+          <div class="chart-value">${scan.health_score}</div>
+          <div class="chart-label">${time}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function runScan() {
+    if (isScanning) return;
+
+    isScanning = true;
+    const btn = document.getElementById('scanBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading">⏳ SCANNING...</span>';
+
+    try {
+      // Run scan
+      const startTime = Date.now();
+      const scanResponse = await fetch('/api/sentinel/scan-project', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project: 'sar' })
+      });
+
+      const scanData = await scanResponse.json();
+      const duration = Date.now() - startTime;
+
+      if (scanData.success) {
+        // Save score
+        await fetch('/api/sentinel/scoring', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            threats: scanData.threats,
+            duration_ms: duration
+          })
+        });
+
+        // Reload data
+        await loadData();
+      }
+    } catch (error) {
+      console.error('Scan failed:', error);
+    } finally {
+      isScanning = false;
+      btn.disabled = false;
+      btn.textContent = '🔍 RUN NEW SCAN';
+    }
+  }
+
+  // Load initial data
+  loadData();
+
+  // Auto-refresh every 30 seconds
+  setInterval(loadData, 30000);
+</script>
+
+</body>
+</html>

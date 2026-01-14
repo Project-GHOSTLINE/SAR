@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ SENTINEL COMMAND CENTER - Real Execution</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      background: linear-gradient(180deg, #0a0e27 0%, #000 100%);
+      color: #e0e0e0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .command-center {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100vh;
+      padding: 24px;
+      gap: 24px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(102, 126, 234, 0.5);
+    }
+
+    .title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #e0e0e0;
+      margin-top: 8px;
+      letter-spacing: 2px;
+    }
+
+    /* Terminal Output */
+    .terminal {
+      background: #000;
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 24px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.6;
+      box-shadow: 0 0 40px rgba(102, 126, 234, 0.3);
+    }
+
+    .terminal::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .terminal::-webkit-scrollbar-track {
+      background: #0a0e27;
+    }
+
+    .terminal::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 4px;
+    }
+
+    .log-entry {
+      margin-bottom: 16px;
+      padding: 12px;
+      border-left: 3px solid #667eea;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 4px;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .log-time {
+      color: #a78bfa;
+      font-size: 12px;
+    }
+
+    .log-action {
+      color: #10b981;
+      font-size: 16px;
+    }
+
+    .log-output {
+      color: #e0e0e0;
+      white-space: pre-wrap;
+      font-size: 13px;
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+    }
+
+    .log-error {
+      color: #ef4444;
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: 4px;
+      border-left: 3px solid #ef4444;
+    }
+
+    .log-duration {
+      color: #a78bfa;
+      font-size: 11px;
+      margin-top: 8px;
+    }
+
+    /* Input Section */
+    .input-section {
+      background: #1a1f3a;
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .input-label {
+      color: #a78bfa;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .input-container {
+      display: flex;
+      gap: 12px;
+    }
+
+    .prompt-input {
+      flex: 1;
+      background: #000;
+      border: 2px solid #667eea;
+      color: #e0e0e0;
+      padding: 16px;
+      font-size: 16px;
+      font-family: 'SF Mono', monospace;
+      border-radius: 8px;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .prompt-input:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .execute-btn {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: none;
+      color: #fff;
+      padding: 16px 32px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .execute-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(16, 185, 129, 0.5);
+    }
+
+    .execute-btn:active {
+      transform: translateY(0);
+    }
+
+    .execute-btn:disabled {
+      background: #374151;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .quick-commands {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px;
+    }
+
+    .quick-cmd {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid #667eea;
+      color: #e0e0e0;
+      padding: 8px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .quick-cmd:hover {
+      background: rgba(102, 126, 234, 0.3);
+      border-color: #10b981;
+      transform: translateY(-2px);
+    }
+
+    .loading {
+      display: inline-block;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .status-success { background: #10b981; }
+    .status-error { background: #ef4444; }
+    .status-running { background: #f59e0b; animation: pulse 1s infinite; }
+  </style>
+</head>
+<body>
+
+<div class="command-center">
+  <!-- Header -->
+  <div class="header">
+    <div class="title">⚡ SENTINEL COMMAND CENTER</div>
+    <div class="subtitle">Real Command Execution - No Simulations</div>
+  </div>
+
+  <!-- Terminal Output -->
+  <div class="terminal" id="terminal">
+    <div class="log-entry">
+      <div class="log-header">
+        <span class="log-action">🎯 System Ready</span>
+        <span class="log-time">Ready to execute commands</span>
+      </div>
+      <div class="log-output">Sentinel Command Center initialized. Enter commands below to execute real actions.</div>
+    </div>
+  </div>
+
+  <!-- Input Section -->
+  <div class="input-section">
+    <div class="input-label">📝 Command Prompt</div>
+    <div class="input-container">
+      <input
+        type="text"
+        class="prompt-input"
+        id="promptInput"
+        placeholder="Enter command: build, test, scan, clean console.logs..."
+        autocomplete="off"
+      />
+      <button class="execute-btn" id="executeBtn" onclick="executeCommand()">
+        EXECUTE
+      </button>
+    </div>
+
+    <div class="quick-commands">
+      <button class="quick-cmd" onclick="quickCommand('build the project')">🔨 Build Project</button>
+      <button class="quick-cmd" onclick="quickCommand('run tests')">🧪 Run Tests</button>
+      <button class="quick-cmd" onclick="quickCommand('check typescript')">✅ Check TypeScript</button>
+      <button class="quick-cmd" onclick="quickCommand('scan project')">🔍 Scan Project</button>
+      <button class="quick-cmd" onclick="quickCommand('clean console.logs')">🧹 Clean Logs</button>
+      <button class="quick-cmd" onclick="quickCommand('git status')">📊 Git Status</button>
+      <button class="quick-cmd" onclick="quickCommand('lint project')">📝 Lint</button>
+      <button class="quick-cmd" onclick="quickCommand('delete backup files')">🗑️ Delete Backups</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let isExecuting = false;
+
+  // Handle Enter key
+  document.getElementById('promptInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !isExecuting) {
+      executeCommand();
+    }
+  });
+
+  function quickCommand(cmd) {
+    document.getElementById('promptInput').value = cmd;
+    executeCommand();
+  }
+
+  async function executeCommand() {
+    if (isExecuting) return;
+
+    const input = document.getElementById('promptInput');
+    const btn = document.getElementById('executeBtn');
+    const prompt = input.value.trim();
+
+    if (!prompt) {
+      addLog('Error', 'Please enter a command', '', true, 0);
+      return;
+    }
+
+    isExecuting = true;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading">EXECUTING...</span>';
+
+    // Add running status
+    addLog('Running', `Executing: ${prompt}`, '', false, 0, true);
+
+    try {
+      const response = await fetch('/api/sentinel/execute-command', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.result) {
+        const { action, output, error, duration } = data.result;
+        addLog(action, output, error, !data.result.success, duration);
+
+        // Log to activity
+        await fetch('/api/activity/log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            project_name: 'sar',
+            action_type: 'sentinel-command',
+            target: action,
+            thought: prompt,
+            status: data.result.success ? 'success' : 'error'
+          })
+        });
+      } else {
+        addLog('Error', data.error || 'Command failed', data.suggestions?.join('\n') || '', true, 0);
+      }
+    } catch (error) {
+      addLog('Error', 'Failed to execute command', error.message, true, 0);
+    } finally {
+      isExecuting = false;
+      btn.disabled = false;
+      btn.textContent = 'EXECUTE';
+      input.value = '';
+      input.focus();
+    }
+  }
+
+  function addLog(action, output, error, isError, duration, isRunning = false) {
+    const terminal = document.getElementById('terminal');
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+
+    const statusClass = isRunning ? 'status-running' : (isError ? 'status-error' : 'status-success');
+    const statusIcon = isRunning ? '⏳' : (isError ? '❌' : '✅');
+
+    entry.innerHTML = `
+      <div class="log-header">
+        <span class="log-action">
+          <span class="status-indicator ${statusClass}"></span>
+          ${statusIcon} ${action}
+        </span>
+        <span class="log-time">${new Date().toLocaleTimeString()}</span>
+      </div>
+      <div class="log-output">${output}</div>
+      ${error ? `<div class="log-error">❌ Error: ${error}</div>` : ''}
+      ${duration > 0 ? `<div class="log-duration">⏱️ Completed in ${duration}ms</div>` : ''}
+    `;
+
+    // If running, replace last entry if it's also running
+    if (isRunning) {
+      const lastEntry = terminal.lastElementChild;
+      if (lastEntry && lastEntry.innerHTML.includes('status-running')) {
+        terminal.removeChild(lastEntry);
+      }
+    }
+
+    terminal.appendChild(entry);
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  // Auto-focus input on load
+  window.addEventListener('load', () => {
+    document.getElementById('promptInput').focus();
+  });
+</script>
+
+</body>
+</html>

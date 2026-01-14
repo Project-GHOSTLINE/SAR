@@ -165,11 +165,7 @@ export async function POST(request: NextRequest) {
     const emailResult = await emailResponse.json()
 
     // Enregistrer l'envoi dans les logs (optionnel)
-    console.log('[VoPay Alert] Email sent:', {
-      webhookId,
-      transactionId: webhook.transaction_id,
-      emailId: emailResult.id
-    })
+    // TODO: Implémenter le logging si nécessaire
 
     return NextResponse.json({
       success: true,

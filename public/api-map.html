@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🗺️ SAR API Map - Carte Interactive des Routes</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      background: #0a0e27;
+      color: #e0e0e0;
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      text-align: center;
+      border-bottom: 3px solid #667eea;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .controls {
+      background: #1a1f3a;
+      padding: 12px 20px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      border-bottom: 1px solid #2a3f5f;
+    }
+
+    .controls button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      font-weight: 600;
+    }
+
+    .controls button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .controls .filter-group {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .controls label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+
+    .controls input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .container {
+      display: flex;
+      height: calc(100vh - 140px);
+    }
+
+    .canvas-container {
+      flex: 1;
+      position: relative;
+      background: radial-gradient(circle at center, #0f1729 0%, #0a0e27 100%);
+      overflow: hidden;
+    }
+
+    #apiCanvas {
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    #apiCanvas.dragging {
+      cursor: grabbing;
+    }
+
+    .sidebar {
+      width: 350px;
+      background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+      border-left: 2px solid #667eea;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .sidebar h3 {
+      color: #667eea;
+      font-size: 16px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .route-detail {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid #667eea;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .route-method {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-right: 8px;
+      text-transform: uppercase;
+    }
+
+    .method-GET { background: #10b981; color: white; }
+    .method-POST { background: #3b82f6; color: white; }
+    .method-PUT { background: #f59e0b; color: white; }
+    .method-DELETE { background: #ef4444; color: white; }
+
+    .route-path {
+      font-size: 13px;
+      color: #e0e0e0;
+      margin: 8px 0;
+      font-weight: 600;
+    }
+
+    .route-desc {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    .route-deps {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .dep-tag {
+      display: inline-block;
+      background: rgba(139, 92, 246, 0.2);
+      color: #a78bfa;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 9px;
+      margin-right: 6px;
+      margin-top: 4px;
+      border: 1px solid #8b5cf6;
+    }
+
+    .stats {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-box {
+      flex: 1;
+      background: rgba(102, 126, 234, 0.1);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #667eea;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      color: #667eea;
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .legend {
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      border: 1px solid #2a3f5f;
+    }
+
+    .legend-title {
+      font-size: 12px;
+      color: #a78bfa;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0a0e27;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 4px;
+    }
+
+    .tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      pointer-events: none;
+      z-index: 1000;
+      border: 1px solid #667eea;
+      display: none;
+      max-width: 300px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🗺️ SAR API Map - Carte Interactive des Routes</h1>
+    <p>Visualisation de toutes les routes API du projet • Cliquez sur les nodes pour voir les détails • Drag pour déplacer</p>
+  </div>
+
+  <div class="controls">
+    <button onclick="resetView()">🔄 Reset Vue</button>
+    <button onclick="autoArrange()">✨ Auto-Arrange</button>
+    <button onclick="exportMap()">💾 Exporter</button>
+    <button onclick="window.location.href='/claude-monitor.html'">📊 Monitor</button>
+    <button onclick="window.location.href='/claude-cortex.html'">🧠 Cortex</button>
+
+    <div class="filter-group">
+      <label>
+        <input type="checkbox" id="filterMemory" checked onchange="redraw()">
+        🧠 Memory
+      </label>
+      <label>
+        <input type="checkbox" id="filterActivity" checked onchange="redraw()">
+        📊 Activity
+      </label>
+      <label>
+        <input type="checkbox" id="filterTest" checked onchange="redraw()">
+        🧪 Test
+      </label>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="canvas-container">
+      <canvas id="apiCanvas"></canvas>
+      <div class="tooltip" id="tooltip"></div>
+    </div>
+
+    <div class="sidebar">
+      <div class="stats">
+        <div class="stat-box">
+          <div class="stat-value" id="totalRoutes">0</div>
+          <div class="stat-label">Routes</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="totalEndpoints">0</div>
+          <div class="stat-label">Endpoints</div>
+        </div>
+      </div>
+
+      <h3>📋 Routes Actives</h3>
+      <div id="routesList"></div>
+
+      <div class="legend">
+        <div class="legend-title">🎨 Légende</div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #10b981;"></div>
+          <span>GET - Lecture de données</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #3b82f6;"></div>
+          <span>POST - Création/Action</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #f59e0b;"></div>
+          <span>PUT - Mise à jour</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #ef4444;"></div>
+          <span>DELETE - Suppression</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #8b5cf6;"></div>
+          <span>Dépendance externe</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('apiCanvas');
+    const ctx = canvas.getContext('2d');
+    const tooltip = document.getElementById('tooltip');
+
+    let canvasWidth, canvasHeight;
+    let offsetX = 0, offsetY = 0;
+    let scale = 1;
+    let isDragging = false;
+    let dragStartX, dragStartY;
+    let selectedNode = null;
+
+    // Données des routes API
+    const apiRoutes = [
+      // Memory APIs
+      {
+        id: 'memory-store',
+        category: 'memory',
+        path: '/api/memory/store',
+        method: 'POST',
+        description: 'Stocke une nouvelle mémoire dans Supabase',
+        dependencies: ['Supabase', 'PostgreSQL'],
+        params: ['project_name', 'category', 'key', 'content'],
+        x: 200, y: 150
+      },
+      {
+        id: 'memory-recall',
+        category: 'memory',
+        path: '/api/memory/recall',
+        method: 'GET',
+        description: 'Récupère des mémoires par catégorie',
+        dependencies: ['Supabase', 'PostgreSQL'],
+        params: ['project_name', 'category'],
+        x: 200, y: 250
+      },
+      {
+        id: 'memory-context',
+        category: 'memory',
+        path: '/api/memory/context',
+        method: 'GET',
+        description: 'Récupère le contexte complet du projet',
+        dependencies: ['Supabase', 'PostgreSQL'],
+        params: ['project'],
+        x: 200, y: 350
+      },
+      {
+        id: 'memory-session',
+        category: 'memory',
+        path: '/api/memory/session',
+        method: 'POST',
+        description: 'Enregistre une session de travail',
+        dependencies: ['Supabase', 'PostgreSQL'],
+        params: ['project_name', 'summary'],
+        x: 200, y: 450
+      },
+      {
+        id: 'memory-doc-read',
+        category: 'memory',
+        path: '/api/memory/doc-read',
+        method: 'POST',
+        description: 'Marque un document comme lu',
+        dependencies: ['Supabase', 'PostgreSQL'],
+        params: ['project_name', 'doc_path'],
+        x: 200, y: 550
+      },
+
+      // Activity APIs
+      {
+        id: 'activity-log',
+        category: 'activity',
+        path: '/api/activity/log',
+        method: 'POST',
+        description: 'Log une action Claude en temps réel',
+        dependencies: ['Supabase', 'PostgreSQL'],
+        params: ['action_type', 'target', 'thought', 'goal'],
+        x: 600, y: 150
+      },
+      {
+        id: 'activity-stats',
+        category: 'activity',
+        path: '/api/activity/stats',
+        method: 'GET',
+        description: 'Récupère les statistiques d\'activité',
+        dependencies: ['Supabase', 'PostgreSQL', 'SQL Functions'],
+        params: ['project'],
+        x: 600, y: 300
+      },
+      {
+        id: 'activity-recent',
+        category: 'activity',
+        path: '/api/activity/recent',
+        method: 'GET',
+        description: 'Récupère les actions récentes',
+        dependencies: ['Supabase', 'PostgreSQL', 'SQL Functions'],
+        params: ['project', 'limit'],
+        x: 600, y: 450
+      },
+
+      // Test API
+      {
+        id: 'test-tool',
+        category: 'test',
+        path: '/api/test-tool',
+        method: 'POST',
+        description: 'Teste les outils Claude (Read, Write, Bash, etc.)',
+        dependencies: ['File System', 'Child Process', 'Bash'],
+        params: ['tool', 'action', 'target'],
+        x: 1000, y: 300
+      },
+
+      // Supabase (node central)
+      {
+        id: 'supabase',
+        category: 'external',
+        path: 'Supabase',
+        method: 'SERVICE',
+        description: 'Base de données PostgreSQL hébergée',
+        dependencies: [],
+        params: [],
+        x: 400, y: 350,
+        isExternal: true
+      },
+
+      // Dashboard pages (nodes visuels)
+      {
+        id: 'monitor',
+        category: 'frontend',
+        path: '/claude-monitor.html',
+        method: 'GET',
+        description: 'Dashboard de monitoring en temps réel',
+        dependencies: ['activity-stats', 'activity-recent', 'memory-context'],
+        params: [],
+        x: 800, y: 100,
+        isPage: true
+      },
+      {
+        id: 'cortex',
+        category: 'frontend',
+        path: '/claude-cortex.html',
+        method: 'GET',
+        description: 'Cortex d\'intelligence augmentée',
+        dependencies: ['memory-store', 'memory-context'],
+        params: [],
+        x: 800, y: 600,
+        isPage: true
+      }
+    ];
+
+    // Couleurs par méthode
+    const methodColors = {
+      'GET': '#10b981',
+      'POST': '#3b82f6',
+      'PUT': '#f59e0b',
+      'DELETE': '#ef4444',
+      'SERVICE': '#8b5cf6'
+    };
+
+    function resizeCanvas() {
+      canvasWidth = canvas.offsetWidth;
+      canvasHeight = canvas.offsetHeight;
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      redraw();
+    }
+
+    function redraw() {
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      // Filtres
+      const showMemory = document.getElementById('filterMemory').checked;
+      const showActivity = document.getElementById('filterActivity').checked;
+      const showTest = document.getElementById('filterTest').checked;
+
+      const filteredRoutes = apiRoutes.filter(route => {
+        if (route.category === 'memory' && !showMemory) return false;
+        if (route.category === 'activity' && !showActivity) return false;
+        if (route.category === 'test' && !showTest) return false;
+        return true;
+      });
+
+      // Draw connections
+      ctx.strokeStyle = 'rgba(102, 126, 234, 0.3)';
+      ctx.lineWidth = 2;
+
+      filteredRoutes.forEach(route => {
+        if (route.dependencies && route.dependencies.length > 0) {
+          route.dependencies.forEach(depName => {
+            const dep = apiRoutes.find(r => r.path === depName || r.id === depName || r.path.includes(depName));
+            if (dep) {
+              drawConnection(route, dep);
+            }
+          });
+        }
+      });
+
+      // Draw nodes
+      filteredRoutes.forEach(route => {
+        drawNode(route);
+      });
+
+      // Update stats
+      const endpoints = filteredRoutes.filter(r => !r.isExternal && !r.isPage).length;
+      document.getElementById('totalRoutes').textContent = filteredRoutes.length;
+      document.getElementById('totalEndpoints').textContent = endpoints;
+    }
+
+    function drawConnection(from, to) {
+      const x1 = from.x + offsetX;
+      const y1 = from.y + offsetY;
+      const x2 = to.x + offsetX;
+      const y2 = to.y + offsetY;
+
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+
+      // Courbe de Bézier
+      const cpX = (x1 + x2) / 2;
+      const cpY = (y1 + y2) / 2;
+      ctx.quadraticCurveTo(cpX, cpY, x2, y2);
+
+      ctx.stroke();
+
+      // Flèche
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      const arrowSize = 8;
+      ctx.fillStyle = 'rgba(102, 126, 234, 0.5)';
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(
+        x2 - arrowSize * Math.cos(angle - Math.PI / 6),
+        y2 - arrowSize * Math.sin(angle - Math.PI / 6)
+      );
+      ctx.lineTo(
+        x2 - arrowSize * Math.cos(angle + Math.PI / 6),
+        y2 - arrowSize * Math.sin(angle + Math.PI / 6)
+      );
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawNode(route) {
+      const x = route.x + offsetX;
+      const y = route.y + offsetY;
+      const radius = route.isExternal ? 50 : (route.isPage ? 40 : 35);
+
+      // Shadow
+      ctx.shadowColor = methodColors[route.method] || '#667eea';
+      ctx.shadowBlur = 20;
+
+      // Node circle
+      ctx.fillStyle = route.isExternal ?
+        'rgba(139, 92, 246, 0.3)' :
+        (route.isPage ? 'rgba(251, 191, 36, 0.3)' : 'rgba(102, 126, 234, 0.2)');
+      ctx.strokeStyle = methodColors[route.method] || '#667eea';
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+
+      // Icon
+      ctx.font = '24px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const icon = route.isExternal ? '🗄️' : (route.isPage ? '🖥️' : getIcon(route.category));
+      ctx.fillText(icon, x, y - 5);
+
+      // Method badge
+      if (!route.isExternal && !route.isPage) {
+        ctx.fillStyle = methodColors[route.method];
+        ctx.fillRect(x - 20, y + 20, 40, 14);
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 9px monospace';
+        ctx.fillText(route.method, x, y + 27);
+      }
+
+      // Label
+      ctx.fillStyle = '#e0e0e0';
+      ctx.font = '11px monospace';
+      const label = route.isExternal ? route.path : route.path.split('/').pop();
+      ctx.fillText(label, x, y + radius + 16);
+    }
+
+    function getIcon(category) {
+      const icons = {
+        'memory': '🧠',
+        'activity': '📊',
+        'test': '🧪',
+        'frontend': '🖥️'
+      };
+      return icons[category] || '⚡';
+    }
+
+    // Mouse events
+    canvas.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      dragStartX = e.clientX - offsetX;
+      dragStartY = e.clientY - offsetY;
+      canvas.classList.add('dragging');
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left - offsetX;
+      const mouseY = e.clientY - rect.top - offsetY;
+
+      if (isDragging) {
+        offsetX = e.clientX - dragStartX;
+        offsetY = e.clientY - dragStartY;
+        redraw();
+      } else {
+        // Hover detection
+        let hoveredNode = null;
+        for (const route of apiRoutes) {
+          const dx = mouseX - route.x;
+          const dy = mouseY - route.y;
+          const radius = route.isExternal ? 50 : (route.isPage ? 40 : 35);
+
+          if (Math.sqrt(dx * dx + dy * dy) < radius) {
+            hoveredNode = route;
+            break;
+          }
+        }
+
+        if (hoveredNode) {
+          showTooltip(e, hoveredNode);
+        } else {
+          hideTooltip();
+        }
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      isDragging = false;
+      canvas.classList.remove('dragging');
+    });
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left - offsetX;
+      const mouseY = e.clientY - rect.top - offsetY;
+
+      for (const route of apiRoutes) {
+        const dx = mouseX - route.x;
+        const dy = mouseY - route.y;
+        const radius = route.isExternal ? 50 : (route.isPage ? 40 : 35);
+
+        if (Math.sqrt(dx * dx + dy * dy) < radius) {
+          selectNode(route);
+          break;
+        }
+      }
+    });
+
+    function showTooltip(e, node) {
+      tooltip.style.display = 'block';
+      tooltip.style.left = e.clientX + 15 + 'px';
+      tooltip.style.top = e.clientY + 15 + 'px';
+      tooltip.innerHTML = `
+        <strong>${node.path}</strong><br>
+        <span style="color: ${methodColors[node.method]};">${node.method}</span><br>
+        <span style="font-size: 10px; color: #94a3b8;">${node.description}</span>
+      `;
+    }
+
+    function hideTooltip() {
+      tooltip.style.display = 'none';
+    }
+
+    function selectNode(node) {
+      selectedNode = node;
+      updateSidebar();
+    }
+
+    function updateSidebar() {
+      const list = document.getElementById('routesList');
+      list.innerHTML = '';
+
+      const routes = apiRoutes.filter(r => !r.isExternal);
+
+      routes.forEach(route => {
+        const div = document.createElement('div');
+        div.className = 'route-detail';
+        div.innerHTML = `
+          <div>
+            <span class="route-method method-${route.method}">${route.method}</span>
+            ${route.isPage ? '🖥️' : ''}
+          </div>
+          <div class="route-path">${route.path}</div>
+          <div class="route-desc">${route.description}</div>
+          ${route.dependencies.length > 0 ? `
+            <div class="route-deps">
+              ${route.dependencies.map(dep => `<span class="dep-tag">${dep}</span>`).join('')}
+            </div>
+          ` : ''}
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function resetView() {
+      offsetX = 0;
+      offsetY = 0;
+      scale = 1;
+      redraw();
+    }
+
+    function autoArrange() {
+      // Simple circular arrangement
+      const categories = {
+        memory: [],
+        activity: [],
+        test: [],
+        frontend: [],
+        external: []
+      };
+
+      apiRoutes.forEach(route => {
+        categories[route.category]?.push(route);
+      });
+
+      let angleStep = (Math.PI * 2) / Object.keys(categories).length;
+      let currentAngle = 0;
+      const centerX = 600;
+      const centerY = 400;
+      const radius = 250;
+
+      Object.values(categories).forEach(routes => {
+        routes.forEach((route, i) => {
+          const subAngle = currentAngle + (i * angleStep / routes.length);
+          route.x = centerX + Math.cos(subAngle) * radius;
+          route.y = centerY + Math.sin(subAngle) * radius;
+        });
+        currentAngle += angleStep;
+      });
+
+      redraw();
+    }
+
+    function exportMap() {
+      const dataStr = JSON.stringify(apiRoutes, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      const exportFileDefaultName = 'sar-api-map.json';
+
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+    }
+
+    // Initialization
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    updateSidebar();
+  </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-01-13T18:20:00Z",
+  "sentinel": {
+    "status": "ACTIVE",
+    "monitoring": true
+  },
+  "worker": {
+    "status": "ASSIGNED",
+    "can_act": true
+  },
+  "command_queue": [],
+  "active_command": {
+    "id": "cmd-001",
+    "type": "TEST",
+    "priority": "HIGH",
+    "title": "Tester le Système de Mémoire",
+    "description": "Valider que le système de mémoire fonctionne correctement avant commit",
+    "actions": [
+      "1. Exécuter database/claude-memory-system.sql dans Supabase SQL Editor",
+      "2. Vérifier que les 5 tables sont créées (claude_memory, claude_sessions, etc.)",
+      "3. Exécuter: node scripts/init-claude-memory.mjs",
+      "4. Vérifier la sortie du script (nombre de docs stockés, mémoires créées)",
+      "5. Tester GET /api/memory/context?project=sar",
+      "6. Tester GET /api/memory/recall?project=sar&category=stack",
+      "7. Tester POST /api/memory/store (créer une mémoire test)",
+      "8. Vérifier dans Supabase que les données sont bien présentes",
+      "9. Créer TEST-MEMORY-SYSTEM.md avec tous les résultats",
+      "10. Mettre à jour WORKER-STATUS.md avec COMPLETED ou BLOCKED"
+    ],
+    "files": [
+      "database/claude-memory-system.sql",
+      "scripts/init-claude-memory.mjs",
+      "src/app/api/memory/*",
+      "TEST-MEMORY-SYSTEM.md (à créer)"
+    ],
+    "require_approval_before_commit": true,
+    "created_at": "2026-01-13T18:20:00Z",
+    "assigned_by": "Sentinel SAR"
+  },
+  "completed_commands": [],
+  "protocol": {
+    "worker_must_read": [
+      "SENTINEL-INSTRUCTIONS.md",
+      "SENTINEL-COMMANDS.json"
+    ],
+    "worker_must_update": [
+      "WORKER-STATUS.md",
+      "WORKER-CHANGELOG.md"
+    ],
+    "commit_requires_approval": true,
+    "auto_report_frequency": "on_action",
+    "max_file_changes_before_report": 5,
+    "require_tests_before_commit": true
+  }
+}

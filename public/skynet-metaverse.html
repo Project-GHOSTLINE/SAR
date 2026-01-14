@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌐 SKYNET Metaverse - Sentinel Command</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    #metaverse {
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, #0a0e27 0%, #000 100%);
+      position: relative;
+    }
+
+    #canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* HUD Skynet */
+    .hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, rgba(102, 126, 234, 0.9) 0%, rgba(10, 14, 39, 0.95) 100%);
+      padding: 20px;
+      border-bottom: 3px solid #667eea;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+
+    .hud-title {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px #667eea;
+      margin-bottom: 16px;
+    }
+
+    .hud-stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      color: #667eea;
+      font-weight: 700;
+      text-shadow: 0 0 10px #667eea;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    /* Control Panel */
+    .control-panel {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 14, 39, 0.95);
+      border: 2px solid #667eea;
+      border-radius: 16px;
+      padding: 24px;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      box-shadow: 0 0 40px rgba(102, 126, 234, 0.5);
+    }
+
+    .control-title {
+      text-align: center;
+      font-size: 16px;
+      color: #667eea;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+
+    .commands {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .cmd-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cmd-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .cmd-btn:hover::before {
+      left: 100%;
+    }
+
+    .cmd-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+    }
+
+    .cmd-btn:active {
+      transform: translateY(-2px);
+    }
+
+    /* Garage */
+    .garage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      height: 300px;
+      z-index: 10;
+    }
+
+    .garage-building {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+      border: 3px solid #667eea;
+      border-radius: 12px;
+      position: relative;
+      box-shadow: 0 0 60px rgba(102, 126, 234, 0.6);
+    }
+
+    .garage-label {
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 18px;
+      color: #667eea;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 20px #667eea;
+    }
+
+    .garage-door {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 70%;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      border: 2px solid #a78bfa;
+      border-radius: 8px 8px 0 0;
+      transition: height 1s ease-in-out;
+      overflow: hidden;
+      box-shadow: inset 0 0 30px rgba(102, 126, 234, 0.5);
+    }
+
+    .garage-door.open {
+      height: 10%;
+    }
+
+    .door-lines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 20px,
+        rgba(0, 0, 0, 0.3) 20px,
+        rgba(0, 0, 0, 0.3) 22px
+      );
+    }
+
+    /* Sentinels */
+    .sentinel {
+      position: absolute;
+      width: 60px;
+      height: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.5s ease-out;
+      z-index: 50;
+    }
+
+    .sentinel-body {
+      width: 50px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: 2px solid #a78bfa;
+      border-radius: 8px;
+      position: relative;
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      animation: hover 2s ease-in-out infinite;
+    }
+
+    @keyframes hover {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .sentinel-eye {
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+      top: 15px;
+      animation: blink 3s infinite;
+    }
+
+    @keyframes blink {
+      0%, 90%, 100% { opacity: 1; }
+      95% { opacity: 0; }
+    }
+
+    .sentinel-label {
+      font-size: 9px;
+      color: #a78bfa;
+      margin-top: 4px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .sentinel-status {
+      font-size: 8px;
+      color: #10b981;
+      margin-top: 2px;
+    }
+
+    /* Particle effects */
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #667eea;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: particle-float 2s ease-out forwards;
+    }
+
+    @keyframes particle-float {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(0);
+      }
+    }
+
+    /* Mission log */
+    .mission-log {
+      position: absolute;
+      top: 160px;
+      right: 20px;
+      width: 350px;
+      max-height: 400px;
+      background: rgba(10, 14, 39, 0.95);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      overflow-y: auto;
+    }
+
+    .log-title {
+      font-size: 14px;
+      color: #667eea;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      font-weight: 700;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #667eea;
+    }
+
+    .log-entry {
+      font-size: 11px;
+      padding: 8px;
+      margin-bottom: 6px;
+      border-left: 3px solid #667eea;
+      padding-left: 10px;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 4px;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .log-time {
+      color: #a78bfa;
+      font-size: 9px;
+      margin-bottom: 4px;
+    }
+
+    .log-text {
+      color: #e0e0e0;
+    }
+
+    /* Grid background */
+    #grid-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      opacity: 0.3;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0a0e27;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div id="metaverse">
+    <!-- Grid background -->
+    <canvas id="grid-canvas"></canvas>
+
+    <!-- Main canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- HUD Skynet -->
+    <div class="hud">
+      <div class="hud-title">🌐 SKYNET METAVERSE COMMAND</div>
+      <div class="hud-stats">
+        <div class="stat">
+          <div class="stat-value" id="sentinelCount">0</div>
+          <div class="stat-label">Sentinels Active</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="missionCount">0</div>
+          <div class="stat-label">Missions Completed</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="statusValue">ONLINE</div>
+          <div class="stat-label">System Status</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Garage -->
+    <div class="garage">
+      <div class="garage-label">⚙️ SENTINEL FACTORY</div>
+      <div class="garage-building">
+        <div class="garage-door" id="garageDoor">
+          <div class="door-lines"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+      <div class="control-title">⚡ SKYNET COMMAND INTERFACE</div>
+      <div class="commands">
+        <button class="cmd-btn" onclick="deployOneSentinel()">
+          🤖 DEPLOY 1
+        </button>
+        <button class="cmd-btn" onclick="deployMultipleSentinels(5)">
+          🚀 DEPLOY 5
+        </button>
+        <button class="cmd-btn" onclick="openGarage()">
+          🚪 OPEN GARAGE
+        </button>
+        <button class="cmd-btn" onclick="closeGarage()">
+          🔒 CLOSE GARAGE
+        </button>
+        <button class="cmd-btn" onclick="executeCommand('scan')">
+          🔍 SCAN NETWORK
+        </button>
+        <button class="cmd-btn" onclick="executeCommand('build')">
+          🔨 BUILD PROJECT
+        </button>
+        <button class="cmd-btn" onclick="executeCommand('test')">
+          🧪 RUN TESTS
+        </button>
+        <button class="cmd-btn" onclick="recallAllSentinels()">
+          ↩️ RECALL ALL
+        </button>
+      </div>
+    </div>
+
+    <!-- Mission Log -->
+    <div class="mission-log">
+      <div class="log-title">📋 MISSION LOG</div>
+      <div id="missionLog"></div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const gridCanvas = document.getElementById('grid-canvas');
+    const gridCtx = gridCanvas.getContext('2d');
+
+    let sentinels = [];
+    let nextSentinelId = 1;
+    let missionCount = 0;
+    let garageOpen = false;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      gridCanvas.width = window.innerWidth;
+      gridCanvas.height = window.innerHeight;
+      drawGrid();
+    }
+
+    // Draw grid background
+    function drawGrid() {
+      gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+      gridCtx.strokeStyle = '#667eea';
+      gridCtx.lineWidth = 1;
+
+      const gridSize = 50;
+
+      // Vertical lines
+      for (let x = 0; x < gridCanvas.width; x += gridSize) {
+        gridCtx.beginPath();
+        gridCtx.moveTo(x, 0);
+        gridCtx.lineTo(x, gridCanvas.height);
+        gridCtx.stroke();
+      }
+
+      // Horizontal lines
+      for (let y = 0; y < gridCanvas.height; y += gridSize) {
+        gridCtx.beginPath();
+        gridCtx.moveTo(0, y);
+        gridCtx.lineTo(gridCanvas.width, y);
+        gridCtx.stroke();
+      }
+    }
+
+    // Open garage
+    function openGarage() {
+      garageOpen = true;
+      document.getElementById('garageDoor').classList.add('open');
+      addLog('Garage door opening...');
+      createParticles(window.innerWidth / 2, window.innerHeight / 2, 30);
+
+      setTimeout(() => {
+        addLog('Garage ready for deployment');
+      }, 1000);
+    }
+
+    // Close garage
+    function closeGarage() {
+      garageOpen = false;
+      document.getElementById('garageDoor').classList.remove('open');
+      addLog('Garage door closing...');
+    }
+
+    // Deploy one sentinel
+    function deployOneSentinel() {
+      if (!garageOpen) {
+        addLog('⚠️ Garage door must be open first!');
+        return;
+      }
+
+      const sentinel = createSentinel();
+      sentinels.push(sentinel);
+
+      addLog(`✅ Sentinel #${sentinel.id} deployed - Status: Active`);
+      updateStats();
+      createParticles(sentinel.x, sentinel.y, 10);
+    }
+
+    // Deploy multiple sentinels
+    function deployMultipleSentinels(count) {
+      if (!garageOpen) {
+        addLog('⚠️ Garage door must be open first!');
+        openGarage();
+
+        setTimeout(() => {
+          deployMultipleSentinels(count);
+        }, 1200);
+        return;
+      }
+
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          deployOneSentinel();
+        }, i * 300);
+      }
+    }
+
+    // Create a sentinel
+    function createSentinel() {
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      return {
+        id: nextSentinelId++,
+        x: centerX,
+        y: centerY,
+        targetX: centerX + (Math.random() - 0.5) * 400,
+        targetY: centerY + (Math.random() - 0.5) * 400,
+        status: 'active',
+        mission: null
+      };
+    }
+
+    // Execute command with sentinel
+    function executeCommand(cmd) {
+      if (sentinels.length === 0) {
+        addLog('⚠️ No sentinels available. Deploy sentinels first!');
+        return;
+      }
+
+      // Find available sentinel
+      const sentinel = sentinels.find(s => s.status === 'active' && !s.mission);
+
+      if (!sentinel) {
+        addLog('⚠️ All sentinels are busy!');
+        return;
+      }
+
+      sentinel.mission = cmd;
+      sentinel.status = 'working';
+
+      const commandNames = {
+        'scan': 'Network Scan',
+        'build': 'Build Project',
+        'test': 'Run Tests'
+      };
+
+      addLog(`🚀 Sentinel #${sentinel.id} executing: ${commandNames[cmd]}`);
+
+      // Simulate command execution
+      setTimeout(() => {
+        sentinel.status = 'active';
+        sentinel.mission = null;
+        missionCount++;
+        updateStats();
+        addLog(`✅ Sentinel #${sentinel.id} completed: ${commandNames[cmd]}`);
+      }, 3000 + Math.random() * 2000);
+    }
+
+    // Recall all sentinels
+    function recallAllSentinels() {
+      const count = sentinels.length;
+
+      sentinels.forEach((sentinel, index) => {
+        setTimeout(() => {
+          sentinel.targetX = window.innerWidth / 2;
+          sentinel.targetY = window.innerHeight / 2;
+
+          setTimeout(() => {
+            sentinels = sentinels.filter(s => s.id !== sentinel.id);
+            updateStats();
+          }, 1000);
+        }, index * 200);
+      });
+
+      addLog(`↩️ Recalling ${count} sentinel(s) to garage...`);
+
+      setTimeout(() => {
+        closeGarage();
+      }, count * 200 + 1500);
+    }
+
+    // Create particles
+    function createParticles(x, y, count) {
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+
+        const tx = (Math.random() - 0.5) * 200;
+        const ty = (Math.random() - 0.5) * 200;
+        particle.style.setProperty('--tx', tx + 'px');
+        particle.style.setProperty('--ty', ty + 'px');
+
+        document.body.appendChild(particle);
+
+        setTimeout(() => {
+          particle.remove();
+        }, 2000);
+      }
+    }
+
+    // Add log entry
+    function addLog(text) {
+      const log = document.getElementById('missionLog');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+
+      const time = new Date().toLocaleTimeString('fr-FR');
+
+      entry.innerHTML = `
+        <div class="log-time">[${time}]</div>
+        <div class="log-text">${text}</div>
+      `;
+
+      log.insertBefore(entry, log.firstChild);
+
+      if (log.children.length > 50) {
+        log.removeChild(log.lastChild);
+      }
+    }
+
+    // Update stats
+    function updateStats() {
+      document.getElementById('sentinelCount').textContent = sentinels.length;
+      document.getElementById('missionCount').textContent = missionCount;
+    }
+
+    // Animation loop
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Update and draw sentinels
+      sentinels.forEach(sentinel => {
+        // Move towards target
+        const dx = sentinel.targetX - sentinel.x;
+        const dy = sentinel.targetY - sentinel.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist > 2) {
+          sentinel.x += dx * 0.05;
+          sentinel.y += dy * 0.05;
+        }
+
+        // Draw sentinel
+        ctx.save();
+        ctx.translate(sentinel.x, sentinel.y);
+
+        // Glow effect
+        ctx.shadowColor = '#667eea';
+        ctx.shadowBlur = 20;
+
+        // Body
+        const gradient = ctx.createLinearGradient(-25, -30, 25, 30);
+        gradient.addColorStop(0, '#667eea');
+        gradient.addColorStop(1, '#764ba2');
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(-25, -30, 50, 60);
+
+        // Eye
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = sentinel.mission ? '#fbbf24' : '#fff';
+        ctx.beginPath();
+        ctx.arc(0, -15, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        // ID
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`S-${sentinel.id}`, 0, 40);
+
+        // Status
+        ctx.font = '8px monospace';
+        ctx.fillStyle = sentinel.mission ? '#fbbf24' : '#10b981';
+        ctx.fillText(sentinel.mission || 'READY', 0, 52);
+
+        ctx.restore();
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    // Initialize
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    animate();
+
+    // Welcome messages
+    addLog('🌐 SKYNET Metaverse initialized');
+    addLog('⚙️ Sentinel Factory online');
+    addLog('⚡ Command interface ready');
+    addLog('💡 Open garage door to deploy sentinels');
+  </script>
+</body>
+</html>

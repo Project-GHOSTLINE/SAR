@@ -113,7 +113,6 @@ export async function GET(request: NextRequest) {
 
     if (!analyticsClient) {
       // Mode mock pour développement
-      console.log('📊 Mode MOCK - Retour de données fictives')
       return NextResponse.json(getMockData(startDate, endDate))
     }
 

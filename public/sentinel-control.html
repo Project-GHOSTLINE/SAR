@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎮 SENTINEL CONTROL - Master Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      background: linear-gradient(180deg, #0a0e27 0%, #000 100%);
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 16px;
+      overflow-x: hidden;
+    }
+
+    .master-grid {
+      display: grid;
+      grid-template-columns: 350px 1fr 350px;
+      gap: 16px;
+      max-width: 2000px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .master-header {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(102, 126, 234, 0.5);
+      margin-bottom: 8px;
+    }
+
+    .master-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+    }
+
+    .master-subtitle {
+      font-size: 12px;
+      color: #e0e0e0;
+      margin-top: 4px;
+      letter-spacing: 2px;
+    }
+
+    /* Panels */
+    .panel {
+      background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .panel-title {
+      font-size: 14px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      font-weight: 700;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 8px;
+    }
+
+    /* Sentinel Mini Cards */
+    .sentinel-mini {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid #667eea;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .sentinel-mini:hover {
+      background: rgba(102, 126, 234, 0.2);
+      transform: translateX(4px);
+    }
+
+    .sentinel-mini.active {
+      border-color: #10b981;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .mini-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .mini-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .mini-level {
+      font-size: 11px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      font-size: 10px;
+      color: #a78bfa;
+    }
+
+    .mini-bar {
+      height: 4px;
+      background: #1a1f3a;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .mini-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+      transition: width 0.5s ease;
+    }
+
+    /* Activity Feed */
+    .activity-feed {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .activity-item {
+      background: rgba(102, 126, 234, 0.1);
+      border-left: 3px solid #667eea;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    .activity-item.success {
+      border-left-color: #10b981;
+    }
+
+    .activity-item.error {
+      border-left-color: #ef4444;
+    }
+
+    .activity-time {
+      color: #a78bfa;
+      font-size: 9px;
+      margin-bottom: 4px;
+    }
+
+    .activity-action {
+      color: #e0e0e0;
+      font-weight: 600;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .quick-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: #fff;
+      padding: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s;
+    }
+
+    .quick-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .quick-btn:active {
+      transform: translateY(0);
+    }
+
+    .quick-btn.success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .quick-btn.danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    /* Stats Display */
+    .stat-display {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid #667eea;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #10b981;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0a0e27;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 3px;
+    }
+
+    .loading {
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Navigation Links */
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid #667eea;
+      color: #e0e0e0;
+      padding: 6px 12px;
+      font-size: 10px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .nav-link:hover {
+      background: rgba(102, 126, 234, 0.3);
+      border-color: #10b981;
+    }
+  </style>
+</head>
+<body>
+
+<div class="master-grid">
+  <!-- Header -->
+  <div class="master-header">
+    <div class="master-title">🎮 SENTINEL CONTROL CENTER</div>
+    <div class="master-subtitle">Real-Time Fleet Management & Operations</div>
+  </div>
+
+  <!-- Left Panel: Fleet Status -->
+  <div class="panel">
+    <div class="panel-title">🚀 Fleet Status</div>
+    <div id="fleetStatus"></div>
+
+    <div class="panel-title" style="margin-top: 20px;">📊 Global Stats</div>
+    <div class="stat-display">
+      <div class="stat-value" id="totalXP">0</div>
+      <div class="stat-label">Total XP Earned</div>
+    </div>
+    <div class="stat-display">
+      <div class="stat-value" id="totalMissions">0</div>
+      <div class="stat-label">Missions Completed</div>
+    </div>
+    <div class="stat-display">
+      <div class="stat-value" id="totalThreats">0</div>
+      <div class="stat-label">Threats Eliminated</div>
+    </div>
+  </div>
+
+  <!-- Center Panel: Activity Feed -->
+  <div class="panel">
+    <div class="panel-title">📡 Live Activity Feed</div>
+    <div class="activity-feed" id="activityFeed"></div>
+  </div>
+
+  <!-- Right Panel: Quick Actions -->
+  <div class="panel">
+    <div class="panel-title">⚡ Quick Actions</div>
+    <div class="quick-actions">
+      <button class="quick-btn success" onclick="runScan()">🔍 Run Scan</button>
+      <button class="quick-btn" onclick="runCommand('build the project')">🔨 Build</button>
+      <button class="quick-btn" onclick="runCommand('run tests')">🧪 Test</button>
+      <button class="quick-btn" onclick="runCommand('check typescript')">✅ Type Check</button>
+      <button class="quick-btn danger" onclick="runCommand('clean console.logs')">🧹 Clean Logs</button>
+      <button class="quick-btn" onclick="runCommand('git status')">📊 Git Status</button>
+    </div>
+
+    <div class="panel-title" style="margin-top: 20px;">🔗 Dashboards</div>
+    <div class="nav-links">
+      <a href="/sentinel-fleet.html" class="nav-link" target="_blank">Fleet Specs</a>
+      <a href="/sentinel-scoring.html" class="nav-link" target="_blank">Scoring</a>
+      <a href="/sentinel-command.html" class="nav-link" target="_blank">Commands</a>
+      <a href="/sentinel-warfare.html" class="nav-link" target="_blank">Warfare</a>
+      <a href="/sentinel-garage.html" class="nav-link" target="_blank">Garage</a>
+      <a href="/command-center.html" class="nav-link" target="_blank">System Info</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  let fleet = [];
+  let activities = [];
+
+  async function loadFleet() {
+    try {
+      const response = await fetch('/api/sentinel/fleet');
+      const data = await response.json();
+
+      if (data.success) {
+        fleet = data.fleet;
+        renderFleet();
+        updateGlobalStats();
+      }
+    } catch (error) {
+      console.error('Failed to load fleet:', error);
+    }
+  }
+
+  async function loadActivities() {
+    try {
+      const response = await fetch('/api/activity/recent?project=sar&limit=20');
+      const data = await response.json();
+
+      if (data.success) {
+        activities = data.actions || [];
+        renderActivities();
+      }
+    } catch (error) {
+      console.error('Failed to load activities:', error);
+    }
+  }
+
+  function renderFleet() {
+    const container = document.getElementById('fleetStatus');
+
+    container.innerHTML = fleet.map(s => {
+      const healthPercent = (s.health / s.max_health) * 100;
+      const energyPercent = (s.energy / s.max_energy) * 100;
+
+      return `
+        <div class="sentinel-mini ${s.status}">
+          <div class="mini-header">
+            <div>
+              <span style="font-size: 20px; margin-right: 8px;">${s.skin}</span>
+              <span class="mini-name">${s.name}</span>
+            </div>
+            <span class="mini-level">Lv ${s.level}</span>
+          </div>
+          <div class="mini-stats">
+            <span>❤️ ${s.health}/${s.max_health}</span>
+            <span>⚡ ${s.energy}/${s.max_energy}</span>
+            <span>⚔️ ATK ${s.attack}</span>
+            <span>🛡️ DEF ${s.defense}</span>
+          </div>
+          <div class="mini-bar">
+            <div class="mini-bar-fill" style="width: ${healthPercent}%"></div>
+          </div>
+          <div class="mini-bar">
+            <div class="mini-bar-fill" style="width: ${energyPercent}%"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderActivities() {
+    const container = document.getElementById('activityFeed');
+
+    if (activities.length === 0) {
+      container.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 20px;">No recent activity</p>';
+      return;
+    }
+
+    container.innerHTML = activities.map(a => {
+      const time = new Date(a.timestamp).toLocaleTimeString();
+      const statusClass = a.status === 'success' ? 'success' : 'error';
+
+      return `
+        <div class="activity-item ${statusClass}">
+          <div class="activity-time">${time}</div>
+          <div class="activity-action">${a.action_type}: ${a.target || 'N/A'}</div>
+          <div style="font-size: 10px; color: #9ca3af; margin-top: 4px;">${a.thought || ''}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateGlobalStats() {
+    const totalXP = fleet.reduce((sum, s) => sum + s.xp, 0);
+    const totalMissions = fleet.reduce((sum, s) => sum + s.missions_completed, 0);
+    const totalThreats = fleet.reduce((sum, s) => sum + s.threats_eliminated, 0);
+
+    document.getElementById('totalXP').textContent = totalXP.toLocaleString();
+    document.getElementById('totalMissions').textContent = totalMissions;
+    document.getElementById('totalThreats').textContent = totalThreats;
+  }
+
+  async function runScan() {
+    try {
+      const response = await fetch('/api/sentinel/scan-project', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project: 'sar' })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        addActivity('Scan', `Found ${data.count} threats`, 'success');
+        setTimeout(loadFleet, 1000);
+      }
+    } catch (error) {
+      addActivity('Scan', 'Failed', 'error');
+    }
+  }
+
+  async function runCommand(cmd) {
+    try {
+      const response = await fetch('/api/sentinel/execute-command', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: cmd })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        addActivity('Command', cmd, 'success');
+        setTimeout(loadFleet, 1000);
+      }
+    } catch (error) {
+      addActivity('Command', cmd + ' failed', 'error');
+    }
+  }
+
+  function addActivity(type, msg, status) {
+    activities.unshift({
+      timestamp: new Date().toISOString(),
+      action_type: type,
+      target: msg,
+      status: status
+    });
+    activities = activities.slice(0, 20);
+    renderActivities();
+  }
+
+  // Initial load
+  loadFleet();
+  loadActivities();
+
+  // Auto-refresh
+  setInterval(() => {
+    loadFleet();
+    loadActivities();
+  }, 5000);
+</script>
+
+</body>
+</html>

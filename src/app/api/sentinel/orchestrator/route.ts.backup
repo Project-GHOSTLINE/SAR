@@ -1,0 +1,269 @@
+// API: Sentinel Orchestrator
+// Central system that orchestrates all sentinel activities and updates metrics in real-time
+// POST /api/sentinel/orchestrator - Process action and update all metrics
+
+import { NextRequest, NextResponse } from 'next/server';
+import { writeFile, readFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+
+const cacheDir = join(process.cwd(), '.sentinel-cache');
+const fleetFile = join(cacheDir, 'fleet.json');
+const scansFile = join(cacheDir, 'scans.json');
+
+interface OrchestratorAction {
+  type: 'scan' | 'command' | 'build' | 'test' | 'fix' | 'deploy';
+  sentinel_id: string;
+  result: {
+    success: boolean;
+    threats?: number;
+    duration_ms?: number;
+    output?: string;
+  };
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const action: OrchestratorAction = await request.json();
+
+    await mkdir(cacheDir, { recursive: true });
+
+    // Load fleet
+    let fleet = await loadFleet();
+    const sentinel = fleet.find(s => s.id === action.sentinel_id);
+
+    if (!sentinel) {
+      return NextResponse.json(
+        { success: false, error: 'Sentinel not found' },
+        { status: 404 }
+      );
+    }
+
+    // Process action and update sentinel
+    const updates = processAction(action, sentinel);
+
+    // Update fleet
+    fleet = fleet.map(s => s.id === sentinel.id ? { ...s, ...updates } : s);
+    await writeFile(fleetFile, JSON.stringify(fleet, null, 2));
+
+    // Log activity
+    await logActivity(action, updates);
+
+    return NextResponse.json({
+      success: true,
+      sentinel: { ...sentinel, ...updates },
+      rewards: {
+        xp_gained: updates.xp - sentinel.xp,
+        level_up: updates.level > sentinel.level,
+        achievements: getNewAchievements(sentinel, updates)
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Orchestrator error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+function processAction(action: OrchestratorAction, sentinel: any): any {
+  const updates: any = { ...sentinel };
+
+  // Calculate XP gain based on action type
+  let xpGain = 0;
+  let energyCost = 0;
+
+  switch (action.type) {
+    case 'scan':
+      xpGain = 50 + (action.result.threats || 0) * 10;
+      energyCost = 15;
+      updates.missions_completed += 1;
+      if (action.result.threats) {
+        updates.threats_eliminated += action.result.threats;
+      }
+      break;
+
+    case 'build':
+      xpGain = action.result.success ? 100 : 30;
+      energyCost = 25;
+      if (action.result.success) {
+        updates.builds_completed += 1;
+      }
+      break;
+
+    case 'test':
+      xpGain = action.result.success ? 80 : 20;
+      energyCost = 20;
+      if (action.result.success) {
+        updates.tests_passed += 1;
+      }
+      break;
+
+    case 'fix':
+      xpGain = 60;
+      energyCost = 15;
+      updates.threats_eliminated += 1;
+      break;
+
+    case 'command':
+      xpGain = 40;
+      energyCost = 10;
+      updates.missions_completed += 1;
+      break;
+
+    case 'deploy':
+      xpGain = 150;
+      energyCost = 30;
+      updates.missions_completed += 1;
+      break;
+  }
+
+  // Apply XP
+  updates.xp += xpGain;
+
+  // Check for level up
+  while (updates.xp >= updates.xp_to_next) {
+    updates.level += 1;
+    updates.xp -= updates.xp_to_next;
+    updates.xp_to_next = Math.floor(updates.xp_to_next * 1.5);
+
+    // Level up bonuses
+    updates.max_health += 10;
+    updates.health = updates.max_health;
+    updates.max_energy += 5;
+    updates.energy = updates.max_energy;
+    updates.attack += Math.floor(Math.random() * 5) + 3;
+    updates.defense += Math.floor(Math.random() * 5) + 3;
+    updates.speed += Math.floor(Math.random() * 3) + 2;
+    updates.accuracy += Math.floor(Math.random() * 2) + 1;
+
+    // Random powerup at certain levels
+    if (updates.level % 5 === 0) {
+      const powerups = ['mega_boost', 'ultra_shield', 'hyper_speed', 'precision_aim'];
+      const newPowerup = powerups[Math.floor(Math.random() * powerups.length)];
+      if (!updates.powerups.includes(newPowerup)) {
+        updates.powerups.push(newPowerup);
+      }
+    }
+  }
+
+  // Apply energy cost
+  updates.energy = Math.max(0, updates.energy - energyCost);
+
+  // Energy regeneration (5% per action)
+  if (updates.energy < updates.max_energy) {
+    updates.energy = Math.min(updates.max_energy, updates.energy + Math.floor(updates.max_energy * 0.05));
+  }
+
+  // Health damage if action failed
+  if (!action.result.success && action.result.threats && action.result.threats > 5) {
+    const damage = Math.min(20, action.result.threats * 2);
+    updates.health = Math.max(0, updates.health - damage);
+  }
+
+  // Auto-heal slowly
+  if (updates.health < updates.max_health) {
+    updates.health = Math.min(updates.max_health, updates.health + 5);
+  }
+
+  // Update status
+  if (updates.energy < 20) {
+    updates.status = 'recharging';
+  } else if (updates.health < updates.max_health * 0.3) {
+    updates.status = 'offline';
+  } else {
+    updates.status = Math.random() > 0.5 ? 'active' : 'idle';
+  }
+
+  updates.last_mission = new Date().toISOString();
+  updates.updated_at = new Date().toISOString();
+
+  return updates;
+}
+
+function getNewAchievements(old: any, updated: any): string[] {
+  const achievements: string[] = [];
+
+  // Mission milestones
+  if (old.missions_completed < 50 && updated.missions_completed >= 50) {
+    achievements.push('🏆 50 Missions Complete');
+  }
+  if (old.missions_completed < 100 && updated.missions_completed >= 100) {
+    achievements.push('🏆 100 Missions Master');
+  }
+
+  // Threat hunter
+  if (old.threats_eliminated < 100 && updated.threats_eliminated >= 100) {
+    achievements.push('⚔️ Threat Hunter - 100 Kills');
+  }
+
+  // Level milestones
+  if (updated.level === 10) {
+    achievements.push('⭐ Level 10 - Elite Status');
+  }
+  if (updated.level === 20) {
+    achievements.push('⭐ Level 20 - Legendary');
+  }
+
+  return achievements;
+}
+
+async function loadFleet(): Promise<any[]> {
+  try {
+    const data = await readFile(fleetFile, 'utf-8');
+    return JSON.parse(data);
+  } catch {
+    // Return defaults if file doesn't exist
+    const defaults = [
+      {
+        id: 'sentinel-001',
+        name: 'Scout Alpha',
+        class: 'scout',
+        level: 1,
+        xp: 0,
+        xp_to_next: 1000,
+        health: 100,
+        max_health: 100,
+        energy: 100,
+        max_energy: 100,
+        attack: 50,
+        defense: 30,
+        speed: 80,
+        accuracy: 75,
+        weapon: 'Read',
+        skin: '🤖',
+        missions_completed: 0,
+        threats_eliminated: 0,
+        builds_completed: 0,
+        tests_passed: 0,
+        powerups: [],
+        status: 'idle',
+        last_mission: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    ];
+    await writeFile(fleetFile, JSON.stringify(defaults, null, 2));
+    return defaults;
+  }
+}
+
+async function logActivity(action: OrchestratorAction, updates: any): Promise<void> {
+  try {
+    // Log to activity system
+    await fetch('http://localhost:3001/api/activity/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        project_name: 'sar',
+        action_type: action.type,
+        target: updates.name,
+        thought: `${updates.name} completed ${action.type} - Level ${updates.level}`,
+        status: action.result.success ? 'success' : 'error'
+      })
+    });
+  } catch {
+    // Ignore logging errors
+  }
+}

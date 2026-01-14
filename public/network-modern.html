@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAR - Modern Network Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .header {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 20px rgba(255, 255, 255, 0.3);
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .controls {
+            position: fixed;
+            top: 50%;
+            left: 30px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 15px 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 200px;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(5px);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .control-btn.active {
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+        }
+
+        .icon {
+            font-size: 20px;
+        }
+
+        .stats-panel {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            padding: 25px;
+            max-width: 350px;
+            z-index: 100;
+        }
+
+        .stats-panel h3 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .stat-label {
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .routes-panel {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px;
+            max-width: 90vw;
+            max-height: 200px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            z-index: 100;
+            display: flex;
+            gap: 15px;
+        }
+
+        .route-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 15px 20px;
+            min-width: 250px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+        }
+
+        .route-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .route-card.active {
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            border-color: transparent;
+        }
+
+        .route-path {
+            font-weight: 700;
+            font-size: 0.95em;
+            margin-bottom: 8px;
+        }
+
+        .route-methods {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .method-badge {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .method-GET { background: rgba(16, 185, 129, 0.9); }
+        .method-POST { background: rgba(59, 130, 246, 0.9); }
+        .method-PUT { background: rgba(245, 158, 11, 0.9); }
+        .method-DELETE { background: rgba(239, 68, 68, 0.9); }
+        .method-PATCH { background: rgba(139, 92, 246, 0.9); }
+
+        .route-card.active .method-badge {
+            color: white;
+        }
+
+        .floating-particle {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+            filter: blur(1px);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        /* Scrollbar moderne */
+        ::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Loading animation */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5em;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                pointer-events: none;
+            }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.5s forwards;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .controls {
+                left: 10px;
+                gap: 10px;
+            }
+
+            .control-btn {
+                min-width: 150px;
+                padding: 12px 15px;
+                font-size: 12px;
+            }
+
+            .stats-panel {
+                right: 10px;
+                top: 10px;
+                max-width: 250px;
+                padding: 15px;
+            }
+
+            .routes-panel {
+                bottom: 10px;
+                padding: 15px;
+            }
+
+            .route-card {
+                min-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div class="loading" id="loading">
+        Loading Network...
+    </div>
+
+    <div class="header">
+        <h1>⚡ Network Visualization</h1>
+        <p>Real-time Interactive Architecture</p>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" onclick="sendPacket()">
+            <span class="icon">📦</span>
+            Send Packet
+        </button>
+        <button class="control-btn" onclick="scanNetwork()">
+            <span class="icon">🔍</span>
+            Scan Network
+        </button>
+        <button class="control-btn" onclick="toggleFlow()">
+            <span class="icon">🌊</span>
+            Toggle Flow
+        </button>
+        <button class="control-btn" onclick="resetView()">
+            <span class="icon">🔄</span>
+            Reset View
+        </button>
+    </div>
+
+    <div class="stats-panel glass-panel">
+        <h3>📊 Network Stats</h3>
+        <div class="stat-item pulse-animation">
+            <span class="stat-label">Local IP</span>
+            <span class="stat-value" id="local-ip">...</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Gateway</span>
+            <span class="stat-value" id="gateway">...</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Routes</span>
+            <span class="stat-value" id="route-count">0</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Active</span>
+            <span class="stat-value" id="active-count">0</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Latency</span>
+            <span class="stat-value" id="latency">0ms</span>
+        </div>
+    </div>
+
+    <div class="routes-panel glass-panel" id="routes-panel">
+        <div style="color: rgba(255,255,255,0.7); text-align: center; width: 100%;">
+            Loading routes...
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        let routes = [];
+        let packets = [];
+        let particles = [];
+        let activeRoute = null;
+        let flowEnabled = true;
+        let mouseX = width / 2;
+        let mouseY = height / 2;
+
+        // Modern network nodes avec positions fluides
+        const nodes = [
+            { id: 'device', x: 0.1, y: 0.5, radius: 50, color: '#fff', icon: '💻', label: 'Your Device' },
+            { id: 'wifi', x: 0.2, y: 0.5, radius: 40, color: '#10b981', icon: '📡', label: 'WiFi' },
+            { id: 'router', x: 0.35, y: 0.5, radius: 45, color: '#f59e0b', icon: '🌐', label: 'Router' },
+            { id: 'isp', x: 0.5, y: 0.5, radius: 40, color: '#3b82f6', icon: '🔌', label: 'ISP' },
+            { id: 'internet', x: 0.65, y: 0.5, radius: 60, color: '#8b5cf6', icon: '☁️', label: 'Internet' },
+            { id: 'cdn', x: 0.78, y: 0.4, radius: 35, color: '#ec4899', icon: '⚡', label: 'CDN' },
+            { id: 'server', x: 0.88, y: 0.5, radius: 45, color: '#6366f1', icon: '🖥️', label: 'Server' }
+        ];
+
+        // Calculate absolute positions
+        nodes.forEach(node => {
+            node.absX = width * node.x;
+            node.absY = height * node.y;
+            node.targetX = node.absX;
+            node.targetY = node.absY;
+        });
+
+        // Particle class for modern effects
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.life = 1;
+                this.decay = 0.01;
+                this.size = Math.random() * 3 + 1;
+                this.color = `rgba(255, 255, 255, ${this.life})`;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+                this.color = `rgba(255, 255, 255, ${this.life})`;
+                return this.life > 0;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // Packet class
+        class Packet {
+            constructor(path) {
+                this.path = path;
+                this.currentIndex = 0;
+                this.progress = 0;
+                this.speed = 0.02;
+                this.size = 8;
+                this.color = '#fff';
+            }
+
+            update() {
+                this.progress += this.speed;
+
+                if (this.progress >= 1) {
+                    this.progress = 0;
+                    this.currentIndex++;
+
+                    // Spawn particles at node
+                    const node = nodes.find(n => n.id === this.path[this.currentIndex]);
+                    if (node) {
+                        for (let i = 0; i < 10; i++) {
+                            particles.push(new Particle(node.absX, node.absY));
+                        }
+                    }
+
+                    if (this.currentIndex >= this.path.length - 1) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            draw() {
+                const startNode = nodes.find(n => n.id === this.path[this.currentIndex]);
+                const endNode = nodes.find(n => n.id === this.path[this.currentIndex + 1]);
+
+                if (!startNode || !endNode) return;
+
+                const x = startNode.absX + (endNode.absX - startNode.absX) * this.progress;
+                const y = startNode.absY + (endNode.absY - startNode.absY) * this.progress;
+
+                // Glow effect
+                ctx.beginPath();
+                ctx.arc(x, y, this.size * 2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fill();
+
+                // Packet
+                ctx.beginPath();
+                ctx.arc(x, y, this.size, 0, Math.PI * 2);
+                const gradient = ctx.createRadialGradient(x, y, 0, x, y, this.size);
+                gradient.addColorStop(0, '#ffffff');
+                gradient.addColorStop(1, '#667eea');
+                ctx.fillStyle = gradient;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#fff';
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Trail
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(startNode.absX, startNode.absY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+        }
+
+        // Draw connection with gradient
+        function drawConnection(n1, n2, active = false) {
+            const gradient = ctx.createLinearGradient(n1.absX, n1.absY, n2.absX, n2.absY);
+            gradient.addColorStop(0, active ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.2)');
+            gradient.addColorStop(1, active ? 'rgba(102, 126, 234, 0.8)' : 'rgba(255, 255, 255, 0.1)');
+
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = active ? 3 : 1;
+            ctx.beginPath();
+            ctx.moveTo(n1.absX, n1.absY);
+            ctx.lineTo(n2.absX, n2.absY);
+            ctx.stroke();
+
+            if (active) {
+                // Animated dots along line
+                const time = Date.now() / 1000;
+                for (let i = 0; i < 5; i++) {
+                    const t = (time * 0.5 + i / 5) % 1;
+                    const x = n1.absX + (n2.absX - n1.absX) * t;
+                    const y = n1.absY + (n2.absY - n1.absY) * t;
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, 3, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.fill();
+                }
+            }
+        }
+
+        // Draw node with modern style
+        function drawNode(node, hover = false) {
+            // Interaction with mouse
+            const dx = mouseX - node.absX;
+            const dy = mouseY - node.absY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const influence = Math.max(0, 1 - dist / 200);
+
+            node.targetX = node.absX + dx * influence * 0.1;
+            node.targetY = node.absY + dy * influence * 0.1;
+
+            // Smooth movement
+            node.absX += (node.targetX - node.absX) * 0.1;
+            node.absY += (node.targetY - node.absY) * 0.1;
+
+            const scale = hover ? 1.1 : 1;
+            const radius = node.radius * scale;
+
+            // Outer glow
+            const gradient = ctx.createRadialGradient(
+                node.absX, node.absY, 0,
+                node.absX, node.absY, radius * 2
+            );
+            gradient.addColorStop(0, node.color + '40');
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(node.absX, node.absY, radius * 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Main circle
+            const mainGradient = ctx.createRadialGradient(
+                node.absX - radius * 0.3, node.absY - radius * 0.3, 0,
+                node.absX, node.absY, radius
+            );
+            mainGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+            mainGradient.addColorStop(1, node.color);
+            ctx.fillStyle = mainGradient;
+            ctx.beginPath();
+            ctx.arc(node.absX, node.absY, radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Border
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Icon
+            ctx.font = `${radius * 0.8}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(node.icon, node.absX, node.absY);
+
+            // Label
+            ctx.font = 'bold 14px -apple-system';
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 10;
+            ctx.fillText(node.label, node.absX, node.absY + radius + 20);
+            ctx.shadowBlur = 0;
+        }
+
+        // Animation loop
+        function animate() {
+            // Gradient background
+            const gradient = ctx.createRadialGradient(
+                mouseX, mouseY, 0,
+                mouseX, mouseY, width
+            );
+            gradient.addColorStop(0, 'rgba(102, 126, 234, 0.1)');
+            gradient.addColorStop(1, 'rgba(118, 75, 162, 0.1)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw connections
+            for (let i = 0; i < nodes.length - 1; i++) {
+                drawConnection(nodes[i], nodes[i + 1], packets.length > 0);
+            }
+
+            // Draw nodes
+            nodes.forEach(node => drawNode(node));
+
+            // Update and draw particles
+            particles = particles.filter(p => {
+                const alive = p.update();
+                if (alive) p.draw();
+                return alive;
+            });
+
+            // Update and draw packets
+            packets = packets.filter(p => {
+                const alive = p.update();
+                if (alive) p.draw();
+                return alive;
+            });
+
+            // Auto-spawn particles if flow enabled
+            if (flowEnabled && Math.random() < 0.05) {
+                nodes.forEach(node => {
+                    if (Math.random() < 0.1) {
+                        particles.push(new Particle(node.absX, node.absY));
+                    }
+                });
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Load routes
+        async function loadRoutes() {
+            try {
+                const response = await fetch('/api/routes/discover');
+                const data = await response.json();
+
+                if (data.success) {
+                    routes = data.routes;
+                    document.getElementById('route-count').textContent = data.stats.total_routes;
+
+                    const panel = document.getElementById('routes-panel');
+                    panel.innerHTML = routes.slice(0, 20).map(r => `
+                        <div class="route-card" onclick="activateRoute('${r.path.replace(/'/g, "\\'")}')">
+                            <div class="route-path">${r.path}</div>
+                            <div class="route-methods">
+                                ${r.methods.map(m =>
+                                    `<span class="method-badge method-${m}">${m}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading routes:', error);
+            }
+        }
+
+        // Load network info
+        async function loadNetworkInfo() {
+            try {
+                const response = await fetch('/api/network/trace');
+                const data = await response.json();
+
+                if (data.success) {
+                    const mainInterface = data.traces.interfaces.find(i => i.addresses && i.addresses.length > 0);
+                    if (mainInterface && mainInterface.addresses[0]) {
+                        document.getElementById('local-ip').textContent = mainInterface.addresses[0].address;
+                    }
+
+                    const gateway = data.traces.routes.find(r => r.destination === 'default');
+                    if (gateway) {
+                        document.getElementById('gateway').textContent = gateway.gateway;
+                    }
+
+                    if (data.traces.gateway_latency) {
+                        document.getElementById('latency').textContent =
+                            data.traces.gateway_latency.avg.toFixed(1) + 'ms';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading network info:', error);
+            }
+
+            // Hide loading
+            document.getElementById('loading').classList.add('fade-out');
+        }
+
+        // Send packet
+        window.sendPacket = function() {
+            const path = ['device', 'wifi', 'router', 'isp', 'internet', 'cdn', 'server'];
+            packets.push(new Packet(path));
+            document.getElementById('active-count').textContent = packets.length;
+        };
+
+        // Scan network
+        window.scanNetwork = function() {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => sendPacket(), i * 300);
+            }
+        };
+
+        // Toggle flow
+        window.toggleFlow = function() {
+            flowEnabled = !flowEnabled;
+            event.target.classList.toggle('active');
+        };
+
+        // Reset view
+        window.resetView = function() {
+            nodes.forEach(node => {
+                node.absX = width * node.x;
+                node.absY = height * node.y;
+                node.targetX = node.absX;
+                node.targetY = node.absY;
+            });
+            packets = [];
+            particles = [];
+            activeRoute = null;
+            document.querySelectorAll('.route-card').forEach(el => el.classList.remove('active'));
+        };
+
+        // Activate route
+        window.activateRoute = function(path) {
+            activeRoute = path;
+            document.querySelectorAll('.route-card').forEach(el => {
+                el.classList.remove('active');
+                if (el.textContent.includes(path)) {
+                    el.classList.add('active');
+                }
+            });
+            sendPacket();
+        };
+
+        // Mouse tracking
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Resize
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            nodes.forEach(node => {
+                node.absX = width * node.x;
+                node.absY = height * node.y;
+            });
+        });
+
+        // Start
+        loadRoutes();
+        loadNetworkInfo();
+        animate();
+
+        // Auto-send packets
+        setInterval(() => {
+            if (Math.random() < 0.3) {
+                sendPacket();
+            }
+        }, 4000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+// API: Sentinel Project Scanner
+// POST /api/sentinel/scan-project
+// Scanne le projet pour trouver de VRAIS problèmes (bugs, erreurs, vulnérabilités)
+
+import { NextRequest, NextResponse } from 'next/server';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import { readdir, readFile } from 'fs/promises';
+import { join } from 'path';
+import { osintAuthMiddleware } from '@/middleware/osint-auth'
+
+const execAsync = promisify(exec);
+
+export async function POST(request: NextRequest) {
+  // 🔐 Security: Check authentication
+  const authError = await osintAuthMiddleware(request)
+  if (authError) return authError
+
+  try {
+    const { project } = await request.json();
+    const threats: any[] = [];
+
+    // 1. Check for TypeScript errors
+    try {
+      const { stderr } = await execAsync('npx tsc --noEmit', {
+        cwd: process.cwd(),
+        timeout: 10000
+      });
+
+      if (stderr) {
+        const errors = stderr.split('\n').filter(line => line.includes('error TS'));
+        errors.slice(0, 5).forEach((error, i) => {
+          threats.push({
+            type: 'typescript-error',
+            name: `TS Error ${i + 1}`,
+            severity: 'high',
+            description: error.substring(0, 100)
+          });
+        });
+      }
+    } catch (tsError: any) {
+      // TypeScript errors found
+      if (tsError.stdout) {
+        const errors = tsError.stdout.split('\n').filter((line: string) => line.includes('error TS'));
+        errors.slice(0, 3).forEach((error: string, i: number) => {
+          threats.push({
+            type: 'typescript-error',
+            name: `TS Error ${i + 1}`,
+            severity: 'high',
+            description: error.substring(0, 100)
+          });
+        });
+      }
+    }
+
+    // 2. Check for ESLint warnings
+    try {
+      const { stdout } = await execAsync('npx eslint src --format json', {
+        cwd: process.cwd(),
+        timeout: 10000
+      });
+
+      const lintResults = JSON.parse(stdout);
+      lintResults.slice(0, 5).forEach((result: any, i: number) => {
+        if (result.errorCount > 0 || result.warningCount > 0) {
+          threats.push({
+            type: 'lint-warning',
+            name: `Lint Issue ${i + 1}`,
+            severity: result.errorCount > 0 ? 'high' : 'medium',
+            description: `${result.errorCount} errors, ${result.warningCount} warnings`
+          });
+        }
+      });
+    } catch (lintError) {
+      // ESLint not configured or errors
+    }
+
+    // 3. Check for TODO/FIXME comments (tech debt)
+    try {
+      const { stdout } = await execAsync('grep -r "TODO\\|FIXME" src --include="*.ts" --include="*.tsx" | head -10', {
+        cwd: process.cwd(),
+        timeout: 5000
+      });
+
+      const todos = stdout.trim().split('\n').filter(Boolean);
+      todos.slice(0, 5).forEach((todo, i) => {
+        threats.push({
+          type: 'tech-debt',
+          name: `Tech Debt ${i + 1}`,
+          severity: 'low',
+          description: todo.substring(0, 80)
+        });
+      });
+    } catch (grepError) {
+      // No TODOs found or grep failed
+    }
+
+    // 4. Check for unused dependencies
+    try {
+      const { stdout } = await execAsync('npx depcheck --json', {
+        cwd: process.cwd(),
+        timeout: 15000
+      });
+
+      const depcheck = JSON.parse(stdout);
+      if (depcheck.dependencies && depcheck.dependencies.length > 0) {
+        depcheck.dependencies.slice(0, 3).forEach((dep: string, i: number) => {
+          threats.push({
+            type: 'unused-dependency',
+            name: `Unused Dep ${i + 1}`,
+            severity: 'low',
+            description: `Package "${dep}" not used`
+          });
+        });
+      }
+    } catch (depError) {
+      // Depcheck not available or no unused deps
+    }
+
+    // 5. Check for security vulnerabilities
+    try {
+      const { stdout } = await execAsync('npm audit --json', {
+        cwd: process.cwd(),
+        timeout: 10000
+      });
+
+      const audit = JSON.parse(stdout);
+      if (audit.vulnerabilities) {
+        Object.entries(audit.vulnerabilities).slice(0, 3).forEach(([name, vuln]: any, i) => {
+          threats.push({
+            type: 'security-vulnerability',
+            name: `Vuln ${i + 1}`,
+            severity: vuln.severity === 'critical' ? 'high' : 'medium',
+            description: `${name}: ${vuln.title || 'Security issue'}`
+          });
+        });
+      }
+    } catch (auditError) {
+      // Audit failed or no vulns
+    }
+
+    // 6. Check for large files (performance issue)
+    try {
+      const { stdout } = await execAsync('find src -type f -size +100k | head -5', {
+        cwd: process.cwd(),
+        timeout: 5000
+      });
+
+      const largeFiles = stdout.trim().split('\n').filter(Boolean);
+      largeFiles.forEach((file, i) => {
+        threats.push({
+          type: 'large-file',
+          name: `Large File ${i + 1}`,
+          severity: 'medium',
+          description: `File > 100KB: ${file.split('/').pop()}`
+        });
+      });
+    } catch (findError) {
+      // Find failed or no large files
+    }
+
+    try {
+      const { stdout } = await execAsync('grep -r "console\\.log" src --include="*.ts" --include="*.tsx" | wc -l', {
+        cwd: process.cwd(),
+        timeout: 5000
+      });
+
+      const count = parseInt(stdout.trim());
+      if (count > 0) {
+        threats.push({
+          type: 'debug-code',
+          name: 'Debug Logs',
+          severity: 'low',
+        });
+      }
+    } catch (consoleError) {
+    }
+
+    // 8. Check for missing error handling
+    try {
+      const { stdout } = await execAsync('grep -r "async.*{" src --include="*.ts" --include="*.tsx" | grep -v "try" | wc -l', {
+        cwd: process.cwd(),
+        timeout: 5000
+      });
+
+      const count = parseInt(stdout.trim());
+      if (count > 5) {
+        threats.push({
+          type: 'error-handling',
+          name: 'Missing Try-Catch',
+          severity: 'medium',
+          description: `${count} async functions without try-catch`
+        });
+      }
+    } catch (asyncError) {
+      // Check failed
+    }
+
+    // If no threats found, add success message
+    if (threats.length === 0) {
+      return NextResponse.json({
+        success: true,
+        threats: [],
+        message: 'Project is clean! No threats detected.',
+        scanned: true
+      });
+    }
+
+    // Notify orchestrator - assign to random active sentinel
+    const sentinelIds = ['sentinel-001', 'sentinel-002', 'sentinel-003'];
+    const assignedSentinel = sentinelIds[Math.floor(Math.random() * sentinelIds.length)];
+
+    try {
+      await fetch('http://localhost:3001/api/sentinel/orchestrator', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'scan',
+          sentinel_id: assignedSentinel,
+          result: {
+            success: true,
+            threats: threats.length,
+            duration_ms: 1000
+          }
+        })
+      });
+    } catch (err) {
+      // Ignore orchestrator errors
+    }
+
+    return NextResponse.json({
+      success: true,
+      threats,
+      count: threats.length,
+      scanned: true,
+      assigned_sentinel: assignedSentinel
+    });
+
+  } catch (error: any) {
+    console.error('Scan error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message,
+        threats: []
+      },
+      { status: 500 }
+    );
+  }
+}

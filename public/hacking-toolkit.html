@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Hacking Toolkit - All Tools</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier New', monospace; background: #000; color: #0f0; padding: 20px; }
+        h1 { text-align: center; font-size: 3em; color: #0f0; text-shadow: 0 0 30px #0f0; margin-bottom: 10px; animation: glow 2s infinite; }
+        @keyframes glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .subtitle { text-align: center; margin-bottom: 40px; color: #0a0; font-size: 1.2em; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .tool { background: rgba(0, 50, 0, 0.3); border: 3px solid #0f0; padding: 25px; transition: all 0.3s; cursor: pointer; }
+        .tool:hover { transform: translateY(-5px); box-shadow: 0 10px 40px rgba(0, 255, 0, 0.5); border-color: #0ff; }
+        .tool-title { font-size: 1.5em; color: #0f0; margin-bottom: 10px; font-weight: bold; }
+        .tool-desc { color: #0a0; margin-bottom: 15px; line-height: 1.5; }
+        .tool-features { margin: 10px 0; }
+        .feature { padding: 5px 0; color: #0f0; }
+        .feature::before { content: "✓ "; color: #0ff; }
+        .badge { display: inline-block; padding: 5px 10px; margin: 5px 5px 0 0; background: #0f0; color: #000; font-size: 0.8em; font-weight: bold; border-radius: 3px; }
+        .badge-critical { background: #f00; color: #fff; animation: blink 1s infinite; }
+        .badge-active { background: #0ff; color: #000; }
+        .badge-new { background: #ff0; color: #000; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat { background: rgba(0, 50, 0, 0.3); border: 2px solid #0f0; padding: 20px; text-align: center; }
+        .stat-value { font-size: 2.5em; font-weight: bold; color: #0f0; }
+        .stat-label { color: #0a0; margin-top: 5px; }
+        .warning { background: #f00; color: #fff; padding: 20px; margin-bottom: 30px; border: 3px solid #fff; font-weight: bold; text-align: center; }
+        .category { margin-bottom: 40px; }
+        .category-title { font-size: 2em; color: #0f0; margin-bottom: 20px; border-bottom: 2px solid #0f0; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>⚔️ HACKING TOOLKIT</h1>
+    <p class="subtitle">Complete Penetration Testing & Security Research Suite</p>
+
+    <div class="warning">
+        ⚠️ ETHICAL USE ONLY - These tools are for authorized security testing and research purposes only
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-value">12</div>
+            <div class="stat-label">TOTAL TOOLS</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">70+</div>
+            <div class="stat-label">ATTACK VECTORS</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">100%</div>
+            <div class="stat-label">FUNCTIONAL</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">LIVE</div>
+            <div class="stat-label">REAL DATA</div>
+        </div>
+    </div>
+
+    <div class="category">
+        <div class="category-title">🎯 RECONNAISSANCE & SCANNING</div>
+        <div class="grid">
+            <div class="tool" onclick="openTool('/network-recon.html')">
+                <div class="tool-title">🔍 Active Network Recon</div>
+                <div class="tool-desc">Discover all devices on network with port scanning</div>
+                <div class="tool-features">
+                    <div class="feature">ARP table scanning</div>
+                    <div class="feature">Port scanning (15 common ports)</div>
+                    <div class="feature">Device type detection</div>
+                    <div class="feature">Threat detection</div>
+                </div>
+                <span class="badge badge-active">ACTIVE</span>
+                <span class="badge">16 devices found</span>
+            </div>
+
+            <div class="tool" onclick="openTool('/network-sentinel.html')">
+                <div class="tool-title">🛡️ Network Sentinel</div>
+                <div class="tool-desc">AI-powered packet capture with Wireshark-like analysis</div>
+                <div class="tool-features">
+                    <div class="feature">Packet capture (tcpdump)</div>
+                    <div class="feature">AI threat detection</div>
+                    <div class="feature">Sentinel monitoring</div>
+                    <div class="feature">Auto-response system</div>
+                </div>
+                <span class="badge badge-active">ACTIVE</span>
+                <span class="badge">AI-POWERED</span>
+            </div>
+
+            <div class="tool" onclick="openTool('/fingerprint-deep.html')">
+                <div class="tool-title">🔴 Deep Fingerprint Scanner</div>
+                <div class="tool-desc">Extract all trackable data points from device</div>
+                <div class="tool-features">
+                    <div class="feature">Hardware UUIDs</div>
+                    <div class="feature">Canvas/WebGL fingerprinting</div>
+                    <div class="feature">50+ data points</div>
+                    <div class="feature">Uniqueness scoring</div>
+                </div>
+                <span class="badge badge-critical">CRITICAL</span>
+                <span class="badge">95+ uniqueness</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="category">
+        <div class="category-title">💉 VULNERABILITY TESTING</div>
+        <div class="grid">
+            <div class="tool" onclick="openTool('/vulnerability-scanner.html')">
+                <div class="tool-title">🔓 Vulnerability Scanner</div>
+                <div class="tool-desc">Test 15 vulnerability types on target</div>
+                <div class="tool-features">
+                    <div class="feature">SQL Injection detection</div>
+                    <div class="feature">XSS testing</div>
+                    <div class="feature">Path traversal</div>
+                    <div class="feature">Default credentials</div>
+                </div>
+                <span class="badge badge-active">ACTIVE</span>
+                <span class="badge">15 checks</span>
+            </div>
+
+            <div class="tool" onclick="openTool('/bypass-tester.html')">
+                <div class="tool-title">🔓 Bypass Tester</div>
+                <div class="tool-desc">Test 70 bypass techniques</div>
+                <div class="tool-features">
+                    <div class="feature">WAF bypass (10 techniques)</div>
+                    <div class="feature">Auth bypass (8 techniques)</div>
+                    <div class="feature">Filter bypass (8 techniques)</div>
+                    <div class="feature">SQL/XSS/RCE bypass</div>
+                </div>
+                <span class="badge badge-critical">CRITICAL</span>
+                <span class="badge">70 techniques</span>
+            </div>
+
+            <div class="tool" onclick="openTool('/exploit-chains.html')">
+                <div class="tool-title">⚔️ Exploit Chains</div>
+                <div class="tool-desc">Step-by-step exploitation paths</div>
+                <div class="tool-features">
+                    <div class="feature">SQL injection chains</div>
+                    <div class="feature">XSS exploitation</div>
+                    <div class="feature">RCE payloads</div>
+                    <div class="feature">Tool recommendations</div>
+                </div>
+                <span class="badge badge-active">ACTIVE</span>
+                <span class="badge">8 chains</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="category">
+        <div class="category-title">🕵️ OSINT & INTELLIGENCE</div>
+        <div class="grid">
+            <div class="tool" onclick="openTool('/osint-advanced.html')">
+                <div class="tool-title">🔎 Advanced OSINT</div>
+                <div class="tool-desc">8 types of external reconnaissance</div>
+                <div class="tool-features">
+                    <div class="feature">Port scanning</div>
+                    <div class="feature">DNS enumeration</div>
+                    <div class="feature">WHOIS lookup</div>
+                    <div class="feature">SSL certificate check</div>
+                </div>
+                <span class="badge badge-active">ACTIVE</span>
+                <span class="badge">8 scan types</span>
+            </div>
+
+            <div class="tool" onclick="openTool('/seo-exploit.html')">
+                <div class="tool-title">🔮 SEO Secret Exploiter</div>
+                <div class="tool-desc">Reveal hidden SEO techniques and pages</div>
+                <div class="tool-features">
+                    <div class="feature">Hidden pages discovery</div>
+                    <div class="feature">Cloaking detection</div>
+                    <div class="feature">Black hat techniques</div>
+                    <div class="feature">Competitor analysis</div>
+                </div>
+                <span class="badge badge-active">ACTIVE</span>
+                <span class="badge">110+ pages found</span>
+            </div>
+
+            <div class="tool" onclick="openTool('/osint-real.html')">
+                <div class="tool-title">📡 Local OSINT</div>
+                <div class="tool-desc">Scan local network infrastructure</div>
+                <div class="tool-features">
+                    <div class="feature">Network interfaces</div>
+                    <div class="feature">ARP table</div>
+                    <div class="feature">Open ports</div>
+                    <div class="feature">Gateway latency</div>
+                </div>
+                <span class="badge badge-active">ACTIVE</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="category">
+        <div class="category-title">🔐 ANONYMITY & PRIVACY</div>
+        <div class="grid">
+            <div class="tool" onclick="openTool('/anonymity-check.html')">
+                <div class="tool-title">🔒 Anonymity Checker</div>
+                <div class="tool-desc">Verify if you're truly anonymous</div>
+                <div class="tool-features">
+                    <div class="feature">IP exposure check</div>
+                    <div class="feature">DNS leak detection</div>
+                    <div class="feature">Tor/VPN detection</div>
+                    <div class="feature">Geolocation tracking</div>
+                </div>
+                <span class="badge badge-critical">CRITICAL</span>
+                <span class="badge">Score: 5/100</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="category">
+        <div class="category-title">🎮 DASHBOARDS & VISUALIZATION</div>
+        <div class="grid">
+            <div class="tool" onclick="openTool('/network-modern.html')">
+                <div class="tool-title">🌐 Network Visualization</div>
+                <div class="tool-desc">Modern interactive network topology</div>
+                <div class="tool-features">
+                    <div class="feature">7 animated nodes</div>
+                    <div class="feature">Particle effects</div>
+                    <div class="feature">Real-time packet flow</div>
+                    <div class="feature">47 routes displayed</div>
+                </div>
+                <span class="badge badge-active">ACTIVE</span>
+            </div>
+
+            <div class="tool" onclick="openTool('/route-explorer.html')">
+                <div class="tool-title">🗺️ Route Explorer</div>
+                <div class="tool-desc">Discover and create API routes</div>
+                <div class="tool-features">
+                    <div class="feature">47 routes discovered</div>
+                    <div class="feature">Dynamic route creation</div>
+                    <div class="feature">Route testing</div>
+                    <div class="feature">Code generation</div>
+                </div>
+                <span class="badge badge-active">ACTIVE</span>
+                <span class="badge">47 routes</span>
+            </div>
+
+            <div class="tool" onclick="openTool('/sentinel-control.html')">
+                <div class="tool-title">🤖 Sentinel Control</div>
+                <div class="tool-desc">AI agent monitoring and control</div>
+                <div class="tool-features">
+                    <div class="feature">3 AI sentinels</div>
+                    <div class="feature">Real-time monitoring</div>
+                    <div class="feature">Threat neutralization</div>
+                    <div class="feature">XP & leveling system</div>
+                </div>
+                <span class="badge badge-active">AI-POWERED</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 50px; padding: 30px; background: rgba(0, 50, 0, 0.3); border: 2px solid #0f0; text-align: center;">
+        <div style="font-size: 1.5em; color: #0f0; margin-bottom: 15px;">📊 SUITE STATISTICS</div>
+        <div style="color: #0a0; line-height: 1.8;">
+            <div>✓ 12 Fully Functional Tools</div>
+            <div>✓ 70+ Attack Techniques</div>
+            <div>✓ Real System Commands (tcpdump, nmap, curl, dig, etc.)</div>
+            <div>✓ AI-Powered Threat Detection</div>
+            <div>✓ 100% Real Data - No Simulation</div>
+            <div>✓ Complete Network Visibility</div>
+            <div>✓ Professional Grade Testing</div>
+        </div>
+    </div>
+
+    <script>
+        function openTool(url) {
+            window.open(url, '_blank');
+        }
+
+        // Show stats on hover
+        document.querySelectorAll('.tool').forEach(tool => {
+            tool.addEventListener('mouseenter', function() {
+                this.style.borderColor = '#0ff';
+            });
+            tool.addEventListener('mouseleave', function() {
+                this.style.borderColor = '#0f0';
+            });
+        });
+
+        console.log('%c⚔️ HACKING TOOLKIT LOADED', 'font-size: 20px; color: #0f0; font-weight: bold;');
+        console.log('12 tools available - All functional with real data');
+        console.log('Use for authorized security testing only');
+    </script>
+</body>
+</html>

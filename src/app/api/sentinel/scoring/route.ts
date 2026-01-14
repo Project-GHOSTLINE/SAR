@@ -1,0 +1,257 @@
+// API: Sentinel Scoring System
+// GET /api/sentinel/scoring - Récupère les scores et stats
+// POST /api/sentinel/scoring - Enregistre un nouveau score d'analyse
+
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { writeFile, readFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+import { osintAuthMiddleware } from '@/middleware/osint-auth'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY!
+);
+
+// Cache local en cas de problème Supabase
+const cacheDir = join(process.cwd(), '.sentinel-cache');
+const cacheFile = join(cacheDir, 'scans.json');
+
+interface ScanScore {
+  scan_id: string;
+  timestamp: string;
+  threats_found: number;
+  high_severity: number;
+  medium_severity: number;
+  low_severity: number;
+  duration_ms: number;
+  health_score: number; // 0-100
+  trend: 'improving' | 'stable' | 'declining';
+}
+
+export async function POST(request: NextRequest) {
+  // 🔐 Security: Check authentication
+  const authError = await osintAuthMiddleware(request)
+  if (authError) return authError
+
+  try {
+    const { threats, duration_ms } = await request.json();
+
+    // Calculer les scores
+    const high = threats.filter((t: any) => t.severity === 'high').length;
+    const medium = threats.filter((t: any) => t.severity === 'medium').length;
+    const low = threats.filter((t: any) => t.severity === 'low').length;
+    const total = threats.length;
+
+    // Health Score (0-100)
+    // Formule: 100 - (high*10 + medium*5 + low*1)
+    const healthScore = Math.max(0, 100 - (high * 10 + medium * 5 + low * 1));
+
+    // Sauvegarder dans Supabase OU cache local
+    const scanData = {
+      id: Date.now(),
+      project_name: 'sar',
+      threats_found: total,
+      high_severity: high,
+      medium_severity: medium,
+      low_severity: low,
+      duration_ms,
+      health_score: healthScore,
+      scan_details: threats,
+      scanned_at: new Date().toISOString()
+    };
+
+    let savedData = scanData;
+
+    try {
+      const { data, error } = await supabase
+        .from('sentinel_scans')
+        .insert(scanData)
+        .select()
+        .single();
+
+      if (error) {
+        await saveToCache(scanData);
+      } else {
+        savedData = data;
+      }
+    } catch (err) {
+      await saveToCache(scanData);
+    }
+
+    // Calculer la tendance (besoin des 3 derniers scans)
+    const { data: recentScans } = await supabase
+      .from('sentinel_scans')
+      .select('health_score, scanned_at')
+      .eq('project_name', 'sar')
+      .order('scanned_at', { ascending: false })
+      .limit(3);
+
+    let trend: 'improving' | 'stable' | 'declining' = 'stable';
+    if (recentScans && recentScans.length >= 2) {
+      const current = recentScans[0].health_score;
+      const previous = recentScans[1].health_score;
+      if (current > previous + 5) trend = 'improving';
+      else if (current < previous - 5) trend = 'declining';
+    }
+
+    return NextResponse.json({
+      success: true,
+      score: {
+        scan_id: savedData?.id || 'unknown',
+        timestamp: new Date().toISOString(),
+        threats_found: total,
+        high_severity: high,
+        medium_severity: medium,
+        low_severity: low,
+        duration_ms,
+        health_score: healthScore,
+        trend
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Scoring error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  // 🔐 Security: Check authentication
+  const authError = await osintAuthMiddleware(request)
+  if (authError) return authError
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const limit = parseInt(searchParams.get('limit') || '20');
+
+    let scans: any[] = [];
+
+    // Essayer Supabase d'abord
+    try {
+      const { data, error } = await supabase
+        .from('sentinel_scans')
+        .select('*')
+        .eq('project_name', 'sar')
+        .order('scanned_at', { ascending: false })
+        .limit(limit);
+
+      if (!error && data) {
+        scans = data;
+      } else {
+        throw new Error('Supabase query failed');
+      }
+    } catch (err) {
+      scans = await loadFromCache(limit);
+    }
+
+    // Calculer les statistiques
+    const stats = calculateStats(scans);
+
+    return NextResponse.json({
+      success: true,
+      scans,
+      stats,
+      count: scans.length
+    });
+
+  } catch (error: any) {
+    console.error('Get scoring error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+function calculateStats(scans: any[]) {
+  if (scans.length === 0) {
+    return {
+      total_scans: 0,
+      average_health: 0,
+      average_duration: 0,
+      total_threats_found: 0,
+      time_between_scans: 0,
+      best_score: 0,
+      worst_score: 0,
+      current_trend: 'stable' as const
+    };
+  }
+
+  const totalHealth = scans.reduce((sum, s) => sum + (s.health_score || 0), 0);
+  const totalDuration = scans.reduce((sum, s) => sum + (s.duration_ms || 0), 0);
+  const totalThreats = scans.reduce((sum, s) => sum + (s.threats_found || 0), 0);
+
+  const healthScores = scans.map(s => s.health_score || 0);
+  const bestScore = Math.max(...healthScores);
+  const worstScore = Math.min(...healthScores);
+
+  // Calculer le temps moyen entre les scans
+  let avgTimeBetween = 0;
+  if (scans.length >= 2) {
+    const times = scans.map(s => new Date(s.scanned_at).getTime());
+    const diffs = [];
+    for (let i = 0; i < times.length - 1; i++) {
+      diffs.push(times[i] - times[i + 1]);
+    }
+    avgTimeBetween = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+  }
+
+  // Tendance actuelle
+  let currentTrend: 'improving' | 'stable' | 'declining' = 'stable';
+  if (scans.length >= 2) {
+    const current = scans[0].health_score || 0;
+    const previous = scans[1].health_score || 0;
+    if (current > previous + 5) currentTrend = 'improving';
+    else if (current < previous - 5) currentTrend = 'declining';
+  }
+
+  return {
+    total_scans: scans.length,
+    average_health: Math.round(totalHealth / scans.length),
+    average_duration: Math.round(totalDuration / scans.length),
+    total_threats_found: totalThreats,
+    time_between_scans: Math.round(avgTimeBetween / 1000), // en secondes
+    best_score: bestScore,
+    worst_score: worstScore,
+    current_trend: currentTrend
+  };
+}
+
+// ============================================
+// CACHE LOCAL HELPERS
+// ============================================
+
+async function saveToCache(scan: any): Promise<void> {
+  try {
+    await mkdir(cacheDir, { recursive: true });
+
+    let scans: any[] = [];
+    try {
+      const data = await readFile(cacheFile, 'utf-8');
+      scans = JSON.parse(data);
+    } catch {
+      // File doesn't exist yet
+    }
+
+    scans.unshift(scan);
+    scans = scans.slice(0, 100); // Keep only last 100
+
+    await writeFile(cacheFile, JSON.stringify(scans, null, 2));
+  } catch (error) {
+    console.error('Failed to save to cache:', error);
+  }
+}
+
+async function loadFromCache(limit: number): Promise<any[]> {
+  try {
+    const data = await readFile(cacheFile, 'utf-8');
+    const scans = JSON.parse(data);
+    return scans.slice(0, limit);
+  } catch {
+    return [];
+  }
+}

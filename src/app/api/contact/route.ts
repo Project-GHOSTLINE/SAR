@@ -236,7 +236,6 @@ export async function POST(request: NextRequest) {
       } else {
         messageId = data.id
         reference = generateReference(data.id)
-        console.log('Message sauvegarde dans Supabase, ID:', messageId)
 
         // Creer les enregistrements d'emails dans emails_envoyes
 
@@ -645,12 +644,6 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
     }
 
     // Mode dev
-    console.log('=== CONTACT (DEV MODE) ===')
-    console.log('To: perception@solutionargentrapide.ca, mrosa@solutionargentrapide.ca')
-    console.log('Reference:', reference)
-    console.log('Message:', message)
-    console.log('Contact:', contact)
-    console.log('==========================')
 
     return NextResponse.json({
       success: true,

@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSINT Advanced - Kung Fu Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #000000 0%, #1a0000 50%, #000000 100%);
+            color: #ff0000;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: #ff0000;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000; }
+            50% { text-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000, 0 0 80px #ff0000; }
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #ff6666;
+            font-size: 1.2em;
+        }
+
+        .scan-controls {
+            background: #1a0000;
+            border: 2px solid #ff0000;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #ff6666;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 2px solid #ff0000;
+            color: #ff0000;
+            font-family: inherit;
+            font-size: 1em;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        .scan-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .scan-type-btn {
+            background: #1a0000;
+            border: 2px solid #ff0000;
+            padding: 20px;
+            color: #ff0000;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .scan-type-btn:hover {
+            background: #ff0000;
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 0, 0, 0.5);
+        }
+
+        .scan-type-btn.active {
+            background: #ff0000;
+            color: #000;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 20px;
+            background: #ff0000;
+            border: none;
+            color: #000;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .action-btn:hover {
+            background: #ff3333;
+            box-shadow: 0 5px 30px rgba(255, 0, 0, 0.7);
+        }
+
+        .action-btn:disabled {
+            background: #660000;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .results {
+            background: #1a0000;
+            border: 2px solid #ff0000;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ff0000;
+        }
+
+        .result-title {
+            font-size: 1.8em;
+            color: #ff0000;
+        }
+
+        .result-time {
+            color: #ff6666;
+            font-size: 0.9em;
+        }
+
+        .result-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #ff3333;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #000;
+            border-left: 4px solid #ff0000;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .data-item {
+            background: #000;
+            border: 1px solid #ff0000;
+            padding: 15px;
+        }
+
+        .data-label {
+            color: #ff6666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .data-value {
+            color: #ff0000;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ff0000;
+        }
+
+        th {
+            background: #ff0000;
+            color: #000;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background: #0a0000;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .badge-open {
+            background: #ff0000;
+            color: #fff;
+        }
+
+        .badge-closed {
+            background: #333;
+            color: #666;
+        }
+
+        .badge-success {
+            background: #00ff00;
+            color: #000;
+        }
+
+        .badge-warning {
+            background: #ffaa00;
+            color: #000;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.5em;
+            color: #ff0000;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .error {
+            background: #ff0000;
+            color: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        pre {
+            background: #000;
+            padding: 15px;
+            overflow-x: auto;
+            color: #ff6666;
+            border: 1px solid #ff0000;
+        }
+
+        code {
+            color: #ff0000;
+            background: #000;
+            padding: 2px 6px;
+        }
+
+        .scan-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🥋 OSINT ADVANCED</h1>
+        <p class="subtitle">Kung Fu Network Reconnaissance - Advanced Tools</p>
+
+        <div class="scan-controls">
+            <div class="control-group">
+                <label for="target">🎯 TARGET (IP or Domain)</label>
+                <input type="text" id="target" placeholder="example.com or 192.168.1.1" value="google.com">
+            </div>
+
+            <label style="margin-bottom: 15px;">⚔️ SELECT SCAN TYPE</label>
+            <div class="scan-types">
+                <div class="scan-type-btn" data-type="port_scan">
+                    <div class="scan-icon">🔓</div>
+                    <div>Port Scan</div>
+                </div>
+                <div class="scan-type-btn" data-type="service_detection">
+                    <div class="scan-icon">🔍</div>
+                    <div>Service Detection</div>
+                </div>
+                <div class="scan-type-btn" data-type="traceroute">
+                    <div class="scan-icon">🗺️</div>
+                    <div>Traceroute</div>
+                </div>
+                <div class="scan-type-btn" data-type="dns_lookup">
+                    <div class="scan-icon">🌐</div>
+                    <div>DNS Lookup</div>
+                </div>
+                <div class="scan-type-btn" data-type="whois">
+                    <div class="scan-icon">📋</div>
+                    <div>WHOIS</div>
+                </div>
+                <div class="scan-type-btn" data-type="ssl_check">
+                    <div class="scan-icon">🔐</div>
+                    <div>SSL Check</div>
+                </div>
+                <div class="scan-type-btn" data-type="headers">
+                    <div class="scan-icon">📡</div>
+                    <div>HTTP Headers</div>
+                </div>
+                <div class="scan-type-btn" data-type="subdomain_enum">
+                    <div class="scan-icon">🔎</div>
+                    <div>Subdomain Enum</div>
+                </div>
+            </div>
+
+            <button class="action-btn" id="scan-btn" onclick="executeScan()">
+                ▶ EXECUTE SCAN
+            </button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            Scanning in progress
+        </div>
+
+        <div id="error" style="display: none;"></div>
+
+        <div id="results" style="display: none;"></div>
+    </div>
+
+    <script>
+        let selectedScanType = null;
+
+        // Scan type selection
+        document.querySelectorAll('.scan-type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.scan-type-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedScanType = btn.dataset.type;
+            });
+        });
+
+        async function executeScan() {
+            const target = document.getElementById('target').value.trim();
+            if (!target) {
+                alert('Please enter a target');
+                return;
+            }
+
+            if (!selectedScanType) {
+                alert('Please select a scan type');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('scan-btn').disabled = true;
+
+            try {
+                const response = await fetch('/api/osint/advanced', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        target,
+                        scan_type: selectedScanType
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayResults(result.results);
+                } else {
+                    showError('Scan failed: ' + result.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('scan-btn').disabled = false;
+            }
+        }
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+
+            let html = `
+                <div class="result-header">
+                    <div class="result-title">🎯 ${results.scan_type.toUpperCase().replace('_', ' ')}</div>
+                    <div class="result-time">${new Date(results.timestamp).toLocaleString()}</div>
+                </div>
+            `;
+
+            const data = results.data;
+
+            switch (results.scan_type) {
+                case 'port_scan':
+                    html += renderPortScan(data);
+                    break;
+                case 'service_detection':
+                    html += renderServiceDetection(data);
+                    break;
+                case 'traceroute':
+                    html += renderTraceroute(data);
+                    break;
+                case 'dns_lookup':
+                    html += renderDNSLookup(data);
+                    break;
+                case 'whois':
+                    html += renderWhois(data);
+                    break;
+                case 'ssl_check':
+                    html += renderSSLCheck(data);
+                    break;
+                case 'headers':
+                    html += renderHeaders(data);
+                    break;
+                case 'subdomain_enum':
+                    html += renderSubdomains(data);
+                    break;
+            }
+
+            resultsDiv.innerHTML = html;
+        }
+
+        function renderPortScan(data) {
+            let html = `
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Total Scanned</div>
+                        <div class="data-value">${data.total_scanned}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Open Ports</div>
+                        <div class="data-value">${data.open_ports}</div>
+                    </div>
+                </div>
+
+                <div class="section-title">Port Status</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Port</th>
+                            <th>Service</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.ports.filter(p => p.status === 'open').forEach(port => {
+                html += `
+                    <tr>
+                        <td><strong>${port.port}</strong></td>
+                        <td>${port.service}</td>
+                        <td><span class="badge badge-open">OPEN</span></td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function renderServiceDetection(data) {
+            let html = `
+                <div class="data-item" style="margin-bottom: 20px;">
+                    <div class="data-label">Services Found</div>
+                    <div class="data-value">${data.services_found}</div>
+                </div>
+
+                <div class="section-title">Detected Services</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Port</th>
+                            <th>Protocol</th>
+                            <th>Server/Version</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.services.forEach(service => {
+                html += `
+                    <tr>
+                        <td><strong>${service.port}</strong></td>
+                        <td>${service.protocol}</td>
+                        <td>${service.server || service.version || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function renderTraceroute(data) {
+            let html = `
+                <div class="data-item" style="margin-bottom: 20px;">
+                    <div class="data-label">Total Hops</div>
+                    <div class="data-value">${data.total_hops}</div>
+                </div>
+
+                <div class="section-title">Route Path</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hop</th>
+                            <th>Hostname</th>
+                            <th>IP</th>
+                            <th>RTT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.hops.forEach(hop => {
+                html += `
+                    <tr>
+                        <td><strong>${hop.hop}</strong></td>
+                        <td>${hop.hostname}</td>
+                        <td>${hop.ip || 'N/A'}</td>
+                        <td>${hop.rtt || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function renderDNSLookup(data) {
+            let html = '<div class="section-title">DNS Records</div>';
+
+            if (data.a_records && data.a_records.length > 0) {
+                html += `<div class="result-section">
+                    <strong>A Records (IPv4):</strong><br>
+                    ${data.a_records.map(r => `<code>${r}</code>`).join(', ')}
+                </div>`;
+            }
+
+            if (data.aaaa_records && data.aaaa_records.length > 0) {
+                html += `<div class="result-section">
+                    <strong>AAAA Records (IPv6):</strong><br>
+                    ${data.aaaa_records.map(r => `<code>${r}</code>`).join(', ')}
+                </div>`;
+            }
+
+            if (data.mx_records && data.mx_records.length > 0) {
+                html += `<div class="result-section">
+                    <strong>MX Records (Mail):</strong><br>
+                    ${data.mx_records.map(r => `<code>${r}</code>`).join('<br>')}
+                </div>`;
+            }
+
+            if (data.ns_records && data.ns_records.length > 0) {
+                html += `<div class="result-section">
+                    <strong>NS Records (Nameservers):</strong><br>
+                    ${data.ns_records.map(r => `<code>${r}</code>`).join('<br>')}
+                </div>`;
+            }
+
+            if (data.txt_records && data.txt_records.length > 0) {
+                html += `<div class="result-section">
+                    <strong>TXT Records:</strong><br>
+                    ${data.txt_records.map(r => `<code>${r}</code>`).join('<br>')}
+                </div>`;
+            }
+
+            return html;
+        }
+
+        function renderWhois(data) {
+            if (data.error) {
+                return `<div class="error">${data.error}</div>`;
+            }
+
+            return `
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Registrar</div>
+                        <div class="data-value">${data.registrar || 'N/A'}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Created</div>
+                        <div class="data-value">${data.created_date || 'N/A'}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Expires</div>
+                        <div class="data-value">${data.expiry_date || 'N/A'}</div>
+                    </div>
+                </div>
+
+                ${data.nameservers && data.nameservers.length > 0 ? `
+                    <div class="section-title">Nameservers</div>
+                    <div class="result-section">
+                        ${data.nameservers.map(ns => `<code>${ns}</code>`).join('<br>')}
+                    </div>
+                ` : ''}
+
+                ${data.raw ? `
+                    <div class="section-title">Raw WHOIS Data</div>
+                    <pre>${data.raw}</pre>
+                ` : ''}
+            `;
+        }
+
+        function renderSSLCheck(data) {
+            if (data.error) {
+                return `<div class="error">${data.error}</div>`;
+            }
+
+            return `
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Valid From</div>
+                        <div class="data-value">${data.valid_from}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Valid Until</div>
+                        <div class="data-value">${data.valid_until}</div>
+                    </div>
+                </div>
+
+                <div class="section-title">Certificate Details</div>
+                <div class="result-section">
+                    <strong>Subject:</strong> <code>${data.subject}</code><br>
+                    <strong>Issuer:</strong> <code>${data.issuer}</code>
+                </div>
+            `;
+        }
+
+        function renderHeaders(data) {
+            if (data.error) {
+                return `<div class="error">${data.error}</div>`;
+            }
+
+            let html = `
+                <div class="data-item" style="margin-bottom: 20px;">
+                    <div class="data-label">Security Score</div>
+                    <div class="data-value">${data.security_score}/5</div>
+                </div>
+
+                <div class="section-title">Security Headers</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Header</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            for (const [header, present] of Object.entries(data.security_headers)) {
+                html += `
+                    <tr>
+                        <td>${header}</td>
+                        <td><span class="badge ${present ? 'badge-success' : 'badge-warning'}">${present ? 'PRESENT' : 'MISSING'}</span></td>
+                    </tr>
+                `;
+            }
+
+            html += `
+                    </tbody>
+                </table>
+
+                <div class="section-title">All Headers</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Header</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            for (const [key, value] of Object.entries(data.headers)) {
+                html += `
+                    <tr>
+                        <td><strong>${key}</strong></td>
+                        <td><code>${value}</code></td>
+                    </tr>
+                `;
+            }
+
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function renderSubdomains(data) {
+            return `
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Total Checked</div>
+                        <div class="data-value">${data.total_checked}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Found</div>
+                        <div class="data-value">${data.found}</div>
+                    </div>
+                </div>
+
+                ${data.subdomains.length > 0 ? `
+                    <div class="section-title">Discovered Subdomains</div>
+                    <div class="result-section">
+                        ${data.subdomains.map(sub => `<code>${sub}</code>`).join('<br>')}
+                    </div>
+                ` : '<div class="result-section">No subdomains found</div>'}
+            `;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.innerHTML = `<div class="error">${message}</div>`;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

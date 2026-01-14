@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Anonymity Checker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier New', monospace; background: #000; color: #0f0; padding: 20px; }
+        h1 { text-align: center; font-size: 2.5em; color: #0f0; text-shadow: 0 0 20px #0f0; margin-bottom: 20px; }
+        .btn { width: 100%; padding: 20px; background: #0f0; border: none; color: #000; font-size: 1.5em; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
+        .btn:hover { background: #0c0; box-shadow: 0 0 30px #0f0; }
+        .score-box { background: rgba(0, 50, 0, 0.3); border: 3px solid #0f0; padding: 40px; margin-bottom: 20px; text-align: center; }
+        .score-value { font-size: 5em; font-weight: bold; margin: 20px 0; }
+        .score-label { font-size: 1.5em; margin-top: 10px; }
+        .score-low { color: #f00; animation: blink 1s infinite; }
+        .score-medium { color: #ff0; }
+        .score-high { color: #0f0; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .info-box { background: rgba(0, 50, 0, 0.3); border: 2px solid #0f0; padding: 20px; }
+        .info-title { font-size: 1.3em; color: #0f0; margin-bottom: 15px; font-weight: bold; }
+        .info-item { margin: 10px 0; padding: 10px; background: #000; border-left: 3px solid #0f0; }
+        .label { color: #0a0; font-weight: bold; }
+        .critical { border-left-color: #f00; color: #f00; }
+        .high { border-left-color: #f90; color: #f90; }
+        .medium { border-left-color: #ff0; color: #ff0; }
+        .good { border-left-color: #0f0; color: #0f0; }
+        .section { background: rgba(0, 50, 0, 0.3); border: 2px solid #0f0; padding: 20px; margin-bottom: 20px; }
+        .section-title { font-size: 1.5em; color: #0f0; margin-bottom: 15px; font-weight: bold; }
+        .leak { background: #000; border-left: 5px solid #f00; padding: 15px; margin-bottom: 10px; }
+        .exposure { background: #000; border-left: 5px solid #f90; padding: 15px; margin-bottom: 10px; }
+        .rec { background: #000; padding: 15px; margin-bottom: 10px; border-left: 3px solid #0f0; }
+        .loading { text-align: center; padding: 60px; font-size: 2em; color: #0f0; }
+    </style>
+</head>
+<body>
+    <h1>🔒 ANONYMITY CHECKER</h1>
+    <button class="btn" onclick="check()">🔍 CHECK ANONYMITY NOW</button>
+
+    <div id="loading" class="loading" style="display: none;">Checking anonymity...</div>
+
+    <div id="results" style="display: none;">
+        <div class="score-box">
+            <div style="font-size: 1.5em; color: #0f0;">ANONYMITY SCORE</div>
+            <div id="score" class="score-value score-low">0</div>
+            <div id="score-label" class="score-label">NOT ANONYMOUS</div>
+            <div id="status" style="margin-top: 20px; font-size: 1.2em;"></div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-box">
+                <div class="info-title">🌍 YOUR IP</div>
+                <div id="ip-info"></div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-title">🛡️ PROTECTION</div>
+                <div id="protection-info"></div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-title">📍 LOCATION</div>
+                <div id="location-info"></div>
+            </div>
+        </div>
+
+        <div id="leaks-section" style="display: none;" class="section">
+            <div class="section-title">🚨 LEAKS DETECTED</div>
+            <div id="leaks-list"></div>
+        </div>
+
+        <div id="exposures-section" style="display: none;" class="section">
+            <div class="section-title">⚠️ EXPOSURES</div>
+            <div id="exposures-list"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">💡 RECOMMENDATIONS</div>
+            <div id="recommendations-list"></div>
+        </div>
+
+        <div class="info-box">
+            <div class="info-title">🖥️ BROWSER FINGERPRINT</div>
+            <div id="fingerprint-info"></div>
+        </div>
+    </div>
+
+    <script>
+        async function check() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/anonymity/check');
+                const result = await response.json();
+
+                if (result.success) display(result.results);
+                else alert('Check failed: ' + result.error);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function display(data) {
+            document.getElementById('results').style.display = 'block';
+
+            // Score
+            const score = data.anonymity_score;
+            const scoreEl = document.getElementById('score');
+            scoreEl.textContent = score;
+
+            if (score < 30) {
+                scoreEl.className = 'score-value score-low';
+                document.getElementById('score-label').textContent = '🚨 NOT ANONYMOUS';
+                document.getElementById('score-label').style.color = '#f00';
+            } else if (score < 50) {
+                scoreEl.className = 'score-value score-medium';
+                document.getElementById('score-label').textContent = '⚠️ LOW ANONYMITY';
+                document.getElementById('score-label').style.color = '#ff0';
+            } else if (score < 70) {
+                scoreEl.className = 'score-value score-medium';
+                document.getElementById('score-label').textContent = '💪 MEDIUM ANONYMITY';
+                document.getElementById('score-label').style.color = '#ff0';
+            } else {
+                scoreEl.className = 'score-value score-high';
+                document.getElementById('score-label').textContent = '🛡️ HIGH ANONYMITY';
+                document.getElementById('score-label').style.color = '#0f0';
+            }
+
+            document.getElementById('status').innerHTML = data.is_anonymous ?
+                '<span style="color: #0f0;">✅ You are reasonably anonymous</span>' :
+                '<span style="color: #f00;">❌ You are NOT anonymous</span>';
+
+            // IP Info
+            document.getElementById('ip-info').innerHTML = `
+                <div class="info-item">
+                    <div><span class="label">Public IP:</span> ${data.public_ip.ip || 'Unknown'}</div>
+                </div>
+            `;
+
+            // Protection
+            document.getElementById('protection-info').innerHTML = `
+                <div class="info-item ${data.using_tor ? 'good' : ''}">
+                    <div><span class="label">Tor:</span> ${data.using_tor ? '✅ Yes' : '❌ No'}</div>
+                </div>
+                <div class="info-item ${data.using_vpn ? 'good' : ''}">
+                    <div><span class="label">VPN:</span> ${data.using_vpn ? '✅ Yes' : '❌ No'}</div>
+                </div>
+                <div class="info-item ${data.using_proxy ? 'good' : ''}">
+                    <div><span class="label">Proxy:</span> ${data.using_proxy ? '✅ Yes' : '❌ No'}</div>
+                </div>
+            `;
+
+            // Location
+            const geo = data.geolocation;
+            document.getElementById('location-info').innerHTML = `
+                <div class="info-item">
+                    <div><span class="label">Country:</span> ${geo.country || 'Unknown'}</div>
+                    ${geo.city ? `<div><span class="label">City:</span> ${geo.city}</div>` : ''}
+                    ${geo.isp ? `<div><span class="label">ISP:</span> ${geo.isp}</div>` : ''}
+                    ${data.timezone ? `<div><span class="label">Timezone:</span> ${data.timezone}</div>` : ''}
+                </div>
+            `;
+
+            // Leaks
+            if (data.leaks.length > 0) {
+                document.getElementById('leaks-section').style.display = 'block';
+                document.getElementById('leaks-list').innerHTML = data.leaks.map(leak => `
+                    <div class="leak">
+                        <div style="font-size: 1.2em; margin-bottom: 10px; color: #f00;">🚨 ${leak.type}</div>
+                        <div><span class="label">Severity:</span> ${leak.severity}</div>
+                        <div style="color: #fff;">${leak.description}</div>
+                        ${leak.servers ? `<div><span class="label">DNS Servers:</span> ${leak.servers.join(', ')}</div>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            // Exposures
+            if (data.exposures.length > 0) {
+                document.getElementById('exposures-section').style.display = 'block';
+                document.getElementById('exposures-list').innerHTML = data.exposures.map(exp => `
+                    <div class="exposure">
+                        <div style="font-size: 1.2em; margin-bottom: 10px; color: #f90;">⚠️ ${exp.type}</div>
+                        <div><span class="label">Severity:</span> ${exp.severity}</div>
+                        <div style="color: #fff;">${exp.description}</div>
+                        ${exp.value ? `<div><span class="label">Value:</span> ${exp.value}</div>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            // Recommendations
+            document.getElementById('recommendations-list').innerHTML = data.recommendations.map(rec => `
+                <div class="rec">${rec}</div>
+            `).join('');
+
+            // Fingerprint
+            document.getElementById('fingerprint-info').innerHTML = `
+                <div class="info-item">
+                    <div><span class="label">User-Agent:</span></div>
+                    <div style="color: #0a0; word-break: break-all; margin-top: 5px;">${data.fingerprint.user_agent || 'Unknown'}</div>
+                </div>
+                <div class="info-item">
+                    <div><span class="label">Language:</span> ${data.fingerprint.accept_language || 'Unknown'}</div>
+                </div>
+                <div class="info-item">
+                    <div><span class="label">Encoding:</span> ${data.fingerprint.accept_encoding || 'Unknown'}</div>
+                </div>
+                ${data.exposed_headers.length > 0 ? `
+                    <div class="info-item high">
+                        <div><span class="label">Exposed Headers:</span></div>
+                        ${data.exposed_headers.map(h => `<div style="margin-top: 5px;">⚠️ ${h}</div>`).join('')}
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            setTimeout(check, 1000);
+        });
+    </script>
+</body>
+</html>

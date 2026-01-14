@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Network Recon - See Everyone</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier New', monospace; background: #000; color: #0f0; padding: 20px; }
+        h1 { text-align: center; font-size: 2.5em; color: #0f0; text-shadow: 0 0 20px #0f0; margin-bottom: 20px; }
+        .btn { padding: 20px 40px; background: #0f0; border: none; color: #000; font-size: 1.5em; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 20px; }
+        .btn:hover { background: #0a0; box-shadow: 0 0 30px #0f0; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat { background: rgba(0, 50, 0, 0.3); border: 2px solid #0f0; padding: 20px; text-align: center; }
+        .stat-value { font-size: 2.5em; font-weight: bold; color: #0f0; }
+        .stat-label { color: #0a0; }
+        .devices-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .device { background: rgba(0, 50, 0, 0.3); border: 2px solid #0f0; padding: 15px; }
+        .device-online { border-color: #0f0; }
+        .device-suspicious { border-color: #f00; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .device-ip { font-size: 1.3em; font-weight: bold; color: #0f0; margin-bottom: 10px; }
+        .device-info { margin: 5px 0; font-size: 0.9em; }
+        .label { color: #0a0; font-weight: bold; }
+        .ports { background: #000; padding: 10px; margin-top: 10px; border: 1px solid #0f0; }
+        .port { display: inline-block; padding: 3px 8px; margin: 2px; background: #0f0; color: #000; border-radius: 3px; }
+        .port-danger { background: #f00; color: #fff; }
+        .threats { background: rgba(50, 0, 0, 0.5); border: 2px solid #f00; padding: 20px; margin-bottom: 20px; }
+        .threat { background: #000; border-left: 5px solid #f00; padding: 15px; margin-bottom: 10px; }
+        .loading { text-align: center; padding: 60px; font-size: 2em; color: #0f0; }
+        .loading::after { content: '...'; animation: dots 1.5s infinite; }
+        @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60%, 100% { content: '...'; } }
+    </style>
+</head>
+<body>
+    <h1>👁️ ACTIVE NETWORK RECONNAISSANCE</h1>
+    <button class="btn" onclick="scan()">🔍 SCAN NETWORK NOW</button>
+
+    <div id="loading" class="loading" style="display: none;">Scanning all devices on network</div>
+
+    <div id="results" style="display: none;">
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="stat-devices">0</div>
+                <div class="stat-label">DEVICES FOUND</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-online">0</div>
+                <div class="stat-label">ONLINE</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-ports">0</div>
+                <div class="stat-label">OPEN PORTS</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-threats">0</div>
+                <div class="stat-label">THREATS</div>
+            </div>
+        </div>
+
+        <div id="threats-section" style="display: none;" class="threats">
+            <h2 style="color: #f00; margin-bottom: 15px;">🚨 SUSPICIOUS ACTIVITY</h2>
+            <div id="threats-list"></div>
+        </div>
+
+        <h2 style="color: #0f0; margin-bottom: 15px;">📡 DISCOVERED DEVICES</h2>
+        <div id="devices-grid" class="devices-grid"></div>
+    </div>
+
+    <script>
+        async function scan() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/network/active-recon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ scan_type: 'full' })
+                });
+
+                const result = await response.json();
+                if (result.success) display(result.results);
+                else alert('Scan failed: ' + result.error);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function display(data) {
+            document.getElementById('results').style.display = 'block';
+
+            // Stats
+            document.getElementById('stat-devices').textContent = data.devices.length;
+            document.getElementById('stat-online').textContent = data.devices.filter(d => d.online).length;
+            document.getElementById('stat-ports').textContent = data.open_ports_all_devices.reduce((sum, d) => sum + d.open_ports.length, 0);
+            document.getElementById('stat-threats').textContent = data.suspicious_activity.length;
+
+            // Threats
+            if (data.suspicious_activity.length > 0) {
+                document.getElementById('threats-section').style.display = 'block';
+                document.getElementById('threats-list').innerHTML = data.suspicious_activity.map(t => `
+                    <div class="threat">
+                        <div style="font-size: 1.2em; color: #f00; font-weight: bold; margin-bottom: 10px;">
+                            ⚠️ ${t.type} - ${t.severity}
+                        </div>
+                        <div style="color: #fff;">${t.description}</div>
+                        ${t.device ? `<div style="margin-top: 5px;">Device: ${t.device}</div>` : ''}
+                        ${t.recommendation ? `<div style="margin-top: 5px; color: #0f0;">→ ${t.recommendation}</div>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            // Devices
+            const grid = document.getElementById('devices-grid');
+            grid.innerHTML = data.devices.map(device => {
+                const portsData = data.open_ports_all_devices.find(p => p.device === device.ip);
+                const hasDangerousPorts = portsData && portsData.open_ports.some(p => [23, 21, 445, 3389].includes(p.port));
+                const cssClass = hasDangerousPorts ? 'device device-suspicious' : 'device device-online';
+
+                return `
+                    <div class="${cssClass}">
+                        <div class="device-ip">${device.ip}</div>
+                        <div class="device-info"><span class="label">Hostname:</span> ${device.hostname}</div>
+                        <div class="device-info"><span class="label">MAC:</span> ${device.mac}</div>
+                        <div class="device-info"><span class="label">Type:</span> ${device.device_type}</div>
+                        <div class="device-info"><span class="label">Status:</span> ${device.online ? '🟢 ONLINE' : '🔴 OFFLINE'}</div>
+                        ${portsData ? `
+                            <div class="ports">
+                                <div style="color: #0a0; margin-bottom: 5px;">Open Ports:</div>
+                                ${portsData.open_ports.map(p => {
+                                    const isDangerous = [23, 21, 445, 3389, 3306, 1433].includes(p.port);
+                                    return `<span class="port ${isDangerous ? 'port-danger' : ''}">${p.port} (${p.service})</span>`;
+                                }).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

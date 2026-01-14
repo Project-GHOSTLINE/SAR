@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Deep Fingerprint Scanner</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier New', monospace; background: #000; color: #f00; padding: 20px; }
+        h1 { text-align: center; font-size: 2.5em; color: #f00; text-shadow: 0 0 20px #f00; margin-bottom: 20px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .btn { width: 100%; padding: 20px; background: #f00; border: none; color: #fff; font-size: 1.5em; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
+        .btn:hover { background: #c00; box-shadow: 0 0 30px #f00; }
+        .score-box { background: rgba(50, 0, 0, 0.5); border: 3px solid #f00; padding: 40px; margin-bottom: 20px; text-align: center; }
+        .score-value { font-size: 5em; font-weight: bold; color: #f00; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .hash { font-size: 1.5em; margin: 20px 0; color: #f66; }
+        .section { background: rgba(50, 0, 0, 0.3); border: 2px solid #f00; padding: 20px; margin-bottom: 20px; }
+        .section-title { font-size: 1.5em; color: #f00; margin-bottom: 15px; font-weight: bold; }
+        .vector { background: #000; border-left: 5px solid; padding: 15px; margin-bottom: 10px; }
+        .uniqueness-very-high { border-left-color: #f00; }
+        .uniqueness-high { border-left-color: #f90; }
+        .uniqueness-medium { border-left-color: #ff0; }
+        .uniqueness-low { border-left-color: #0f0; }
+        .label { color: #f66; font-weight: bold; }
+        .value { color: #f00; word-break: break-all; }
+        .loading { text-align: center; padding: 60px; font-size: 2em; color: #f00; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat { background: rgba(50, 0, 0, 0.3); border: 2px solid #f00; padding: 15px; text-align: center; }
+        .stat-value { font-size: 2em; font-weight: bold; color: #f00; }
+        .stat-label { color: #f66; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔴 DEEP FINGERPRINT SCANNER</h1>
+    <button class="btn" onclick="scan()">🔍 SCAN EVERYTHING</button>
+
+    <div id="loading" class="loading" style="display: none;">Extracting all trackable data...</div>
+
+    <div id="results" style="display: none;">
+        <div class="score-box">
+            <div style="font-size: 1.5em;">UNIQUENESS SCORE</div>
+            <div id="score" class="score-value">0</div>
+            <div id="trackability" style="font-size: 1.3em; margin-top: 10px;"></div>
+            <div class="hash">FINGERPRINT: <span id="hash"></span></div>
+            <div id="datapoints" style="font-size: 1.2em; color: #f66;"></div>
+        </div>
+
+        <div class="grid">
+            <div class="stat">
+                <div class="stat-value" id="stat-vectors">0</div>
+                <div class="stat-label">TRACKING VECTORS</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-hardware">0</div>
+                <div class="stat-label">HARDWARE IDs</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-browser">0</div>
+                <div class="stat-label">BROWSER DATA</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🎯 TRACKING VECTORS</div>
+            <div id="vectors-list"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">💻 HARDWARE IDENTIFIERS</div>
+            <div id="hardware-list"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🌐 NETWORK INFORMATION</div>
+            <div id="network-list"></div>
+        </div>
+    </div>
+
+    <canvas id="canvas" style="display:none;"></canvas>
+    <script>
+        async function scan() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+
+            const fingerprint = await collectFingerprint();
+
+            try {
+                const response = await fetch('/api/fingerprint/deep-scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fingerprint)
+                });
+
+                const result = await response.json();
+                if (result.success) display(result.results);
+                else alert('Scan failed: ' + result.error);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        async function collectFingerprint() {
+            const fp = {};
+
+            // Screen
+            fp.screen = {
+                width: screen.width,
+                height: screen.height,
+                availWidth: screen.availWidth,
+                availHeight: screen.availHeight,
+                colorDepth: screen.colorDepth,
+                pixelDepth: screen.pixelDepth,
+                orientation: screen.orientation ? screen.orientation.type : 'unknown'
+            };
+
+            // Navigator
+            fp.platform = navigator.platform;
+            fp.user_agent = navigator.userAgent;
+            fp.languages = navigator.languages;
+            fp.language = navigator.language;
+            fp.cpu_cores = navigator.hardwareConcurrency;
+            fp.device_memory = navigator.deviceMemory;
+            fp.max_touch_points = navigator.maxTouchPoints;
+            fp.vendor = navigator.vendor;
+            fp.product = navigator.product;
+            fp.product_sub = navigator.productSub;
+            fp.app_name = navigator.appName;
+            fp.app_version = navigator.appVersion;
+            fp.do_not_track = navigator.doNotTrack;
+            fp.cookie_enabled = navigator.cookieEnabled;
+            fp.online = navigator.onLine;
+
+            // Timezone
+            fp.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            fp.timezone_offset = new Date().getTimezoneOffset();
+
+            // Canvas fingerprint
+            try {
+                const canvas = document.getElementById('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.textBaseline = 'alphabetic';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(125, 1, 62, 20);
+                ctx.fillStyle = '#069';
+                ctx.fillText('Canvas FP 🔴', 2, 15);
+                ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+                ctx.fillText('Canvas FP 🔴', 4, 17);
+                fp.canvas = canvas.toDataURL();
+            } catch (e) {}
+
+            // WebGL
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (gl) {
+                    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                    fp.webgl = {
+                        vendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
+                        renderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL),
+                        version: gl.getParameter(gl.VERSION),
+                        shading_language: gl.getParameter(gl.SHADING_LANGUAGE_VERSION)
+                    };
+                }
+            } catch (e) {}
+
+            // Audio fingerprint
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const analyser = audioContext.createAnalyser();
+                const gainNode = audioContext.createGain();
+                const scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+
+                oscillator.type = 'triangle';
+                oscillator.connect(analyser);
+                analyser.connect(scriptProcessor);
+                scriptProcessor.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.start(0);
+                const audioData = new Float32Array(analyser.frequencyBinCount);
+                analyser.getFloatFrequencyData(audioData);
+                oscillator.stop();
+                audioContext.close();
+
+                fp.audio = Array.from(audioData).slice(0, 30).join(',');
+            } catch (e) {}
+
+            // Fonts
+            try {
+                const baseFonts = ['monospace', 'sans-serif', 'serif'];
+                const testFonts = [
+                    'Arial', 'Verdana', 'Times New Roman', 'Courier New', 'Georgia',
+                    'Palatino', 'Garamond', 'Bookman', 'Comic Sans MS', 'Trebuchet MS',
+                    'Impact', 'Lucida Sans', 'Tahoma', 'Geneva', 'Helvetica',
+                    'Monaco', 'Consolas', 'Menlo', 'Andale Mono'
+                ];
+
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                const testString = 'mmmmmmmmmmlli';
+                const baseWidths = {};
+                baseFonts.forEach(font => {
+                    ctx.font = '72px ' + font;
+                    baseWidths[font] = ctx.measureText(testString).width;
+                });
+
+                fp.fonts = testFonts.filter(font => {
+                    return baseFonts.some(baseFont => {
+                        ctx.font = '72px ' + font + ', ' + baseFont;
+                        return ctx.measureText(testString).width !== baseWidths[baseFont];
+                    });
+                });
+            } catch (e) {
+                fp.fonts = [];
+            }
+
+            // Plugins
+            fp.plugins = Array.from(navigator.plugins || []).map(p => p.name);
+
+            // Media devices
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                fp.media_devices = {
+                    audioinput: devices.filter(d => d.kind === 'audioinput').length,
+                    videoinput: devices.filter(d => d.kind === 'videoinput').length,
+                    audiooutput: devices.filter(d => d.kind === 'audiooutput').length
+                };
+            } catch (e) {}
+
+            // Battery
+            try {
+                if (navigator.getBattery) {
+                    const battery = await navigator.getBattery();
+                    fp.battery = {
+                        charging: battery.charging,
+                        level: battery.level,
+                        charging_time: battery.chargingTime,
+                        discharging_time: battery.dischargingTime
+                    };
+                }
+            } catch (e) {}
+
+            // Connection
+            if (navigator.connection) {
+                fp.connection = {
+                    type: navigator.connection.effectiveType,
+                    downlink: navigator.connection.downlink,
+                    rtt: navigator.connection.rtt
+                };
+            }
+
+            // Touch support
+            fp.touch_support = {
+                max_points: navigator.maxTouchPoints,
+                touch_event: 'ontouchstart' in window,
+                touch_points: navigator.maxTouchPoints > 0
+            };
+
+            // WebRTC leak
+            try {
+                const pc = new RTCPeerConnection({iceServers: []});
+                pc.createDataChannel('');
+                await pc.createOffer().then(offer => pc.setLocalDescription(offer));
+
+                const ips = [];
+                pc.onicecandidate = (ice) => {
+                    if (!ice || !ice.candidate || !ice.candidate.candidate) return;
+                    const parts = ice.candidate.candidate.split(' ');
+                    const ip = parts[4];
+                    if (ip && !ips.includes(ip)) ips.push(ip);
+                };
+
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                fp.webrtc_ips = ips;
+                pc.close();
+            } catch (e) {}
+
+            // Performance
+            if (window.performance) {
+                fp.performance = {
+                    memory: performance.memory ? {
+                        used: performance.memory.usedJSHeapSize,
+                        total: performance.memory.totalJSHeapSize,
+                        limit: performance.memory.jsHeapSizeLimit
+                    } : null,
+                    timing: {
+                        dns: performance.timing.domainLookupEnd - performance.timing.domainLookupStart,
+                        connect: performance.timing.connectEnd - performance.timing.connectStart,
+                        load: performance.timing.loadEventEnd - performance.timing.navigationStart
+                    }
+                };
+            }
+
+            return fp;
+        }
+
+        function display(data) {
+            document.getElementById('results').style.display = 'block';
+
+            // Score
+            document.getElementById('score').textContent = data.uniqueness_score;
+            document.getElementById('trackability').textContent = data.trackability;
+            document.getElementById('hash').textContent = data.fingerprint_hash;
+            document.getElementById('datapoints').textContent = `${data.data_points} data points collected`;
+
+            // Stats
+            document.getElementById('stat-vectors').textContent = data.tracking_vectors.length;
+            const hardwareIds = [data.system_info.machine_uuid, data.system_info.serial_number, data.system_info.mac_address].filter(Boolean).length;
+            document.getElementById('stat-hardware').textContent = hardwareIds;
+            document.getElementById('stat-browser').textContent = Object.keys(data.client_side).length;
+
+            // Vectors
+            document.getElementById('vectors-list').innerHTML = data.tracking_vectors.map(v => `
+                <div class="vector uniqueness-${v.uniqueness.toLowerCase().replace(' ', '-')}">
+                    <div style="font-size: 1.2em; margin-bottom: 10px; color: #f00;">${v.vector}</div>
+                    <div><span class="label">Value:</span> <span class="value">${v.value}</span></div>
+                    <div><span class="label">Uniqueness:</span> ${v.uniqueness}</div>
+                    <div><span class="label">Description:</span> ${v.description}</div>
+                </div>
+            `).join('');
+
+            // Hardware
+            const hw = data.system_info;
+            document.getElementById('hardware-list').innerHTML = `
+                ${hw.machine_uuid ? `<div class="vector uniqueness-very-high">
+                    <div><span class="label">Machine UUID:</span> <span class="value">${hw.machine_uuid}</span></div>
+                    <div style="color: #f66;">⚠️ PERMANENT HARDWARE ID - Never changes</div>
+                </div>` : ''}
+                ${hw.serial_number ? `<div class="vector uniqueness-very-high">
+                    <div><span class="label">Serial Number:</span> <span class="value">${hw.serial_number}</span></div>
+                    <div style="color: #f66;">⚠️ UNIQUE DEVICE ID</div>
+                </div>` : ''}
+                ${hw.mac_address ? `<div class="vector uniqueness-very-high">
+                    <div><span class="label">MAC Address:</span> <span class="value">${hw.mac_address}</span></div>
+                    <div style="color: #f66;">⚠️ NETWORK CARD ID</div>
+                </div>` : ''}
+                <div class="vector uniqueness-low">
+                    <div><span class="label">Model:</span> ${hw.hardware_model}</div>
+                    <div><span class="label">CPU:</span> ${hw.cpu}</div>
+                    <div><span class="label">Cores:</span> ${hw.cpu_cores}</div>
+                    <div><span class="label">Memory:</span> ${hw.memory_gb}GB</div>
+                </div>
+            `;
+
+            // Network
+            const net = data.network_info;
+            document.getElementById('network-list').innerHTML = `
+                <div class="vector uniqueness-high">
+                    <div><span class="label">Local IP:</span> ${net.local_ip}</div>
+                    <div><span class="label">Gateway:</span> ${net.gateway}</div>
+                    ${net.wifi_ssid ? `<div><span class="label">WiFi SSID:</span> ${net.wifi_ssid}</div>` : ''}
+                    <div><span class="label">DNS Servers:</span> ${net.dns_servers.join(', ')}</div>
+                </div>
+            `;
+        }
+
+        // Auto-scan on load
+        window.addEventListener('load', () => {
+            setTimeout(scan, 500);
+        });
+    </script>
+</body>
+</html>

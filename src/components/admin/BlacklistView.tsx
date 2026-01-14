@@ -261,7 +261,6 @@ export default function BlacklistView() {
 
   const handleAddCase = async () => {
     // TODO: Implement API call to add case
-    console.log('Adding new case:', newCase)
 
     // Refresh list
     await fetchRecentCases()

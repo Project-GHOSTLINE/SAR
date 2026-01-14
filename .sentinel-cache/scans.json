@@ -1,0 +1,623 @@
+[
+  {
+    "id": 1768357707364,
+    "project_name": "sar",
+    "threats_found": 10,
+    "high_severity": 0,
+    "medium_severity": 4,
+    "low_severity": 6,
+    "duration_ms": 3943,
+    "health_score": 74,
+    "scan_details": [
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 1",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page-backup-20260111-115808.tsx:                { id: 's"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 2",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page.backup-temp.tsx:                { id: 'support', la"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 3",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/route.ts:    // TODO: Envoyer les emails de no"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 4",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/[id]/route.ts:    // TODO: Envoyer notificatio"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 5",
+        "severity": "low",
+        "description": "src/app/api/admin/support/messages/route.ts:    // TODO: Envoyer notification em"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 1",
+        "severity": "medium",
+        "description": "File > 100KB: page-backup-20260111-115808.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 2",
+        "severity": "medium",
+        "description": "File > 100KB: page.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 3",
+        "severity": "medium",
+        "description": "File > 100KB: page.backup-temp.tsx"
+      },
+      {
+        "type": "debug-code",
+        "name": "Debug Logs",
+        "severity": "low",
+        "description": "67 console.log statements found"
+      },
+      {
+        "type": "error-handling",
+        "name": "Missing Try-Catch",
+        "severity": "medium",
+        "description": "169 async functions without try-catch"
+      }
+    ],
+    "scanned_at": "2026-01-14T02:28:27.364Z"
+  },
+  {
+    "id": 1768357707167,
+    "project_name": "sar",
+    "threats_found": 10,
+    "high_severity": 0,
+    "medium_severity": 4,
+    "low_severity": 6,
+    "duration_ms": 0,
+    "health_score": 74,
+    "scan_details": [
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 1",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page-backup-20260111-115808.tsx:                { id: 's"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 2",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page.backup-temp.tsx:                { id: 'support', la"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 3",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/route.ts:    // TODO: Envoyer les emails de no"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 4",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/[id]/route.ts:    // TODO: Envoyer notificatio"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 5",
+        "severity": "low",
+        "description": "src/app/api/admin/support/messages/route.ts:    // TODO: Envoyer notification em"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 1",
+        "severity": "medium",
+        "description": "File > 100KB: page-backup-20260111-115808.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 2",
+        "severity": "medium",
+        "description": "File > 100KB: page.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 3",
+        "severity": "medium",
+        "description": "File > 100KB: page.backup-temp.tsx"
+      },
+      {
+        "type": "debug-code",
+        "name": "Debug Logs",
+        "severity": "low",
+        "description": "67 console.log statements found"
+      },
+      {
+        "type": "error-handling",
+        "name": "Missing Try-Catch",
+        "severity": "medium",
+        "description": "169 async functions without try-catch"
+      }
+    ],
+    "scanned_at": "2026-01-14T02:28:27.167Z"
+  },
+  {
+    "id": 1768357422617,
+    "project_name": "sar",
+    "threats_found": 10,
+    "high_severity": 0,
+    "medium_severity": 4,
+    "low_severity": 6,
+    "duration_ms": 3523,
+    "health_score": 74,
+    "scan_details": [
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 1",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page-backup-20260111-115808.tsx:                { id: 's"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 2",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page.backup-temp.tsx:                { id: 'support', la"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 3",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/route.ts:    // TODO: Envoyer les emails de no"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 4",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/[id]/route.ts:    // TODO: Envoyer notificatio"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 5",
+        "severity": "low",
+        "description": "src/app/api/admin/support/messages/route.ts:    // TODO: Envoyer notification em"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 1",
+        "severity": "medium",
+        "description": "File > 100KB: page-backup-20260111-115808.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 2",
+        "severity": "medium",
+        "description": "File > 100KB: page.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 3",
+        "severity": "medium",
+        "description": "File > 100KB: page.backup-temp.tsx"
+      },
+      {
+        "type": "debug-code",
+        "name": "Debug Logs",
+        "severity": "low",
+        "description": "67 console.log statements found"
+      },
+      {
+        "type": "error-handling",
+        "name": "Missing Try-Catch",
+        "severity": "medium",
+        "description": "167 async functions without try-catch"
+      }
+    ],
+    "scanned_at": "2026-01-14T02:23:42.617Z"
+  },
+  {
+    "id": 1768357422444,
+    "project_name": "sar",
+    "threats_found": 10,
+    "high_severity": 0,
+    "medium_severity": 4,
+    "low_severity": 6,
+    "duration_ms": 0,
+    "health_score": 74,
+    "scan_details": [
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 1",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page-backup-20260111-115808.tsx:                { id: 's"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 2",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page.backup-temp.tsx:                { id: 'support', la"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 3",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/route.ts:    // TODO: Envoyer les emails de no"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 4",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/[id]/route.ts:    // TODO: Envoyer notificatio"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 5",
+        "severity": "low",
+        "description": "src/app/api/admin/support/messages/route.ts:    // TODO: Envoyer notification em"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 1",
+        "severity": "medium",
+        "description": "File > 100KB: page-backup-20260111-115808.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 2",
+        "severity": "medium",
+        "description": "File > 100KB: page.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 3",
+        "severity": "medium",
+        "description": "File > 100KB: page.backup-temp.tsx"
+      },
+      {
+        "type": "debug-code",
+        "name": "Debug Logs",
+        "severity": "low",
+        "description": "67 console.log statements found"
+      },
+      {
+        "type": "error-handling",
+        "name": "Missing Try-Catch",
+        "severity": "medium",
+        "description": "167 async functions without try-catch"
+      }
+    ],
+    "scanned_at": "2026-01-14T02:23:42.444Z"
+  },
+  {
+    "id": 1768357409956,
+    "project_name": "sar",
+    "threats_found": 10,
+    "high_severity": 0,
+    "medium_severity": 4,
+    "low_severity": 6,
+    "duration_ms": 3592,
+    "health_score": 74,
+    "scan_details": [
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 1",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page-backup-20260111-115808.tsx:                { id: 's"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 2",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page.backup-temp.tsx:                { id: 'support', la"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 3",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/route.ts:    // TODO: Envoyer les emails de no"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 4",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/[id]/route.ts:    // TODO: Envoyer notificatio"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 5",
+        "severity": "low",
+        "description": "src/app/api/admin/support/messages/route.ts:    // TODO: Envoyer notification em"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 1",
+        "severity": "medium",
+        "description": "File > 100KB: page-backup-20260111-115808.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 2",
+        "severity": "medium",
+        "description": "File > 100KB: page.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 3",
+        "severity": "medium",
+        "description": "File > 100KB: page.backup-temp.tsx"
+      },
+      {
+        "type": "debug-code",
+        "name": "Debug Logs",
+        "severity": "low",
+        "description": "67 console.log statements found"
+      },
+      {
+        "type": "error-handling",
+        "name": "Missing Try-Catch",
+        "severity": "medium",
+        "description": "167 async functions without try-catch"
+      }
+    ],
+    "scanned_at": "2026-01-14T02:23:29.956Z"
+  },
+  {
+    "id": 1768357409779,
+    "project_name": "sar",
+    "threats_found": 10,
+    "high_severity": 0,
+    "medium_severity": 4,
+    "low_severity": 6,
+    "duration_ms": 0,
+    "health_score": 74,
+    "scan_details": [
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 1",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page-backup-20260111-115808.tsx:                { id: 's"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 2",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page.backup-temp.tsx:                { id: 'support', la"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 3",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/route.ts:    // TODO: Envoyer les emails de no"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 4",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/[id]/route.ts:    // TODO: Envoyer notificatio"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 5",
+        "severity": "low",
+        "description": "src/app/api/admin/support/messages/route.ts:    // TODO: Envoyer notification em"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 1",
+        "severity": "medium",
+        "description": "File > 100KB: page-backup-20260111-115808.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 2",
+        "severity": "medium",
+        "description": "File > 100KB: page.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 3",
+        "severity": "medium",
+        "description": "File > 100KB: page.backup-temp.tsx"
+      },
+      {
+        "type": "debug-code",
+        "name": "Debug Logs",
+        "severity": "low",
+        "description": "67 console.log statements found"
+      },
+      {
+        "type": "error-handling",
+        "name": "Missing Try-Catch",
+        "severity": "medium",
+        "description": "167 async functions without try-catch"
+      }
+    ],
+    "scanned_at": "2026-01-14T02:23:29.779Z"
+  },
+  {
+    "id": 1768357391486,
+    "project_name": "sar",
+    "threats_found": 10,
+    "high_severity": 0,
+    "medium_severity": 4,
+    "low_severity": 6,
+    "duration_ms": 3768,
+    "health_score": 74,
+    "scan_details": [
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 1",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page-backup-20260111-115808.tsx:                { id: 's"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 2",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page.backup-temp.tsx:                { id: 'support', la"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 3",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/route.ts:    // TODO: Envoyer les emails de no"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 4",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/[id]/route.ts:    // TODO: Envoyer notificatio"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 5",
+        "severity": "low",
+        "description": "src/app/api/admin/support/messages/route.ts:    // TODO: Envoyer notification em"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 1",
+        "severity": "medium",
+        "description": "File > 100KB: page-backup-20260111-115808.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 2",
+        "severity": "medium",
+        "description": "File > 100KB: page.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 3",
+        "severity": "medium",
+        "description": "File > 100KB: page.backup-temp.tsx"
+      },
+      {
+        "type": "debug-code",
+        "name": "Debug Logs",
+        "severity": "low",
+        "description": "67 console.log statements found"
+      },
+      {
+        "type": "error-handling",
+        "name": "Missing Try-Catch",
+        "severity": "medium",
+        "description": "167 async functions without try-catch"
+      }
+    ],
+    "scanned_at": "2026-01-14T02:23:11.486Z"
+  },
+  {
+    "id": 1768357391293,
+    "project_name": "sar",
+    "threats_found": 10,
+    "high_severity": 0,
+    "medium_severity": 4,
+    "low_severity": 6,
+    "duration_ms": 0,
+    "health_score": 74,
+    "scan_details": [
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 1",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page-backup-20260111-115808.tsx:                { id: 's"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 2",
+        "severity": "low",
+        "description": "src/app/admin/dashboard/page.backup-temp.tsx:                { id: 'support', la"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 3",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/route.ts:    // TODO: Envoyer les emails de no"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 4",
+        "severity": "low",
+        "description": "src/app/api/admin/support/tickets/[id]/route.ts:    // TODO: Envoyer notificatio"
+      },
+      {
+        "type": "tech-debt",
+        "name": "Tech Debt 5",
+        "severity": "low",
+        "description": "src/app/api/admin/support/messages/route.ts:    // TODO: Envoyer notification em"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 1",
+        "severity": "medium",
+        "description": "File > 100KB: page-backup-20260111-115808.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 2",
+        "severity": "medium",
+        "description": "File > 100KB: page.tsx"
+      },
+      {
+        "type": "large-file",
+        "name": "Large File 3",
+        "severity": "medium",
+        "description": "File > 100KB: page.backup-temp.tsx"
+      },
+      {
+        "type": "debug-code",
+        "name": "Debug Logs",
+        "severity": "low",
+        "description": "67 console.log statements found"
+      },
+      {
+        "type": "error-handling",
+        "name": "Missing Try-Catch",
+        "severity": "medium",
+        "description": "167 async functions without try-catch"
+      }
+    ],
+    "scanned_at": "2026-01-14T02:23:11.293Z"
+  },
+  {
+    "id": 1768357380452,
+    "project_name": "sar",
+    "threats_found": 6,
+    "high_severity": 0,
+    "medium_severity": 3,
+    "low_severity": 3,
+    "duration_ms": 4523,
+    "health_score": 82,
+    "scan_details": [
+      {
+        "type": "tech-debt",
+        "severity": "low"
+      },
+      {
+        "type": "tech-debt",
+        "severity": "low"
+      },
+      {
+        "type": "large-file",
+        "severity": "medium"
+      },
+      {
+        "type": "large-file",
+        "severity": "medium"
+      },
+      {
+        "type": "debug-code",
+        "severity": "low"
+      },
+      {
+        "type": "error-handling",
+        "severity": "medium"
+      }
+    ],
+    "scanned_at": "2026-01-14T02:23:00.452Z"
+  }
+]

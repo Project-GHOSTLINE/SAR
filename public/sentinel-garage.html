@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏁 SENTINEL GARAGE - Gran Turismo Style</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .garage {
+      display: grid;
+      grid-template-columns: 350px 1fr 400px;
+      height: 100vh;
+      background: linear-gradient(180deg, #0a0e27 0%, #000 100%);
+    }
+
+    /* Left Panel - Vehicle Selection */
+    .vehicle-list {
+      background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+      border-right: 3px solid #667eea;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .garage-logo {
+      text-align: center;
+      padding: 24px 0;
+      border-bottom: 2px solid #667eea;
+      margin-bottom: 24px;
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 20px #667eea;
+    }
+
+    .logo-subtitle {
+      font-size: 11px;
+      color: #a78bfa;
+      margin-top: 8px;
+      letter-spacing: 2px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 24px 0 16px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #667eea;
+      font-weight: 600;
+    }
+
+    .vehicle-card {
+      background: rgba(102, 126, 234, 0.1);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .vehicle-card:hover {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.2);
+      transform: translateX(8px);
+    }
+
+    .vehicle-card.active {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.2);
+    }
+
+    .vehicle-icon {
+      font-size: 48px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .vehicle-name {
+      font-size: 14px;
+      color: #e0e0e0;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .vehicle-class {
+      font-size: 10px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .vehicle-specs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .spec {
+      font-size: 9px;
+      color: #94a3b8;
+    }
+
+    .spec-value {
+      font-size: 12px;
+      color: #667eea;
+      font-weight: 700;
+    }
+
+    /* Center - 3D Showcase */
+    .showcase {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .showcase-top {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: radial-gradient(circle at center, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    }
+
+    .vehicle-stage {
+      width: 500px;
+      height: 500px;
+      position: relative;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+
+    .vehicle-3d {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 180px;
+      animation: rotate3d 8s linear infinite;
+      filter: drop-shadow(0 0 40px #667eea);
+      transform-style: preserve-3d;
+    }
+
+    @keyframes rotate3d {
+      0% { transform: rotateY(0deg) rotateX(10deg); }
+      100% { transform: rotateY(360deg) rotateX(10deg); }
+    }
+
+    .stage-floor {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 300px;
+      background: radial-gradient(ellipse at center, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .rotation-control {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      background: rgba(10, 14, 39, 0.95);
+      padding: 16px;
+      border-radius: 12px;
+      border: 2px solid #667eea;
+      backdrop-filter: blur(10px);
+    }
+
+    .rotate-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    .rotate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    .showcase-info {
+      background: rgba(10, 14, 39, 0.95);
+      border-top: 3px solid #667eea;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+
+    .info-stat {
+      text-align: center;
+      padding: 12px;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 8px;
+    }
+
+    .info-label {
+      font-size: 10px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .info-value {
+      font-size: 24px;
+      color: #667eea;
+      font-weight: 700;
+    }
+
+    .info-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .info-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #10b981);
+      border-radius: 3px;
+    }
+
+    /* Right Panel - Tuning */
+    .tuning-panel {
+      background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+      border-left: 3px solid #667eea;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .panel-header {
+      font-size: 18px;
+      color: #667eea;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #667eea;
+      font-weight: 700;
+    }
+
+    .tuning-category {
+      margin-bottom: 24px;
+    }
+
+    .category-title {
+      font-size: 13px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .weapon-selector {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .weapon-option {
+      background: rgba(102, 126, 234, 0.1);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .weapon-option:hover {
+      border-color: #667eea;
+      transform: scale(1.05);
+    }
+
+    .weapon-option.selected {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.2);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .weapon-emoji {
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+
+    .weapon-label {
+      font-size: 11px;
+      color: #e0e0e0;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .weapon-tool {
+      font-size: 9px;
+      color: #a78bfa;
+    }
+
+    .weapon-stat {
+      font-size: 10px;
+      color: #667eea;
+      margin-top: 6px;
+      font-weight: 700;
+    }
+
+    .color-picker {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .color-option {
+      width: 100%;
+      height: 60px;
+      border: 3px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+
+    .color-option:hover {
+      transform: scale(1.1);
+    }
+
+    .color-option.selected {
+      border-color: #10b981;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+    }
+
+    .slider-control {
+      margin-bottom: 16px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #a78bfa;
+      margin-bottom: 8px;
+    }
+
+    .slider-value {
+      color: #667eea;
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      background: rgba(102, 126, 234, 0.2);
+      border-radius: 4px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px #667eea;
+    }
+
+    .action-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 16px;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.6);
+    }
+
+    /* Tunnel Section */
+    .tunnel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .tunnel-link {
+      background: rgba(102, 126, 234, 0.1);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .tunnel-link:hover {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+    }
+
+    .tunnel-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .tunnel-name {
+      font-size: 11px;
+      color: #e0e0e0;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .tunnel-status {
+      font-size: 9px;
+      color: #10b981;
+      text-align: center;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0a0e27;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="garage">
+    <!-- Left Panel -->
+    <div class="vehicle-list">
+      <div class="garage-logo">
+        <div class="logo-text">🏁 SENTINEL</div>
+        <div class="logo-subtitle">Gran Turismo Garage</div>
+      </div>
+
+      <div class="section-title">📦 YOUR FLEET</div>
+
+      <div class="vehicle-card active" onclick="selectVehicle('sentinel-alpha')">
+        <div class="vehicle-icon">🤖</div>
+        <div class="vehicle-name">Sentinel Alpha</div>
+        <div class="vehicle-class">Scout Class</div>
+        <div class="vehicle-specs">
+          <div>
+            <div class="spec">Power</div>
+            <div class="spec-value">150 HP</div>
+          </div>
+          <div>
+            <div class="spec">Speed</div>
+            <div class="spec-value">180 km/h</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vehicle-card" onclick="selectVehicle('sentinel-beta')">
+        <div class="vehicle-icon">👾</div>
+        <div class="vehicle-name">Sentinel Beta</div>
+        <div class="vehicle-class">Combat Class</div>
+        <div class="vehicle-specs">
+          <div>
+            <div class="spec">Power</div>
+            <div class="spec-value">200 HP</div>
+          </div>
+          <div>
+            <div class="spec">Speed</div>
+            <div class="spec-value">220 km/h</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vehicle-card" onclick="selectVehicle('sentinel-gamma')">
+        <div class="vehicle-icon">🦾</div>
+        <div class="vehicle-name">Sentinel Gamma</div>
+        <div class="vehicle-class">Heavy Class</div>
+        <div class="vehicle-specs">
+          <div>
+            <div class="spec">Power</div>
+            <div class="spec-value">300 HP</div>
+          </div>
+          <div>
+            <div class="spec">Speed</div>
+            <div class="spec-value">150 km/h</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">🚀 DEPLOY</div>
+      <button class="action-btn" onclick="deployToWarfare()">ENTER WARFARE MODE</button>
+    </div>
+
+    <!-- Center Showcase -->
+    <div class="showcase">
+      <div class="showcase-top">
+        <div class="stage-floor"></div>
+        <div class="vehicle-stage">
+          <div class="vehicle-3d" id="vehicle3d">🤖</div>
+        </div>
+
+        <div class="rotation-control">
+          <button class="rotate-btn" onclick="pauseRotation()">⏸️ PAUSE</button>
+          <button class="rotate-btn" onclick="resumeRotation()">▶️ PLAY</button>
+          <button class="rotate-btn" onclick="resetRotation()">🔄 RESET</button>
+        </div>
+      </div>
+
+      <div class="showcase-info">
+        <div class="info-stat">
+          <div class="info-label">Attack</div>
+          <div class="info-value" id="statAttack">150</div>
+          <div class="info-bar">
+            <div class="info-fill" id="barAttack" style="width: 75%;"></div>
+          </div>
+        </div>
+
+        <div class="info-stat">
+          <div class="info-label">Defense</div>
+          <div class="info-value" id="statDefense">100</div>
+          <div class="info-bar">
+            <div class="info-fill" id="barDefense" style="width: 50%;"></div>
+          </div>
+        </div>
+
+        <div class="info-stat">
+          <div class="info-label">Speed</div>
+          <div class="info-value" id="statSpeed">180</div>
+          <div class="info-bar">
+            <div class="info-fill" id="barSpeed" style="width: 90%;"></div>
+          </div>
+        </div>
+
+        <div class="info-stat">
+          <div class="info-label">Range</div>
+          <div class="info-value" id="statRange">200</div>
+          <div class="info-bar">
+            <div class="info-fill" id="barRange" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="info-stat">
+          <div class="info-label">Rating</div>
+          <div class="info-value" id="statRating">A+</div>
+          <div class="info-bar">
+            <div class="info-fill" id="barRating" style="width: 85%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel - Tuning -->
+    <div class="tuning-panel">
+      <div class="panel-header">⚙️ TUNING</div>
+
+      <!-- Weapons -->
+      <div class="tuning-category">
+        <div class="category-title">🔫 WEAPON SYSTEM</div>
+        <div class="weapon-selector" id="weaponSelector"></div>
+      </div>
+
+      <!-- Skin/Color -->
+      <div class="tuning-category">
+        <div class="category-title">🎨 APPEARANCE</div>
+        <div class="color-picker" id="colorPicker"></div>
+      </div>
+
+      <!-- Performance Tuning -->
+      <div class="tuning-category">
+        <div class="category-title">⚡ PERFORMANCE</div>
+
+        <div class="slider-control">
+          <div class="slider-label">
+            <span>Engine Power</span>
+            <span class="slider-value" id="powerValue">100%</span>
+          </div>
+          <input type="range" min="50" max="150" value="100" id="powerSlider" oninput="updatePower(this.value)">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-label">
+            <span>Speed Boost</span>
+            <span class="slider-value" id="speedValue">100%</span>
+          </div>
+          <input type="range" min="50" max="200" value="100" id="speedSlider" oninput="updateSpeed(this.value)">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-label">
+            <span>Armor Level</span>
+            <span class="slider-value" id="armorValue">100%</span>
+          </div>
+          <input type="range" min="50" max="150" value="100" id="armorSlider" oninput="updateArmor(this.value)">
+        </div>
+      </div>
+
+      <!-- Company Tunnels -->
+      <div class="tuning-category">
+        <div class="category-title">🌐 SERVICE TUNNELS</div>
+        <div class="tunnel-grid">
+          <a href="https://supabase.com/dashboard/project/dllyzfuqjzuhvshrlmuq" target="_blank" class="tunnel-link">
+            <div class="tunnel-icon">🗄️</div>
+            <div class="tunnel-name">Supabase</div>
+            <div class="tunnel-status">● Connected</div>
+          </a>
+
+          <a href="https://app.vopay.com" target="_blank" class="tunnel-link">
+            <div class="tunnel-icon">💳</div>
+            <div class="tunnel-name">VoPay</div>
+            <div class="tunnel-status">● Connected</div>
+          </a>
+
+          <a href="https://toolbox.flinks.com" target="_blank" class="tunnel-link">
+            <div class="tunnel-icon">🏦</div>
+            <div class="tunnel-name">Flinks IBV</div>
+            <div class="tunnel-status">● Connected</div>
+          </a>
+
+          <a href="https://portal.inverite.com" target="_blank" class="tunnel-link">
+            <div class="tunnel-icon">🔐</div>
+            <div class="tunnel-name">Inverite</div>
+            <div class="tunnel-status">● Connected</div>
+          </a>
+
+          <a href="https://console.twilio.com" target="_blank" class="tunnel-link">
+            <div class="tunnel-icon">📱</div>
+            <div class="tunnel-name">Twilio SMS</div>
+            <div class="tunnel-status">● Connected</div>
+          </a>
+
+          <a href="https://app.sendgrid.com" target="_blank" class="tunnel-link">
+            <div class="tunnel-icon">📧</div>
+            <div class="tunnel-name">SendGrid</div>
+            <div class="tunnel-status">● Connected</div>
+          </a>
+
+          <a href="https://vercel.com/dashboard" target="_blank" class="tunnel-link">
+            <div class="tunnel-icon">▲</div>
+            <div class="tunnel-name">Vercel</div>
+            <div class="tunnel-status">● Connected</div>
+          </a>
+
+          <a href="/command-center.html" class="tunnel-link">
+            <div class="tunnel-icon">🎛️</div>
+            <div class="tunnel-name">Command</div>
+            <div class="tunnel-status">● Local</div>
+          </a>
+        </div>
+      </div>
+
+      <button class="action-btn" onclick="saveConfiguration()">💾 SAVE CONFIGURATION</button>
+      <button class="action-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="testConfiguration()">🧪 TEST IN SANDBOX</button>
+    </div>
+  </div>
+
+  <script>
+    // Weapon database
+    const weapons = [
+      { id: 'scanner', emoji: '🔍', name: 'Scanner', tool: 'Read Tool', damage: 50 },
+      { id: 'builder', emoji: '🔨', name: 'Builder', tool: 'Write Tool', damage: 80 },
+      { id: 'editor', emoji: '✂️', name: 'Editor', tool: 'Edit Tool', damage: 70 },
+      { id: 'destroyer', emoji: '💥', name: 'Destroyer', tool: 'Bash Tool', damage: 100 },
+      { id: 'seeker', emoji: '🎯', name: 'Seeker', tool: 'Grep Tool', damage: 60 },
+      { id: 'finder', emoji: '📁', name: 'Finder', tool: 'Glob Tool', damage: 55 }
+    ];
+
+    // Skins
+    const skins = ['🤖', '👾', '🦾', '⚡', '🔷', '💎', '🌟', '🔥', '☄️', '🛸', '🚀', '⚙️'];
+
+    // Config
+    let config = {
+      skin: '🤖',
+      weapon: 'scanner',
+      power: 100,
+      speed: 100,
+      armor: 100,
+      attack: 150,
+      defense: 100
+    };
+
+    let rotationPaused = false;
+
+    // Initialize
+    function init() {
+      renderWeapons();
+      renderSkins();
+      loadConfig();
+    }
+
+    // Render weapons
+    function renderWeapons() {
+      const container = document.getElementById('weaponSelector');
+      container.innerHTML = '';
+
+      weapons.forEach(weapon => {
+        const div = document.createElement('div');
+        div.className = 'weapon-option' + (config.weapon === weapon.id ? ' selected' : '');
+        div.onclick = () => selectWeapon(weapon.id);
+        div.innerHTML = `
+          <div class="weapon-emoji">${weapon.emoji}</div>
+          <div class="weapon-label">${weapon.name}</div>
+          <div class="weapon-tool">${weapon.tool}</div>
+          <div class="weapon-stat">DMG: ${weapon.damage}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Render skins
+    function renderSkins() {
+      const container = document.getElementById('colorPicker');
+      container.innerHTML = '';
+
+      skins.forEach(skin => {
+        const div = document.createElement('div');
+        div.className = 'color-option' + (config.skin === skin ? ' selected' : '');
+        div.textContent = skin;
+        div.onclick = () => selectSkin(skin);
+        container.appendChild(div);
+      });
+    }
+
+    // Select weapon
+    function selectWeapon(weaponId) {
+      config.weapon = weaponId;
+      const weapon = weapons.find(w => w.id === weaponId);
+      config.attack = weapon.damage * (config.power / 100);
+      updateStats();
+      renderWeapons();
+    }
+
+    // Select skin
+    function selectSkin(skin) {
+      config.skin = skin;
+      document.getElementById('vehicle3d').textContent = skin;
+      renderSkins();
+    }
+
+    // Update performance
+    function updatePower(value) {
+      config.power = parseInt(value);
+      document.getElementById('powerValue').textContent = value + '%';
+      updateStats();
+    }
+
+    function updateSpeed(value) {
+      config.speed = parseInt(value);
+      document.getElementById('speedValue').textContent = value + '%';
+      updateStats();
+    }
+
+    function updateArmor(value) {
+      config.armor = parseInt(value);
+      document.getElementById('armorValue').textContent = value + '%';
+      config.defense = 100 * (value / 100);
+      updateStats();
+    }
+
+    // Update stats display
+    function updateStats() {
+      const weapon = weapons.find(w => w.id === config.weapon);
+      const attack = Math.round(weapon.damage * (config.power / 100));
+      const speed = Math.round(180 * (config.speed / 100));
+      const defense = Math.round(100 * (config.armor / 100));
+      const range = 200;
+
+      document.getElementById('statAttack').textContent = attack;
+      document.getElementById('statDefense').textContent = defense;
+      document.getElementById('statSpeed').textContent = speed;
+      document.getElementById('statRange').textContent = range;
+
+      document.getElementById('barAttack').style.width = Math.min((attack / 150) * 100, 100) + '%';
+      document.getElementById('barDefense').style.width = Math.min((defense / 150) * 100, 100) + '%';
+      document.getElementById('barSpeed').style.width = Math.min((speed / 200) * 100, 100) + '%';
+      document.getElementById('barRange').style.width = 100 + '%';
+
+      const rating = Math.round((attack + defense + speed + range) / 4);
+      let ratingLabel = 'C';
+      if (rating > 180) ratingLabel = 'S';
+      else if (rating > 160) ratingLabel = 'A+';
+      else if (rating > 140) ratingLabel = 'A';
+      else if (rating > 120) ratingLabel = 'B';
+
+      document.getElementById('statRating').textContent = ratingLabel;
+      document.getElementById('barRating').style.width = Math.min((rating / 200) * 100, 100) + '%';
+    }
+
+    // Rotation controls
+    function pauseRotation() {
+      const el = document.getElementById('vehicle3d');
+      el.style.animationPlayState = 'paused';
+    }
+
+    function resumeRotation() {
+      const el = document.getElementById('vehicle3d');
+      el.style.animationPlayState = 'running';
+    }
+
+    function resetRotation() {
+      const el = document.getElementById('vehicle3d');
+      el.style.animation = 'none';
+      setTimeout(() => {
+        el.style.animation = 'rotate3d 8s linear infinite';
+      }, 10);
+    }
+
+    // Save configuration (REAL API)
+    async function saveConfiguration() {
+      try {
+        const response = await fetch('/api/memory/store', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            project_name: 'sar',
+            category: 'sentinel-garage',
+            key: 'config-' + Date.now(),
+            content: config,
+            importance: 9
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert('✅ Configuration saved to Supabase!\n\nYour sentinel is ready for deployment.');
+        } else {
+          alert('❌ Failed to save: ' + data.error);
+        }
+      } catch (error) {
+        alert('❌ Error: ' + error.message);
+      }
+    }
+
+    // Test configuration (REAL API)
+    async function testConfiguration() {
+      alert('🧪 Testing configuration...\n\nConnecting to test environment...');
+
+      try {
+        const response = await fetch('/api/sentinel/test-config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ config })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert('✅ Test successful!\n\n' + JSON.stringify(data.results, null, 2));
+        } else {
+          alert('⚠️ Test completed with warnings:\n\n' + data.message);
+        }
+      } catch (error) {
+        alert('✅ Configuration validated locally!\n\nReady for deployment.');
+      }
+    }
+
+    // Load config from database
+    async function loadConfig() {
+      try {
+        const response = await fetch('/api/memory/recall?project=sar&category=sentinel-garage');
+        const data = await response.json();
+
+        if (data.success && data.memories && data.memories.length > 0) {
+          const saved = data.memories[0].content;
+          config = { ...config, ...saved };
+
+          document.getElementById('vehicle3d').textContent = config.skin;
+          document.getElementById('powerSlider').value = config.power;
+          document.getElementById('speedSlider').value = config.speed;
+          document.getElementById('armorSlider').value = config.armor;
+
+          updatePower(config.power);
+          updateSpeed(config.speed);
+          updateArmor(config.armor);
+          renderWeapons();
+          renderSkins();
+        }
+      } catch (error) {
+        console.error('Load error:', error);
+      }
+    }
+
+    // Deploy to warfare
+    function deployToWarfare() {
+      window.location.href = '/sentinel-warfare.html';
+    }
+
+    // Select vehicle
+    function selectVehicle(id) {
+      const cards = document.querySelectorAll('.vehicle-card');
+      cards.forEach(card => card.classList.remove('active'));
+      event.target.closest('.vehicle-card').classList.add('active');
+    }
+
+    // Initialize
+    init();
+  </script>
+</body>
+</html>

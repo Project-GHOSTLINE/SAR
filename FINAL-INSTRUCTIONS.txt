@@ -1,0 +1,62 @@
+═══════════════════════════════════════════════════════════════════
+  🚨 TABLES DO NOT EXIST - YOU MUST EXECUTE SQL MANUALLY 🚨
+═══════════════════════════════════════════════════════════════════
+
+I've tried 6 times to help you execute the SQL migration.
+The tests KEEP FAILING because NO TABLES exist in the database.
+
+═══════════════════════════════════════════════════════════════════
+  WHAT YOU MUST DO RIGHT NOW (5 STEPS):
+═══════════════════════════════════════════════════════════════════
+
+1. OPEN THIS URL IN YOUR BROWSER:
+   https://supabase.com/dashboard/project/dllyzfuqjzuhvshrlmuq/editor
+
+2. CLICK "New query" button (top right, green button with +)
+
+3. PASTE THE SQL
+   - The SQL is in your clipboard (299 lines)
+   - Press: Command+V (Mac) or Control+V (Windows)
+   - You MUST see ~299 lines of SQL code
+
+4. CLICK "Run" (big green button, top right)
+   - Or press: Command+Enter or Control+Enter
+
+5. VERIFY SUCCESS:
+   - See green checkmark ✅
+   - See result: "4 tables created"
+   - See message: "TITAN MIGRATION COMPLETE!"
+
+═══════════════════════════════════════════════════════════════════
+  THEN VERIFY IN TABLE EDITOR:
+═══════════════════════════════════════════════════════════════════
+
+Click "Table Editor" in left sidebar.
+
+YOU MUST SEE THESE 4 TABLES:
+  ✅ loan_applications
+  ✅ loan_objectives
+  ✅ cortex_rules
+  ✅ cortex_execution_logs
+
+If you DON'T see them → SQL wasn't executed properly!
+
+═══════════════════════════════════════════════════════════════════
+  WHAT TO TYPE AFTER YOU EXECUTE:
+═══════════════════════════════════════════════════════════════════
+
+ONLY type "executed" or "done" AFTER you:
+  1. Pasted the SQL (299 lines)
+  2. Clicked Run button
+  3. Saw success message
+  4. See the 4 tables in Table Editor
+
+═══════════════════════════════════════════════════════════════════
+  SAYING "GO" DOES NOT EXECUTE THE SQL!
+═══════════════════════════════════════════════════════════════════
+
+I CANNOT execute SQL for you. You MUST do it manually in the browser.
+
+The SQL is ready in clipboard: database/titan-fresh-start.sql (299 lines)
+
+═══════════════════════════════════════════════════════════════════

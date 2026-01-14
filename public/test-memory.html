@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Système de Mémoire - SAR</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    h1 {
+      color: #1a202c;
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #718096;
+      font-size: 16px;
+      margin-bottom: 32px;
+    }
+    .status {
+      display: inline-block;
+      padding: 6px 16px;
+      background: #10b981;
+      color: white;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    .test-section {
+      margin-top: 24px;
+    }
+    .test-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-right: 12px;
+      margin-bottom: 12px;
+    }
+    button:hover {
+      background: #5a67d8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    .result {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .error {
+      color: #e53e3e;
+      background: #fff5f5;
+      border-color: #fc8181;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .stat {
+      background: #f7fafc;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      color: #718096;
+      font-size: 14px;
+    }
+    .detailed-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .detail-card {
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+    }
+    .detail-card h3 {
+      color: #2d3748;
+      font-size: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .detail-item:last-child {
+      border-bottom: none;
+    }
+    .detail-label {
+      color: #718096;
+      font-size: 13px;
+    }
+    .detail-value {
+      color: #2d3748;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .memory-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 12px;
+    }
+    .memory-item {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border-left: 3px solid #667eea;
+    }
+    .memory-item h4 {
+      color: #2d3748;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .memory-item p {
+      color: #718096;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .tags {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .tag {
+      background: #667eea;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+    }
+    code {
+      background: #2d3748;
+      color: #48bb78;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .importance-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .importance-10 { background: #f56565; color: white; }
+    .importance-9 { background: #ed8936; color: white; }
+    .importance-8 { background: #ecc94b; color: white; }
+    .importance-7 { background: #48bb78; color: white; }
+    .importance-low { background: #cbd5e0; color: #2d3748; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>🧠 Système de Mémoire Claude</h1>
+      <p class="subtitle">Solution Argent Rapide - Dashboard Complet</p>
+      <span class="status">✅ OPÉRATIONNEL</span>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value" id="memoryCount">-</div>
+          <div class="stat-label">Mémoires Totales</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="sessionCount">-</div>
+          <div class="stat-label">Sessions</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="docsCount">-</div>
+          <div class="stat-label">Documents Lus</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="insightsCount">-</div>
+          <div class="stat-label">Insights Code</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="questionsCount">-</div>
+          <div class="stat-label">Questions Ouvertes</div>
+        </div>
+      </div>
+
+      <div class="detailed-stats">
+        <div class="detail-card">
+          <h3>📊 Par Catégorie</h3>
+          <div id="categoryStats">Chargement...</div>
+        </div>
+        <div class="detail-card">
+          <h3>🏆 Top Importance</h3>
+          <div id="topImportance">Chargement...</div>
+        </div>
+        <div class="detail-card">
+          <h3>📅 Sessions Récentes</h3>
+          <div id="recentSessions">Chargement...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="test-title">🧠 Mémoires Stockées</div>
+      <div id="memoriesList" class="memory-list">Chargement...</div>
+    </div>
+
+    <div class="card">
+      <div class="test-section">
+        <div class="test-title">🔍 Tests Disponibles</div>
+        <button onclick="testContext()">📊 Charger le Contexte Complet</button>
+        <button onclick="testRecall('stack')">💻 Recall: Stack</button>
+        <button onclick="testRecall('deployment')">🚀 Recall: Déploiement</button>
+        <button onclick="testRecall('urls')">🌐 Recall: URLs</button>
+        <button onclick="testRecall('security')">🔐 Recall: Security</button>
+        <button onclick="testStore()">💾 Test: Stocker</button>
+        <button onclick="loadAllStats()">📈 Rafraîchir Tout</button>
+        <div id="result" class="result" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="test-title">📚 Guide d'Utilisation</div>
+      <p style="color: #4a5568; line-height: 1.6; margin-top: 16px;">
+        <strong>Pour Claude:</strong><br>
+        • Au début de chaque session: <code>GET /api/memory/context?project=sar</code><br>
+        • Rechercher: <code>GET /api/memory/recall?project=sar&category=stack</code><br>
+        • Stocker: <code>POST /api/memory/store</code><br>
+        • Session: <code>POST /api/memory/session</code>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    let currentContext = null;
+
+    function showResult(text, isError) {
+      const result = document.getElementById('result');
+      result.style.display = 'block';
+      result.className = isError ? 'result error' : 'result';
+      result.textContent = text;
+    }
+
+    function getImportanceBadge(importance) {
+      const level = importance >= 10 ? 10 : importance >= 9 ? 9 : importance >= 8 ? 8 : importance >= 7 ? 7 : 'low';
+      return `<span class="importance-badge importance-${level}">★ ${importance}/10</span>`;
+    }
+
+    async function loadAllStats() {
+      await Promise.all([
+        loadBasicStats(),
+        loadMemoriesList(),
+        loadDetailedStats()
+      ]);
+    }
+
+    async function loadBasicStats() {
+      try {
+        const res = await fetch(API_BASE + '/api/memory/context?project=sar');
+        const data = await res.json();
+
+        if (data.success) {
+          currentContext = data.context;
+          const ctx = data.context;
+
+          document.getElementById('memoryCount').textContent = ctx.top_memories ? ctx.top_memories.length : 0;
+          document.getElementById('sessionCount').textContent = ctx.recent_sessions ? ctx.recent_sessions.length : 0;
+          document.getElementById('docsCount').textContent = ctx.docs_count || 0;
+          document.getElementById('insightsCount').textContent = ctx.insights_count || 0;
+          document.getElementById('questionsCount').textContent = ctx.pending_questions || 0;
+        }
+      } catch (error) {
+        console.error('Erreur stats de base:', error);
+      }
+    }
+
+    async function loadDetailedStats() {
+      try {
+        const res = await fetch(API_BASE + '/api/memory/recall?project=sar&limit=100');
+        const data = await res.json();
+
+        if (data.success && data.memories) {
+          // Stats par catégorie
+          const categories = {};
+          data.memories.forEach(m => {
+            categories[m.category] = (categories[m.category] || 0) + 1;
+          });
+
+          let categoryHTML = '';
+          Object.entries(categories).sort((a, b) => b[1] - a[1]).forEach(([cat, count]) => {
+            categoryHTML += `
+              <div class="detail-item">
+                <span class="detail-label">${cat}</span>
+                <span class="detail-value">${count}</span>
+              </div>
+            `;
+          });
+          document.getElementById('categoryStats').innerHTML = categoryHTML || 'Aucune catégorie';
+
+          // Top importance
+          const topMemories = data.memories
+            .sort((a, b) => b.importance - a.importance)
+            .slice(0, 5);
+
+          let topHTML = '';
+          topMemories.forEach(m => {
+            topHTML += `
+              <div class="detail-item">
+                <span class="detail-label">${m.category}/${m.key}</span>
+                <span class="detail-value">${getImportanceBadge(m.importance)}</span>
+              </div>
+            `;
+          });
+          document.getElementById('topImportance').innerHTML = topHTML || 'Aucune mémoire';
+        }
+
+        // Sessions récentes
+        if (currentContext && currentContext.recent_sessions) {
+          let sessionsHTML = '';
+          currentContext.recent_sessions.slice(0, 3).forEach(s => {
+            const date = new Date(s.date).toLocaleDateString('fr-FR');
+            sessionsHTML += `
+              <div class="detail-item">
+                <span class="detail-label">${date}</span>
+                <span class="detail-value">${s.tasks_completed ? s.tasks_completed.length : 0} tâches</span>
+              </div>
+            `;
+          });
+          document.getElementById('recentSessions').innerHTML = sessionsHTML || 'Aucune session';
+        }
+      } catch (error) {
+        console.error('Erreur stats détaillées:', error);
+      }
+    }
+
+    async function loadMemoriesList() {
+      try {
+        const res = await fetch(API_BASE + '/api/memory/recall?project=sar&limit=50');
+        const data = await res.json();
+
+        if (data.success && data.memories) {
+          let html = '';
+          data.memories.forEach(m => {
+            const tags = m.tags ? m.tags.map(t => `<span class="tag">${t}</span>`).join('') : '';
+            html += `
+              <div class="memory-item">
+                <h4>${m.category} / ${m.key} ${getImportanceBadge(m.importance)}</h4>
+                <p>${m.context || 'Pas de contexte'}</p>
+                <div class="tags">${tags}</div>
+              </div>
+            `;
+          });
+          document.getElementById('memoriesList').innerHTML = html || '<p style="color: #718096;">Aucune mémoire stockée</p>';
+        }
+      } catch (error) {
+        console.error('Erreur liste mémoires:', error);
+        document.getElementById('memoriesList').innerHTML = '<p style="color: #e53e3e;">Erreur de chargement</p>';
+      }
+    }
+
+    async function testContext() {
+      showResult('⏳ Chargement du contexte...', false);
+      try {
+        const res = await fetch(API_BASE + '/api/memory/context?project=sar');
+        const data = await res.json();
+        showResult(JSON.stringify(data, null, 2));
+      } catch (error) {
+        showResult('❌ Erreur: ' + error.message, true);
+      }
+    }
+
+    async function testRecall(category) {
+      showResult('⏳ Recherche: ' + category + '...', false);
+      try {
+        const res = await fetch(API_BASE + '/api/memory/recall?project=sar&category=' + category);
+        const data = await res.json();
+
+        if (data.success && data.memories && data.memories.length > 0) {
+          let formatted = formatMemoryDisplay(category, data.memories);
+          showResult(formatted);
+        } else {
+          showResult('Aucune mémoire trouvée pour: ' + category);
+        }
+      } catch (error) {
+        showResult('❌ Erreur: ' + error.message, true);
+      }
+    }
+
+    function formatMemoryDisplay(category, memories) {
+      let output = '🧠 MÉMOIRE: ' + category.toUpperCase() + '\n';
+      output += '═'.repeat(60) + '\n\n';
+
+      memories.forEach((mem, index) => {
+        output += (index + 1) + '. ' + mem.key + ' [Importance: ' + mem.importance + '/10]\n';
+        output += '─'.repeat(60) + '\n';
+
+        if (category === 'stack' && mem.content) {
+          output += '📦 Stack Technique:\n';
+          if (mem.content.frontend) output += '  Frontend: ' + mem.content.frontend.join(', ') + '\n';
+          if (mem.content.backend) output += '  Backend: ' + mem.content.backend.join(', ') + '\n';
+          if (mem.content.database) output += '  Database: ' + mem.content.database.join(', ') + '\n';
+          if (mem.content.services) output += '  Services: ' + mem.content.services.join(', ') + '\n';
+        } else if (category === 'deployment' && mem.content) {
+          output += '🚀 Workflow:\n';
+          if (mem.content.steps) {
+            mem.content.steps.forEach((step, i) => {
+              output += '  ' + (i + 1) + '. ' + step + '\n';
+            });
+          }
+          if (mem.content.important) {
+            output += '\n  ⚠️  IMPORTANT: ' + mem.content.important + '\n';
+          }
+        } else if (category === 'urls' && mem.content) {
+          output += '🌐 URLs Production:\n';
+          Object.entries(mem.content).forEach(([key, value]) => {
+            output += '  • ' + key + ': ' + value + '\n';
+          });
+        } else if (category === 'security' && mem.content) {
+          output += '🔐 Emplacements:\n';
+          Object.entries(mem.content).forEach(([key, value]) => {
+            output += '  • ' + key + ':\n    ' + value + '\n';
+          });
+        } else if (category === 'project_info' && mem.content) {
+          output += '📋 Informations:\n';
+          Object.entries(mem.content).forEach(([key, value]) => {
+            output += '  • ' + key + ': ' + value + '\n';
+          });
+        } else {
+          output += JSON.stringify(mem.content, null, 2) + '\n';
+        }
+
+        if (mem.context) {
+          output += '\n💬 Contexte: ' + mem.context + '\n';
+        }
+
+        if (mem.tags && mem.tags.length > 0) {
+          output += '\n🏷️  Tags: ' + mem.tags.join(', ') + '\n';
+        }
+
+        output += '\n';
+      });
+
+      return output;
+    }
+
+    async function testStore() {
+      showResult('⏳ Stockage mémoire test...', false);
+      try {
+        const res = await fetch(API_BASE + '/api/memory/store', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            project_name: 'sar',
+            category: 'test',
+            key: 'test_' + Date.now(),
+            content: { message: 'Test de stockage', timestamp: new Date().toISOString() },
+            context: 'Mémoire de test créée depuis la page de test',
+            importance: Math.floor(Math.random() * 10) + 1,
+            tags: ['test', 'demo', 'automated']
+          })
+        });
+        const data = await res.json();
+        showResult(JSON.stringify(data, null, 2));
+        setTimeout(loadAllStats, 500);
+      } catch (error) {
+        showResult('❌ Erreur: ' + error.message, true);
+      }
+    }
+
+    // Auto-refresh toutes les 30 secondes
+    setInterval(loadAllStats, 30000);
+
+    // Charger au démarrage
+    loadAllStats();
+  </script>
+</body>
+</html>

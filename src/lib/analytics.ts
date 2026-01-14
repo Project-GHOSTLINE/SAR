@@ -23,7 +23,6 @@ export const trackEvent = (
       ...eventParams,
       timestamp: new Date().toISOString()
     })
-    console.log('📊 Analytics Event:', eventName, eventParams)
   }
 }
 

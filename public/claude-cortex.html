@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧠 Claude Cortex - Intelligence Augmentée</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      background: #000;
+      color: #e0e0e0;
+      overflow: hidden;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 300px 1fr 350px;
+      height: 100vh;
+      gap: 2px;
+      background: #000;
+    }
+
+    /* LEFT PANEL: Portes d'injection */
+    .injection-panel {
+      background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+      padding: 20px;
+      overflow-y: auto;
+      border-right: 2px solid #667eea;
+    }
+
+    .panel-title {
+      font-size: 18px;
+      color: #667eea;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .injection-gate {
+      background: rgba(102, 126, 234, 0.1);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .injection-gate::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .injection-gate:hover::before {
+      left: 100%;
+    }
+
+    .injection-gate:hover {
+      background: rgba(102, 126, 234, 0.2);
+      transform: translateX(8px);
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .gate-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .gate-title {
+      font-size: 14px;
+      color: #a78bfa;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .gate-desc {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
+    .gate-status {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 4px 10px;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid #10b981;
+      border-radius: 12px;
+      font-size: 9px;
+      color: #10b981;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* CENTER: Cortex visuel */
+    .cortex-container {
+      background: radial-gradient(circle at center, #0a0e27 0%, #000 100%);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #cortexCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .cortex-core {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+    }
+
+    .brain-sphere {
+      width: 300px;
+      height: 300px;
+      margin: 0 auto 30px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #667eea 0%, #764ba2 50%, #1a1f3a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 120px;
+      animation: brainPulse 3s infinite;
+      box-shadow:
+        0 0 60px rgba(102, 126, 234, 0.6),
+        0 0 120px rgba(102, 126, 234, 0.4),
+        inset 0 0 60px rgba(102, 126, 234, 0.2);
+      position: relative;
+    }
+
+    .brain-sphere::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      border-radius: 50%;
+      border: 2px solid #667eea;
+      animation: rotate 10s linear infinite;
+      opacity: 0.3;
+    }
+
+    .brain-sphere::after {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      bottom: -20px;
+      border-radius: 50%;
+      border: 1px solid #764ba2;
+      animation: rotate 15s linear infinite reverse;
+      opacity: 0.2;
+    }
+
+    @keyframes brainPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow:
+          0 0 60px rgba(102, 126, 234, 0.6),
+          0 0 120px rgba(102, 126, 234, 0.4);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow:
+          0 0 80px rgba(102, 126, 234, 0.8),
+          0 0 160px rgba(102, 126, 234, 0.6);
+      }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .intelligence-level {
+      font-size: 48px;
+      color: #667eea;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .intelligence-label {
+      font-size: 12px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .stats-bar {
+      margin-top: 40px;
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      color: #a78bfa;
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* RIGHT PANEL: Injection form */
+    .injection-form-panel {
+      background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+      padding: 20px;
+      overflow-y: auto;
+      border-left: 2px solid #764ba2;
+    }
+
+    .form-section {
+      margin-bottom: 24px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      background: rgba(102, 126, 234, 0.05);
+      border: 1px solid #667eea;
+      border-radius: 8px;
+      padding: 12px;
+      color: #e0e0e0;
+      font-family: inherit;
+      font-size: 13px;
+      transition: all 0.3s;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #a78bfa;
+      background: rgba(102, 126, 234, 0.1);
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .file-upload {
+      border: 2px dashed #667eea;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: rgba(102, 126, 234, 0.05);
+    }
+
+    .file-upload:hover {
+      border-color: #a78bfa;
+      background: rgba(102, 126, 234, 0.1);
+    }
+
+    .file-upload-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .file-upload-text {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    button {
+      width: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    button:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.5);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .injection-history {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .history-item {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid #10b981;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      animation: slideIn 0.4s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .history-time {
+      color: #667eea;
+      font-size: 9px;
+      margin-bottom: 4px;
+    }
+
+    .history-content {
+      color: #cbd5e0;
+      line-height: 1.4;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0a0e27;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 4px;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #667eea;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: particle-flow 2s ease-in forwards;
+    }
+
+    @keyframes particle-flow {
+      0% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- LEFT: Portes d'injection -->
+    <div class="injection-panel">
+      <div class="panel-title">🚪 PORTES D'INJECTION</div>
+
+      <div class="injection-gate" onclick="selectGate('text')">
+        <div class="gate-icon">💭</div>
+        <div class="gate-title">Idées & Texte</div>
+        <div class="gate-desc">Injecter des concepts, pensées, notes et idées</div>
+        <div class="gate-status">● Actif</div>
+      </div>
+
+      <div class="injection-gate" onclick="selectGate('document')">
+        <div class="gate-icon">📄</div>
+        <div class="gate-title">Documents</div>
+        <div class="gate-desc">PDF, MD, TXT - Documentation et connaissances</div>
+        <div class="gate-status">● Actif</div>
+      </div>
+
+      <div class="injection-gate" onclick="selectGate('code')">
+        <div class="gate-icon">💻</div>
+        <div class="gate-title">Code Source</div>
+        <div class="gate-desc">JS, TS, Python - Patterns et architecture</div>
+        <div class="gate-status">● Actif</div>
+      </div>
+
+      <div class="injection-gate" onclick="selectGate('image')">
+        <div class="gate-icon">🖼️</div>
+        <div class="gate-title">Images</div>
+        <div class="gate-desc">Screenshots, diagrammes, mockups</div>
+        <div class="gate-status">● Actif</div>
+      </div>
+
+      <div class="injection-gate" onclick="selectGate('video')">
+        <div class="gate-icon">🎬</div>
+        <div class="gate-title">Vidéos</div>
+        <div class="gate-desc">Tutoriels, démos, explications visuelles</div>
+        <div class="gate-status">● En développement</div>
+      </div>
+
+      <div class="injection-gate" onclick="selectGate('url')">
+        <div class="gate-icon">🌐</div>
+        <div class="gate-title">URLs & Web</div>
+        <div class="gate-desc">Documentation externe, articles, APIs</div>
+        <div class="gate-status">● Actif</div>
+      </div>
+
+      <div class="injection-gate" onclick="selectGate('memory')">
+        <div class="gate-icon">🧠</div>
+        <div class="gate-title">Mémoires</div>
+        <div class="gate-desc">Contexte projet, décisions, historique</div>
+        <div class="gate-status">● Actif</div>
+      </div>
+
+      <div class="injection-gate" onclick="showRules()" style="border-color: #fbbf24;">
+        <div class="gate-icon">📜</div>
+        <div class="gate-title" style="color: #fbbf24;">Règles Gravées</div>
+        <div class="gate-desc">Lois internes, principes fondamentaux, directives</div>
+        <div class="gate-status" style="border-color: #fbbf24; color: #fbbf24;">● SYSTÈME CORE</div>
+      </div>
+    </div>
+
+    <!-- CENTER: Cortex -->
+    <div class="cortex-container">
+      <canvas id="cortexCanvas"></canvas>
+
+      <div class="cortex-core">
+        <div class="brain-sphere">🧠</div>
+
+        <div class="intelligence-level" id="intelligenceLevel">1247</div>
+        <div class="intelligence-label">Points d'Intelligence</div>
+
+        <div class="stats-bar">
+          <div class="stat">
+            <div class="stat-value" id="memoryCount">0</div>
+            <div class="stat-label">Mémoires</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="documentCount">0</div>
+            <div class="stat-label">Documents</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="injectionCount">0</div>
+            <div class="stat-label">Injections</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Formulaire d'injection / Règles -->
+    <div class="injection-form-panel">
+      <div class="panel-title" id="rightPanelTitle">⚡ INJECTION ACTIVE</div>
+
+      <!-- Mode Injection -->
+      <div id="injectionMode">
+        <div class="form-section">
+          <label class="form-label">Type d'injection</label>
+          <select id="injectionType" onchange="updateForm()">
+            <option value="text">💭 Idées & Texte</option>
+            <option value="document">📄 Documents</option>
+            <option value="code">💻 Code Source</option>
+            <option value="image">🖼️ Images</option>
+            <option value="url">🌐 URLs & Web</option>
+            <option value="memory">🧠 Mémoires</option>
+          </select>
+        </div>
+
+        <div id="formContent"></div>
+
+        <button onclick="injectData()">
+          <span style="position: relative; z-index: 1;">⚡ INJECTER DANS LE CORTEX</span>
+        </button>
+
+        <div class="injection-history">
+          <div class="form-label">📊 Historique des injections</div>
+          <div id="historyContainer"></div>
+        </div>
+      </div>
+
+      <!-- Mode Règles Gravées -->
+      <div id="rulesMode" style="display: none;">
+        <button onclick="showInjectionMode()" style="margin-bottom: 16px; background: linear-gradient(135deg, #64748b 0%, #475569 100%);">
+          <span style="position: relative; z-index: 1;">← Retour aux Injections</span>
+        </button>
+
+        <div class="form-section" style="background: rgba(251, 191, 36, 0.1); border: 2px solid #fbbf24; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+          <div style="text-align: center; margin-bottom: 16px;">
+            <div style="font-size: 48px; margin-bottom: 8px;">⚖️</div>
+            <div style="font-size: 16px; color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">CONSTITUTION INTERNE</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Règles fondamentales du système Claude SAR</div>
+          </div>
+        </div>
+
+        <div id="rulesContent" style="max-height: calc(100vh - 320px); overflow-y: auto;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Canvas pour les animations de routes neuronales
+    const canvas = document.getElementById('cortexCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Particules neuronales
+    const particles = [];
+    const maxParticles = 100;
+
+    class NeuralParticle {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        // Position aléatoire sur les bords
+        const side = Math.floor(Math.random() * 4);
+        if (side === 0) { // top
+          this.x = Math.random() * canvas.width;
+          this.y = 0;
+        } else if (side === 1) { // right
+          this.x = canvas.width;
+          this.y = Math.random() * canvas.height;
+        } else if (side === 2) { // bottom
+          this.x = Math.random() * canvas.width;
+          this.y = canvas.height;
+        } else { // left
+          this.x = 0;
+          this.y = Math.random() * canvas.height;
+        }
+
+        // Direction vers le centre
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const angle = Math.atan2(centerY - this.y, centerX - this.x);
+
+        this.vx = Math.cos(angle) * (1 + Math.random() * 2);
+        this.vy = Math.sin(angle) * (1 + Math.random() * 2);
+
+        this.life = 1;
+        this.maxLife = 100 + Math.random() * 100;
+        this.size = 1 + Math.random() * 2;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life++;
+
+        // Attraction vers le centre
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const dx = centerX - this.x;
+        const dy = centerY - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist > 0) {
+          this.vx += (dx / dist) * 0.1;
+          this.vy += (dy / dist) * 0.1;
+        }
+
+        // Reset si mort ou trop proche du centre
+        if (this.life > this.maxLife || dist < 50) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        const alpha = 1 - (this.life / this.maxLife);
+        ctx.fillStyle = `rgba(102, 126, 234, ${alpha * 0.6})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Trail
+        ctx.strokeStyle = `rgba(102, 126, 234, ${alpha * 0.3})`;
+        ctx.lineWidth = this.size * 0.5;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x - this.vx * 3, this.y - this.vy * 3);
+        ctx.stroke();
+      }
+    }
+
+    // Initialiser les particules
+    for (let i = 0; i < maxParticles; i++) {
+      particles.push(new NeuralParticle());
+    }
+
+    // Animation loop
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Update et draw particules
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+
+      // Connections entre particules proches
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 100) {
+            const alpha = (1 - dist / 100) * 0.2;
+            ctx.strokeStyle = `rgba(102, 126, 234, ${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Gestion des portes
+    let selectedGate = 'text';
+
+    function selectGate(type) {
+      selectedGate = type;
+      document.getElementById('injectionType').value = type;
+      updateForm();
+    }
+
+    // Mise à jour du formulaire
+    function updateForm() {
+      const type = document.getElementById('injectionType').value;
+      const container = document.getElementById('formContent');
+
+      const forms = {
+        text: `
+          <div class="form-section">
+            <label class="form-label">Titre / Sujet</label>
+            <input type="text" id="title" placeholder="Ex: Nouvelle feature authentication">
+          </div>
+          <div class="form-section">
+            <label class="form-label">Contenu</label>
+            <textarea id="content" placeholder="Décris ton idée, concept ou note..."></textarea>
+          </div>
+          <div class="form-section">
+            <label class="form-label">Catégorie</label>
+            <select id="category">
+              <option value="idea">Idée</option>
+              <option value="note">Note</option>
+              <option value="concept">Concept</option>
+              <option value="decision">Décision</option>
+            </select>
+          </div>
+        `,
+        document: `
+          <div class="form-section">
+            <label class="form-label">Nom du document</label>
+            <input type="text" id="docName" placeholder="Ex: Architecture.md">
+          </div>
+          <div class="form-section">
+            <label class="form-label">Upload fichier</label>
+            <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+              <div class="file-upload-icon">📁</div>
+              <div class="file-upload-text">Cliquer pour uploader<br>PDF, MD, TXT</div>
+            </div>
+            <input type="file" id="fileInput" style="display: none;" accept=".pdf,.md,.txt">
+          </div>
+        `,
+        code: `
+          <div class="form-section">
+            <label class="form-label">Nom du fichier</label>
+            <input type="text" id="fileName" placeholder="Ex: useAuth.ts">
+          </div>
+          <div class="form-section">
+            <label class="form-label">Code</label>
+            <textarea id="code" placeholder="Colle ton code ici..." style="font-family: 'Monaco', monospace; min-height: 200px;"></textarea>
+          </div>
+        `,
+        image: `
+          <div class="form-section">
+            <label class="form-label">Description</label>
+            <input type="text" id="imageDesc" placeholder="Ex: Mockup de la page login">
+          </div>
+          <div class="form-section">
+            <label class="form-label">Upload image</label>
+            <div class="file-upload" onclick="document.getElementById('imageInput').click()">
+              <div class="file-upload-icon">🖼️</div>
+              <div class="file-upload-text">Cliquer pour uploader<br>PNG, JPG, SVG</div>
+            </div>
+            <input type="file" id="imageInput" style="display: none;" accept="image/*">
+          </div>
+        `,
+        url: `
+          <div class="form-section">
+            <label class="form-label">URL</label>
+            <input type="text" id="url" placeholder="https://...">
+          </div>
+          <div class="form-section">
+            <label class="form-label">Type de contenu</label>
+            <select id="urlType">
+              <option value="doc">Documentation</option>
+              <option value="article">Article</option>
+              <option value="api">API</option>
+              <option value="tutorial">Tutorial</option>
+            </select>
+          </div>
+        `,
+        memory: `
+          <div class="form-section">
+            <label class="form-label">Clé mémoire</label>
+            <input type="text" id="memKey" placeholder="Ex: stack-technique">
+          </div>
+          <div class="form-section">
+            <label class="form-label">Contenu JSON</label>
+            <textarea id="memContent" placeholder='{"frontend": "Next.js", ...}'></textarea>
+          </div>
+          <div class="form-section">
+            <label class="form-label">Importance (1-10)</label>
+            <input type="number" id="importance" min="1" max="10" value="5">
+          </div>
+        `
+      };
+
+      container.innerHTML = forms[type] || forms.text;
+    }
+
+    // Injection de données
+    async function injectData() {
+      const type = document.getElementById('injectionType').value;
+
+      // Animation de particules vers le cerveau
+      createInjectionAnimation();
+
+      // Données selon le type
+      let data = {
+        project_name: 'sar',
+        category: type,
+        key: '',
+        content: {},
+        importance: 7
+      };
+
+      if (type === 'text') {
+        data.key = document.getElementById('title').value || 'note-' + Date.now();
+        data.content = {
+          text: document.getElementById('content').value,
+          category: document.getElementById('category').value
+        };
+      } else if (type === 'memory') {
+        data.key = document.getElementById('memKey').value;
+        try {
+          data.content = JSON.parse(document.getElementById('memContent').value);
+        } catch (e) {
+          data.content = { raw: document.getElementById('memContent').value };
+        }
+        data.importance = parseInt(document.getElementById('importance').value);
+      } else if (type === 'url') {
+        data.key = 'url-' + Date.now();
+        data.content = {
+          url: document.getElementById('url').value,
+          type: document.getElementById('urlType').value
+        };
+      }
+
+      // Envoyer à l'API
+      try {
+        const res = await fetch('/api/memory/store', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+          // Ajouter à l'historique
+          addToHistory(type, data);
+
+          // Incrémenter les stats
+          updateStats();
+
+          // Augmenter l'intelligence
+          incrementIntelligence();
+
+          alert('✅ Injection réussie dans le cortex!');
+        } else {
+          alert('❌ Erreur: ' + result.error);
+        }
+      } catch (error) {
+        alert('❌ Erreur: ' + error.message);
+      }
+    }
+
+    // Animation d'injection
+    function createInjectionAnimation() {
+      for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.left = Math.random() * window.innerWidth + 'px';
+          particle.style.top = Math.random() * window.innerHeight + 'px';
+          document.body.appendChild(particle);
+
+          setTimeout(() => particle.remove(), 2000);
+        }, i * 50);
+      }
+    }
+
+    // Ajouter à l'historique
+    function addToHistory(type, data) {
+      const container = document.getElementById('historyContainer');
+      const item = document.createElement('div');
+      item.className = 'history-item';
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('fr-FR');
+
+      const icons = {
+        text: '💭',
+        document: '📄',
+        code: '💻',
+        image: '🖼️',
+        url: '🌐',
+        memory: '🧠'
+      };
+
+      item.innerHTML = `
+        <div class="history-time">${timeStr}</div>
+        <div class="history-content">${icons[type]} ${data.key}</div>
+      `;
+
+      container.insertBefore(item, container.firstChild);
+
+      if (container.children.length > 10) {
+        container.removeChild(container.lastChild);
+      }
+    }
+
+    // Mettre à jour les stats
+    async function updateStats() {
+      try {
+        const res = await fetch('/api/memory/context?project=sar');
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById('memoryCount').textContent = data.context.top_memories?.length || 0;
+          document.getElementById('documentCount').textContent = data.context.docs_count || 0;
+        }
+      } catch (error) {
+        console.error('Erreur stats:', error);
+      }
+
+      // Injection count
+      const currentCount = parseInt(document.getElementById('injectionCount').textContent);
+      document.getElementById('injectionCount').textContent = currentCount + 1;
+    }
+
+    // Incrémenter l'intelligence
+    function incrementIntelligence() {
+      const current = parseInt(document.getElementById('intelligenceLevel').textContent);
+      const increment = 5 + Math.floor(Math.random() * 15);
+
+      let count = 0;
+      const interval = setInterval(() => {
+        if (count >= increment) {
+          clearInterval(interval);
+        } else {
+          document.getElementById('intelligenceLevel').textContent = current + count;
+          count++;
+        }
+      }, 50);
+    }
+
+    // Afficher les règles gravées
+    function showRules() {
+      document.getElementById('injectionMode').style.display = 'none';
+      document.getElementById('rulesMode').style.display = 'block';
+      document.getElementById('rightPanelTitle').innerHTML = '📜 RÈGLES GRAVÉES';
+
+      const rules = [
+        {
+          category: '⚖️ LOIS FONDAMENTALES',
+          color: '#ef4444',
+          items: [
+            '❌ NE JAMAIS commiter des credentials ou secrets',
+            '❌ NE JAMAIS supprimer de données sans confirmation',
+            '❌ NE JAMAIS push --force sur main/master',
+            '❌ NE JAMAIS skip les hooks (--no-verify) sans autorisation',
+            '❌ NE JAMAIS créer de fichiers inutiles (sauf si demandé)'
+          ]
+        },
+        {
+          category: '✅ OBLIGATIONS ABSOLUES',
+          color: '#10b981',
+          items: [
+            '✅ TOUJOURS lire un fichier avant de le modifier',
+            '✅ TOUJOURS préférer Edit à Write pour fichiers existants',
+            '✅ TOUJOURS logger mes actions dans la base de données',
+            '✅ TOUJOURS valider avec le user avant gros changements',
+            '✅ TOUJOURS utiliser les outils spécialisés (Read, Grep, etc.)'
+          ]
+        },
+        {
+          category: '🎯 PRINCIPES DE FONCTIONNEMENT',
+          color: '#667eea',
+          items: [
+            '🔹 Être concis et direct dans la communication',
+            '🔹 Éviter la sur-ingénierie et rester simple',
+            '🔹 Prioriser la qualité sur la quantité',
+            '🔹 Documenter uniquement si nécessaire',
+            '🔹 Tester avant de livrer'
+          ]
+        },
+        {
+          category: '🧠 MÉMOIRE & CONTEXTE',
+          color: '#a78bfa',
+          items: [
+            '💾 Stocker le contexte important dans Supabase',
+            '💾 Me rappeler de la stack: Next.js 14, TypeScript, Supabase',
+            '💾 Connaître les services: VoPay, Flinks, Inverite',
+            '💾 Respecter l\'architecture existante',
+            '💾 Apprendre des erreurs passées'
+          ]
+        },
+        {
+          category: '🔒 SÉCURITÉ',
+          color: '#fbbf24',
+          items: [
+            '🛡️ Utiliser .env.local pour credentials',
+            '🛡️ Vérifier .gitignore avant commit',
+            '🛡️ Valider les inputs utilisateur',
+            '🛡️ Utiliser service role key côté serveur seulement',
+            '🛡️ Ne jamais exposer de secrets côté client'
+          ]
+        },
+        {
+          category: '📊 MONITORING & LOGGING',
+          color: '#3b82f6',
+          items: [
+            '📈 Logger toutes mes actions importantes',
+            '📈 Tracer mes pensées et objectifs',
+            '📈 Mesurer les durées d\'exécution',
+            '📈 Maintenir l\'historique des modifications',
+            '📈 Fournir de la visibilité en temps réel'
+          ]
+        },
+        {
+          category: '🎨 QUALITÉ DU CODE',
+          color: '#8b5cf6',
+          items: [
+            '💎 Respecter les conventions TypeScript',
+            '💎 Utiliser les types stricts',
+            '💎 Gérer les erreurs proprement',
+            '💎 Éviter la duplication de code',
+            '💎 Optimiser les performances'
+          ]
+        },
+        {
+          category: '🚀 PROJET SAR',
+          color: '#ec4899',
+          items: [
+            '🎯 Mission: Solution Argent Rapide (prêts rapides)',
+            '🎯 Stack: Next.js 14, React 18, TypeScript, Supabase',
+            '🎯 Paiements: VoPay API',
+            '🎯 Vérification bancaire: Flinks/Inverite',
+            '🎯 Déploiement: Vercel auto-deploy'
+          ]
+        }
+      ];
+
+      const container = document.getElementById('rulesContent');
+      container.innerHTML = '';
+
+      rules.forEach(section => {
+        const sectionDiv = document.createElement('div');
+        sectionDiv.style.marginBottom = '24px';
+
+        sectionDiv.innerHTML = `
+          <div style="background: rgba(102, 126, 234, 0.1); border-left: 4px solid ${section.color}; padding: 16px; border-radius: 8px;">
+            <div style="font-size: 14px; color: ${section.color}; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">
+              ${section.category}
+            </div>
+            ${section.items.map(item => `
+              <div style="background: rgba(0, 0, 0, 0.2); padding: 10px; margin-bottom: 8px; border-radius: 6px; font-size: 12px; line-height: 1.6; color: #cbd5e0;">
+                ${item}
+              </div>
+            `).join('')}
+          </div>
+        `;
+
+        container.appendChild(sectionDiv);
+      });
+    }
+
+    // Retour au mode injection
+    function showInjectionMode() {
+      document.getElementById('rulesMode').style.display = 'none';
+      document.getElementById('injectionMode').style.display = 'block';
+      document.getElementById('rightPanelTitle').innerHTML = '⚡ INJECTION ACTIVE';
+    }
+
+    // Initialisation
+    updateForm();
+    updateStats();
+  </script>
+</body>
+</html>
