@@ -1,0 +1,19 @@
+{
+  "headers": [
+    {
+      "source": "/performance-diagnostic.html",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/admin/performance",
+      "destination": "/performance-diagnostic.html"
+    }
+  ]
+}

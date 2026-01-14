@@ -137,7 +137,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
     },
     {
       name: 'Performance',
-      href: '/performance-diagnostic.html',
+      href: '/admin/performance',
       icon: Zap,
       badge: null
     }
