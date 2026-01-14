@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAR Performance Diagnostic Pro</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 40px;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: #1a202c;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .subtitle {
+      color: #718096;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+    .status {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status.running { background: #fef3c7; color: #92400e; }
+    .status.success { background: #d1fae5; color: #065f46; }
+    .status.error { background: #fee2e2; color: #991b1b; }
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .btn-secondary { background: #e2e8f0; color: #1a202c; }
+    .btn-danger { background: #ef4444; color: white; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-radius: 15px;
+      padding: 20px;
+      border-left: 4px solid #667eea;
+      transition: all 0.3s;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .card-title {
+      font-weight: 700;
+      color: #1a202c;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .card-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+    .card-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+    }
+    .test-result {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-left: 4px solid #e2e8f0;
+      transition: all 0.2s;
+    }
+    .test-result:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .test-result.fast { border-left-color: #10b981; background: linear-gradient(90deg, #d1fae5 0%, white 100%); }
+    .test-result.medium { border-left-color: #f59e0b; background: linear-gradient(90deg, #fef3c7 0%, white 100%); }
+    .test-result.slow { border-left-color: #ef4444; background: linear-gradient(90deg, #fee2e2 0%, white 100%); }
+    .test-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .test-name {
+      font-weight: 700;
+      color: #1a202c;
+      font-size: 14px;
+    }
+    .test-time {
+      font-weight: 800;
+      font-size: 18px;
+    }
+    .test-details {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 5px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      transition: width 0.3s;
+      border-radius: 10px;
+    }
+    .recommendations {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 30px;
+      border-left: 4px solid #f59e0b;
+    }
+    .recommendations h3 {
+      color: #92400e;
+      font-size: 18px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .recommendation-item {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: #1a202c;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .recommendation-icon {
+      background: #f59e0b;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .metric-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+    .badge-excellent { background: #d1fae5; color: #065f46; }
+    .badge-good { background: #dbeafe; color: #1e40af; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-critical { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      ⚡ Performance Diagnostic Professionnel
+      <span id="status" class="status running">EN ATTENTE</span>
+    </h1>
+    <p class="subtitle">Analyse complète des performances du dashboard SAR Admin</p>
+
+    <div class="controls">
+      <button class="btn-primary" onclick="runFullDiagnostic()">
+        <span>▶️</span> Lancer Diagnostic Complet
+      </button>
+      <button class="btn-secondary" onclick="runQuickTest()">
+        <span>⚡</span> Test Rapide
+      </button>
+      <button class="btn-secondary" onclick="runStressTest()">
+        <span>🔥</span> Stress Test
+      </button>
+      <button class="btn-danger" onclick="location.reload()">
+        <span>🔄</span> Réinitialiser
+      </button>
+      <button class="btn-primary" onclick="downloadReport()" id="downloadBtn" style="display: none;">
+        <span>💾</span> Télécharger Rapport JSON
+      </button>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">⚡ Temps Moyen</span>
+        </div>
+        <div class="card-value" id="avgTime">0ms</div>
+        <div class="card-label">Temps de réponse moyen des API</div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🚀 API la Plus Rapide</span>
+        </div>
+        <div class="card-value" id="fastest">-</div>
+        <div class="card-label" id="fastestApi">En attente...</div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🐌 API la Plus Lente</span>
+        </div>
+        <div class="card-value" id="slowest">-</div>
+        <div class="card-label" id="slowestApi">En attente...</div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📊 Tests Effectués</span>
+        </div>
+        <div class="card-value" id="testCount">0</div>
+        <div class="card-label">Endpoints testés</div>
+      </div>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress" style="width: 0%"></div>
+    </div>
+
+    <h2 style="margin: 30px 0 20px 0; color: #1a202c; font-size: 20px; font-weight: 800;">
+      📋 Résultats Détaillés
+    </h2>
+    <div id="results"></div>
+
+    <div id="recommendations" style="display: none;" class="recommendations">
+      <h3>💡 Recommandations d'Optimisation</h3>
+      <div id="recommendationsList"></div>
+    </div>
+  </div>
+
+  <script>
+    const endpoints = [
+      { name: 'Messages', url: '/api/admin/messages/assign', critical: true },
+      { name: 'VoPay Transactions', url: '/api/admin/vopay/transactions', critical: true },
+      { name: 'VoPay Dashboard', url: '/api/admin/vopay', critical: true },
+      { name: 'Webhook Stats', url: '/api/admin/webhooks/stats', critical: false },
+      { name: 'Download Stats', url: '/api/admin/downloads/stats?fileName=test.zip', critical: false },
+      { name: 'Analytics', url: '/api/admin/analytics', critical: false },
+      { name: 'Support Tickets', url: '/api/admin/support/tickets?status=nouveau&limit=1', critical: false },
+      { name: 'Client Analysis', url: '/api/admin/client-analysis', critical: false }
+    ];
+
+    let results = [];
+
+    async function testEndpoint(endpoint) {
+      const start = performance.now();
+      try {
+        const response = await fetch(`http://localhost:3000${endpoint.url}`, {
+          credentials: 'include',
+          headers: { 'Accept': 'application/json' }
+        });
+        const end = performance.now();
+        const time = Math.round(end - start);
+        const data = await response.json();
+
+        return {
+          name: endpoint.name,
+          url: endpoint.url,
+          time: time,
+          status: response.status,
+          success: response.ok,
+          size: new Blob([JSON.stringify(data)]).size,
+          critical: endpoint.critical,
+          data: data
+        };
+      } catch (error) {
+        const end = performance.now();
+        return {
+          name: endpoint.name,
+          url: endpoint.url,
+          time: Math.round(end - start),
+          status: 0,
+          success: false,
+          error: error.message,
+          critical: endpoint.critical
+        };
+      }
+    }
+
+    function getPerformanceClass(time, critical) {
+      if (critical) {
+        if (time < 100) return 'fast';
+        if (time < 300) return 'medium';
+        return 'slow';
+      } else {
+        if (time < 200) return 'fast';
+        if (time < 500) return 'medium';
+        return 'slow';
+      }
+    }
+
+    function getPerformanceBadge(time, critical) {
+      if (critical) {
+        if (time < 100) return '<span class="metric-badge badge-excellent">EXCELLENT</span>';
+        if (time < 300) return '<span class="metric-badge badge-good">BON</span>';
+        if (time < 500) return '<span class="metric-badge badge-warning">LENT</span>';
+        return '<span class="metric-badge badge-critical">CRITIQUE</span>';
+      } else {
+        if (time < 200) return '<span class="metric-badge badge-excellent">EXCELLENT</span>';
+        if (time < 500) return '<span class="metric-badge badge-good">BON</span>';
+        if (time < 1000) return '<span class="metric-badge badge-warning">LENT</span>';
+        return '<span class="metric-badge badge-critical">CRITIQUE</span>';
+      }
+    }
+
+    function displayResult(result) {
+      const perfClass = getPerformanceClass(result.time, result.critical);
+      const badge = getPerformanceBadge(result.time, result.critical);
+      const resultsDiv = document.getElementById('results');
+
+      const resultHtml = `
+        <div class="test-result ${perfClass}">
+          <div class="test-header">
+            <div>
+              <span class="test-name">${result.critical ? '🔴 ' : ''}${result.name}</span>
+              ${badge}
+            </div>
+            <span class="test-time" style="color: ${perfClass === 'fast' ? '#10b981' : perfClass === 'medium' ? '#f59e0b' : '#ef4444'}">
+              ${result.time}ms
+            </span>
+          </div>
+          <div class="test-details">
+            📍 ${result.url}<br>
+            ${result.success
+              ? `✅ Status ${result.status} • ${(result.size / 1024).toFixed(2)} KB transférés`
+              : `❌ Erreur: ${result.error || 'Request failed'}`
+            }
+          </div>
+        </div>
+      `;
+
+      resultsDiv.innerHTML += resultHtml;
+    }
+
+    function updateStats() {
+      const times = results.map(r => r.time);
+      const avgTime = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+      const fastest = results.reduce((min, r) => r.time < min.time ? r : min, results[0]);
+      const slowest = results.reduce((max, r) => r.time > max.time ? r : max, results[0]);
+
+      document.getElementById('avgTime').textContent = avgTime + 'ms';
+      document.getElementById('fastest').textContent = fastest.time + 'ms';
+      document.getElementById('fastestApi').textContent = fastest.name;
+      document.getElementById('slowest').textContent = slowest.time + 'ms';
+      document.getElementById('slowestApi').textContent = slowest.name;
+      document.getElementById('testCount').textContent = results.length;
+    }
+
+    function generateRecommendations() {
+      const recommendations = [];
+      const criticalSlow = results.filter(r => r.critical && r.time > 300);
+      const nonCriticalSlow = results.filter(r => !r.critical && r.time > 500);
+      const failed = results.filter(r => !r.success);
+      const largeSizes = results.filter(r => r.size > 100000); // > 100KB
+
+      if (criticalSlow.length > 0) {
+        recommendations.push(`⚠️ <strong>${criticalSlow.length} API(s) critique(s) trop lente(s)</strong>: ${criticalSlow.map(r => r.name).join(', ')} prennent plus de 300ms. Optimisation URGENTE requise!`);
+      }
+
+      if (nonCriticalSlow.length > 0) {
+        recommendations.push(`📊 ${nonCriticalSlow.length} API(s) non-critique(s) lente(s): Envisager mise en cache ou chargement différé`);
+      }
+
+      if (failed.length > 0) {
+        recommendations.push(`❌ ${failed.length} API(s) en échec: ${failed.map(r => r.name).join(', ')} - Vérifier l'authentification et la disponibilité`);
+      }
+
+      if (largeSizes.length > 0) {
+        recommendations.push(`📦 Données volumineuses détectées (${largeSizes.map(r => `${r.name}: ${(r.size/1024).toFixed(0)}KB`).join(', ')}) - Envisager pagination`);
+      }
+
+      const avgTime = results.reduce((a, b) => a + b.time, 0) / results.length;
+      if (avgTime > 500) {
+        recommendations.push(`🐌 Temps moyen global élevé (${Math.round(avgTime)}ms) - Problème de réseau ou serveur surchargé?`);
+      }
+
+      if (recommendations.length === 0) {
+        recommendations.push(`✅ <strong>Performances excellentes!</strong> Toutes les API répondent rapidement.`);
+      }
+
+      const recDiv = document.getElementById('recommendationsList');
+      recDiv.innerHTML = recommendations.map((rec, i) => `
+        <div class="recommendation-item">
+          <span class="recommendation-icon">${i + 1}</span>
+          <div>${rec}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('recommendations').style.display = 'block';
+    }
+
+    async function runFullDiagnostic() {
+      document.getElementById('status').textContent = 'EN COURS';
+      document.getElementById('status').className = 'status running';
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('recommendations').style.display = 'none';
+      document.getElementById('downloadBtn').style.display = 'none';
+      results = [];
+
+      for (let i = 0; i < endpoints.length; i++) {
+        const endpoint = endpoints[i];
+        const result = await testEndpoint(endpoint);
+        results.push(result);
+        displayResult(result);
+        updateStats();
+
+        const progress = ((i + 1) / endpoints.length) * 100;
+        document.getElementById('progress').style.width = progress + '%';
+      }
+
+      document.getElementById('status').textContent = 'TERMINÉ';
+      document.getElementById('status').className = 'status success';
+      generateRecommendations();
+      document.getElementById('downloadBtn').style.display = 'flex';
+    }
+
+    async function runQuickTest() {
+      document.getElementById('status').textContent = 'TEST RAPIDE';
+      document.getElementById('status').className = 'status running';
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('downloadBtn').style.display = 'none';
+      results = [];
+
+      const critical = endpoints.filter(e => e.critical);
+      for (let i = 0; i < critical.length; i++) {
+        const result = await testEndpoint(critical[i]);
+        results.push(result);
+        displayResult(result);
+        updateStats();
+        document.getElementById('progress').style.width = ((i + 1) / critical.length) * 100 + '%';
+      }
+
+      document.getElementById('status').textContent = 'TERMINÉ';
+      document.getElementById('status').className = 'status success';
+      generateRecommendations();
+      document.getElementById('downloadBtn').style.display = 'flex';
+    }
+
+    async function runStressTest() {
+      document.getElementById('status').textContent = 'STRESS TEST';
+      document.getElementById('status').className = 'status running';
+      document.getElementById('results').innerHTML = '';
+      results = [];
+
+      // Run each critical endpoint 5 times
+      const critical = endpoints.filter(e => e.critical);
+      const totalTests = critical.length * 5;
+      let count = 0;
+
+      for (const endpoint of critical) {
+        for (let i = 0; i < 5; i++) {
+          const result = await testEndpoint(endpoint);
+          result.name = `${endpoint.name} (test ${i + 1}/5)`;
+          results.push(result);
+          displayResult(result);
+          updateStats();
+          count++;
+          document.getElementById('progress').style.width = (count / totalTests) * 100 + '%';
+        }
+      }
+
+      document.getElementById('status').textContent = 'TERMINÉ';
+      document.getElementById('status').className = 'status success';
+      generateRecommendations();
+      document.getElementById('downloadBtn').style.display = 'flex';
+    }
+
+    function downloadReport() {
+      if (results.length === 0) {
+        alert('❌ Aucun test n\'a été effectué. Lancez un diagnostic d\'abord!');
+        return;
+      }
+
+      // Calculer les statistiques
+      const times = results.map(r => r.time);
+      const avgTime = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+      const fastest = results.reduce((min, r) => r.time < min.time ? r : min, results[0]);
+      const slowest = results.reduce((max, r) => r.time > max.time ? r : max, results[0]);
+
+      // Générer les recommandations
+      const recommendations = [];
+      const criticalSlow = results.filter(r => r.critical && r.time > 300);
+      const nonCriticalSlow = results.filter(r => !r.critical && r.time > 500);
+      const failed = results.filter(r => !r.success);
+      const largeSizes = results.filter(r => r.size > 100000);
+
+      if (criticalSlow.length > 0) {
+        recommendations.push({
+          type: 'critical',
+          message: `${criticalSlow.length} API(s) critique(s) trop lente(s): ${criticalSlow.map(r => r.name).join(', ')} prennent plus de 300ms`,
+          apis: criticalSlow.map(r => r.name)
+        });
+      }
+
+      if (nonCriticalSlow.length > 0) {
+        recommendations.push({
+          type: 'warning',
+          message: `${nonCriticalSlow.length} API(s) non-critique(s) lente(s)`,
+          apis: nonCriticalSlow.map(r => r.name)
+        });
+      }
+
+      if (failed.length > 0) {
+        recommendations.push({
+          type: 'error',
+          message: `${failed.length} API(s) en échec`,
+          apis: failed.map(r => r.name)
+        });
+      }
+
+      if (largeSizes.length > 0) {
+        recommendations.push({
+          type: 'info',
+          message: 'Données volumineuses détectées',
+          apis: largeSizes.map(r => ({ name: r.name, size: r.size }))
+        });
+      }
+
+      // Créer le rapport JSON complet
+      const report = {
+        metadata: {
+          timestamp: new Date().toISOString(),
+          dateFormatted: new Date().toLocaleString('fr-CA'),
+          project: 'SAR - Solution Argent Rapide',
+          testType: document.getElementById('status').textContent,
+          userAgent: navigator.userAgent,
+          browser: navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/)?.[0] || 'Unknown',
+          platform: navigator.platform,
+          screenResolution: `${screen.width}x${screen.height}`,
+          viewport: `${window.innerWidth}x${window.innerHeight}`
+        },
+        summary: {
+          totalTests: results.length,
+          successfulTests: results.filter(r => r.success).length,
+          failedTests: results.filter(r => !r.success).length,
+          averageResponseTime: avgTime,
+          fastestAPI: {
+            name: fastest.name,
+            url: fastest.url,
+            time: fastest.time
+          },
+          slowestAPI: {
+            name: slowest.name,
+            url: slowest.url,
+            time: slowest.time
+          }
+        },
+        results: results.map(r => ({
+          name: r.name,
+          url: r.url,
+          responseTime: r.time,
+          status: r.status,
+          success: r.success,
+          critical: r.critical,
+          size: r.size,
+          sizeKB: r.size ? (r.size / 1024).toFixed(2) : null,
+          error: r.error || null,
+          performance: getPerformanceClass(r.time, r.critical),
+          performanceLabel: getPerformanceBadgeText(r.time, r.critical)
+        })),
+        performanceBreakdown: {
+          excellent: results.filter(r => r.critical ? r.time < 100 : r.time < 200).length,
+          good: results.filter(r => r.critical ? (r.time >= 100 && r.time < 300) : (r.time >= 200 && r.time < 500)).length,
+          slow: results.filter(r => r.critical ? (r.time >= 300 && r.time < 500) : (r.time >= 500 && r.time < 1000)).length,
+          critical: results.filter(r => r.critical ? r.time >= 500 : r.time >= 1000).length
+        },
+        recommendations: recommendations,
+        rawData: {
+          allResults: results
+        }
+      };
+
+      // Créer le blob et télécharger
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sar-performance-report-${new Date().toISOString().split('T')[0]}-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      console.log('✅ Rapport JSON téléchargé avec succès!');
+      console.log('📊 Rapport:', report);
+    }
+
+    function getPerformanceBadgeText(time, critical) {
+      if (critical) {
+        if (time < 100) return 'EXCELLENT';
+        if (time < 300) return 'BON';
+        if (time < 500) return 'LENT';
+        return 'CRITIQUE';
+      } else {
+        if (time < 200) return 'EXCELLENT';
+        if (time < 500) return 'BON';
+        if (time < 1000) return 'LENT';
+        return 'CRITIQUE';
+      }
+    }
+  </script>
+</body>
+</html>
