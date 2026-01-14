@@ -35,8 +35,24 @@ export async function GET(request: NextRequest) {
         p_file_name: fileName
       })
 
+      // Si la fonction n'existe pas encore, retourner des stats vides au lieu de crasher
       if (error) {
-        throw error
+        console.warn('⚠️ Fonction get_download_stats non disponible:', error.message)
+        return NextResponse.json({
+          success: true,
+          stats: {
+            total_downloads: 0,
+            unique_users: 0,
+            unique_ips: 0,
+            downloads_today: 0,
+            downloads_this_week: 0,
+            downloads_this_month: 0,
+            last_download: null,
+            first_download: null,
+            avg_downloads_per_day: 0
+          },
+          warning: 'Système de tracking non configuré. Exécutez database/create_download_tracking.sql'
+        })
       }
 
       return NextResponse.json({
@@ -60,8 +76,14 @@ export async function GET(request: NextRequest) {
         .select('*')
         .order('total_downloads', { ascending: false })
 
+      // Si la vue n'existe pas encore, retourner un tableau vide
       if (error) {
-        throw error
+        console.warn('⚠️ Vue download_stats non disponible:', error.message)
+        return NextResponse.json({
+          success: true,
+          stats: [],
+          warning: 'Système de tracking non configuré. Exécutez database/create_download_tracking.sql'
+        })
       }
 
       return NextResponse.json({

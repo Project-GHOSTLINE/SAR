@@ -19,6 +19,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
   const [messagesCount, setMessagesCount] = useState(0)
   const [supportCount, setSupportCount] = useState(0)
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [mounted, setMounted] = useState(false)
+
+  // Marquer comme monté côté client pour éviter les erreurs d'hydration
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Mettre à jour l'heure toutes les 30 secondes
   useEffect(() => {
@@ -222,10 +228,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
           {/* Right Section - Time & Logout */}
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {/* Time Display */}
-            <div className="hidden 2xl:flex items-center gap-1.5 text-xs text-gray-700">
-              <Clock size={14} />
-              <span className="font-medium">{formatTime()}</span>
-            </div>
+            {mounted && (
+              <div className="hidden 2xl:flex items-center gap-1.5 text-xs text-gray-700">
+                <Clock size={14} />
+                <span className="font-medium">{formatTime()}</span>
+              </div>
+            )}
 
             {/* Notifications */}
             <button className="relative p-1 sm:p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
