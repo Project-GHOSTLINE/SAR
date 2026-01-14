@@ -54,26 +54,52 @@ git checkout -b feat/db-restructure-dossier-client
 - Ce fichier créé
 - Structure de journalisation en place
 
+**20:57** - Commit Git effectué
+```bash
+git add database/ JOURNAL/
+git commit -m "🗄️ Phase 0: Préparation Restructuration DB 'Dossier Médical Client'"
+# Commit: 0d0ef30
+```
+
+**21:00** - Tentatives d'exécution Phase 0
+- ❌ Échec: Connection PostgreSQL via Node.js pg (pooler port 6543)
+- ❌ Échec: Connection PostgreSQL via Node.js pg (direct port 5432)
+- Installation: PostgreSQL 15.15 via Homebrew
+- ❌ Échec: Connection via psql avec différents formats user/pass
+- **Erreur récurrente:** "Tenant or user not found"
+
+**21:02** - Blocker identifié: Connection String
+- Phase 0 prête à 100% mais impossible à exécuter
+- Credentials Supabase présents mais format connection string invalide
+- 3 options proposées à l'utilisateur (voir STATUS-REPORT)
+- **En attente décision utilisateur** pour débloquer exécution
+
 ---
 
 ## 📋 PHASE 0: PRÉPARATION & BASELINE
 
 **Objectif:** Snapshot état actuel + validation environnement
-**Statut:** 🔄 EN COURS
-**Environnement:** Staging
+**Statut:** ⚠️  BLOQUÉ (connection database)
+**Environnement:** Production (Phase 0 = READ-ONLY safe)
+**Blocker:** Connection string PostgreSQL invalide/incomplet
 
 ### Étapes
 
 #### ✅ 0.1 - Validation environnement
 **Fichier:** N/A (checks manuels)
 **Exécuté:** 2026-01-14 20:56
-**Résultat:** _(à compléter après exécution)_
+**Résultat:** ✅ Préparation complète - 18 fichiers migrations + 6 tests prêts
 
-#### ⏳ 0.2 - Baseline snapshot
+#### ⚠️  0.2 - Baseline snapshot
 **Fichier:** `000_baseline_snapshot.sql`
-**SHA256:** _(à calculer)_
-**Exécuté:** _(en attente)_
-**Résultat:** _(à compléter)_
+**SHA256:** `(en attente d'exécution)`
+**Tentative:** 2026-01-14 21:00-21:02
+**Résultat:** ❌ BLOQUÉ - Connection database échoue
+**Erreur:** "Tenant or user not found" (psql + Node pg)
+**Options proposées:**
+  - A) Supabase SQL Editor (manuel)
+  - B) Connection string correct fourni par utilisateur
+  - C) supabase CLI link + execute
 
 #### ⏳ 0.3 - Backup complet DB
 **Méthode:** Supabase Dashboard snapshot
@@ -157,16 +183,31 @@ Attendre validation humaine après Phase 0
 
 ## 🔍 ANOMALIES & INCIDENTS
 
-_(Aucune pour le moment)_
+### ⚠️  [2026-01-14 21:00] - BLOCKER - Connection Database Impossible
 
-Format attendu:
-```
-**[TIMESTAMP]** - [SÉVÉRITÉ] - [DESCRIPTION]
-- Fichier: ...
-- Erreur: ...
-- Action: ...
-- Résolution: ...
-```
+**Description:** Impossible de connecter à Supabase via PostgreSQL client
+
+**Détails:**
+- Fichier: `000_baseline_snapshot.sql` (Phase 0)
+- Erreur: "Tenant or user not found"
+- Tentatives:
+  1. Node.js pg package (pooler port 6543) ❌
+  2. Node.js pg package (direct port 5432) ❌
+  3. psql CLI (PostgreSQL 15.15) ❌
+  4. Formats user testés: `postgres.dllyzfuqjzuhvshrlmuq`, `postgres` ❌
+  5. Formats host testés: `aws-0-ca-central-1.pooler.supabase.com`, `db.dllyzfuqjzuhvshrlmuq.supabase.co` ❌
+
+**Impact:** Phase 0 ne peut pas être exécutée automatiquement
+
+**Action prise:**
+- Rapport status complet créé: `/Users/xunit/Desktop/PHASE-0-STATUS-REPORT.md`
+- 3 options proposées à l'utilisateur
+- En attente décision utilisateur pour débloquer
+
+**Résolution:** ⏳ EN ATTENTE
+- Option A: Exécution manuelle via Supabase SQL Editor
+- Option B: Fourniture connection string correct
+- Option C: Configuration supabase CLI link
 
 ---
 
@@ -241,6 +282,7 @@ Format attendu:
 
 ---
 
-**Dernière mise à jour:** 2026-01-14 20:56
+**Dernière mise à jour:** 2026-01-14 21:02
 **Maintenu par:** Claude Sonnet 4.5 (SAR Cortex)
 **Contact urgence:** fred@solutionargentrapide.ca
+**Statut actuel:** ⚠️  BLOQUÉ Phase 0 - En attente décision utilisateur
