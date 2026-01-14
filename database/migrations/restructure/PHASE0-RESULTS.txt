@@ -1,0 +1,98 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                     PHASE 0 - BASELINE SNAPSHOT RESULTS                    ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Exécution: 2026-01-14 21:10 UTC
+Méthode: Supabase PostgREST API (service_role key)
+Statut: ✅ SUCCESS (9/12 queries - compteurs obtenus)
+
+════════════════════════════════════════════════════════════════════════════════
+
+📊 COMPTEURS BASELINE
+
+loan_applications:      0 rows
+client_accounts:        218 rows
+client_transactions:    222,101 rows  🔒 LEDGER INTOUCHABLE
+client_analyses:        48 rows
+emails_envoyes:         719 rows      🔒 READ-ONLY
+contact_messages:       357 rows
+support_tickets:        0 rows
+vopay_webhook_logs:     998 rows      🔒 RAW
+fraud_cases:            0 rows
+
+TOTAL RECORDS:          224,441 rows
+
+════════════════════════════════════════════════════════════════════════════════
+
+⚠️  QUERIES NON EXÉCUTÉES (requiert RPC custom function)
+
+Query 1: Timestamp - N/A (méthode API utilisée à la place)
+Query 2: Table Statistics - N/A (pg_stat_user_tables nécessite RPC)
+Query 3: RLS Status - N/A (pg_class nécessite RPC)
+
+Note: Ces queries nécessitent une fonction PostgreSQL custom pour être
+exécutées via l'API REST. Les compteurs de tables sont suffisants pour
+établir la baseline Phase 0.
+
+════════════════════════════════════════════════════════════════════════════════
+
+✅ VALIDATION BASELINE
+
+[✅] client_transactions présent: 222,101 rows
+[✅] emails_envoyes présent: 719 rows
+[✅] vopay_webhook_logs présent: 998 rows
+[✅] client_accounts présent: 218 rows
+[✅] Total > 200k records confirmé
+[✅] Aucune erreur critique
+[✅] Tables critiques intactes
+
+════════════════════════════════════════════════════════════════════════════════
+
+📋 OBSERVATIONS
+
+1. loan_applications = 0
+   → Table vide ou nouvelle structure
+   → À vérifier si normal pour cette instance
+
+2. fraud_cases = 0
+   → Bon signe (pas de fraudes détectées)
+   → Ou feature pas encore utilisée
+
+3. support_tickets = 0
+   → Système de tickets pas encore utilisé
+   → Ou migration récente vers nouveau système
+
+4. client_transactions = 222,101 🔥
+   → Volume significatif dans le ledger
+   → CRITIQUE: Table INTOUCHABLE pendant migration
+
+5. vopay_webhook_logs = 998
+   → Historique webhooks préservé
+   → Donnée RAW à conserver intact
+
+════════════════════════════════════════════════════════════════════════════════
+
+🔒 RÈGLES CONFIRMÉES
+
+✅ client_transactions (222,101 rows) = INTOUCHABLE
+✅ emails_envoyes (719 rows) = READ-ONLY
+✅ vopay_webhook_logs (998 rows) = RAW
+
+════════════════════════════════════════════════════════════════════════════════
+
+⏭️  PROCHAINES ÉTAPES
+
+Phase 0: ✅ COMPLÈTE
+Phase 1: ⏳ Prête à démarrer après validation humaine
+
+Fichiers prêts pour Phase 1:
+- 010_create_clients_enhanced.sql (avec recommandations GPT)
+- 011_add_client_id_columns.sql
+- 012_backfill_clients.sql
+- 013_add_performance_indexes.sql
+
+════════════════════════════════════════════════════════════════════════════════
+
+Généré par: Claude Sonnet 4.5 (SAR Cortex)
+Branche Git: feat/db-restructure-dossier-client
+Commit: 78002ae
