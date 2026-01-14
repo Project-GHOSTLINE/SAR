@@ -9,11 +9,5 @@
         }
       ]
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/admin/performance",
-      "destination": "/performance-diagnostic.html"
-    }
   ]
 }
