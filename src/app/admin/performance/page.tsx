@@ -8,7 +8,7 @@ export default function PerformanceDiagnosticPage() {
       <AdminNav currentPage="/admin/performance" />
       <div style={{ paddingTop: '80px', height: '100vh' }}>
         <iframe
-          src="/performance-diagnostic.html"
+          src="/api/performance-diagnostic"
           style={{
             width: '100%',
             height: 'calc(100vh - 80px)',

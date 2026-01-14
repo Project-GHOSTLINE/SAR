@@ -6,7 +6,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/performance-diagnostic.html',
+        source: '/api/performance-diagnostic',
         headers: [
           {
             key: 'X-Frame-Options',
