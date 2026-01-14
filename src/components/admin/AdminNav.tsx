@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import {
   LayoutDashboard, MessageSquare, DollarSign, FileText,
   Wrench, Webhook, BarChart3, LogOut, Menu, X,
-  ChevronDown, User, Clock, Bell, Shield, Database, Download
+  ChevronDown, User, Clock, Bell, Shield, Database, Download, Zap
 } from 'lucide-react'
 
 interface AdminNavProps {
@@ -133,6 +133,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       name: 'Explorer',
       href: '/admin/data-explorer',
       icon: Database,
+      badge: null
+    },
+    {
+      name: 'Performance',
+      href: '/performance-diagnostic.html',
+      icon: Zap,
       badge: null
     }
   ]
