@@ -1107,7 +1107,10 @@ function AdminDashboardContent() {
                                   )}
 
                                   {/* Données VoPay complètes */}
-                                  <details className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                  <details
+                                    className="bg-gray-50 rounded-lg p-3 border border-gray-200"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
                                     <summary className="text-xs font-bold text-gray-600 cursor-pointer hover:text-[#00874e] transition-colors">
                                       Voir données VoPay complètes
                                     </summary>
