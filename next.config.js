@@ -6,6 +6,19 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: '/performance-diagnostic.html',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+        ]
+      },
+      {
         source: '/(.*)',
         headers: [
           {
