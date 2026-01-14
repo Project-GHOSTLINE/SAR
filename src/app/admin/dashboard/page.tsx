@@ -383,16 +383,12 @@ function AdminDashboardContent() {
 
   const fetchMessageStats = async () => {
     try {
-      console.log('🔄 Chargement des stats messages...')
       const res = await fetch('/api/admin/messages/assign', { credentials: 'include' })
-      console.log('📡 Réponse API stats:', res.status)
 
       if (res.ok) {
         const data = await res.json()
-        console.log('📊 Données stats reçues:', data)
 
         if (data.success && data.stats) {
-          console.log('✅ Mise à jour des stats:', data.stats)
           setMessageStats(data.stats)
         } else {
           console.warn('⚠️ Format de réponse inattendu:', data)
@@ -482,6 +478,7 @@ function AdminDashboardContent() {
     const interval = setInterval(() => {
       fetchMessages()
       fetchMessageStats()
+      fetchVopayData() // ✅ Ajouté pour auto-refresh VoPay
       fetchWebhookStats()
     }, 30000)
     return () => clearInterval(interval)
@@ -813,18 +810,18 @@ function AdminDashboardContent() {
                 <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex items-center justify-between">
                   <h2 className="font-bold text-gray-900 flex items-center gap-2">
                     <Activity size={18} className="text-[#00874e]" />
-                    Transactions recentes
+                    Transactions recentes VoPay
                   </h2>
                   <button
-                    onClick={fetchWebhookStats}
+                    onClick={fetchVopayData}
                     className="text-gray-400 hover:text-[#00874e] transition-all hover:scale-110"
                   >
-                    <RefreshCw size={16} className={webhookStatsLoading ? 'animate-spin' : ''} />
+                    <RefreshCw size={16} className={vopayLoading ? 'animate-spin' : ''} />
                   </button>
                 </div>
 
                 {/* View Buttons */}
-                {webhookStats?.recentTransactions && webhookStats.recentTransactions.length > 0 && (
+                {vopayData?.recentTransactions && vopayData.recentTransactions.length > 0 && (
                   <div className="px-6 py-3 bg-gray-50 border-b border-gray-100">
                     <div className="flex gap-2">
                       <button
@@ -862,18 +859,18 @@ function AdminDashboardContent() {
                 )}
 
                 <div className="divide-y divide-gray-100">
-                  {webhookStatsLoading ? (
+                  {vopayLoading ? (
                     <div className="px-6 py-8 text-center">
                       <Loader2 size={24} className="animate-spin text-[#00874e] mx-auto" />
                     </div>
-                  ) : webhookStats?.recentTransactions && webhookStats.recentTransactions.length > 0 ? (
+                  ) : vopayData?.recentTransactions && vopayData.recentTransactions.length > 0 ? (
                     (() => {
                       // Filtrer selon la vue active
-                      let filteredTx = webhookStats.recentTransactions
+                      let filteredTx = vopayData.recentTransactions
 
                       if (txView !== 'all') {
-                        filteredTx = webhookStats.recentTransactions.filter((tx: any) => {
-                          const txType = (tx.transaction_type || '').toLowerCase()
+                        filteredTx = vopayData.recentTransactions.filter((tx: any) => {
+                          const txType = (tx.TransactionType || tx.transaction_type || '').toLowerCase()
 
                           // Vrais types VoPay pour les ENTRÉES (argent qui rentre)
                           const isDeposit = txType.includes('eft funding') ||
@@ -898,19 +895,24 @@ function AdminDashboardContent() {
 
                       // Limiter à 10 transactions
                       return filteredTx.slice(0, 10).map((tx: any, i: number) => {
-                        const status = tx.status.toLowerCase()
-                        const isSuccessful = status === 'successful'
+                        // Support pour format VoPay API (majuscules) et webhooks (minuscules)
+                        const status = (tx.Status || tx.TransactionStatus || tx.status || '').toLowerCase()
+                        const isSuccessful = status === 'successful' || status === 'complete' || status === 'completed'
                         const isFailed = status === 'failed'
                         const isPending = status === 'pending' || status === 'in progress'
                         const isCancelled = status === 'cancelled'
 
-                        // Extraire le nom du client et description du raw_payload
-                        const rawData = tx.raw_payload || {}
-                        const clientName = rawData.FullName || rawData.full_name || rawData.AccountName || 'Client VoPay'
-                        const vopayTransactionId = rawData.TransactionID || tx.transaction_id
+                        // Extraire le nom du client (format VoPay API direct)
+                        const clientName = tx.FullName || tx.AccountName || tx.full_name || 'Client VoPay'
+                        const vopayTransactionId = tx.TransactionID || tx.transaction_id
+
+                        // Calculer le montant (VoPay utilise DebitAmount et CreditAmount)
+                        const debitAmount = parseFloat(tx.DebitAmount || '0')
+                        const creditAmount = parseFloat(tx.CreditAmount || '0')
+                        const transactionAmount = creditAmount > 0 ? creditAmount : debitAmount
 
                         // Déterminer si c'est une entrée ou sortie (vrais types VoPay)
-                        const txType = (tx.transaction_type || '').toLowerCase()
+                        const txType = (tx.TransactionType || tx.transaction_type || '').toLowerCase()
                         const isDeposit = txType.includes('eft funding') ||
                                          txType.includes('inbound') ||
                                          txType.includes('payout') ||
@@ -978,11 +980,11 @@ function AdminDashboardContent() {
                                       )}
                                     </div>
                                     <div className="flex items-center gap-3 text-xs text-gray-500">
-                                      <span className="font-mono">#{tx.transaction_id}</span>
+                                      <span className="font-mono">#{vopayTransactionId}</span>
                                       <span>•</span>
-                                      <span className="font-medium">{tx.transaction_type}</span>
+                                      <span className="font-medium">{tx.TransactionType || tx.transaction_type}</span>
                                       <span>•</span>
-                                      <span suppressHydrationWarning>{new Date(tx.received_at).toLocaleString('fr-CA')}</span>
+                                      <span suppressHydrationWarning>{new Date(tx.TransactionDateTime || tx.received_at).toLocaleString('fr-CA')}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -993,7 +995,7 @@ function AdminDashboardContent() {
                                     isFailed ? 'text-gray-400' :
                                     'text-gray-900'
                                   }`}>
-                                    {isDeposit && '+'}{isWithdrawal && '-'}{formatCurrency(tx.transaction_amount)}
+                                    {isDeposit && '+'}{isWithdrawal && '-'}{formatCurrency(transactionAmount)}
                                   </p>
                                 </div>
                                 <ChevronRight size={20} className="text-gray-400 ml-2 group-open:rotate-90 transition-transform" />
@@ -1016,12 +1018,20 @@ function AdminDashboardContent() {
                                         <span className={`font-bold text-lg ${
                                           isDeposit ? 'text-green-600' : isWithdrawal ? 'text-red-600' : 'text-gray-900'
                                         }`}>
-                                          {isDeposit && '+'}{isWithdrawal && '-'}{formatCurrency(tx.transaction_amount)}
+                                          {isDeposit && '+'}{isWithdrawal && '-'}{formatCurrency(transactionAmount)}
                                         </span>
                                       </div>
                                       <div className="flex justify-between">
+                                        <span className="text-gray-600">Crédit:</span>
+                                        <span className="font-semibold text-green-600">+{formatCurrency(creditAmount)}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Débit:</span>
+                                        <span className="font-semibold text-red-600">-{formatCurrency(debitAmount)}</span>
+                                      </div>
+                                      <div className="flex justify-between">
                                         <span className="text-gray-600">Type:</span>
-                                        <span className="font-semibold text-gray-900">{tx.transaction_type}</span>
+                                        <span className="font-semibold text-gray-900">{tx.TransactionType || tx.transaction_type}</span>
                                       </div>
                                       <div className="flex justify-between">
                                         <span className="text-gray-600">Statut:</span>
@@ -1030,7 +1040,7 @@ function AdminDashboardContent() {
                                           isFailed ? 'text-red-600' :
                                           isPending ? 'text-blue-600' :
                                           'text-gray-600'
-                                        }`}>{tx.status}</span>
+                                        }`}>{tx.TransactionStatus || tx.Status || tx.status}</span>
                                       </div>
                                       {tx.currency && (
                                         <div className="flex justify-between">
@@ -1048,8 +1058,8 @@ function AdminDashboardContent() {
                                       Client
                                     </h4>
                                     <p className="font-semibold text-blue-900 text-sm">{clientName}</p>
-                                    {rawData.AccountName && rawData.AccountName !== clientName && (
-                                      <p className="text-xs text-blue-600 mt-1">Compte: {rawData.AccountName}</p>
+                                    {tx.AccountName && tx.AccountName !== clientName && (
+                                      <p className="text-xs text-blue-600 mt-1">Compte: {tx.AccountName}</p>
                                     )}
                                   </div>
                                 </div>
@@ -1096,17 +1106,15 @@ function AdminDashboardContent() {
                                     </div>
                                   )}
 
-                                  {/* Données brutes webhook */}
-                                  {rawData && Object.keys(rawData).length > 0 && (
-                                    <details className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                                      <summary className="text-xs font-bold text-gray-600 cursor-pointer hover:text-[#00874e] transition-colors">
-                                        Voir données brutes webhook
-                                      </summary>
-                                      <pre className="mt-2 text-xs text-gray-700 whitespace-pre-wrap break-all font-mono bg-white p-2 rounded border border-gray-200 max-h-40 overflow-auto">
-                                        {JSON.stringify(rawData, null, 2)}
-                                      </pre>
-                                    </details>
-                                  )}
+                                  {/* Données VoPay complètes */}
+                                  <details className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                    <summary className="text-xs font-bold text-gray-600 cursor-pointer hover:text-[#00874e] transition-colors">
+                                      Voir données VoPay complètes
+                                    </summary>
+                                    <pre className="mt-2 text-xs text-gray-700 whitespace-pre-wrap break-all font-mono bg-white p-2 rounded border border-gray-200 max-h-40 overflow-auto">
+                                      {JSON.stringify(tx, null, 2)}
+                                    </pre>
+                                  </details>
                                 </div>
                               </div>
                             </div>
@@ -1117,9 +1125,9 @@ function AdminDashboardContent() {
                   ) : (
                     <div className="px-6 py-12 text-center">
                       <Activity size={48} className="text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500 font-medium mb-2">Pas encore configuré</p>
+                      <p className="text-gray-500 font-medium mb-2">Aucune transaction</p>
                       <p className="text-sm text-gray-400">
-                        Aucune transaction de production n'a été reçue
+                        Aucune transaction VoPay récente disponible
                       </p>
                     </div>
                   )}
