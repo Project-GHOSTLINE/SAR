@@ -72,6 +72,17 @@ CREATE INDEX IF NOT EXISTS claude_conversation_log_branch_idx
 
 COMMENT ON TABLE public.claude_conversation_log IS 'Journal complet des sessions de travail avec Claude.';
 
+-- ==============================================================================
+-- FONCTION: set_updated_at (utilisée par triggers)
+-- ==============================================================================
+
+CREATE OR REPLACE FUNCTION public.set_updated_at() RETURNS trigger AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Trigger auto-update
 DO $$
 BEGIN
@@ -121,6 +132,16 @@ CREATE INDEX IF NOT EXISTS claude_projects_status_idx ON public.claude_projects(
 CREATE INDEX IF NOT EXISTS claude_projects_slug_idx ON public.claude_projects(project_slug);
 
 COMMENT ON TABLE public.claude_projects IS 'Liste des projets disponibles avec accès et permissions.';
+
+-- Trigger auto-update
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_projects_updated_at') THEN
+    CREATE TRIGGER trg_projects_updated_at
+      BEFORE UPDATE ON public.claude_projects
+      FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+  END IF;
+END $$;
 
 -- ==============================================================================
 -- PARTIE 3: TABLE claude_messages
@@ -276,6 +297,16 @@ CREATE INDEX IF NOT EXISTS claude_knowledge_tags_idx ON public.claude_knowledge 
 CREATE INDEX IF NOT EXISTS claude_knowledge_search_idx ON public.claude_knowledge USING gin(search_vector);
 
 COMMENT ON TABLE public.claude_knowledge IS 'Base de connaissance accumulée.';
+
+-- Trigger auto-update
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_knowledge_updated_at') THEN
+    CREATE TRIGGER trg_knowledge_updated_at
+      BEFORE UPDATE ON public.claude_knowledge
+      FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+  END IF;
+END $$;
 
 -- ==============================================================================
 -- TRIGGERS: Auto-update search_vector

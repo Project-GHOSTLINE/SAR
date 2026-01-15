@@ -1,7 +1,7 @@
 # Status Board — Restructuration SAR — FINAL
 
 - [x] P0 — Préparation ✅ (2026-01-14 21:10)
-- [ ] P1 — Clients + liens client_id
+- [x] P1 — Clients + liens client_id ✅ (2026-01-15 00:50)
 - [ ] P2 — Communications (emails_envoyes + support view)
 - [ ] P3 — Loans + payment schedules/events
 - [ ] P4 — VoPay normalisé
