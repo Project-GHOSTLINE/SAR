@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAR - Parcours Client en Temps Réel</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0a0f;
+      --bg-card: #12121a;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --text: #ffffff;
+      --text-dim: #94a3b8;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      padding: 20px 30px;
+      background: var(--bg-card);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .stats-bar {
+      display: flex;
+      gap: 30px;
+      font-size: 13px;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 350px 1fr 350px;
+      gap: 20px;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    /* Steps */
+    .step {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .step::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      bottom: -20px;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .step:last-child::before {
+      display: none;
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .step-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-icon.success {
+      background: var(--success);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+    }
+
+    .step-icon.error {
+      background: var(--error);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+      animation: shake 0.5s infinite;
+    }
+
+    .step-icon.warning {
+      background: var(--warning);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+    }
+
+    .step-icon.pending {
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px dashed rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-2px); }
+      75% { transform: translateX(2px); }
+    }
+
+    .step-info {
+      flex: 1;
+    }
+
+    .step-title {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .step-desc {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .step-metrics {
+      display: flex;
+      gap: 15px;
+      margin-top: 8px;
+      font-size: 11px;
+    }
+
+    .metric {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-details {
+      margin-top: 12px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .step-details.error {
+      border-left: 3px solid var(--error);
+    }
+
+    .step-details.warning {
+      border-left: 3px solid var(--warning);
+    }
+
+    .error-reason {
+      color: var(--error);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .error-details {
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* Canvas */
+    .canvas-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Live clients */
+    .client-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .client-card:hover {
+      transform: translateX(5px);
+      border-color: var(--info);
+    }
+
+    .client-card.active {
+      border-color: var(--success);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .client-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .client-id {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .client-status {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .client-status.active {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+
+    .client-status.blocked {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--error);
+    }
+
+    .client-progress {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success), var(--info));
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-fill.error {
+      background: var(--error);
+    }
+
+    /* Conversion funnel */
+    .funnel {
+      margin-bottom: 30px;
+    }
+
+    .funnel-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .funnel-step {
+      margin-bottom: 12px;
+    }
+
+    .funnel-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .funnel-bar {
+      height: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .funnel-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success), var(--info));
+      display: flex;
+      align-items: center;
+      padding: 0 15px;
+      font-weight: 700;
+      font-size: 13px;
+      transition: width 0.5s ease;
+    }
+
+    .funnel-fill.partial {
+      background: linear-gradient(90deg, var(--warning), var(--info));
+    }
+
+    .funnel-fill.low {
+      background: linear-gradient(90deg, var(--error), var(--warning));
+    }
+
+    /* Scrollbar */
+    .panel-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .panel-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .panel-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    .legend {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 15px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 4px;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎯 Parcours Client - Demande de Prêt</h1>
+      <div class="stats-bar">
+        <div class="stat">
+          <div class="stat-dot" style="background: var(--success);"></div>
+          <span><strong id="completed-count">0</strong> Complétés</span>
+        </div>
+        <div class="stat">
+          <div class="stat-dot" style="background: var(--warning);"></div>
+          <span><strong id="inprogress-count">0</strong> En cours</span>
+        </div>
+        <div class="stat">
+          <div class="stat-dot" style="background: var(--error);"></div>
+          <span><strong id="blocked-count">0</strong> Bloqués</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- Left: Journey steps -->
+      <div class="panel">
+        <div class="panel-header">📍 Étapes du Parcours</div>
+        <div class="panel-content" id="journey-steps"></div>
+      </div>
+
+      <!-- Center: Visual flow -->
+      <div class="panel">
+        <div class="canvas-container">
+          <canvas id="flow-canvas"></canvas>
+
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-color" style="background: var(--success);"></div>
+              <span>Chemin réussi</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: var(--error);"></div>
+              <span>Chemin bloqué</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: var(--warning);"></div>
+              <span>En attente</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Live clients & funnel -->
+      <div class="panel">
+        <div class="panel-header">👥 Clients en Temps Réel</div>
+        <div class="panel-content">
+          <div class="funnel">
+            <div class="funnel-title">Taux de Conversion</div>
+            <div id="funnel-viz"></div>
+          </div>
+
+          <div style="margin-top: 30px;">
+            <div style="font-weight: 700; margin-bottom: 15px; font-size: 14px;">Clients Actifs</div>
+            <div id="live-clients"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://dllyzfuqjzuhvshrlmuq.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsbHl6ZnVxanp1aHZzaHJsbXVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5OTU5ODEsImV4cCI6MjA4MTU3MTk4MX0.xskVblRlKdbTST1Mdgz76oR7N2rDq8ZOUgaN-f_TTM4'
+
+    // Définition du parcours client
+    const JOURNEY_STEPS = [
+      {
+        id: 'landing',
+        title: '🌐 Arrivée sur le Site',
+        desc: 'Client visite solutionargentrapide.ca',
+        route: null,
+        required: [],
+        blockers: []
+      },
+      {
+        id: 'form',
+        title: '📝 Formulaire de Demande',
+        desc: 'Remplissage des informations personnelles',
+        route: '/api/applications/submit',
+        required: ['nom', 'email', 'téléphone', 'montant'],
+        blockers: ['Champs manquants', 'Email invalide', 'Montant hors limites']
+      },
+      {
+        id: 'identity',
+        title: '🆔 Vérification Identité',
+        desc: 'Validation des documents (permis, carte)',
+        route: '/api/device/deep-inspector',
+        required: ['photo_id', 'selfie'],
+        blockers: ['Document illisible', 'Photo floue', 'Identité non vérifiable']
+      },
+      {
+        id: 'credit',
+        title: '📊 Vérification Crédit',
+        desc: 'Consultation bureau de crédit (Equifax)',
+        route: '/api/osint/scan',
+        required: ['sin', 'adresse', 'date_naissance'],
+        blockers: ['Score trop bas (<550)', 'Faillite récente', 'SIN invalide']
+      },
+      {
+        id: 'scoring',
+        title: '🎯 Scoring AI',
+        desc: 'Analyse risque avec modèle ML',
+        route: '/api/sentinel/scoring',
+        required: ['credit_score', 'revenus', 'dépenses'],
+        blockers: ['Ratio d\'endettement >40%', 'Revenus insuffisants', 'Modèle timeout']
+      },
+      {
+        id: 'approval',
+        title: '✅ Décision Automatique',
+        desc: 'Approbation ou refus du prêt',
+        route: '/api/admin/analytics',
+        required: ['score_final'],
+        blockers: ['Score final <60%', 'Politique refus auto', 'Révision manuelle requise']
+      },
+      {
+        id: 'documents',
+        title: '📄 Signature Documents',
+        desc: 'Contrat de prêt + entente',
+        route: '/api/admin/messages',
+        required: ['contrat_signé', 'entente_acceptée'],
+        blockers: ['Documents non signés', 'Timeout signature (24h)', 'Refus conditions']
+      },
+      {
+        id: 'banking',
+        title: '🏦 Liaison Bancaire',
+        desc: 'Connexion compte via Flinks',
+        route: '/api/admin/vopay/transactions',
+        required: ['institution', 'transit', 'account'],
+        blockers: ['Connexion Flinks échoue', 'Compte invalide', 'Institution non supportée']
+      },
+      {
+        id: 'disbursement',
+        title: '💰 Décaissement',
+        desc: 'Virement via VoPay',
+        route: '/api/admin/vopay/transactions',
+        required: ['bank_verified'],
+        blockers: ['VoPay timeout', 'Compte bloqué', 'Limite quotidienne atteinte']
+      },
+      {
+        id: 'confirmation',
+        title: '🎉 Confirmation',
+        desc: 'Client reçoit les fonds',
+        route: '/api/admin/support/tickets',
+        required: ['virement_complété'],
+        blockers: []
+      }
+    ]
+
+    let performanceData = {}
+    let clients = []
+    let canvas, ctx
+
+    // Generate mock clients
+    function generateClients() {
+      clients = []
+      for (let i = 0; i < 5; i++) {
+        const progress = Math.floor(Math.random() * JOURNEY_STEPS.length)
+        const blocked = Math.random() < 0.3 && progress > 2
+
+        clients.push({
+          id: `CLI-${1000 + i}`,
+          currentStep: progress,
+          blocked: blocked,
+          blockedReason: blocked ? JOURNEY_STEPS[progress].blockers[Math.floor(Math.random() * JOURNEY_STEPS[progress].blockers.length)] : null,
+          startedAt: new Date(Date.now() - Math.random() * 3600000)
+        })
+      }
+    }
+
+    async function fetchPerformanceData() {
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/vw_route_performance?select=*`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          performanceData = {}
+          data.forEach(item => {
+            performanceData[item.route] = item
+          })
+          console.log('✅ Performance data loaded:', data.length, 'routes')
+        }
+      } catch (error) {
+        console.error('Error fetching performance:', error)
+      }
+    }
+
+    function getStepStatus(step, client) {
+      if (!client) {
+        // Overall step status
+        const perf = performanceData[step.route]
+        if (!perf) return 'pending'
+        if (perf.error_count > 0) return 'error'
+        if (perf.avg_ms > 500) return 'warning'
+        return 'success'
+      }
+
+      // Client-specific status
+      if (client.currentStep > JOURNEY_STEPS.indexOf(step)) return 'success'
+      if (client.currentStep === JOURNEY_STEPS.indexOf(step)) {
+        return client.blocked ? 'error' : 'warning'
+      }
+      return 'pending'
+    }
+
+    function renderJourneySteps() {
+      const container = document.getElementById('journey-steps')
+
+      let html = ''
+      JOURNEY_STEPS.forEach((step, idx) => {
+        const perf = performanceData[step.route]
+        const status = getStepStatus(step)
+
+        let icon = '⏳'
+        let iconClass = 'pending'
+
+        if (status === 'success') {
+          icon = '✓'
+          iconClass = 'success'
+        } else if (status === 'error') {
+          icon = '✗'
+          iconClass = 'error'
+        } else if (status === 'warning') {
+          icon = '⚠'
+          iconClass = 'warning'
+        }
+
+        html += `
+          <div class="step">
+            <div class="step-header">
+              <div class="step-icon ${iconClass}">${icon}</div>
+              <div class="step-info">
+                <div class="step-title">${step.title}</div>
+                <div class="step-desc">${step.desc}</div>
+                ${perf ? `
+                  <div class="step-metrics">
+                    <div class="metric">⚡ ${perf.avg_ms}ms</div>
+                    <div class="metric">📊 ${perf.total_requests} req</div>
+                    ${perf.error_count > 0 ? `<div class="metric" style="color: var(--error);">❌ ${perf.error_count} erreurs</div>` : ''}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+            ${status === 'error' && step.blockers.length > 0 ? `
+              <div class="step-details error">
+                <div class="error-reason">⚠️ Blocages Possibles:</div>
+                <div class="error-details">
+                  ${step.blockers.map(b => `• ${b}`).join('<br>')}
+                </div>
+              </div>
+            ` : ''}
+            ${step.required.length > 0 ? `
+              <div class="step-details">
+                <div style="font-weight: 600; margin-bottom: 6px;">📋 Requis:</div>
+                <div style="color: var(--text-dim);">
+                  ${step.required.map(r => `• ${r}`).join('<br>')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `
+      })
+
+      container.innerHTML = html
+    }
+
+    function renderFunnel() {
+      const container = document.getElementById('funnel-viz')
+
+      // Calculate conversion rates (mock data based on performance)
+      const funnelSteps = [
+        { label: 'Visiteurs', count: 1000, percent: 100 },
+        { label: 'Formulaire', count: 650, percent: 65 },
+        { label: 'Identité OK', count: 520, percent: 52 },
+        { label: 'Crédit OK', count: 390, percent: 39 },
+        { label: 'Approuvés', count: 280, percent: 28 },
+        { label: 'Signés', count: 240, percent: 24 },
+        { label: 'Décaissés', count: 220, percent: 22 }
+      ]
+
+      let html = ''
+      funnelSteps.forEach(step => {
+        let fillClass = ''
+        if (step.percent < 30) fillClass = 'low'
+        else if (step.percent < 60) fillClass = 'partial'
+
+        html += `
+          <div class="funnel-step">
+            <div class="funnel-label">
+              <span>${step.label}</span>
+              <span><strong>${step.count}</strong> (${step.percent}%)</span>
+            </div>
+            <div class="funnel-bar">
+              <div class="funnel-fill ${fillClass}" style="width: ${step.percent}%;">
+                ${step.percent}%
+              </div>
+            </div>
+          </div>
+        `
+      })
+
+      container.innerHTML = html
+    }
+
+    function renderLiveClients() {
+      const container = document.getElementById('live-clients')
+
+      let html = ''
+      clients.forEach(client => {
+        const progress = (client.currentStep / JOURNEY_STEPS.length) * 100
+        const currentStep = JOURNEY_STEPS[client.currentStep]
+
+        html += `
+          <div class="client-card ${!client.blocked ? 'active' : ''}">
+            <div class="client-header">
+              <div class="client-id">${client.id}</div>
+              <div class="client-status ${client.blocked ? 'blocked' : 'active'}">
+                ${client.blocked ? 'Bloqué' : 'Actif'}
+              </div>
+            </div>
+            <div class="client-progress">
+              Étape: ${currentStep.title}
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill ${client.blocked ? 'error' : ''}" style="width: ${progress}%;"></div>
+            </div>
+            ${client.blocked ? `
+              <div style="margin-top: 10px; font-size: 11px; color: var(--error);">
+                🚫 ${client.blockedReason}
+              </div>
+            ` : ''}
+          </div>
+        `
+      })
+
+      container.innerHTML = html
+
+      // Update stats
+      const completed = clients.filter(c => c.currentStep === JOURNEY_STEPS.length - 1 && !c.blocked).length
+      const inProgress = clients.filter(c => !c.blocked && c.currentStep < JOURNEY_STEPS.length - 1).length
+      const blocked = clients.filter(c => c.blocked).length
+
+      document.getElementById('completed-count').textContent = completed
+      document.getElementById('inprogress-count').textContent = inProgress
+      document.getElementById('blocked-count').textContent = blocked
+    }
+
+    function initCanvas() {
+      canvas = document.getElementById('flow-canvas')
+      ctx = canvas.getContext('2d')
+
+      function resize() {
+        canvas.width = canvas.offsetWidth * 2
+        canvas.height = canvas.offsetHeight * 2
+        ctx.scale(2, 2)
+      }
+
+      resize()
+      window.addEventListener('resize', resize)
+
+      drawFlow()
+    }
+
+    function drawFlow() {
+      const w = canvas.width / 2
+      const h = canvas.height / 2
+
+      ctx.fillStyle = '#0a0a0f'
+      ctx.fillRect(0, 0, w, h)
+
+      // Draw journey flow
+      const stepHeight = h / (JOURNEY_STEPS.length + 1)
+      const centerX = w / 2
+
+      JOURNEY_STEPS.forEach((step, idx) => {
+        const y = stepHeight * (idx + 1)
+        const status = getStepStatus(step)
+
+        // Connection line to next
+        if (idx < JOURNEY_STEPS.length - 1) {
+          ctx.beginPath()
+          ctx.moveTo(centerX, y + 20)
+          ctx.lineTo(centerX, y + stepHeight - 20)
+          ctx.strokeStyle = status === 'error' ? '#ef4444' : status === 'success' ? '#10b981' : 'rgba(255,255,255,0.2)'
+          ctx.lineWidth = 3
+          ctx.stroke()
+        }
+
+        // Node
+        const gradient = ctx.createRadialGradient(centerX, y, 0, centerX, y, 30)
+        const color = status === 'error' ? '#ef4444' : status === 'success' ? '#10b981' : status === 'warning' ? '#f59e0b' : 'rgba(255,255,255,0.2)'
+        gradient.addColorStop(0, color)
+        gradient.addColorStop(1, 'transparent')
+
+        ctx.fillStyle = gradient
+        ctx.beginPath()
+        ctx.arc(centerX, y, 30, 0, Math.PI * 2)
+        ctx.fill()
+
+        ctx.fillStyle = color
+        ctx.beginPath()
+        ctx.arc(centerX, y, 20, 0, Math.PI * 2)
+        ctx.fill()
+
+        // Label
+        ctx.fillStyle = '#ffffff'
+        ctx.font = 'bold 11px Inter'
+        ctx.textAlign = 'center'
+        ctx.fillText(step.title.split(' ').slice(1).join(' '), centerX, y + 50)
+
+        // Client markers on this step
+        clients.forEach((client, cidx) => {
+          if (client.currentStep === idx) {
+            const offsetX = centerX + 40 + (cidx * 15)
+            ctx.fillStyle = client.blocked ? '#ef4444' : '#3b82f6'
+            ctx.beginPath()
+            ctx.arc(offsetX, y, 6, 0, Math.PI * 2)
+            ctx.fill()
+          }
+        })
+      })
+
+      requestAnimationFrame(drawFlow)
+    }
+
+    // Initialize
+    async function init() {
+      await fetchPerformanceData()
+      generateClients()
+      renderJourneySteps()
+      renderFunnel()
+      renderLiveClients()
+      initCanvas()
+
+      // Update clients every 3 seconds
+      setInterval(() => {
+        // Simulate client progress
+        clients.forEach(client => {
+          if (!client.blocked && Math.random() < 0.3) {
+            client.currentStep = Math.min(client.currentStep + 1, JOURNEY_STEPS.length - 1)
+
+            // Random blocking
+            if (Math.random() < 0.15 && client.currentStep > 2) {
+              client.blocked = true
+              const step = JOURNEY_STEPS[client.currentStep]
+              client.blockedReason = step.blockers[Math.floor(Math.random() * step.blockers.length)]
+            }
+          }
+        })
+        renderLiveClients()
+      }, 3000)
+
+      // Refresh data every 10 seconds
+      setInterval(fetchPerformanceData, 10000)
+    }
+
+    init()
+  </script>
+</body>
+</html>

@@ -1,0 +1,411 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧪 Route Verification Report</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'SF Mono', 'Consolas', monospace;
+      background: #000;
+      color: #0f0;
+      padding: 30px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #0f0;
+    }
+    h1 {
+      font-size: 32px;
+      text-shadow: 0 0 10px #0f0;
+      margin-bottom: 10px;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .stat-box {
+      background: rgba(0, 255, 0, 0.05);
+      border: 2px solid #0f0;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 48px;
+      font-weight: bold;
+      color: #0f0;
+      text-shadow: 0 0 10px #0f0;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      margin-top: 10px;
+    }
+    .stat-box.success .stat-value { color: #0f0; }
+    .stat-box.failed .stat-value { color: #f00; }
+    .stat-box.warning .stat-value { color: #ff0; }
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .results-table th {
+      background: rgba(0, 255, 0, 0.1);
+      padding: 12px;
+      text-align: left;
+      border-bottom: 2px solid #0f0;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    .results-table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(0, 255, 0, 0.1);
+      font-size: 11px;
+    }
+    .results-table tr:hover {
+      background: rgba(0, 255, 0, 0.05);
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .status-badge.success {
+      background: rgba(0, 255, 0, 0.2);
+      color: #0f0;
+      border: 1px solid #0f0;
+    }
+    .status-badge.failed {
+      background: rgba(255, 0, 0, 0.2);
+      color: #f00;
+      border: 1px solid #f00;
+    }
+    .status-badge.warning {
+      background: rgba(255, 255, 0, 0.2);
+      color: #ff0;
+      border: 1px solid #ff0;
+    }
+    .method-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: bold;
+    }
+    .method-badge.GET { background: rgba(0, 255, 0, 0.3); color: #0f0; }
+    .method-badge.POST { background: rgba(0, 150, 255, 0.3); color: #09f; }
+    .duration { color: #888; font-size: 10px; }
+    .duration.fast { color: #0f0; }
+    .duration.slow { color: #ff0; }
+    .duration.veryslow { color: #f00; }
+    .refresh-btn {
+      background: #0f0;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin: 20px auto;
+      display: block;
+    }
+    .refresh-btn:hover {
+      box-shadow: 0 0 20px #0f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🧪 ROUTE VERIFICATION REPORT</h1>
+    <div style="color: #666; font-size: 12px; margin-top: 10px;">
+      Generated: 2026-01-15T20:11:51.441Z
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="stat-box">
+      <div class="stat-value">26</div>
+      <div class="stat-label">Total Tests</div>
+    </div>
+    <div class="stat-box success">
+      <div class="stat-value">21</div>
+      <div class="stat-label">Success</div>
+    </div>
+    <div class="stat-box failed">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Failed</div>
+    </div>
+    <div class="stat-box warning">
+      <div class="stat-value">5</div>
+      <div class="stat-label">Warnings</div>
+    </div>
+  </div>
+
+  <button class="refresh-btn" onclick="location.reload()">🔄 Refresh Report</button>
+
+  <table class="results-table">
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Method</th>
+        <th>Route</th>
+        <th>Status Code</th>
+        <th>Message</th>
+        <th>Duration</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge POST">POST</span></td>
+            <td>/api/admin/login</td>
+            <td>400</td>
+            <td>Validation fonctionne (400)</td>
+            <td><span class="duration ">151ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge POST">POST</span></td>
+            <td>/api/admin/logout</td>
+            <td>200</td>
+            <td>OK (200)</td>
+            <td><span class="duration fast">37ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/admin/messages</td>
+            <td>401</td>
+            <td>Correctement protégé (401)</td>
+            <td><span class="duration ">188ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge POST">POST</span></td>
+            <td>/api/admin/messages/assign</td>
+            <td>401</td>
+            <td>Correctement protégé (401)</td>
+            <td><span class="duration fast">47ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/admin/analytics</td>
+            <td>401</td>
+            <td>Correctement protégé (401)</td>
+            <td><span class="duration slow">954ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/admin/analytics/dashboard</td>
+            <td>401</td>
+            <td>Correctement protégé (401)</td>
+            <td><span class="duration fast">61ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/admin/support/tickets</td>
+            <td>401</td>
+            <td>Correctement protégé (401)</td>
+            <td><span class="duration fast">63ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/admin/support/stats</td>
+            <td>401</td>
+            <td>Correctement protégé (401)</td>
+            <td><span class="duration fast">57ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/admin/vopay</td>
+            <td>401</td>
+            <td>Correctement protégé (401)</td>
+            <td><span class="duration fast">63ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/admin/vopay/transactions</td>
+            <td>401</td>
+            <td>Correctement protégé (401)</td>
+            <td><span class="duration fast">58ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/admin/webhooks/list</td>
+            <td>401</td>
+            <td>Correctement protégé (401)</td>
+            <td><span class="duration fast">63ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/admin/webhooks/stats</td>
+            <td>401</td>
+            <td>Correctement protégé (401)</td>
+            <td><span class="duration fast">60ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/admin/downloads/stats</td>
+            <td>401</td>
+            <td>Correctement protégé (401)</td>
+            <td><span class="duration fast">63ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge POST">POST</span></td>
+            <td>/api/activity/log</td>
+            <td>400</td>
+            <td>Validation fonctionne (400)</td>
+            <td><span class="duration fast">62ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/activity/stats</td>
+            <td>200</td>
+            <td>OK (200)</td>
+            <td><span class="duration ">308ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/activity/recent</td>
+            <td>200</td>
+            <td>OK (200)</td>
+            <td><span class="duration ">180ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge POST">POST</span></td>
+            <td>/api/contact</td>
+            <td>400</td>
+            <td>Validation fonctionne (400)</td>
+            <td><span class="duration fast">96ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/test/demo</td>
+            <td>200</td>
+            <td>OK (200)</td>
+            <td><span class="duration fast">66ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge POST">POST</span></td>
+            <td>/api/applications/submit</td>
+            <td>400</td>
+            <td>Validation fonctionne (400)</td>
+            <td><span class="duration veryslow">1762ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge POST">POST</span></td>
+            <td>/api/memory/store</td>
+            <td>400</td>
+            <td>Validation fonctionne (400)</td>
+            <td><span class="duration ">332ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge warning">warning</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/memory/recall</td>
+            <td>400</td>
+            <td>Status inattendu (400)</td>
+            <td><span class="duration fast">73ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge warning">warning</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/memory/context</td>
+            <td>400</td>
+            <td>Status inattendu (400)</td>
+            <td><span class="duration fast">69ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge warning">warning</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/sentinel/fleet</td>
+            <td>401</td>
+            <td>Status inattendu (401)</td>
+            <td><span class="duration ">151ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge warning">warning</span></td>
+            <td><span class="method-badge POST">POST</span></td>
+            <td>/api/sentinel/scoring</td>
+            <td>401</td>
+            <td>Status inattendu (401)</td>
+            <td><span class="duration ">142ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge warning">warning</span></td>
+            <td><span class="method-badge POST">POST</span></td>
+            <td>/api/osint/scan</td>
+            <td>405</td>
+            <td>Status inattendu (405)</td>
+            <td><span class="duration fast">83ms</span></td>
+          </tr>
+        
+          <tr>
+            <td><span class="status-badge success">success</span></td>
+            <td><span class="method-badge GET">GET</span></td>
+            <td>/api/network/trace</td>
+            <td>200</td>
+            <td>OK (200)</td>
+            <td><span class="duration veryslow">2408ms</span></td>
+          </tr>
+        
+    </tbody>
+  </table>
+</body>
+</html>
+  

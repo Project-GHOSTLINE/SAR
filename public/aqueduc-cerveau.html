@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧠 SAR Brain - Neural API Network</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'SF Pro Display', -apple-system, sans-serif;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: auto;
+    }
+
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Brain pulsing animation */
+    @keyframes brain-pulse {
+      0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.8));
+      }
+      50% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 60px rgba(168, 85, 247, 0.8));
+      }
+    }
+
+    .brain-core {
+      animation: brain-pulse 3s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    /* Tentacle flow animation */
+    @keyframes flow {
+      0% { stroke-dashoffset: 1000; }
+      100% { stroke-dashoffset: 0; }
+    }
+
+    .tentacle {
+      stroke-width: 3;
+      fill: none;
+      stroke-dasharray: 10 5;
+      animation: flow 2s linear infinite;
+      transition: all 0.3s ease;
+    }
+
+    .tentacle:hover {
+      stroke-width: 5;
+      filter: drop-shadow(0 0 10px currentColor);
+    }
+
+    .tentacle.fast { stroke: #00ff41; }
+    .tentacle.good { stroke: #ffeb3b; }
+    .tentacle.slow { stroke: #ff9800; }
+    .tentacle.critical { stroke: #f44336; }
+    .tentacle.error { stroke: #e91e63; animation: pulse-error 1s ease-in-out infinite; }
+    .tentacle.untested { stroke: #444; stroke-dasharray: 5 5; }
+
+    @keyframes pulse-error {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Endpoint nodes */
+    .endpoint {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .endpoint:hover {
+      transform: translate(-50%, -50%) scale(1.2);
+      z-index: 1000;
+    }
+
+    .endpoint-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      border: 3px solid;
+      position: relative;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+    }
+
+    .endpoint.fast .endpoint-circle {
+      border-color: #00ff41;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+    }
+    .endpoint.good .endpoint-circle {
+      border-color: #ffeb3b;
+      box-shadow: 0 0 20px rgba(255, 235, 59, 0.5);
+    }
+    .endpoint.slow .endpoint-circle {
+      border-color: #ff9800;
+      box-shadow: 0 0 20px rgba(255, 152, 0, 0.5);
+    }
+    .endpoint.critical .endpoint-circle {
+      border-color: #f44336;
+      box-shadow: 0 0 20px rgba(244, 67, 54, 0.5);
+    }
+    .endpoint.error .endpoint-circle {
+      border-color: #e91e63;
+      box-shadow: 0 0 20px rgba(233, 30, 99, 0.5);
+      animation: pulse-error 1s ease-in-out infinite;
+    }
+    .endpoint.untested .endpoint-circle {
+      border-color: #444;
+      box-shadow: none;
+    }
+
+    .endpoint-label {
+      position: absolute;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      white-space: nowrap;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid currentColor;
+      pointer-events: none;
+    }
+
+    .endpoint-stats {
+      position: absolute;
+      top: 95px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      white-space: nowrap;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 3px 6px;
+      border-radius: 3px;
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    /* Brain center */
+    .brain-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .brain-svg {
+      width: 200px;
+      height: 200px;
+      filter: drop-shadow(0 0 40px rgba(0, 212, 255, 0.8));
+    }
+
+    .brain-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .brain-title {
+      font-size: 20px;
+      color: #00d4ff;
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+      margin-bottom: 5px;
+    }
+
+    .brain-subtitle {
+      font-size: 12px;
+      color: #a855f7;
+      text-shadow: 0 0 10px rgba(168, 85, 247, 0.8);
+    }
+
+    /* Stats panel */
+    .stats-overlay {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #00d4ff;
+      border-radius: 10px;
+      padding: 20px;
+      z-index: 1000;
+      min-width: 250px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stats-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #00d4ff;
+      text-align: center;
+      margin-bottom: 15px;
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 13px;
+    }
+
+    .stat-value {
+      font-weight: bold;
+      color: #00ff41;
+    }
+
+    /* Legend */
+    .legend {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #00d4ff;
+      border-radius: 10px;
+      padding: 15px;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+
+    .legend-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #00d4ff;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0;
+      font-size: 11px;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid;
+    }
+
+    .refresh-indicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 212, 255, 0.2);
+      border: 2px solid #00d4ff;
+      border-radius: 8px;
+      padding: 10px 15px;
+      font-size: 12px;
+      color: #00d4ff;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Info tooltip */
+    .tooltip {
+      position: fixed;
+      background: rgba(0, 0, 0, 0.95);
+      border: 2px solid #00d4ff;
+      border-radius: 8px;
+      padding: 15px;
+      z-index: 2000;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      max-width: 300px;
+      font-size: 12px;
+    }
+
+    .tooltip.show {
+      opacity: 1;
+    }
+
+    .loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      color: #00d4ff;
+      text-align: center;
+      z-index: 3000;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(0, 212, 255, 0.2);
+      border-top-color: #00d4ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <svg id="tentacles"></svg>
+
+    <div class="brain-container brain-core">
+      <svg class="brain-svg" viewBox="0 0 200 200">
+        <defs>
+          <radialGradient id="brainGradient">
+            <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#a855f7;stop-opacity:0.8" />
+            <stop offset="100%" style="stop-color:#e91e63;stop-opacity:0.6" />
+          </radialGradient>
+        </defs>
+
+        <!-- Brain shape -->
+        <ellipse cx="100" cy="100" rx="70" ry="80" fill="url(#brainGradient)" opacity="0.3"/>
+
+        <!-- Neural pathways -->
+        <path d="M 50 100 Q 70 80, 90 100 T 130 100" stroke="#00d4ff" stroke-width="2" fill="none" opacity="0.6"/>
+        <path d="M 100 50 Q 80 70, 100 90 T 100 130" stroke="#a855f7" stroke-width="2" fill="none" opacity="0.6"/>
+        <path d="M 60 70 Q 80 80, 100 70 T 140 70" stroke="#e91e63" stroke-width="2" fill="none" opacity="0.6"/>
+        <path d="M 60 130 Q 80 120, 100 130 T 140 130" stroke="#00ff41" stroke-width="2" fill="none" opacity="0.6"/>
+
+        <!-- Neurons -->
+        <circle cx="70" cy="80" r="5" fill="#00d4ff" opacity="0.8">
+          <animate attributeName="r" values="5;7;5" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="130" cy="80" r="5" fill="#a855f7" opacity="0.8">
+          <animate attributeName="r" values="5;7;5" dur="2.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="100" cy="60" r="5" fill="#e91e63" opacity="0.8">
+          <animate attributeName="r" values="5;7;5" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="70" cy="120" r="5" fill="#00ff41" opacity="0.8">
+          <animate attributeName="r" values="5;7;5" dur="2.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="130" cy="120" r="5" fill="#ffeb3b" opacity="0.8">
+          <animate attributeName="r" values="5;7;5" dur="2.8s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+
+      <div class="brain-text">
+        <div class="brain-title">SAR BRAIN</div>
+        <div class="brain-subtitle">Neural Network</div>
+      </div>
+    </div>
+
+    <div id="endpoints"></div>
+
+    <div class="stats-overlay">
+      <div class="stats-title">📊 STATISTIQUES</div>
+      <div class="stat-item">
+        <span>Total Endpoints:</span>
+        <span class="stat-value" id="total-count">0</span>
+      </div>
+      <div class="stat-item">
+        <span>✅ Actifs:</span>
+        <span class="stat-value" style="color: #00ff41;" id="active-count">0</span>
+      </div>
+      <div class="stat-item">
+        <span>❌ Erreurs:</span>
+        <span class="stat-value" style="color: #e91e63;" id="error-count">0</span>
+      </div>
+      <div class="stat-item">
+        <span>⏳ Non testés:</span>
+        <span class="stat-value" style="color: #666;" id="untested-count">0</span>
+      </div>
+      <div class="stat-item">
+        <span>⚡ Temps moyen:</span>
+        <span class="stat-value" style="color: #00d4ff;" id="avg-time">--</span>
+      </div>
+      <div class="stat-item">
+        <span>🚀 Plus rapide:</span>
+        <span class="stat-value" style="color: #00ff41;" id="fastest">--</span>
+      </div>
+      <div class="stat-item">
+        <span>🐌 Plus lente:</span>
+        <span class="stat-value" style="color: #f44336;" id="slowest">--</span>
+      </div>
+      <div class="stat-item">
+        <span>📊 Total requêtes:</span>
+        <span class="stat-value" id="total-requests">0</span>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-title">🎨 LÉGENDE</div>
+      <div class="legend-item">
+        <div class="legend-color" style="border-color: #00ff41; background: rgba(0, 255, 65, 0.2);"></div>
+        <span>&lt;50ms RAPIDE</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="border-color: #ffeb3b; background: rgba(255, 235, 59, 0.2);"></div>
+        <span>50-150ms BON</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="border-color: #ff9800; background: rgba(255, 152, 0, 0.2);"></div>
+        <span>150-300ms LENT</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="border-color: #f44336; background: rgba(244, 67, 54, 0.2);"></div>
+        <span>&gt;300ms CRITIQUE</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="border-color: #e91e63; background: rgba(233, 30, 99, 0.2);"></div>
+        <span>ERREUR</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="border-color: #444; background: rgba(68, 68, 68, 0.2);"></div>
+        <span>NON TESTÉ</span>
+      </div>
+    </div>
+
+    <div class="refresh-indicator">
+      🔄 Auto-refresh: 5s
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <div class="loading" id="loading">
+      <div class="loading-spinner"></div>
+      Chargement du réseau neuronal...
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://dllyzfuqjzuhvshrlmuq.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsbHl6ZnVxanp1aHZzaHJsbXVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5OTU5ODEsImV4cCI6MjA4MTU3MTk4MX0.xskVblRlKdbTST1Mdgz76oR7N2rDq8ZOUgaN-f_TTM4'
+
+    const ROUTES = [
+      { route: '/api/admin/analytics', emoji: '📊' },
+      { route: '/api/admin/analytics/dashboard', emoji: '📊' },
+      { route: '/api/admin/messages', emoji: '💬' },
+      { route: '/api/admin/messages/assign', emoji: '💬' },
+      { route: '/api/admin/login', emoji: '🔐' },
+      { route: '/api/admin/logout', emoji: '🔐' },
+      { route: '/api/admin/send', emoji: '📧' },
+      { route: '/api/admin/client-analysis', emoji: '👤' },
+      { route: '/api/admin/clients', emoji: '👥' },
+      { route: '/api/admin/loans', emoji: '💰' },
+      { route: '/api/admin/support/tickets', emoji: '🎫' },
+      { route: '/api/admin/support/tickets/[id]', emoji: '🎫' },
+      { route: '/api/admin/support/messages', emoji: '💬' },
+      { route: '/api/admin/support/stats', emoji: '📈' },
+      { route: '/api/admin/vopay', emoji: '💰' },
+      { route: '/api/admin/vopay-debug', emoji: '💰' },
+      { route: '/api/admin/vopay/transactions', emoji: '💳' },
+      { route: '/api/admin/vopay/real-transactions', emoji: '💳' },
+      { route: '/api/webhooks/vopay', emoji: '🔔' },
+      { route: '/api/admin/webhooks/debug', emoji: '🔔' },
+      { route: '/api/admin/webhooks/list', emoji: '🔔' },
+      { route: '/api/admin/webhooks/send-alert', emoji: '🔔' },
+      { route: '/api/admin/webhooks/stats', emoji: '📊' },
+      { route: '/api/admin/database/explore', emoji: '🗄️' },
+      { route: '/api/admin/downloads/stats', emoji: '📥' },
+      { route: '/api/admin/metrics/inspect', emoji: '🔍' },
+      { route: '/api/memory/context', emoji: '🧠' },
+      { route: '/api/memory/doc-read', emoji: '🧠' },
+      { route: '/api/memory/recall', emoji: '🧠' },
+      { route: '/api/memory/session', emoji: '🧠' },
+      { route: '/api/memory/store', emoji: '🧠' },
+      { route: '/api/sentinel/execute', emoji: '🛡️' },
+      { route: '/api/sentinel/execute-command', emoji: '🛡️' },
+      { route: '/api/sentinel/fleet', emoji: '🛡️' },
+      { route: '/api/sentinel/network-monitor', emoji: '🛡️' },
+      { route: '/api/sentinel/orchestrator', emoji: '🛡️' },
+      { route: '/api/sentinel/scan-project', emoji: '🛡️' },
+      { route: '/api/sentinel/scoring', emoji: '🛡️' },
+      { route: '/api/osint/scan', emoji: '🔎' },
+      { route: '/api/osint/advanced', emoji: '🔎' },
+      { route: '/api/osint/bypass-tests', emoji: '🔎' },
+      { route: '/api/osint/exploit-chains', emoji: '🔎' },
+      { route: '/api/osint/lab-scan', emoji: '🔎' },
+      { route: '/api/osint/network-scan', emoji: '🔎' },
+      { route: '/api/osint/vulnerabilities', emoji: '🔎' },
+      { route: '/api/network/active-recon', emoji: '🌐' },
+      { route: '/api/network/packet-capture', emoji: '🌐' },
+      { route: '/api/network/trace', emoji: '🌐' },
+      { route: '/api/anonymity/check', emoji: '🕵️' },
+      { route: '/api/device/deep-inspector', emoji: '🔬' },
+      { route: '/api/fingerprint/deep-scan', emoji: '👆' },
+      { route: '/api/seo/exploit-secrets', emoji: '🔓' },
+      { route: '/api/activity/log', emoji: '📝' },
+      { route: '/api/activity/recent', emoji: '📝' },
+      { route: '/api/activity/stats', emoji: '📊' },
+      { route: '/api/applications/submit', emoji: '📋' },
+      { route: '/api/contact', emoji: '📧' },
+      { route: '/api/contact-analyse', emoji: '📧' },
+      { route: '/api/download/[filename]', emoji: '📥' },
+      { route: '/api/download/track', emoji: '📥' },
+      { route: '/api/routes/discover', emoji: '🗺️' },
+      { route: '/api/routes/expand', emoji: '🗺️' },
+      { route: '/api/cortex/sync-miro', emoji: '🧠' },
+      { route: '/api/performance-diagnostic', emoji: '⚡' },
+      { route: '/api/test-tool', emoji: '🧪' },
+      { route: '/api/test/demo', emoji: '🧪' }
+    ]
+
+    let performanceData = {}
+    let stats = {}
+
+    function getStatusClass(route) {
+      const perf = performanceData[route]
+
+      if (!perf) {
+        // console.log('  ⏳', route, '- NON TESTÉ (pas de perf data)')
+        return {
+          class: 'untested',
+          status: '⏳',
+          label: 'NON TESTÉ'
+        }
+      }
+
+      console.log('  ✓', route, '- Trouvé:', perf.avg_ms + 'ms')
+
+      if (perf.error_count > 0) return {
+        class: 'error',
+        status: '❌',
+        label: 'ERREUR',
+        avgMs: perf.avg_ms,
+        requests: perf.total_requests,
+        errors: perf.error_count
+      }
+
+      const ms = perf.avg_ms
+
+      if (ms < 50) return {
+        class: 'fast',
+        status: '✅',
+        label: 'RAPIDE',
+        avgMs: ms,
+        requests: perf.total_requests,
+        p95: perf.p95_ms
+      }
+      if (ms < 150) return {
+        class: 'good',
+        status: '✅',
+        label: 'BON',
+        avgMs: ms,
+        requests: perf.total_requests,
+        p95: perf.p95_ms
+      }
+      if (ms < 300) return {
+        class: 'slow',
+        status: '⚠️',
+        label: 'LENT',
+        avgMs: ms,
+        requests: perf.total_requests,
+        p95: perf.p95_ms
+      }
+
+      return {
+        class: 'critical',
+        status: '🔴',
+        label: 'CRITIQUE',
+        avgMs: ms,
+        requests: perf.total_requests,
+        p95: perf.p95_ms
+      }
+    }
+
+    async function fetchData() {
+      try {
+        console.log('🔍 Fetching performance data...')
+
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/vw_route_performance?select=*`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        })
+
+        console.log('📡 Response status:', response.status)
+
+        if (!response.ok) {
+          console.error('❌ Response not OK:', response.status, response.statusText)
+          throw new Error('Failed to fetch')
+        }
+
+        const data = await response.json()
+        console.log('✅ Data received:', data.length, 'routes')
+        console.log('📊 Routes:', data.map(d => d.route))
+
+        performanceData = {}
+        data.forEach(item => {
+          performanceData[item.route] = item
+          console.log('  ✓', item.route, '→', item.avg_ms + 'ms')
+        })
+
+        console.log('💾 performanceData:', performanceData)
+
+        // Calculate stats
+        stats.total = ROUTES.length
+        stats.active = data.filter(d => d.error_count === 0).length
+        stats.errors = data.filter(d => d.error_count > 0).length
+        stats.untested = ROUTES.length - data.length
+
+        const avgMs = data.map(d => d.avg_ms)
+        stats.avgTime = avgMs.length ? Math.round(avgMs.reduce((a,b) => a+b, 0) / avgMs.length) : 0
+
+        const sortedBySpeed = [...data].sort((a,b) => a.avg_ms - b.avg_ms)
+        stats.fastest = sortedBySpeed[0]?.avg_ms || null
+        stats.slowest = sortedBySpeed[sortedBySpeed.length - 1]?.avg_ms || null
+        stats.totalRequests = data.reduce((sum, d) => sum + d.total_requests, 0)
+
+        updateStats()
+        renderNeuralNetwork()
+
+        console.log('🎨 Rendering neural network...')
+        document.getElementById('loading').style.display = 'none'
+      } catch (error) {
+        console.error('❌ FETCH ERROR:', error)
+        alert('Erreur de chargement: ' + error.message)
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('total-count').textContent = stats.total
+      document.getElementById('active-count').textContent = stats.active
+      document.getElementById('error-count').textContent = stats.errors
+      document.getElementById('untested-count').textContent = stats.untested
+      document.getElementById('avg-time').textContent = stats.avgTime ? `${stats.avgTime}ms` : '--'
+      document.getElementById('fastest').textContent = stats.fastest ? `${stats.fastest}ms` : '--'
+      document.getElementById('slowest').textContent = stats.slowest ? `${stats.slowest}ms` : '--'
+      document.getElementById('total-requests').textContent = stats.totalRequests
+    }
+
+    function renderNeuralNetwork() {
+      const centerX = window.innerWidth / 2
+      const centerY = window.innerHeight / 2
+      const radius = Math.min(window.innerWidth, window.innerHeight) * 0.4
+
+      const svg = document.getElementById('tentacles')
+      const endpointsDiv = document.getElementById('endpoints')
+
+      svg.innerHTML = ''
+      endpointsDiv.innerHTML = ''
+
+      ROUTES.forEach((route, index) => {
+        const angle = (index / ROUTES.length) * 2 * Math.PI
+        const x = centerX + radius * Math.cos(angle)
+        const y = centerY + radius * Math.sin(angle)
+
+        const status = getStatusClass(route.route)
+
+        // Create tentacle (curved path from center to endpoint)
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+
+        // Control point for curve (adds organic feel)
+        const controlX = centerX + (radius * 0.6) * Math.cos(angle)
+        const controlY = centerY + (radius * 0.6) * Math.sin(angle)
+
+        path.setAttribute('d', `M ${centerX} ${centerY} Q ${controlX} ${controlY} ${x} ${y}`)
+        path.setAttribute('class', `tentacle ${status.class}`)
+
+        svg.appendChild(path)
+
+        // Create endpoint node
+        const endpoint = document.createElement('div')
+        endpoint.className = `endpoint ${status.class}`
+        endpoint.style.left = `${x}px`
+        endpoint.style.top = `${y}px`
+
+        const circle = document.createElement('div')
+        circle.className = 'endpoint-circle'
+        circle.textContent = route.emoji
+
+        const label = document.createElement('div')
+        label.className = 'endpoint-label'
+        label.style.color = window.getComputedStyle(path).stroke
+        label.textContent = route.route.split('/').pop()
+
+        const statsLabel = document.createElement('div')
+        statsLabel.className = 'endpoint-stats'
+        statsLabel.style.color = window.getComputedStyle(path).stroke
+
+        if (status.avgMs !== undefined) {
+          statsLabel.textContent = `${status.avgMs}ms • ${status.requests} req`
+        } else {
+          statsLabel.textContent = status.label
+        }
+
+        endpoint.appendChild(circle)
+        endpoint.appendChild(label)
+        endpoint.appendChild(statsLabel)
+
+        // Tooltip on hover
+        endpoint.addEventListener('mouseenter', (e) => {
+          const tooltip = document.getElementById('tooltip')
+          tooltip.innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 8px; color: ${window.getComputedStyle(path).stroke}">
+              ${route.emoji} ${route.route}
+            </div>
+            <div style="font-size: 11px; opacity: 0.8;">
+              ${status.label}
+              ${status.avgMs ? `<br>Temps moyen: ${status.avgMs}ms` : ''}
+              ${status.p95 ? `<br>P95: ${status.p95}ms` : ''}
+              ${status.requests ? `<br>Requêtes: ${status.requests}` : ''}
+              ${status.errors ? `<br><span style="color: #e91e63;">Erreurs: ${status.errors}</span>` : ''}
+            </div>
+          `
+          tooltip.style.left = `${e.pageX + 20}px`
+          tooltip.style.top = `${e.pageY - 20}px`
+          tooltip.classList.add('show')
+        })
+
+        endpoint.addEventListener('mouseleave', () => {
+          document.getElementById('tooltip').classList.remove('show')
+        })
+
+        endpointsDiv.appendChild(endpoint)
+      })
+    }
+
+    // Initial load
+    fetchData()
+
+    // Auto-refresh
+    setInterval(fetchData, 5000)
+
+    // Resize handler
+    window.addEventListener('resize', () => {
+      if (Object.keys(performanceData).length > 0) {
+        renderNeuralNetwork()
+      }
+    })
+  </script>
+</body>
+</html>

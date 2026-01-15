@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚇 SAR Route Metro Map - Trajet Complet des Données</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+      background: #000000;
+      color: #00ff00;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .metro-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      height: 100vh;
+    }
+
+    /* Sidebar */
+    .routes-sidebar {
+      background: #0a0a0a;
+      border-right: 2px solid #00ff00;
+      overflow-y: auto;
+      padding: 20px 10px;
+    }
+
+    .sidebar-header {
+      padding: 15px;
+      background: rgba(0, 255, 0, 0.1);
+      border-left: 3px solid #00ff00;
+      margin-bottom: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .search-box {
+      margin-bottom: 20px;
+      padding: 0 10px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px;
+      background: rgba(0, 255, 0, 0.05);
+      border: 1px solid #00ff00;
+      border-radius: 5px;
+      color: #00ff00;
+      font-family: inherit;
+      font-size: 11px;
+    }
+
+    .route-item {
+      padding: 12px;
+      margin: 5px 0;
+      background: rgba(0, 255, 0, 0.05);
+      border-left: 3px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 11px;
+    }
+
+    .route-item:hover {
+      background: rgba(0, 255, 0, 0.1);
+      border-left-color: #00ff00;
+      padding-left: 16px;
+    }
+
+    .route-item.active {
+      background: rgba(0, 255, 0, 0.2);
+      border-left-color: #00ff00;
+      border-left-width: 4px;
+    }
+
+    .route-method {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: bold;
+      margin-right: 6px;
+    }
+
+    .route-method.GET { background: rgba(0, 255, 0, 0.3); color: #00ff00; }
+    .route-method.POST { background: rgba(0, 150, 255, 0.3); color: #0096ff; }
+    .route-method.PUT { background: rgba(255, 165, 0, 0.3); color: #ffa500; }
+    .route-method.DELETE { background: rgba(255, 0, 0, 0.3); color: #ff0000; }
+
+    .route-path {
+      color: #00ff00;
+      font-size: 10px;
+      margin-top: 4px;
+      word-break: break-all;
+    }
+
+    /* Main View */
+    .metro-view {
+      background: #000000;
+      overflow-y: auto;
+      padding: 30px;
+    }
+
+    .metro-header {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #00ff00;
+    }
+
+    .metro-title {
+      font-size: 24px;
+      color: #00ff00;
+      text-shadow: 0 0 10px #00ff00;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .metro-subtitle {
+      color: #666;
+      font-size: 12px;
+    }
+
+    /* Metro Map Container */
+    .metro-map {
+      background: rgba(0, 255, 0, 0.02);
+      border: 2px solid #00ff00;
+      border-radius: 10px;
+      padding: 30px;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .map-title {
+      font-size: 16px;
+      color: #00ff00;
+      margin-bottom: 20px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Metro Line */
+    .metro-line {
+      position: relative;
+      padding-left: 40px;
+    }
+
+    .metro-station {
+      position: relative;
+      margin: 20px 0;
+      padding: 15px 20px;
+      background: rgba(0, 255, 0, 0.05);
+      border-left: 4px solid #00ff00;
+      border-radius: 5px;
+      transition: all 0.3s;
+    }
+
+    .metro-station:hover {
+      background: rgba(0, 255, 0, 0.1);
+      transform: translateX(5px);
+    }
+
+    .metro-station::before {
+      content: '';
+      position: absolute;
+      left: -26px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      background: #00ff00;
+      border: 3px solid #000;
+      border-radius: 50%;
+      box-shadow: 0 0 15px #00ff00;
+      z-index: 2;
+    }
+
+    .metro-station::after {
+      content: '';
+      position: absolute;
+      left: -18px;
+      top: 100%;
+      width: 2px;
+      height: 20px;
+      background: #00ff00;
+      z-index: 1;
+    }
+
+    .metro-station:last-child::after {
+      display: none;
+    }
+
+    .station-number {
+      display: inline-block;
+      background: #00ff00;
+      color: #000;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .station-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #00ff00;
+      margin-bottom: 8px;
+    }
+
+    .station-detail {
+      font-size: 11px;
+      color: #888;
+      line-height: 1.6;
+      margin: 5px 0;
+    }
+
+    .station-code {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid #00ff00;
+      border-radius: 5px;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 10px;
+      color: #00ff00;
+      overflow-x: auto;
+    }
+
+    .station-db {
+      display: inline-block;
+      background: rgba(255, 255, 0, 0.2);
+      border: 1px solid #ffff00;
+      color: #ffff00;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      margin: 5px 5px 5px 0;
+    }
+
+    .station-api {
+      display: inline-block;
+      background: rgba(0, 150, 255, 0.2);
+      border: 1px solid #0096ff;
+      color: #0096ff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      margin: 5px 5px 5px 0;
+    }
+
+    .station-error {
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid #ff0000;
+      border-radius: 4px;
+      padding: 8px;
+      margin-top: 8px;
+      font-size: 10px;
+      color: #ff6666;
+    }
+
+    /* Info Sections */
+    .info-section {
+      background: rgba(0, 255, 0, 0.05);
+      border: 1px solid #00ff00;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .info-title {
+      font-size: 14px;
+      color: #00ff00;
+      font-weight: bold;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .info-card {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid #00ff00;
+      border-radius: 5px;
+      padding: 12px;
+    }
+
+    .info-label {
+      font-size: 9px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .info-value {
+      font-size: 12px;
+      color: #00ff00;
+      font-weight: bold;
+    }
+
+    .code-block {
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid #00ff00;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 10px 0;
+      font-size: 11px;
+      color: #00ff00;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+
+    .keyword { color: #0096ff; }
+    .string { color: #ffa500; }
+    .comment { color: #666; }
+    .function { color: #ff00ff; }
+
+    /* Connections */
+    .connections-box {
+      background: rgba(0, 150, 255, 0.05);
+      border: 1px solid #0096ff;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+
+    .connection-item {
+      padding: 8px 12px;
+      margin: 5px 0;
+      background: rgba(0, 150, 255, 0.1);
+      border-left: 3px solid #0096ff;
+      font-size: 11px;
+      color: #0096ff;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .connection-item:hover {
+      background: rgba(0, 150, 255, 0.2);
+      padding-left: 16px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0a0a0a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #00ff00;
+      border-radius: 4px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 100px 20px;
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="metro-layout">
+    <!-- Sidebar -->
+    <div class="routes-sidebar">
+      <div class="sidebar-header">
+        🚇 TOUTES LES ROUTES
+      </div>
+
+      <div class="search-box">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="🔍 Rechercher..."
+          id="searchInput"
+          onkeyup="filterRoutes()"
+        >
+      </div>
+
+      <div id="routesList">
+        <!-- Routes will be injected -->
+      </div>
+    </div>
+
+    <!-- Main View -->
+    <div class="metro-view">
+      <div id="metroContent">
+        <div class="empty-state">
+          <div style="font-size: 48px; margin-bottom: 20px;">🚇</div>
+          <div>Sélectionnez une route dans le menu de gauche</div>
+          <div style="margin-top: 10px; font-size: 12px;">pour voir le trajet complet des données</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ROUTES WITH COMPLETE JOURNEY MAPS
+    const ROUTES_DATA = {
+      '/api/admin/login': {
+        method: 'POST',
+        description: 'Authentification administrateur avec JWT',
+        journey: [
+          {
+            step: 1,
+            title: 'Réception Requête',
+            detail: 'Client envoie email + password',
+            code: `const { email, password } = await request.json()`,
+            tables: [],
+            apis: []
+          },
+          {
+            step: 2,
+            title: 'Validation Données',
+            detail: 'Vérifie format email et longueur password',
+            code: `if (!email || !password) {
+  return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+}`,
+            tables: [],
+            apis: [],
+            errors: ['400: Champs manquants', '400: Email invalide']
+          },
+          {
+            step: 3,
+            title: 'Interrogation Base de Données',
+            detail: 'Cherche l\'utilisateur dans la table admins',
+            code: `const { data: admin } = await supabase
+  .from('admins')
+  .select('*')
+  .eq('email', email)
+  .single()`,
+            tables: ['admins'],
+            apis: [],
+            errors: ['404: Admin non trouvé']
+          },
+          {
+            step: 4,
+            title: 'Vérification Password',
+            detail: 'Compare avec bcrypt le hash stocké',
+            code: `const isValid = await bcrypt.compare(password, admin.password_hash)
+if (!isValid) {
+  return NextResponse.json({ error: 'Invalid password' }, { status: 401 })
+}`,
+            tables: [],
+            apis: [],
+            errors: ['401: Mot de passe incorrect']
+          },
+          {
+            step: 5,
+            title: 'Génération Token JWT',
+            detail: 'Crée un token signé avec les infos admin',
+            code: `const token = await new SignJWT({ id: admin.id, role: 'admin' })
+  .setProtectedHeader({ alg: 'HS256' })
+  .setExpirationTime('7d')
+  .sign(secret)`,
+            tables: [],
+            apis: []
+          },
+          {
+            step: 6,
+            title: 'Stockage Session',
+            detail: 'Enregistre la session dans la BD',
+            code: `await supabase.from('admin_sessions').insert({
+  admin_id: admin.id,
+  token: token,
+  expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+})`,
+            tables: ['admin_sessions'],
+            apis: []
+          },
+          {
+            step: 7,
+            title: 'Retour Réponse',
+            detail: 'Envoie token + infos admin au client',
+            code: `return NextResponse.json({
+  success: true,
+  token,
+  admin: { id: admin.id, email: admin.email, role: admin.role }
+})`,
+            tables: [],
+            apis: []
+          }
+        ],
+        connections: ['/api/admin/messages', '/api/admin/analytics/dashboard'],
+        file: 'src/app/api/admin/login/route.ts',
+        tablesUsed: ['admins', 'admin_sessions'],
+        externalAPIs: [],
+        security: {
+          auth: false,
+          rateLimit: '10/min',
+          encryption: 'bcrypt + JWT'
+        }
+      },
+
+      '/api/applications/submit': {
+        method: 'POST',
+        description: 'Soumission complète d\'une demande de prêt',
+        journey: [
+          {
+            step: 1,
+            title: 'Réception Formulaire',
+            detail: 'Client envoie 38 champs du formulaire',
+            code: `const body = await request.json() as LoanApplicationFormData
+// 38 champs: nom, email, montant, emploi, revenu, etc.`,
+            tables: [],
+            apis: []
+          },
+          {
+            step: 2,
+            title: 'Rate Limiting',
+            detail: 'Maximum 3 demandes par IP par heure',
+            code: `const rateLimit = await rateLimitFormSubmission(clientIP)
+if (!rateLimit.allowed) {
+  return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+}`,
+            tables: [],
+            apis: [],
+            errors: ['429: Trop de requêtes']
+          },
+          {
+            step: 3,
+            title: 'Validation Complète',
+            detail: 'Vérifie les 38 champs (email, tel, montant, âge, etc.)',
+            code: `const validation = validateLoanApplication(body)
+if (!validation.valid) {
+  return NextResponse.json({ errors: validation.errors }, { status: 400 })
+}`,
+            tables: [],
+            apis: [],
+            errors: ['400: Email invalide', '400: Montant hors limites', '400: Âge < 18 ans']
+          },
+          {
+            step: 4,
+            title: 'Génération Référence',
+            detail: 'Crée une référence unique SAR-LP-XXXXXX',
+            code: `const reference = await generateUniqueReference()
+// Format: SAR-LP-A1B2C3`,
+            tables: [],
+            apis: []
+          },
+          {
+            step: 5,
+            title: 'Insertion Base de Données',
+            detail: 'Crée l\'application avec status "draft"',
+            code: `const { data: application } = await supabase
+  .from('loan_applications')
+  .insert({ reference, status: 'draft', ...applicationData })
+  .select()
+  .single()`,
+            tables: ['loan_applications'],
+            apis: [],
+            errors: ['500: Erreur BD', '409: Référence en double']
+          },
+          {
+            step: 6,
+            title: 'Calcul Score Cortex (ML)',
+            detail: 'Moteur IA calcule le score de risque',
+            code: `let cortexScore = 50
+if (revenu_annuel >= 50000) cortexScore += 20
+if (type_logement === 'proprietaire') cortexScore += 15
+if (autres_dettes > revenu_annuel / 2) cortexScore -= 25`,
+            tables: [],
+            apis: []
+          },
+          {
+            step: 7,
+            title: 'Mise à Jour Score',
+            detail: 'Enregistre le score dans l\'application',
+            code: `await supabase
+  .from('loan_applications')
+  .update({ cortex_score: cortexScore, risk_level: riskLevel })
+  .eq('id', application.id)`,
+            tables: ['loan_applications'],
+            apis: []
+          },
+          {
+            step: 8,
+            title: 'Soumission à Margill',
+            detail: 'Envoie l\'application au système Margill (externe)',
+            code: `const margillResponse = await margillClient.submitApplication(body)
+if (margillResponse.success) {
+  finalStatus = 'submitted'
+}`,
+            tables: [],
+            apis: ['Margill API'],
+            errors: ['500: Margill non disponible', '500: Timeout Margill']
+          },
+          {
+            step: 9,
+            title: 'Mise à Jour Status Final',
+            detail: 'Change status à "submitted" ou "failed"',
+            code: `await supabase
+  .from('loan_applications')
+  .update({
+    status: finalStatus,
+    margill_submitted_at: new Date(),
+    margill_response: margillResponse
+  })
+  .eq('id', application.id)`,
+            tables: ['loan_applications'],
+            apis: []
+          },
+          {
+            step: 10,
+            title: 'Envoi Email Confirmation',
+            detail: 'Email au client via Resend API',
+            code: `// TODO: Implement email via Resend
+// await sendConfirmationEmail(client.email, reference)`,
+            tables: [],
+            apis: ['Resend API (TODO)']
+          },
+          {
+            step: 11,
+            title: 'Logging Métriques',
+            detail: 'Enregistre les métriques de performance',
+            code: `await logFormCompleted(body.origin, Date.now() - startTime)`,
+            tables: ['metrics'],
+            apis: []
+          },
+          {
+            step: 12,
+            title: 'Retour Résultat',
+            detail: 'Envoie confirmation au client',
+            code: `return NextResponse.json({
+  success: true,
+  data: {
+    reference: application.reference,
+    status: finalStatus,
+    cortex_score: cortexScore
+  }
+})`,
+            tables: [],
+            apis: []
+          }
+        ],
+        connections: ['/api/sentinel/scoring', '/api/osint/scan', '/api/device/deep-inspector'],
+        file: 'src/app/api/applications/submit/route.ts',
+        tablesUsed: ['loan_applications', 'metrics'],
+        externalAPIs: ['Margill API', 'Resend API'],
+        security: {
+          auth: false,
+          rateLimit: '3/hour per IP',
+          encryption: 'TLS 1.3',
+          validation: '38 fields'
+        }
+      },
+
+      '/api/admin/vopay/transactions': {
+        method: 'GET',
+        description: 'Liste des transactions VoPay avec filtres',
+        journey: [
+          {
+            step: 1,
+            title: 'Vérification Auth Admin',
+            detail: 'Vérifie le token JWT admin',
+            code: `const session = await getAdminSession(request)
+if (!session) {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+}`,
+            tables: ['admin_sessions'],
+            apis: [],
+            errors: ['401: Non authentifié', '401: Token expiré']
+          },
+          {
+            step: 2,
+            title: 'Parse Query Params',
+            detail: 'Récupère les filtres (status, date, limit)',
+            code: `const { searchParams } = new URL(request.url)
+const status = searchParams.get('status')
+const limit = parseInt(searchParams.get('limit') || '50')`,
+            tables: [],
+            apis: []
+          },
+          {
+            step: 3,
+            title: 'Query Database',
+            detail: 'Interroge la table vopay_transactions',
+            code: `let query = supabase
+  .from('vopay_transactions')
+  .select('*')
+  .order('created_at', { ascending: false })
+
+if (status) query = query.eq('status', status)
+query = query.limit(limit)
+
+const { data, error } = await query`,
+            tables: ['vopay_transactions'],
+            apis: []
+          },
+          {
+            step: 4,
+            title: 'Enrichissement Données',
+            detail: 'Ajoute les infos client pour chaque transaction',
+            code: `const enriched = await Promise.all(data.map(async (tx) => {
+  const { data: client } = await supabase
+    .from('clients')
+    .select('name, email')
+    .eq('id', tx.client_id)
+    .single()
+
+  return { ...tx, client }
+}))`,
+            tables: ['clients'],
+            apis: []
+          },
+          {
+            step: 5,
+            title: 'Calcul Statistiques',
+            detail: 'Calcule totaux et moyennes',
+            code: `const stats = {
+  total: data.length,
+  successful: data.filter(t => t.status === 'completed').length,
+  failed: data.filter(t => t.status === 'failed').length,
+  total_amount: data.reduce((sum, t) => sum + t.amount, 0)
+}`,
+            tables: [],
+            apis: []
+          },
+          {
+            step: 6,
+            title: 'Retour Réponse',
+            detail: 'Envoie les transactions + stats',
+            code: `return NextResponse.json({
+  success: true,
+  transactions: enriched,
+  stats,
+  count: data.length
+})`,
+            tables: [],
+            apis: []
+          }
+        ],
+        connections: ['/api/admin/vopay/real-transactions', '/api/admin/vopay-debug'],
+        file: 'src/app/api/admin/vopay/transactions/route.ts',
+        tablesUsed: ['vopay_transactions', 'clients', 'admin_sessions'],
+        externalAPIs: [],
+        security: {
+          auth: true,
+          rateLimit: '100/min',
+          encryption: 'TLS 1.3'
+        }
+      }
+    }
+
+    let currentRoute = null
+
+    // Render routes list
+    function renderRoutesList() {
+      const routesList = document.getElementById('routesList')
+      routesList.innerHTML = ''
+
+      Object.keys(ROUTES_DATA).forEach(path => {
+        const route = ROUTES_DATA[path]
+
+        const item = document.createElement('div')
+        item.className = 'route-item'
+        item.onclick = () => selectRoute(path)
+        item.innerHTML = `
+          <div>
+            <span class="route-method ${route.method}">${route.method}</span>
+          </div>
+          <div class="route-path">${path}</div>
+        `
+
+        routesList.appendChild(item)
+      })
+    }
+
+    // Select route and show metro map
+    function selectRoute(path) {
+      currentRoute = path
+      const route = ROUTES_DATA[path]
+
+      // Update active state
+      document.querySelectorAll('.route-item').forEach(item => {
+        item.classList.remove('active')
+        if (item.querySelector('.route-path').textContent === path) {
+          item.classList.add('active')
+        }
+      })
+
+      // Render metro map
+      const content = document.getElementById('metroContent')
+      content.innerHTML = `
+        <div class="metro-header">
+          <div class="metro-title">
+            <span class="route-method ${route.method}">${route.method}</span>
+            ${path}
+          </div>
+          <div class="metro-subtitle">${route.description}</div>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="info-section">
+          <div class="info-title">📋 INFORMATIONS GÉNÉRALES</div>
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="info-label">Fichier Source</div>
+              <div class="info-value">${route.file}</div>
+            </div>
+            <div class="info-card">
+              <div class="info-label">Méthode HTTP</div>
+              <div class="info-value">${route.method}</div>
+            </div>
+            <div class="info-card">
+              <div class="info-label">Authentification</div>
+              <div class="info-value">${route.security.auth ? '✓ Requise' : '✗ Publique'}</div>
+            </div>
+            <div class="info-card">
+              <div class="info-label">Rate Limit</div>
+              <div class="info-value">${route.security.rateLimit}</div>
+            </div>
+            <div class="info-card">
+              <div class="info-label">Tables BD</div>
+              <div class="info-value">${route.tablesUsed.length} tables</div>
+            </div>
+            <div class="info-card">
+              <div class="info-label">APIs Externes</div>
+              <div class="info-value">${route.externalAPIs.length} services</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metro Map -->
+        <div class="metro-map">
+          <div class="map-title">🚇 PLAN DE MÉTRO - TRAJET DES DONNÉES</div>
+          <div class="metro-line">
+            ${route.journey.map(station => `
+              <div class="metro-station">
+                <div class="station-number">${station.step}</div>
+                <div class="station-title">${station.title}</div>
+                <div class="station-detail">${station.detail}</div>
+
+                ${station.code ? `
+                  <div class="station-code">${escapeHtml(station.code)}</div>
+                ` : ''}
+
+                ${station.tables && station.tables.length > 0 ? `
+                  <div style="margin-top: 10px;">
+                    ${station.tables.map(table => `<span class="station-db">🗄️ ${table}</span>`).join('')}
+                  </div>
+                ` : ''}
+
+                ${station.apis && station.apis.length > 0 ? `
+                  <div style="margin-top: 10px;">
+                    ${station.apis.map(api => `<span class="station-api">🌐 ${api}</span>`).join('')}
+                  </div>
+                ` : ''}
+
+                ${station.errors && station.errors.length > 0 ? `
+                  <div class="station-error">
+                    <strong>⚠️ Erreurs Possibles:</strong><br>
+                    ${station.errors.map(err => `• ${err}`).join('<br>')}
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Database Tables -->
+        ${route.tablesUsed.length > 0 ? `
+          <div class="info-section">
+            <div class="info-title">🗄️ TABLES BASE DE DONNÉES UTILISÉES</div>
+            <div class="info-grid">
+              ${route.tablesUsed.map(table => `
+                <div class="info-card">
+                  <div class="info-label">Table</div>
+                  <div class="info-value">${table}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- External APIs -->
+        ${route.externalAPIs.length > 0 ? `
+          <div class="info-section">
+            <div class="info-title">🌐 SERVICES EXTERNES APPELÉS</div>
+            <div class="info-grid">
+              ${route.externalAPIs.map(api => `
+                <div class="info-card">
+                  <div class="info-label">Service</div>
+                  <div class="info-value">${api}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Connected Routes -->
+        ${route.connections && route.connections.length > 0 ? `
+          <div class="connections-box">
+            <div class="info-title">🔗 ROUTES CONNECTÉES</div>
+            <div style="font-size: 11px; color: #666; margin-bottom: 10px;">
+              Ces routes sont souvent appelées après ou pendant l'exécution de cette route
+            </div>
+            ${route.connections.map(conn => `
+              <div class="connection-item" onclick="selectRoute('${conn}')">
+                → ${conn}
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      `
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div')
+      div.textContent = text
+      return div.innerHTML
+    }
+
+    function filterRoutes() {
+      const search = document.getElementById('searchInput').value.toLowerCase()
+      const items = document.querySelectorAll('.route-item')
+
+      items.forEach(item => {
+        const path = item.querySelector('.route-path').textContent.toLowerCase()
+        if (path.includes(search)) {
+          item.style.display = 'block'
+        } else {
+          item.style.display = 'none'
+        }
+      })
+    }
+
+    // Initialize
+    window.addEventListener('load', () => {
+      renderRoutesList()
+    })
+  </script>
+</body>
+</html>

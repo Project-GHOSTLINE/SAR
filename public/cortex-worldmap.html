@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAR Cortex - Global Network Intelligence</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-glass: rgba(18, 18, 26, 0.8);
+      --accent-cyan: #00f5ff;
+      --accent-purple: #a855f7;
+      --accent-pink: #ec4899;
+      --accent-green: #10b981;
+      --accent-orange: #f59e0b;
+      --text-primary: #ffffff;
+      --text-secondary: #94a3b8;
+      --border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated gradient background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(0, 245, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
+      animation: gradientShift 15s ease infinite;
+      pointer-events: none;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.1); }
+    }
+
+    /* Grid overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .app-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Top bar */
+    .top-bar {
+      height: 70px;
+      padding: 0 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .logo-text h1 {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text p {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .top-stats {
+      display: flex;
+      gap: 30px;
+    }
+
+    .stat-pill {
+      padding: 8px 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .stat-pill:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 4px 20px rgba(0, 245, 255, 0.2);
+    }
+
+    .stat-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.9); }
+    }
+
+    .stat-dot.green { background: var(--accent-green); }
+    .stat-dot.orange { background: var(--accent-orange); }
+    .stat-dot.purple { background: var(--accent-purple); }
+
+    /* Main content */
+    .main-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 350px 1fr 350px;
+      gap: 20px;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    /* Panels */
+    .panel {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      padding: 20px 25px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel-badge {
+      padding: 4px 10px;
+      background: rgba(0, 245, 255, 0.1);
+      border: 1px solid rgba(0, 245, 255, 0.3);
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-cyan);
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    /* Custom scrollbar */
+    .panel-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .panel-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .panel-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    .panel-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Route cards */
+    .route-group {
+      margin-bottom: 25px;
+    }
+
+    .route-group-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .route-group-title::before {
+      content: '';
+      width: 3px;
+      height: 12px;
+      background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple));
+      border-radius: 2px;
+    }
+
+    .route-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .route-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 3px;
+      height: 100%;
+      background: currentColor;
+      opacity: 0.5;
+    }
+
+    .route-card:hover {
+      transform: translateX(5px);
+      border-color: currentColor;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .route-card.fast { color: var(--accent-green); }
+    .route-card.good { color: var(--accent-cyan); }
+    .route-card.slow { color: var(--accent-orange); }
+    .route-card.critical { color: var(--accent-pink); }
+    .route-card.error {
+      color: var(--accent-pink);
+      animation: pulse-card 2s ease-in-out infinite;
+    }
+    .route-card.untested {
+      color: var(--text-secondary);
+      opacity: 0.5;
+    }
+
+    @keyframes pulse-card {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .route-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .route-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .route-status {
+      padding: 3px 8px;
+      background: currentColor;
+      color: var(--bg-primary);
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .route-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .metric-label {
+      color: var(--text-secondary);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-value {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    /* World map center */
+    .world-map {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Stats overlay on map */
+    .map-overlay {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+    }
+
+    .overlay-stat {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 15px 20px;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .overlay-stat-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    .overlay-stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .overlay-stat-change {
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+
+    .overlay-stat-change.positive { color: var(--accent-green); }
+    .overlay-stat-change.negative { color: var(--accent-pink); }
+
+    /* Legend */
+    .legend {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 15px;
+    }
+
+    .legend-title {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 12px;
+      border-radius: 4px;
+    }
+
+    /* Loading */
+    .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      gap: 20px;
+    }
+
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 245, 255, 0.2);
+      border-top-color: var(--accent-cyan);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 2px;
+    }
+
+    /* IP Flow visualization */
+    .flow-particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      pointer-events: none;
+      box-shadow: 0 0 10px var(--accent-cyan);
+    }
+
+    /* Metrics panel specific */
+    .big-metric {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .big-metric-value {
+      font-size: 48px;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 5px;
+    }
+
+    .big-metric-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .big-metric-change {
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    /* Live indicator */
+    .live-indicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 10px 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 100;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* Mini chart */
+    .mini-chart {
+      height: 60px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      margin-top: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chart-bar {
+      position: absolute;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple));
+      border-radius: 2px 2px 0 0;
+      transition: height 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">INITIALIZING CORTEX</div>
+  </div>
+
+  <div class="app-container">
+    <div class="top-bar">
+      <div class="logo">
+        <div class="logo-icon">🧠</div>
+        <div class="logo-text">
+          <h1>SAR Cortex</h1>
+          <p>Global Network Intelligence</p>
+        </div>
+      </div>
+      <div class="top-stats">
+        <div class="stat-pill">
+          <div class="stat-dot green"></div>
+          <span id="active-count">0</span> Active
+        </div>
+        <div class="stat-pill">
+          <div class="stat-dot orange"></div>
+          <span id="slow-count">0</span> Slow
+        </div>
+        <div class="stat-pill">
+          <div class="stat-dot purple"></div>
+          <span id="error-count">0</span> Errors
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <!-- Left: Routes by status -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            🎯 Routes
+            <span class="panel-badge" id="routes-count">0</span>
+          </div>
+        </div>
+        <div class="panel-content" id="routes-list"></div>
+      </div>
+
+      <!-- Center: World Map -->
+      <div class="panel world-map">
+        <div class="map-container">
+          <canvas id="world-canvas"></canvas>
+
+          <div class="legend">
+            <div class="legend-title">Performance</div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: var(--accent-green);"></div>
+              <span>&lt;50ms Optimal</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: var(--accent-cyan);"></div>
+              <span>50-150ms Good</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: var(--accent-orange);"></div>
+              <span>150-300ms Slow</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: var(--accent-pink);"></div>
+              <span>&gt;300ms Critical</span>
+            </div>
+          </div>
+
+          <div class="map-overlay">
+            <div class="overlay-stat">
+              <div class="overlay-stat-label">Avg Response</div>
+              <div class="overlay-stat-value" id="avg-time">--</div>
+              <div class="overlay-stat-change positive" id="avg-change">--</div>
+            </div>
+            <div class="overlay-stat">
+              <div class="overlay-stat-label">Total Requests</div>
+              <div class="overlay-stat-value" id="total-requests">0</div>
+              <div class="overlay-stat-change positive" id="req-change">--</div>
+            </div>
+            <div class="overlay-stat">
+              <div class="overlay-stat-label">Uptime</div>
+              <div class="overlay-stat-value">99.9</div>
+              <div class="overlay-stat-change positive">+0.2%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Metrics & Analytics -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            📊 Analytics
+          </div>
+        </div>
+        <div class="panel-content">
+          <div class="big-metric">
+            <div class="big-metric-value" id="total-endpoints">0</div>
+            <div class="big-metric-label">Total Endpoints</div>
+          </div>
+
+          <div class="route-group">
+            <div class="route-group-title">Performance Breakdown</div>
+            <div id="metrics-list"></div>
+          </div>
+
+          <div class="route-group">
+            <div class="route-group-title">Recent Activity</div>
+            <div class="mini-chart" id="activity-chart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="live-indicator">
+    <div class="live-dot"></div>
+    <span>Live • Auto-refresh 5s</span>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://dllyzfuqjzuhvshrlmuq.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsbHl6ZnVxanp1aHZzaHJsbXVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5OTU5ODEsImV4cCI6MjA4MTU3MTk4MX0.xskVblRlKdbTST1Mdgz76oR7N2rDq8ZOUgaN-f_TTM4'
+
+    let performanceData = {}
+    let stats = {}
+    let canvas, ctx
+    let particles = []
+
+    // TOUTES les 64 routes réelles du filesystem SAR
+    const ALL_ROUTES = [
+      '/api/activity/log', '/api/activity/recent', '/api/activity/stats',
+      '/api/admin/analytics', '/api/admin/analytics/dashboard', '/api/admin/client-analysis',
+      '/api/admin/clients', '/api/admin/loans',
+      '/api/admin/database/explore', '/api/admin/downloads/stats', '/api/admin/login',
+      '/api/admin/logout', '/api/admin/messages', '/api/admin/messages/assign',
+      '/api/admin/metrics/inspect', '/api/admin/send', '/api/admin/support/messages',
+      '/api/admin/support/stats', '/api/admin/support/tickets', '/api/admin/support/tickets/[id]',
+      '/api/admin/vopay', '/api/admin/vopay-debug', '/api/admin/vopay/real-transactions',
+      '/api/admin/vopay/transactions', '/api/admin/webhooks/debug', '/api/admin/webhooks/list',
+      '/api/admin/webhooks/send-alert', '/api/admin/webhooks/stats', '/api/anonymity/check',
+      '/api/applications/submit', '/api/contact', '/api/contact-analyse', '/api/cortex/sync-miro',
+      '/api/device/deep-inspector', '/api/download/[filename]', '/api/download/track',
+      '/api/fingerprint/deep-scan', '/api/memory/context', '/api/memory/doc-read',
+      '/api/memory/recall', '/api/memory/session', '/api/memory/store',
+      '/api/network/active-recon', '/api/network/packet-capture', '/api/network/trace',
+      '/api/osint/advanced', '/api/osint/bypass-tests', '/api/osint/exploit-chains',
+      '/api/osint/lab-scan', '/api/osint/network-scan', '/api/osint/scan',
+      '/api/osint/vulnerabilities', '/api/performance-diagnostic', '/api/routes/discover',
+      '/api/routes/expand', '/api/sentinel/execute', '/api/sentinel/execute-command',
+      '/api/sentinel/fleet', '/api/sentinel/network-monitor', '/api/sentinel/orchestrator',
+      '/api/sentinel/scan-project', '/api/sentinel/scoring', '/api/seo/exploit-secrets',
+      '/api/test-tool', '/api/test/demo', '/api/webhooks/vopay'
+    ]
+
+    // Categories hiérarchiques
+    const CATEGORIES = {
+      'Admin Core': ['/api/admin/client-analysis', '/api/admin/clients', '/api/admin/loans', '/api/admin/database/explore', '/api/admin/downloads/stats', '/api/admin/login', '/api/admin/logout', '/api/admin/messages', '/api/admin/messages/assign', '/api/admin/metrics/inspect', '/api/admin/send'],
+      'Admin Support': ['/api/admin/support/messages', '/api/admin/support/stats', '/api/admin/support/tickets', '/api/admin/support/tickets/[id]'],
+      'Admin VoPay': ['/api/admin/vopay', '/api/admin/vopay-debug', '/api/admin/vopay/real-transactions', '/api/admin/vopay/transactions'],
+      'Admin Webhooks': ['/api/admin/webhooks/debug', '/api/admin/webhooks/list', '/api/admin/webhooks/send-alert', '/api/admin/webhooks/stats'],
+      'Admin Analytics': ['/api/admin/analytics', '/api/admin/analytics/dashboard'],
+      'Memory System': ['/api/memory/context', '/api/memory/doc-read', '/api/memory/recall', '/api/memory/session', '/api/memory/store'],
+      'Sentinel System': ['/api/sentinel/execute', '/api/sentinel/execute-command', '/api/sentinel/fleet', '/api/sentinel/network-monitor', '/api/sentinel/orchestrator', '/api/sentinel/scan-project', '/api/sentinel/scoring'],
+      'OSINT': ['/api/osint/advanced', '/api/osint/bypass-tests', '/api/osint/exploit-chains', '/api/osint/lab-scan', '/api/osint/network-scan', '/api/osint/scan', '/api/osint/vulnerabilities'],
+      'Network': ['/api/network/active-recon', '/api/network/packet-capture', '/api/network/trace'],
+      'Security': ['/api/anonymity/check', '/api/device/deep-inspector', '/api/fingerprint/deep-scan', '/api/seo/exploit-secrets'],
+      'Activity': ['/api/activity/log', '/api/activity/recent', '/api/activity/stats'],
+      'Applications': ['/api/applications/submit', '/api/contact', '/api/contact-analyse'],
+      'Downloads': ['/api/download/[filename]', '/api/download/track'],
+      'System': ['/api/cortex/sync-miro', '/api/performance-diagnostic', '/api/routes/discover', '/api/routes/expand', '/api/webhooks/vopay'],
+      'Test': ['/api/test-tool', '/api/test/demo']
+    }
+
+    function getCategory(route) {
+      for (const [cat, routes] of Object.entries(CATEGORIES)) {
+        if (routes.includes(route)) return cat
+      }
+      return 'Other'
+    }
+
+    function getStatus(route) {
+      const perf = performanceData[route]
+
+      if (!perf) return {
+        class: 'untested',
+        status: 'Offline',
+        color: '#64748b'
+      }
+
+      if (perf.error_count > 0) return {
+        class: 'error',
+        status: 'Error',
+        color: '#ec4899',
+        ms: perf.avg_ms,
+        requests: perf.total_requests,
+        p95: perf.p95_ms
+      }
+
+      const ms = perf.avg_ms
+
+      if (ms < 50) return {
+        class: 'fast',
+        status: 'Optimal',
+        color: '#10b981',
+        ms, requests: perf.total_requests, p95: perf.p95_ms
+      }
+      if (ms < 150) return {
+        class: 'good',
+        status: 'Good',
+        color: '#00f5ff',
+        ms, requests: perf.total_requests, p95: perf.p95_ms
+      }
+      if (ms < 300) return {
+        class: 'slow',
+        status: 'Slow',
+        color: '#f59e0b',
+        ms, requests: perf.total_requests, p95: perf.p95_ms
+      }
+
+      return {
+        class: 'critical',
+        status: 'Critical',
+        color: '#ec4899',
+        ms, requests: perf.total_requests, p95: perf.p95_ms
+      }
+    }
+
+    async function fetchData() {
+      try {
+        console.log('🧠 Cortex: Fetching intelligence...')
+
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/vw_route_performance?select=*`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        })
+
+        if (!response.ok) throw new Error('Failed to fetch')
+
+        const data = await response.json()
+        console.log('✅ Cortex: Data received:', data.length, 'routes')
+
+        performanceData = {}
+        data.forEach(item => {
+          performanceData[item.route] = item
+        })
+
+        // Calculate stats
+        stats.total = ALL_ROUTES.length
+        stats.active = data.filter(d => d.error_count === 0).length
+        stats.slow = data.filter(d => d.avg_ms >= 150 && d.error_count === 0).length
+        stats.errors = data.filter(d => d.error_count > 0).length
+        stats.avgTime = data.length ? Math.round(data.reduce((sum, d) => sum + d.avg_ms, 0) / data.length) : 0
+        stats.totalRequests = data.reduce((sum, d) => sum + d.total_requests, 0)
+
+        updateUI()
+        document.getElementById('loading').style.display = 'none'
+      } catch (error) {
+        console.error('❌ Cortex error:', error)
+      }
+    }
+
+    function updateUI() {
+      // Top bar
+      document.getElementById('active-count').textContent = stats.active
+      document.getElementById('slow-count').textContent = stats.slow
+      document.getElementById('error-count').textContent = stats.errors
+
+      // Overlay stats
+      document.getElementById('avg-time').textContent = stats.avgTime ? stats.avgTime + 'ms' : '--'
+      document.getElementById('total-requests').textContent = stats.totalRequests
+      document.getElementById('total-endpoints').textContent = stats.total
+      document.getElementById('routes-count').textContent = stats.total
+
+      // Render routes
+      renderRoutes()
+      renderMetrics()
+    }
+
+    function renderRoutes() {
+      const container = document.getElementById('routes-list')
+
+      let html = ''
+      Object.keys(CATEGORIES).forEach(cat => {
+        const routes = CATEGORIES[cat]
+        if (routes.length === 0) return
+        html += `
+          <div class="route-group">
+            <div class="route-group-title">${cat} (${routes.length})</div>
+        `
+        routes.forEach(route => {
+          const status = getStatus(route)
+          const shortName = route.split('/').slice(-2).join('/')
+
+          html += `
+            <div class="route-card ${status.class}">
+              <div class="route-header">
+                <div class="route-name" title="${route}">${shortName}</div>
+                <div class="route-status">${status.status}</div>
+              </div>
+              ${status.ms ? `
+                <div class="route-metrics">
+                  <div class="metric">
+                    <div class="metric-label">Avg</div>
+                    <div class="metric-value">${status.ms}ms</div>
+                  </div>
+                  <div class="metric">
+                    <div class="metric-label">P95</div>
+                    <div class="metric-value">${status.p95 || '--'}ms</div>
+                  </div>
+                  <div class="metric">
+                    <div class="metric-label">Req</div>
+                    <div class="metric-value">${status.requests}</div>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          `
+        })
+        html += `</div>`
+      })
+
+      container.innerHTML = html
+    }
+
+    function renderMetrics() {
+      const container = document.getElementById('metrics-list')
+
+      const breakdown = {
+        'Optimal': ALL_ROUTES.filter(r => getStatus(r).class === 'fast').length,
+        'Good': ALL_ROUTES.filter(r => getStatus(r).class === 'good').length,
+        'Slow': ALL_ROUTES.filter(r => getStatus(r).class === 'slow').length,
+        'Critical': ALL_ROUTES.filter(r => getStatus(r).class === 'critical').length,
+        'Error': ALL_ROUTES.filter(r => getStatus(r).class === 'error').length
+      }
+
+      let html = ''
+      Object.entries(breakdown).forEach(([label, count]) => {
+        const percentage = stats.total ? Math.round((count / stats.total) * 100) : 0
+        html += `
+          <div style="margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px;">
+              <span style="color: var(--text-secondary);">${label}</span>
+              <span style="font-weight: 700;">${count} (${percentage}%)</span>
+            </div>
+            <div style="height: 6px; background: var(--bg-primary); border-radius: 3px; overflow: hidden;">
+              <div style="height: 100%; width: ${percentage}%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple)); border-radius: 3px;"></div>
+            </div>
+          </div>
+        `
+      })
+
+      container.innerHTML = html
+
+      // Activity chart
+      renderActivityChart()
+    }
+
+    function renderActivityChart() {
+      const chart = document.getElementById('activity-chart')
+      const bars = 20
+
+      let html = ''
+      for (let i = 0; i < bars; i++) {
+        const height = 20 + Math.random() * 80
+        const left = (i / bars) * 100
+        html += `<div class="chart-bar" style="left: ${left}%; height: ${height}%;"></div>`
+      }
+
+      chart.innerHTML = html
+    }
+
+    // Canvas world map
+    function initCanvas() {
+      canvas = document.getElementById('world-canvas')
+      ctx = canvas.getContext('2d')
+
+      function resize() {
+        canvas.width = canvas.offsetWidth * 2
+        canvas.height = canvas.offsetHeight * 2
+        ctx.scale(2, 2)
+      }
+
+      resize()
+      window.addEventListener('resize', resize)
+
+      animateWorld()
+    }
+
+    function animateWorld() {
+      const w = canvas.width / 2
+      const h = canvas.height / 2
+
+      ctx.fillStyle = 'rgba(10, 10, 15, 0.1)'
+      ctx.fillRect(0, 0, w, h)
+
+      // Draw world map outline (simplified)
+      drawWorldOutline()
+
+      // Draw nodes for each route
+      drawNodes()
+
+      // Draw particles
+      updateParticles()
+
+      requestAnimationFrame(animateWorld)
+    }
+
+    function drawWorldOutline() {
+      const w = canvas.width / 2
+      const h = canvas.height / 2
+
+      ctx.strokeStyle = 'rgba(0, 245, 255, 0.2)'
+      ctx.lineWidth = 1
+
+      // Simplified world map (continents as circles)
+      const continents = [
+        { x: w * 0.2, y: h * 0.4, r: 80, label: 'Americas' },
+        { x: w * 0.5, y: h * 0.35, r: 70, label: 'Europe' },
+        { x: w * 0.6, y: h * 0.5, r: 60, label: 'Africa' },
+        { x: w * 0.75, y: h * 0.4, r: 90, label: 'Asia' },
+        { x: w * 0.85, y: h * 0.65, r: 50, label: 'Oceania' }
+      ]
+
+      continents.forEach(cont => {
+        ctx.beginPath()
+        ctx.arc(cont.x, cont.y, cont.r, 0, Math.PI * 2)
+        ctx.stroke()
+
+        // Label
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)'
+        ctx.font = '10px Inter'
+        ctx.textAlign = 'center'
+        ctx.fillText(cont.label, cont.x, cont.y)
+      })
+
+      // Grid lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'
+      for (let i = 0; i < w; i += 50) {
+        ctx.beginPath()
+        ctx.moveTo(i, 0)
+        ctx.lineTo(i, h)
+        ctx.stroke()
+      }
+      for (let i = 0; i < h; i += 50) {
+        ctx.beginPath()
+        ctx.moveTo(0, i)
+        ctx.lineTo(w, i)
+        ctx.stroke()
+      }
+    }
+
+    function drawNodes() {
+      const w = canvas.width / 2
+      const h = canvas.height / 2
+      const centerX = w / 2
+      const centerY = h / 2
+
+      // Central hub
+      const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 30)
+      gradient.addColorStop(0, 'rgba(0, 245, 255, 0.5)')
+      gradient.addColorStop(1, 'rgba(168, 85, 247, 0.2)')
+      ctx.fillStyle = gradient
+      ctx.beginPath()
+      ctx.arc(centerX, centerY, 30, 0, Math.PI * 2)
+      ctx.fill()
+
+      ctx.strokeStyle = '#00f5ff'
+      ctx.lineWidth = 2
+      ctx.stroke()
+
+      // Route nodes
+      ALL_ROUTES.forEach((route, i) => {
+        const angle = (i / ALL_ROUTES.length) * Math.PI * 2
+        const distance = 150 + Math.random() * 100
+        const x = centerX + Math.cos(angle) * distance
+        const y = centerY + Math.sin(angle) * distance
+
+        const status = getStatus(route)
+
+        // Connection line
+        ctx.beginPath()
+        ctx.moveTo(centerX, centerY)
+        ctx.lineTo(x, y)
+        ctx.strokeStyle = status.color + '20'
+        ctx.lineWidth = 1
+        ctx.stroke()
+
+        // Node
+        const nodeGradient = ctx.createRadialGradient(x, y, 0, x, y, 8)
+        nodeGradient.addColorStop(0, status.color)
+        nodeGradient.addColorStop(1, status.color + '40')
+        ctx.fillStyle = nodeGradient
+        ctx.beginPath()
+        ctx.arc(x, y, 6, 0, Math.PI * 2)
+        ctx.fill()
+
+        // Create particle occasionally
+        if (Math.random() < 0.02 && status.class !== 'untested') {
+          particles.push({
+            x: centerX,
+            y: centerY,
+            targetX: x,
+            targetY: y,
+            progress: 0,
+            color: status.color
+          })
+        }
+      })
+    }
+
+    function updateParticles() {
+      particles = particles.filter(p => {
+        p.progress += 0.02
+
+        if (p.progress >= 1) return false
+
+        const x = p.x + (p.targetX - p.x) * p.progress
+        const y = p.y + (p.targetY - p.y) * p.progress
+
+        ctx.fillStyle = p.color
+        ctx.shadowBlur = 10
+        ctx.shadowColor = p.color
+        ctx.beginPath()
+        ctx.arc(x, y, 3, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.shadowBlur = 0
+
+        return true
+      })
+    }
+
+    // Initialize
+    initCanvas()
+    fetchData()
+    setInterval(fetchData, 5000)
+  </script>
+</body>
+</html>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ SAR Stress Test Dashboard - Live</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInDown 0.6s ease-out;
+    }
+
+    h1 {
+      font-size: 48px;
+      font-weight: 800;
+      text-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      opacity: 0.9;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: fadeInUp 0.6s ease-out;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .stat-label {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 800;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .stat-unit {
+      font-size: 18px;
+      opacity: 0.7;
+    }
+
+    .routes-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .routes-header {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .route-item {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+      animation: slideInLeft 0.5s ease-out;
+    }
+
+    .route-item:hover {
+      background: rgba(0, 0, 0, 0.3);
+      transform: translateX(5px);
+    }
+
+    .route-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .route-emoji {
+      font-size: 32px;
+      animation: pulse 2s infinite;
+    }
+
+    .route-name {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .route-stats {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .route-time {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .route-bar {
+      width: 200px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .route-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease, background-color 0.5s ease;
+    }
+
+    .speed-excellent { background: linear-gradient(90deg, #10b981 0%, #34d399 100%); }
+    .speed-good { background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%); }
+    .speed-slow { background: linear-gradient(90deg, #f97316 0%, #fb923c 100%); }
+    .speed-critical { background: linear-gradient(90deg, #ef4444 0%, #f87171 100%); }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 12px 20px;
+      border-radius: 24px;
+      backdrop-filter: blur(10px);
+    }
+
+    .live-dot {
+      width: 12px;
+      height: 12px;
+      background: #ef4444;
+      border-radius: 50%;
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px;
+      font-size: 24px;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="live-indicator">
+    <div class="live-dot"></div>
+    <span>LIVE</span>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>⚡ SAR AQUEDUC VELOCITY</h1>
+      <div class="subtitle">Performance Stress Test Dashboard</div>
+    </header>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <div>Chargement des données de performance...</div>
+    </div>
+
+    <div id="content" style="display: none;">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">📊 Total Requêtes</div>
+          <div class="stat-value">
+            <span id="total-requests">0</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">✅ Taux de Succès</div>
+          <div class="stat-value">
+            <span id="success-rate">0</span>
+            <span class="stat-unit">%</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">⚡ Temps Moyen</div>
+          <div class="stat-value">
+            <span id="avg-time">0</span>
+            <span class="stat-unit">ms</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">🔥 Performance</div>
+          <div class="stat-value">
+            <span id="performance-grade">A+</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="routes-container">
+        <div class="routes-header">🚀 Performance par Route</div>
+        <div id="routes-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Config
+    const SUPABASE_URL = 'https://dllyzfuqjzuhvshrlmuq.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsbHl6ZnVxanp1aHZzaHJsbXVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5OTU5ODEsImV4cCI6MjA4MTU3MTk4MX0.xskVblRlKdbTST1Mdgz76oR7N2rDq8ZOUgaN-f_TTM4'
+
+    // Route emojis
+    const ROUTE_EMOJIS = {
+      'Messages': '💬',
+      'Support': '🎫',
+      'Analytics': '📊',
+      'VoPay': '💰',
+      'Clients': '👥',
+      'Loans': '🏦',
+      'Diagnostic': '🔧'
+    }
+
+    async function fetchPerformanceData() {
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/vw_route_performance?select=*`,
+          {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        )
+
+        if (!response.ok) throw new Error('Failed to fetch')
+
+        const data = await response.json()
+        return data
+      } catch (err) {
+        console.error('Error fetching data:', err)
+        return []
+      }
+    }
+
+    function getSpeedClass(ms) {
+      if (ms < 50) return 'speed-excellent'
+      if (ms < 150) return 'speed-good'
+      if (ms < 300) return 'speed-slow'
+      return 'speed-critical'
+    }
+
+    function getEmoji(ms) {
+      if (ms < 50) return '🟢'
+      if (ms < 150) return '🟡'
+      if (ms < 300) return '🟠'
+      return '🔴'
+    }
+
+    function getPerformanceGrade(avgMs, successRate) {
+      if (avgMs < 50 && successRate > 99) return 'A+'
+      if (avgMs < 100 && successRate > 95) return 'A'
+      if (avgMs < 150 && successRate > 90) return 'B'
+      if (avgMs < 200 && successRate > 85) return 'C'
+      return 'D'
+    }
+
+    function extractRouteName(path) {
+      const parts = path.split('/')
+      return parts[parts.length - 1] || 'Root'
+    }
+
+    function renderData(data) {
+      if (data.length === 0) {
+        document.getElementById('content').innerHTML = '<div class="loading">Aucune donnée disponible. Lancez un stress test d\'abord.</div>'
+        document.getElementById('content').style.display = 'block'
+        return
+      }
+
+      // Stats globales
+      const totalRequests = data.reduce((sum, r) => sum + r.total_requests, 0)
+      const totalErrors = data.reduce((sum, r) => sum + r.error_count, 0)
+      const successRate = Math.round(((totalRequests - totalErrors) / totalRequests) * 100)
+      const avgTime = Math.round(data.reduce((sum, r) => sum + r.avg_ms, 0) / data.length)
+
+      document.getElementById('total-requests').textContent = totalRequests.toLocaleString()
+      document.getElementById('success-rate').textContent = successRate
+      document.getElementById('avg-time').textContent = avgTime
+      document.getElementById('performance-grade').textContent = getPerformanceGrade(avgTime, successRate)
+
+      // Routes
+      const routesList = document.getElementById('routes-list')
+      routesList.innerHTML = ''
+
+      data.sort((a, b) => a.avg_ms - b.avg_ms).forEach((route, index) => {
+        const routeName = extractRouteName(route.route)
+        const emoji = ROUTE_EMOJIS[routeName] || '🔹'
+        const speedEmoji = getEmoji(route.avg_ms)
+        const speedClass = getSpeedClass(route.avg_ms)
+        const barWidth = Math.min((route.avg_ms / 500) * 100, 100)
+
+        const routeItem = document.createElement('div')
+        routeItem.className = 'route-item'
+        routeItem.style.animationDelay = `${index * 0.1}s`
+
+        routeItem.innerHTML = `
+          <div class="route-info">
+            <div class="route-emoji">${emoji}</div>
+            <div>
+              <div class="route-name">${routeName}</div>
+              <div style="opacity: 0.7; font-size: 12px;">${route.total_requests} requêtes</div>
+            </div>
+          </div>
+          <div class="route-stats">
+            <div style="text-align: right;">
+              <div class="route-time">${speedEmoji} ${route.avg_ms}ms</div>
+              <div style="opacity: 0.7; font-size: 12px;">P95: ${route.p95_ms}ms</div>
+            </div>
+            <div class="route-bar">
+              <div class="route-bar-fill ${speedClass}" style="width: ${barWidth}%"></div>
+            </div>
+          </div>
+        `
+
+        routesList.appendChild(routeItem)
+      })
+
+      document.getElementById('loading').style.display = 'none'
+      document.getElementById('content').style.display = 'block'
+    }
+
+    // Auto-refresh toutes les 5 secondes
+    async function refresh() {
+      const data = await fetchPerformanceData()
+      renderData(data)
+    }
+
+    // Initial load
+    refresh()
+    setInterval(refresh, 5000)
+  </script>
+</body>
+</html>

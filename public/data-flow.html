@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAR - Flux de Données | Formulaire → Base de Données</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+      color: #ffffff;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 42px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #00d4ff 0%, #00ff88 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 50px;
+      font-size: 18px;
+    }
+
+    .flow-container {
+      position: relative;
+      padding: 40px 0;
+    }
+
+    /* Canvas pour les connexions animées */
+    #flowCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .flow-step {
+      position: relative;
+      z-index: 2;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 60px;
+      transition: all 0.3s ease;
+    }
+
+    .flow-step:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(0, 212, 255, 0.5);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 60px rgba(0, 212, 255, 0.2);
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .step-number {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00d4ff 0%, #00ff88 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: #000;
+      flex-shrink: 0;
+    }
+
+    .step-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .step-subtitle {
+      color: #888;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    .step-content {
+      padding-left: 80px;
+    }
+
+    .code-block {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 15px 0;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+
+    .code-block code {
+      color: #00ff88;
+    }
+
+    .comment {
+      color: #666;
+    }
+
+    .keyword {
+      color: #00d4ff;
+    }
+
+    .string {
+      color: #ffa500;
+    }
+
+    .function {
+      color: #ff00ff;
+    }
+
+    .variable {
+      color: #ffff00;
+    }
+
+    .data-points {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .data-point {
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .data-point:hover {
+      background: rgba(0, 212, 255, 0.2);
+      border-color: rgba(0, 212, 255, 0.6);
+    }
+
+    .data-point-label {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 5px;
+    }
+
+    .data-point-value {
+      font-size: 16px;
+      font-weight: bold;
+      color: #00d4ff;
+    }
+
+    .validation-rules {
+      background: rgba(255, 165, 0, 0.1);
+      border: 1px solid rgba(255, 165, 0, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+
+    .validation-rule {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+    }
+
+    .validation-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .database-schema {
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+
+    .table-field {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      margin: 5px 0;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+    }
+
+    .field-name {
+      color: #00ff88;
+      font-weight: bold;
+    }
+
+    .field-type {
+      color: #00d4ff;
+    }
+
+    .external-systems {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .external-system {
+      background: rgba(255, 0, 255, 0.1);
+      border: 1px solid rgba(255, 0, 255, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .external-system:hover {
+      background: rgba(255, 0, 255, 0.2);
+      border-color: rgba(255, 0, 255, 0.6);
+      transform: scale(1.05);
+    }
+
+    .external-system-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .external-system-name {
+      font-weight: bold;
+      color: #ff00ff;
+      margin-bottom: 5px;
+    }
+
+    .external-system-purpose {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .response-box {
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+
+    .response-title {
+      font-weight: bold;
+      color: #00ff88;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .error-states {
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+
+    .error-state {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      margin: 8px 0;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+    }
+
+    .error-code {
+      background: rgba(255, 0, 0, 0.3);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #ff4444;
+      font-family: monospace;
+    }
+
+    .performance-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .performance-stat {
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #00d4ff;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #888;
+    }
+
+    /* Animation particles */
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #00d4ff;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: particle-flow 3s ease-in-out infinite;
+      z-index: 1;
+    }
+
+    @keyframes particle-flow {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100px) scale(0);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔄 Flux de Données Complet</h1>
+    <p class="subtitle">Du Formulaire jusqu'à la Base de Données et Systèmes Externes</p>
+
+    <div class="flow-container">
+      <canvas id="flowCanvas"></canvas>
+
+      <!-- ÉTAPE 1: FRONTEND -->
+      <div class="flow-step" id="step1">
+        <div class="step-header">
+          <div class="step-number">1</div>
+          <div>
+            <div class="step-title">🖥️ Frontend - Formulaire Utilisateur</div>
+            <div class="step-subtitle">LoanApplicationFormModern.tsx</div>
+          </div>
+        </div>
+        <div class="step-content">
+          <p style="margin-bottom: 15px; color: #ccc;">
+            L'utilisateur remplit le formulaire en 5 étapes. Les données sont auto-sauvegardées dans localStorage toutes les 2 secondes.
+          </p>
+
+          <div class="data-points">
+            <div class="data-point">
+              <div class="data-point-label">Nombre d'étapes</div>
+              <div class="data-point-value">5 étapes</div>
+            </div>
+            <div class="data-point">
+              <div class="data-point-label">Auto-save</div>
+              <div class="data-point-value">Toutes les 2s</div>
+            </div>
+            <div class="data-point">
+              <div class="data-point-label">Stockage local</div>
+              <div class="data-point-value">localStorage</div>
+            </div>
+            <div class="data-point">
+              <div class="data-point-label">Total champs</div>
+              <div class="data-point-value">38 champs</div>
+            </div>
+          </div>
+
+          <div class="code-block">
+<span class="comment">// Quand l'utilisateur clique sur "Soumettre"</span>
+<span class="keyword">const</span> handleSubmit = <span class="keyword">async</span> () => {
+  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'/api/applications/submit'</span>, {
+    method: <span class="string">'POST'</span>,
+    headers: {
+      <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>
+    },
+    body: <span class="function">JSON.stringify</span>(state.formData)
+  })
+}
+          </div>
+
+          <div class="response-box">
+            <div class="response-title">📤 Données envoyées (JSON)</div>
+            <div class="code-block">
+{
+  <span class="string">"prenom"</span>: <span class="string">"Jean"</span>,
+  <span class="string">"nom"</span>: <span class="string">"Tremblay"</span>,
+  <span class="string">"courriel"</span>: <span class="string">"jean@example.com"</span>,
+  <span class="string">"telephone"</span>: <span class="string">"5141234567"</span>,
+  <span class="string">"montant_demande"</span>: 5000,
+  <span class="string">"raison_pret"</span>: <span class="string">"Consolidation de dettes"</span>,
+  <span class="comment">// ... 32 autres champs</span>
+}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 2: API ROUTE -->
+      <div class="flow-step" id="step2">
+        <div class="step-header">
+          <div class="step-number">2</div>
+          <div>
+            <div class="step-title">⚡ API Route - Réception & Traitement</div>
+            <div class="step-subtitle">POST /api/applications/submit/route.ts</div>
+          </div>
+        </div>
+        <div class="step-content">
+          <p style="margin-bottom: 15px; color: #ccc;">
+            Next.js reçoit la requête HTTP et commence le traitement en 11 étapes automatiques.
+          </p>
+
+          <div class="performance-stats">
+            <div class="performance-stat">
+              <div class="stat-value">60s</div>
+              <div class="stat-label">Timeout Max</div>
+            </div>
+            <div class="performance-stat">
+              <div class="stat-value">3</div>
+              <div class="stat-label">Max par IP/heure</div>
+            </div>
+            <div class="performance-stat">
+              <div class="stat-value">11</div>
+              <div class="stat-label">Étapes de traitement</div>
+            </div>
+          </div>
+
+          <div class="code-block">
+<span class="comment">// 1. Récupération IP et User-Agent</span>
+<span class="keyword">const</span> clientIP = request.headers.<span class="function">get</span>(<span class="string">'x-forwarded-for'</span>)
+<span class="keyword">const</span> userAgent = request.headers.<span class="function">get</span>(<span class="string">'user-agent'</span>)
+<span class="keyword">const</span> body = <span class="keyword">await</span> request.<span class="function">json</span>()
+          </div>
+
+          <div class="validation-rules">
+            <div class="response-title">🔒 2. Rate Limiting</div>
+            <div class="validation-rule">
+              <span class="validation-icon">✓</span>
+              <div>
+                <strong>Maximum 3 requêtes par IP par heure</strong><br>
+                <span style="color: #888; font-size: 13px;">Si dépassé → Erreur 429</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="validation-rules">
+            <div class="response-title">✅ 3. Validation Complète (38 champs)</div>
+            <div class="validation-rule">
+              <span class="validation-icon">📧</span>
+              <div>
+                <strong>Email valide</strong><br>
+                <span style="color: #888; font-size: 13px;">Format: test@example.com</span>
+              </div>
+            </div>
+            <div class="validation-rule">
+              <span class="validation-icon">📞</span>
+              <div>
+                <strong>Téléphone valide</strong><br>
+                <span style="color: #888; font-size: 13px;">Format: 10 chiffres canadiens</span>
+              </div>
+            </div>
+            <div class="validation-rule">
+              <span class="validation-icon">💰</span>
+              <div>
+                <strong>Montant entre 500$ et 50,000$</strong><br>
+                <span style="color: #888; font-size: 13px;">Doit être un nombre positif</span>
+              </div>
+            </div>
+            <div class="validation-rule">
+              <span class="validation-icon">📅</span>
+              <div>
+                <strong>Âge minimum 18 ans</strong><br>
+                <span style="color: #888; font-size: 13px;">Date de naissance valide</span>
+              </div>
+            </div>
+            <div class="validation-rule">
+              <span class="validation-icon">🏠</span>
+              <div>
+                <strong>Adresse complète</strong><br>
+                <span style="color: #888; font-size: 13px;">Rue, ville, province, code postal</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-block">
+<span class="comment">// 4. Génération référence unique</span>
+<span class="keyword">const</span> reference = <span class="keyword">await</span> <span class="function">generateUniqueReference</span>()
+<span class="comment">// Format: SAR-LP-A1B2C3</span>
+          </div>
+
+          <div class="error-states">
+            <div class="response-title">❌ Erreurs Possibles</div>
+            <div class="error-state">
+              <span class="error-code">429</span>
+              <span>Trop de requêtes - Rate limit dépassé</span>
+            </div>
+            <div class="error-state">
+              <span class="error-code">400</span>
+              <span>Validation échouée - Données invalides</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 3: SUPABASE INSERT -->
+      <div class="flow-step" id="step3">
+        <div class="step-header">
+          <div class="step-number">3</div>
+          <div>
+            <div class="step-title">💾 Base de Données - Insertion Initiale</div>
+            <div class="step-subtitle">Supabase PostgreSQL - Table: loan_applications</div>
+          </div>
+        </div>
+        <div class="step-content">
+          <p style="margin-bottom: 15px; color: #ccc;">
+            Les données sont insérées dans Supabase avec le status "draft" (brouillon).
+          </p>
+
+          <div class="code-block">
+<span class="comment">// 5. Insertion dans Supabase</span>
+<span class="keyword">const</span> { data: application, error } = <span class="keyword">await</span> supabase
+  .<span class="function">from</span>(<span class="string">'loan_applications'</span>)
+  .<span class="function">insert</span>({
+    reference: <span class="string">'SAR-LP-A1B2C3'</span>,
+    status: <span class="string">'draft'</span>,
+    prenom: body.prenom,
+    nom: body.nom,
+    courriel: body.courriel,
+    <span class="comment">// ... tous les 38 champs</span>
+    ip_address: clientIP,
+    user_agent: userAgent,
+    form_completed_at: <span class="keyword">new</span> <span class="function">Date</span>()
+  })
+  .<span class="function">select</span>()
+  .<span class="function">single</span>()
+          </div>
+
+          <div class="database-schema">
+            <div class="response-title">📊 Schéma Base de Données (loan_applications)</div>
+            <div class="table-field">
+              <span class="field-name">id</span>
+              <span class="field-type">UUID (PRIMARY KEY)</span>
+            </div>
+            <div class="table-field">
+              <span class="field-name">reference</span>
+              <span class="field-type">TEXT UNIQUE</span>
+            </div>
+            <div class="table-field">
+              <span class="field-name">status</span>
+              <span class="field-type">TEXT (draft/submitted/failed)</span>
+            </div>
+            <div class="table-field">
+              <span class="field-name">prenom</span>
+              <span class="field-type">TEXT NOT NULL</span>
+            </div>
+            <div class="table-field">
+              <span class="field-name">nom</span>
+              <span class="field-type">TEXT NOT NULL</span>
+            </div>
+            <div class="table-field">
+              <span class="field-name">courriel</span>
+              <span class="field-type">TEXT NOT NULL</span>
+            </div>
+            <div class="table-field">
+              <span class="field-name">telephone</span>
+              <span class="field-type">TEXT NOT NULL</span>
+            </div>
+            <div class="table-field">
+              <span class="field-name">montant_demande</span>
+              <span class="field-type">NUMERIC NOT NULL</span>
+            </div>
+            <div class="table-field">
+              <span class="field-name">cortex_score</span>
+              <span class="field-type">INTEGER</span>
+            </div>
+            <div class="table-field">
+              <span class="field-name">risk_level</span>
+              <span class="field-type">TEXT (low/medium/high)</span>
+            </div>
+            <div class="table-field">
+              <span class="field-name">ip_address</span>
+              <span class="field-type">TEXT</span>
+            </div>
+            <div class="table-field">
+              <span class="field-name">created_at</span>
+              <span class="field-type">TIMESTAMPTZ</span>
+            </div>
+            <div style="text-align: center; color: #666; margin-top: 10px;">
+              ... + 26 autres champs
+            </div>
+          </div>
+
+          <div class="error-states">
+            <div class="response-title">❌ Erreurs Possibles</div>
+            <div class="error-state">
+              <span class="error-code">500</span>
+              <span>Erreur base de données - Connexion Supabase</span>
+            </div>
+            <div class="error-state">
+              <span class="error-code">500</span>
+              <span>Contrainte unique - Référence déjà existante</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 4: CORTEX SCORING -->
+      <div class="flow-step" id="step4">
+        <div class="step-header">
+          <div class="step-number">4</div>
+          <div>
+            <div class="step-title">🤖 Cortex - Calcul Score ML</div>
+            <div class="step-subtitle">Moteur d'intelligence artificielle</div>
+          </div>
+        </div>
+        <div class="step-content">
+          <p style="margin-bottom: 15px; color: #ccc;">
+            Le système Cortex analyse les données et calcule un score de risque (0-100).
+          </p>
+
+          <div class="code-block">
+<span class="comment">// 6. Calcul du score Cortex</span>
+<span class="keyword">let</span> cortexScore = 50 <span class="comment">// Score de base</span>
+
+<span class="comment">// Revenu annuel élevé</span>
+<span class="keyword">if</span> (body.revenu_annuel >= 50000) {
+  cortexScore += 20
+  riskLevel = <span class="string">'low'</span>
+}
+
+<span class="comment">// Propriétaire de logement</span>
+<span class="keyword">if</span> (body.type_logement === <span class="string">'proprietaire'</span>) {
+  cortexScore += 15
+}
+
+<span class="comment">// Ratio d'endettement trop élevé</span>
+<span class="keyword">if</span> (body.autres_dettes > body.revenu_annuel / 2) {
+  cortexScore -= 25
+  riskLevel = <span class="string">'high'</span>
+}
+          </div>
+
+          <div class="validation-rules">
+            <div class="response-title">📈 Facteurs de Score</div>
+            <div class="validation-rule">
+              <span class="validation-icon">💵</span>
+              <div>
+                <strong>Revenu annuel ≥ 50,000$</strong><br>
+                <span style="color: #00ff88;">+20 points → Risque faible</span>
+              </div>
+            </div>
+            <div class="validation-rule">
+              <span class="validation-icon">🏡</span>
+              <div>
+                <strong>Propriétaire de logement</strong><br>
+                <span style="color: #00ff88;">+15 points</span>
+              </div>
+            </div>
+            <div class="validation-rule">
+              <span class="validation-icon">⚠️</span>
+              <div>
+                <strong>Dettes > 50% du revenu</strong><br>
+                <span style="color: #ff4444;">-25 points → Risque élevé</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-block">
+<span class="comment">// Mise à jour du score dans Supabase</span>
+<span class="keyword">await</span> supabase
+  .<span class="function">from</span>(<span class="string">'loan_applications'</span>)
+  .<span class="function">update</span>({
+    cortex_score: cortexScore,
+    risk_level: riskLevel
+  })
+  .<span class="function">eq</span>(<span class="string">'id'</span>, application.id)
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 5: MARGILL SUBMISSION -->
+      <div class="flow-step" id="step5">
+        <div class="step-header">
+          <div class="step-number">5</div>
+          <div>
+            <div class="step-title">🌐 Margill - Soumission Externe</div>
+            <div class="step-subtitle">Système de gestion de prêts externe</div>
+          </div>
+        </div>
+        <div class="step-content">
+          <p style="margin-bottom: 15px; color: #ccc;">
+            Les données sont envoyées au système Margill pour traitement final et approbation.
+          </p>
+
+          <div class="code-block">
+<span class="comment">// 7. Soumission à Margill</span>
+<span class="keyword">const</span> margillResponse = <span class="keyword">await</span> margillClient.<span class="function">submitApplication</span>(body)
+
+<span class="keyword">if</span> (margillResponse.success) {
+  finalStatus = <span class="string">'submitted'</span>
+  <span class="comment">// ✅ Succès</span>
+} <span class="keyword">else</span> {
+  finalStatus = <span class="string">'failed'</span>
+  <span class="comment">// ❌ Échec</span>
+}
+          </div>
+
+          <div class="external-systems">
+            <div class="external-system">
+              <div class="external-system-icon">🏦</div>
+              <div class="external-system-name">Margill</div>
+              <div class="external-system-purpose">Gestion de prêts</div>
+            </div>
+            <div class="external-system">
+              <div class="external-system-icon">📧</div>
+              <div class="external-system-name">Resend</div>
+              <div class="external-system-purpose">Envoi emails</div>
+            </div>
+            <div class="external-system">
+              <div class="external-system-icon">📊</div>
+              <div class="external-system-name">Analytics</div>
+              <div class="external-system-purpose">Métriques</div>
+            </div>
+          </div>
+
+          <div class="error-states">
+            <div class="response-title">❌ Erreurs Possibles</div>
+            <div class="error-state">
+              <span class="error-code">500</span>
+              <span>Erreur Margill - API non disponible</span>
+            </div>
+            <div class="error-state">
+              <span class="error-code">500</span>
+              <span>Timeout - Margill ne répond pas (>60s)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 6: UPDATE STATUS -->
+      <div class="flow-step" id="step6">
+        <div class="step-header">
+          <div class="step-number">6</div>
+          <div>
+            <div class="step-title">🔄 Mise à Jour Status Final</div>
+            <div class="step-subtitle">Supabase - Enregistrement du résultat</div>
+          </div>
+        </div>
+        <div class="step-content">
+          <p style="margin-bottom: 15px; color: #ccc;">
+            Le status est mis à jour dans la base de données selon le résultat de Margill.
+          </p>
+
+          <div class="code-block">
+<span class="comment">// 8. Mise à jour du status final</span>
+<span class="keyword">await</span> supabase
+  .<span class="function">from</span>(<span class="string">'loan_applications'</span>)
+  .<span class="function">update</span>({
+    status: finalStatus, <span class="comment">// 'submitted' ou 'failed'</span>
+    margill_response: margillResponse,
+    margill_error: margillError,
+    margill_submitted_at: <span class="keyword">new</span> <span class="function">Date</span>(),
+    submitted_at: <span class="keyword">new</span> <span class="function">Date</span>()
+  })
+  .<span class="function">eq</span>(<span class="string">'id'</span>, application.id)
+          </div>
+
+          <div class="data-points">
+            <div class="data-point" style="background: rgba(0, 255, 136, 0.1); border-color: rgba(0, 255, 136, 0.3);">
+              <div class="data-point-label">Status Succès</div>
+              <div class="data-point-value" style="color: #00ff88;">submitted</div>
+            </div>
+            <div class="data-point" style="background: rgba(255, 0, 0, 0.1); border-color: rgba(255, 0, 0, 0.3);">
+              <div class="data-point-label">Status Échec</div>
+              <div class="data-point-value" style="color: #ff4444;">failed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 7: RESPONSE -->
+      <div class="flow-step" id="step7">
+        <div class="step-header">
+          <div class="step-number">7</div>
+          <div>
+            <div class="step-title">✉️ Réponse au Frontend</div>
+            <div class="step-subtitle">JSON Response</div>
+          </div>
+        </div>
+        <div class="step-content">
+          <p style="margin-bottom: 15px; color: #ccc;">
+            L'API retourne un objet JSON au frontend avec le résultat de la soumission.
+          </p>
+
+          <div class="response-box">
+            <div class="response-title">✅ Réponse Succès (200 OK)</div>
+            <div class="code-block">
+{
+  <span class="string">"success"</span>: <span class="keyword">true</span>,
+  <span class="string">"data"</span>: {
+    <span class="string">"reference"</span>: <span class="string">"SAR-LP-A1B2C3"</span>,
+    <span class="string">"status"</span>: <span class="string">"submitted"</span>,
+    <span class="string">"cortex_score"</span>: 75,
+    <span class="string">"message"</span>: <span class="string">"Votre demande a été soumise avec succès!"</span>
+  }
+}
+            </div>
+          </div>
+
+          <div class="error-states">
+            <div class="response-title">❌ Réponse Échec (500 Internal Error)</div>
+            <div class="code-block">
+{
+  <span class="string">"success"</span>: <span class="keyword">false</span>,
+  <span class="string">"error"</span>: <span class="string">"N'a pas pu être envoyée à Margill"</span>,
+  <span class="string">"data"</span>: {
+    <span class="string">"reference"</span>: <span class="string">"SAR-LP-A1B2C3"</span>,
+    <span class="string">"status"</span>: <span class="string">"failed"</span>,
+    <span class="string">"cortex_score"</span>: 75
+  }
+}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 8: FRONTEND DISPLAY -->
+      <div class="flow-step" id="step8">
+        <div class="step-header">
+          <div class="step-number">8</div>
+          <div>
+            <div class="step-title">🎉 Affichage Résultat</div>
+            <div class="step-subtitle">Frontend - Message utilisateur</div>
+          </div>
+        </div>
+        <div class="step-content">
+          <p style="margin-bottom: 15px; color: #ccc;">
+            Le frontend reçoit la réponse et affiche un message à l'utilisateur.
+          </p>
+
+          <div class="code-block">
+<span class="keyword">if</span> (response.ok && result.success) {
+  <span class="comment">// ✅ Succès</span>
+  <span class="function">showSuccessMessage</span>(result.data.message)
+  <span class="function">router.push</span>(<span class="string">`/merci?ref=${result.data.reference}`</span>)
+  localStorage.<span class="function">removeItem</span>(AUTOSAVE_KEY) <span class="comment">// Nettoyer auto-save</span>
+} <span class="keyword">else</span> {
+  <span class="comment">// ❌ Erreur</span>
+  <span class="function">showErrorMessage</span>(result.error)
+}
+          </div>
+
+          <div class="data-points">
+            <div class="data-point" style="background: rgba(0, 255, 136, 0.1); border-color: rgba(0, 255, 136, 0.3);">
+              <div class="data-point-label">Message Succès</div>
+              <div class="data-point-value" style="color: #00ff88; font-size: 14px;">Demande soumise avec succès!</div>
+            </div>
+            <div class="data-point" style="background: rgba(255, 165, 0, 0.1); border-color: rgba(255, 165, 0, 0.3);">
+              <div class="data-point-label">Redirection</div>
+              <div class="data-point-value" style="color: #ffa500; font-size: 14px;">/merci?ref=SAR-LP-A1B2C3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Résumé Performance -->
+    <div class="flow-step" style="background: rgba(0, 212, 255, 0.1); border-color: rgba(0, 212, 255, 0.3);">
+      <div class="step-header">
+        <div class="step-number">📊</div>
+        <div>
+          <div class="step-title">Performance & Métriques</div>
+          <div class="step-subtitle">Statistiques du flux complet</div>
+        </div>
+      </div>
+      <div class="step-content">
+        <div class="performance-stats">
+          <div class="performance-stat">
+            <div class="stat-value">8</div>
+            <div class="stat-label">Étapes Total</div>
+          </div>
+          <div class="performance-stat">
+            <div class="stat-value">38</div>
+            <div class="stat-label">Champs Validés</div>
+          </div>
+          <div class="performance-stat">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Systèmes Externes</div>
+          </div>
+          <div class="performance-stat">
+            <div class="stat-value">60s</div>
+            <div class="stat-label">Timeout Maximum</div>
+          </div>
+          <div class="performance-stat">
+            <div class="stat-value">2-5s</div>
+            <div class="stat-label">Temps Moyen</div>
+          </div>
+          <div class="performance-stat">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Max Requêtes/heure</div>
+          </div>
+        </div>
+
+        <div class="response-box" style="margin-top: 30px;">
+          <div class="response-title">🔄 Flux de Données Résumé</div>
+          <div style="color: #ccc; line-height: 2;">
+            Frontend (Formulaire)
+            <span style="color: #00d4ff;">→</span>
+            Next.js API Route (Validation)
+            <span style="color: #00d4ff;">→</span>
+            Supabase (INSERT draft)
+            <span style="color: #00d4ff;">→</span>
+            Cortex (Scoring)
+            <span style="color: #00d4ff;">→</span>
+            Supabase (UPDATE score)
+            <span style="color: #00d4ff;">→</span>
+            Margill (Soumission)
+            <span style="color: #00d4ff;">→</span>
+            Supabase (UPDATE status)
+            <span style="color: #00d4ff;">→</span>
+            Frontend (Résultat)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Animation du canvas avec connexions entre les étapes
+    const canvas = document.getElementById('flowCanvas')
+    const ctx = canvas.getContext('2d')
+    const container = document.querySelector('.flow-container')
+
+    function resizeCanvas() {
+      canvas.width = container.offsetWidth
+      canvas.height = container.offsetHeight
+    }
+
+    resizeCanvas()
+    window.addEventListener('resize', resizeCanvas)
+
+    const steps = Array.from(document.querySelectorAll('.flow-step'))
+
+    // Particules animées
+    const particles = []
+
+    function createParticle() {
+      // Créer une particule pour chaque connexion entre étapes
+      for (let i = 0; i < steps.length - 1; i++) {
+        const rect1 = steps[i].getBoundingClientRect()
+        const rect2 = steps[i + 1].getBoundingClientRect()
+        const containerRect = container.getBoundingClientRect()
+
+        const x = rect1.left - containerRect.left + rect1.width / 2
+        const y1 = rect1.bottom - containerRect.top
+        const y2 = rect2.top - containerRect.top
+
+        particles.push({
+          x: x + (Math.random() - 0.5) * 50,
+          y: y1,
+          targetY: y2,
+          speed: 0.5 + Math.random() * 0.5,
+          size: 2 + Math.random() * 3,
+          opacity: 0.8,
+          hue: 180 + Math.random() * 40
+        })
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // Dessiner les lignes de connexion
+      for (let i = 0; i < steps.length - 1; i++) {
+        const rect1 = steps[i].getBoundingClientRect()
+        const rect2 = steps[i + 1].getBoundingClientRect()
+        const containerRect = container.getBoundingClientRect()
+
+        const x1 = rect1.left - containerRect.left + rect1.width / 2
+        const y1 = rect1.bottom - containerRect.top
+        const x2 = rect2.left - containerRect.left + rect2.width / 2
+        const y2 = rect2.top - containerRect.top
+
+        // Ligne gradient
+        const gradient = ctx.createLinearGradient(x1, y1, x2, y2)
+        gradient.addColorStop(0, 'rgba(0, 212, 255, 0.2)')
+        gradient.addColorStop(1, 'rgba(0, 255, 136, 0.2)')
+
+        ctx.strokeStyle = gradient
+        ctx.lineWidth = 2
+        ctx.setLineDash([10, 5])
+        ctx.beginPath()
+        ctx.moveTo(x1, y1)
+        ctx.lineTo(x2, y2)
+        ctx.stroke()
+        ctx.setLineDash([])
+      }
+
+      // Dessiner et animer les particules
+      particles.forEach((particle, index) => {
+        particle.y += particle.speed
+
+        // Reset si la particule atteint sa destination
+        if (particle.y >= particle.targetY) {
+          particles.splice(index, 1)
+        }
+
+        // Dessiner la particule
+        ctx.beginPath()
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
+        ctx.fillStyle = `hsla(${particle.hue}, 100%, 50%, ${particle.opacity})`
+        ctx.fill()
+
+        // Glow effect
+        ctx.shadowBlur = 10
+        ctx.shadowColor = `hsla(${particle.hue}, 100%, 50%, 0.5)`
+      })
+
+      requestAnimationFrame(animate)
+    }
+
+    // Créer des particules périodiquement
+    setInterval(createParticle, 800)
+    animate()
+  </script>
+</body>
+</html>

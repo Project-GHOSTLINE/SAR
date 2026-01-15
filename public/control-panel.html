@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAR Control Panel - Panneau de Contrôle des Routes</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+      background: #000000;
+      color: #00ff00;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .control-panel {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+      border-bottom: 2px solid #00ff00;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      color: #00ff00;
+      text-shadow: 0 0 10px #00ff00;
+      letter-spacing: 2px;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 30px;
+      font-size: 14px;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .stat-indicator.green {
+      background: #00ff00;
+      box-shadow: 0 0 10px #00ff00;
+    }
+
+    .stat-indicator.red {
+      background: #ff0000;
+      box-shadow: 0 0 10px #ff0000;
+    }
+
+    .stat-indicator.yellow {
+      background: #ffff00;
+      box-shadow: 0 0 10px #ffff00;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Main Grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      height: calc(100vh - 70px);
+      overflow: hidden;
+    }
+
+    /* Sidebar - Menus */
+    .sidebar {
+      background: #0a0a0a;
+      border-right: 2px solid #00ff00;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .menu-section {
+      margin-bottom: 20px;
+    }
+
+    .menu-title {
+      font-size: 16px;
+      color: #00ff00;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: rgba(0, 255, 0, 0.1);
+      border-left: 3px solid #00ff00;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .menu-title:hover {
+      background: rgba(0, 255, 0, 0.2);
+      padding-left: 15px;
+    }
+
+    .menu-title.active {
+      background: rgba(0, 255, 0, 0.3);
+      border-left: 5px solid #00ff00;
+    }
+
+    .menu-count {
+      float: right;
+      background: #00ff00;
+      color: #000;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    /* Routes Panel */
+    .routes-panel {
+      background: #000000;
+      overflow-y: auto;
+      padding: 30px;
+    }
+
+    .routes-header {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #00ff00;
+    }
+
+    .routes-header h2 {
+      font-size: 28px;
+      color: #00ff00;
+      text-shadow: 0 0 10px #00ff00;
+      margin-bottom: 10px;
+    }
+
+    .routes-header p {
+      color: #888;
+      font-size: 14px;
+    }
+
+    /* Route Cards */
+    .route-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      gap: 20px;
+    }
+
+    .route-card {
+      background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+      border: 2px solid #333;
+      border-radius: 10px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .route-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: #333;
+      transition: all 0.3s ease;
+    }
+
+    .route-card.status-success::before {
+      background: #00ff00;
+      box-shadow: 0 0 20px #00ff00;
+    }
+
+    .route-card.status-error::before {
+      background: #ff0000;
+      box-shadow: 0 0 20px #ff0000;
+    }
+
+    .route-card.status-warning::before {
+      background: #ffff00;
+      box-shadow: 0 0 20px #ffff00;
+    }
+
+    .route-card.status-untested::before {
+      background: #888;
+    }
+
+    .route-card:hover {
+      border-color: #00ff00;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+      transform: translateY(-5px);
+    }
+
+    .route-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+
+    .route-method {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .route-method.GET {
+      background: rgba(0, 255, 0, 0.2);
+      color: #00ff00;
+      border: 1px solid #00ff00;
+    }
+
+    .route-method.POST {
+      background: rgba(0, 150, 255, 0.2);
+      color: #0096ff;
+      border: 1px solid #0096ff;
+    }
+
+    .route-method.PUT {
+      background: rgba(255, 165, 0, 0.2);
+      color: #ffa500;
+      border: 1px solid #ffa500;
+    }
+
+    .route-method.DELETE {
+      background: rgba(255, 0, 0, 0.2);
+      color: #ff0000;
+      border: 1px solid #ff0000;
+    }
+
+    .route-path {
+      font-size: 14px;
+      color: #00ff00;
+      font-weight: bold;
+      margin-bottom: 10px;
+      word-break: break-all;
+    }
+
+    .route-description {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .route-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 15px;
+      border-top: 1px solid #333;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status-badge.success {
+      background: rgba(0, 255, 0, 0.2);
+      color: #00ff00;
+      border: 1px solid #00ff00;
+    }
+
+    .status-badge.error {
+      background: rgba(255, 0, 0, 0.2);
+      color: #ff0000;
+      border: 1px solid #ff0000;
+    }
+
+    .status-badge.warning {
+      background: rgba(255, 255, 0, 0.2);
+      color: #ffff00;
+      border: 1px solid #ffff00;
+    }
+
+    .status-badge.untested {
+      background: rgba(136, 136, 136, 0.2);
+      color: #888;
+      border: 1px solid #888;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .status-badge.success .status-dot {
+      background: #00ff00;
+      box-shadow: 0 0 10px #00ff00;
+    }
+
+    .status-badge.error .status-dot {
+      background: #ff0000;
+      box-shadow: 0 0 10px #ff0000;
+    }
+
+    .status-badge.warning .status-dot {
+      background: #ffff00;
+      box-shadow: 0 0 10px #ffff00;
+    }
+
+    .route-metrics {
+      display: flex;
+      gap: 15px;
+      font-size: 11px;
+      color: #888;
+    }
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .metric-value {
+      font-size: 14px;
+      color: #00ff00;
+      font-weight: bold;
+    }
+
+    .metric-label {
+      font-size: 10px;
+      color: #666;
+      text-transform: uppercase;
+    }
+
+    /* Error Details */
+    .error-details {
+      margin-top: 15px;
+      padding: 10px;
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid #ff0000;
+      border-radius: 5px;
+      font-size: 11px;
+      color: #ff6666;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0a0a0a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #00ff00;
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00cc00;
+    }
+
+    /* Refresh Button */
+    .refresh-btn {
+      background: #00ff00;
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+      background: #00cc00;
+      box-shadow: 0 0 20px #00ff00;
+    }
+
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #333;
+      border-top: 2px solid #00ff00;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Connection Status */
+    .connection-status {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #00ff00;
+      padding: 15px 20px;
+      border-radius: 10px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    .connection-status.connected {
+      border-color: #00ff00;
+    }
+
+    .connection-status.disconnected {
+      border-color: #ff0000;
+    }
+  </style>
+</head>
+<body>
+  <div class="control-panel">
+    <!-- Header -->
+    <div class="header">
+      <h1>🚦 SAR CONTROL PANEL</h1>
+      <div class="header-stats">
+        <div class="stat">
+          <div class="stat-indicator green"></div>
+          <span>Online: <strong id="onlineCount">0</strong></span>
+        </div>
+        <div class="stat">
+          <div class="stat-indicator red"></div>
+          <span>Errors: <strong id="errorCount">0</strong></span>
+        </div>
+        <div class="stat">
+          <div class="stat-indicator yellow"></div>
+          <span>Warnings: <strong id="warningCount">0</strong></span>
+        </div>
+        <button class="refresh-btn" onclick="refreshData()">🔄 REFRESH</button>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="menu-section">
+          <div class="menu-title active" onclick="filterByMenu('all')">
+            🌐 TOUTES LES ROUTES
+            <span class="menu-count" id="count-all">0</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" onclick="filterByMenu('dashboard')">
+            📊 Dashboard
+            <span class="menu-count" id="count-dashboard">0</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" onclick="filterByMenu('messages')">
+            💬 Messages
+            <span class="menu-count" id="count-messages">0</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" onclick="filterByMenu('analyses')">
+            📈 Analyses Client
+            <span class="menu-count" id="count-analyses">0</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" onclick="filterByMenu('vopay')">
+            💰 VoPay
+            <span class="menu-count" id="count-vopay">0</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" onclick="filterByMenu('support')">
+            🛠️ Support
+            <span class="menu-count" id="count-support">0</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" onclick="filterByMenu('webhooks')">
+            🔗 Webhooks
+            <span class="menu-count" id="count-webhooks">0</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" onclick="filterByMenu('applications')">
+            📝 Applications
+            <span class="menu-count" id="count-applications">0</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" onclick="filterByMenu('memory')">
+            🧠 Memory System
+            <span class="menu-count" id="count-memory">0</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" onclick="filterByMenu('activity')">
+            📡 Activity
+            <span class="menu-count" id="count-activity">0</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" onclick="filterByMenu('network')">
+            🌐 Network
+            <span class="menu-count" id="count-network">0</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-title" onclick="filterByMenu('downloads')">
+            📥 Downloads
+            <span class="menu-count" id="count-downloads">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Routes Panel -->
+      <div class="routes-panel">
+        <div class="routes-header">
+          <h2 id="section-title">TOUTES LES ROUTES</h2>
+          <p id="section-description">Vue d'ensemble de toutes les routes API du système</p>
+        </div>
+
+        <div class="route-grid" id="routeGrid">
+          <!-- Routes will be injected here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connection Status -->
+  <div class="connection-status connected" id="connectionStatus">
+    <div class="status-dot" style="background: #00ff00; box-shadow: 0 0 10px #00ff00;"></div>
+    <span>Connected to Supabase</span>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://dllyzfuqjzuhvshrlmuq.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsbHl6ZnVxanp1aHZzaHJsbXVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5OTU5ODEsImV4cCI6MjA4MTU3MTk4MX0.xskVblRlKdbTST1Mdgz76oR7N2rDq8ZOUgaN-f_TTM4'
+
+    // Structure complète des routes par menu
+    const ROUTES = [
+      // DASHBOARD
+      {
+        menu: 'dashboard',
+        method: 'GET',
+        path: '/api/admin/analytics/dashboard',
+        description: 'Récupère les statistiques principales du dashboard',
+        tested: true
+      },
+      {
+        menu: 'dashboard',
+        method: 'GET',
+        path: '/api/admin/analytics',
+        description: 'Analytics générales de l\'application',
+        tested: false
+      },
+
+      // MESSAGES
+      {
+        menu: 'messages',
+        method: 'GET',
+        path: '/api/admin/messages',
+        description: 'Liste de tous les messages clients',
+        tested: true
+      },
+      {
+        menu: 'messages',
+        method: 'POST',
+        path: '/api/admin/messages/assign',
+        description: 'Assigner un message à un agent',
+        tested: false
+      },
+
+      // ANALYSES CLIENT
+      {
+        menu: 'analyses',
+        method: 'GET',
+        path: '/api/admin/client-analysis',
+        description: 'Analyse complète d\'un client',
+        tested: false
+      },
+      {
+        menu: 'analyses',
+        method: 'POST',
+        path: '/api/contact-analyse',
+        description: 'Soumettre une demande d\'analyse',
+        tested: false
+      },
+      {
+        menu: 'analyses',
+        method: 'POST',
+        path: '/api/osint/scan',
+        description: 'Scanner OSINT pour vérification crédit',
+        tested: false
+      },
+      {
+        menu: 'analyses',
+        method: 'POST',
+        path: '/api/sentinel/scoring',
+        description: 'Calcul du score ML Sentinel',
+        tested: false
+      },
+
+      // VOPAY
+      {
+        menu: 'vopay',
+        method: 'GET',
+        path: '/api/admin/vopay',
+        description: 'Données VoPay générales',
+        tested: true
+      },
+      {
+        menu: 'vopay',
+        method: 'GET',
+        path: '/api/admin/vopay/transactions',
+        description: 'Liste des transactions VoPay',
+        tested: true
+      },
+      {
+        menu: 'vopay',
+        method: 'GET',
+        path: '/api/admin/vopay/real-transactions',
+        description: 'Transactions VoPay réelles (API externe)',
+        tested: false
+      },
+      {
+        menu: 'vopay',
+        method: 'GET',
+        path: '/api/admin/vopay-debug',
+        description: 'Debug des transactions VoPay',
+        tested: false
+      },
+
+      // SUPPORT
+      {
+        menu: 'support',
+        method: 'GET',
+        path: '/api/admin/support/tickets',
+        description: 'Liste des tickets de support',
+        tested: true
+      },
+      {
+        menu: 'support',
+        method: 'POST',
+        path: '/api/admin/support/tickets',
+        description: 'Créer un nouveau ticket',
+        tested: false
+      },
+      {
+        menu: 'support',
+        method: 'GET',
+        path: '/api/admin/support/tickets/[id]',
+        description: 'Détails d\'un ticket spécifique',
+        tested: false
+      },
+      {
+        menu: 'support',
+        method: 'PUT',
+        path: '/api/admin/support/tickets/[id]',
+        description: 'Mettre à jour un ticket',
+        tested: false
+      },
+      {
+        menu: 'support',
+        method: 'GET',
+        path: '/api/admin/support/messages',
+        description: 'Messages de support',
+        tested: false
+      },
+      {
+        menu: 'support',
+        method: 'GET',
+        path: '/api/admin/support/stats',
+        description: 'Statistiques de support',
+        tested: false
+      },
+
+      // WEBHOOKS
+      {
+        menu: 'webhooks',
+        method: 'GET',
+        path: '/api/admin/webhooks/list',
+        description: 'Liste de tous les webhooks configurés',
+        tested: false
+      },
+      {
+        menu: 'webhooks',
+        method: 'GET',
+        path: '/api/admin/webhooks/stats',
+        description: 'Statistiques des webhooks',
+        tested: false
+      },
+      {
+        menu: 'webhooks',
+        method: 'POST',
+        path: '/api/admin/webhooks/send-alert',
+        description: 'Envoyer une alerte webhook',
+        tested: false
+      },
+      {
+        menu: 'webhooks',
+        method: 'GET',
+        path: '/api/admin/webhooks/debug',
+        description: 'Debug des webhooks',
+        tested: false
+      },
+
+      // APPLICATIONS (Prêts)
+      {
+        menu: 'applications',
+        method: 'POST',
+        path: '/api/applications/submit',
+        description: 'Soumettre une demande de prêt',
+        tested: true
+      },
+      {
+        menu: 'applications',
+        method: 'GET',
+        path: '/api/applications/[id]',
+        description: 'Détails d\'une application',
+        tested: false
+      },
+      {
+        menu: 'applications',
+        method: 'POST',
+        path: '/api/device/deep-inspector',
+        description: 'Vérification identité (OCR + Face)',
+        tested: false
+      },
+
+      // MEMORY SYSTEM
+      {
+        menu: 'memory',
+        method: 'POST',
+        path: '/api/memory/store',
+        description: 'Stocker du contexte en mémoire',
+        tested: false
+      },
+      {
+        menu: 'memory',
+        method: 'GET',
+        path: '/api/memory/recall',
+        description: 'Rappeler le contexte stocké',
+        tested: false
+      },
+      {
+        menu: 'memory',
+        method: 'POST',
+        path: '/api/memory/session',
+        description: 'Gestion de session',
+        tested: false
+      },
+      {
+        menu: 'memory',
+        method: 'GET',
+        path: '/api/memory/context',
+        description: 'Récupérer le contexte actuel',
+        tested: false
+      },
+      {
+        menu: 'memory',
+        method: 'POST',
+        path: '/api/memory/doc-read',
+        description: 'Lecture de documents',
+        tested: false
+      },
+
+      // ACTIVITY
+      {
+        menu: 'activity',
+        method: 'POST',
+        path: '/api/activity/log',
+        description: 'Logger une activité',
+        tested: true
+      },
+      {
+        menu: 'activity',
+        method: 'GET',
+        path: '/api/activity/stats',
+        description: 'Statistiques d\'activité',
+        tested: false
+      },
+      {
+        menu: 'activity',
+        method: 'GET',
+        path: '/api/activity/recent',
+        description: 'Activités récentes',
+        tested: false
+      },
+
+      // NETWORK
+      {
+        menu: 'network',
+        method: 'GET',
+        path: '/api/network/trace',
+        description: 'Trace réseau (traceroute)',
+        tested: false
+      },
+      {
+        menu: 'network',
+        method: 'POST',
+        path: '/api/network/active-recon',
+        description: 'Reconnaissance active réseau',
+        tested: false
+      },
+      {
+        menu: 'network',
+        method: 'GET',
+        path: '/api/network/packet-capture',
+        description: 'Capture de paquets',
+        tested: false
+      },
+
+      // DOWNLOADS
+      {
+        menu: 'downloads',
+        method: 'GET',
+        path: '/api/admin/downloads/stats',
+        description: 'Statistiques de téléchargements',
+        tested: false
+      }
+    ]
+
+    let performanceData = {}
+    let currentFilter = 'all'
+
+    // Fetch real data from Supabase
+    async function fetchPerformanceData() {
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/vw_route_performance?select=*`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          performanceData = {}
+          data.forEach(route => {
+            performanceData[route.route_path] = route
+          })
+          document.getElementById('connectionStatus').className = 'connection-status connected'
+          document.getElementById('connectionStatus').innerHTML = `
+            <div class="status-dot" style="background: #00ff00; box-shadow: 0 0 10px #00ff00;"></div>
+            <span>Connected to Supabase</span>
+          `
+        } else {
+          throw new Error('Failed to fetch')
+        }
+      } catch (error) {
+        console.error('Error fetching performance data:', error)
+        document.getElementById('connectionStatus').className = 'connection-status disconnected'
+        document.getElementById('connectionStatus').innerHTML = `
+          <div class="status-dot" style="background: #ff0000; box-shadow: 0 0 10px #ff0000;"></div>
+          <span>Connection Error</span>
+        `
+      }
+    }
+
+    // Render routes
+    function renderRoutes(filter = 'all') {
+      const grid = document.getElementById('routeGrid')
+      grid.innerHTML = ''
+
+      const filteredRoutes = filter === 'all'
+        ? ROUTES
+        : ROUTES.filter(r => r.menu === filter)
+
+      let onlineCount = 0
+      let errorCount = 0
+      let warningCount = 0
+
+      filteredRoutes.forEach(route => {
+        const perf = performanceData[route.path]
+
+        let status = 'untested'
+        let statusText = 'Non Testé'
+        let metrics = ''
+        let errorDetails = ''
+
+        if (perf) {
+          const avgTime = parseFloat(perf.avg_response_time_ms)
+          const errorRate = parseFloat(perf.error_rate)
+
+          if (errorRate > 0) {
+            status = 'error'
+            statusText = `${perf.error_count} Erreurs`
+            errorCount++
+            errorDetails = `
+              <div class="error-details">
+                ⚠️ ${perf.error_count} erreurs sur ${perf.total_requests} requêtes (${errorRate.toFixed(1)}%)
+              </div>
+            `
+          } else if (avgTime > 150) {
+            status = 'warning'
+            statusText = 'Lent'
+            warningCount++
+          } else {
+            status = 'success'
+            statusText = 'OK'
+            onlineCount++
+          }
+
+          metrics = `
+            <div class="route-metrics">
+              <div class="metric">
+                <div class="metric-value">${avgTime.toFixed(0)}ms</div>
+                <div class="metric-label">Temps Moy.</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">${perf.total_requests}</div>
+                <div class="metric-label">Requêtes</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">${errorRate.toFixed(1)}%</div>
+                <div class="metric-label">Taux Erreur</div>
+              </div>
+            </div>
+          `
+        }
+
+        const card = document.createElement('div')
+        card.className = `route-card status-${status}`
+        card.innerHTML = `
+          <div class="route-header">
+            <div>
+              <div class="route-method ${route.method}">${route.method}</div>
+              <div class="route-path">${route.path}</div>
+            </div>
+          </div>
+          <div class="route-description">${route.description}</div>
+          ${errorDetails}
+          <div class="route-status">
+            <div class="status-badge ${status}">
+              <div class="status-dot"></div>
+              <span>${statusText}</span>
+            </div>
+            ${metrics}
+          </div>
+        `
+
+        grid.appendChild(card)
+      })
+
+      // Update header stats
+      document.getElementById('onlineCount').textContent = onlineCount
+      document.getElementById('errorCount').textContent = errorCount
+      document.getElementById('warningCount').textContent = warningCount
+
+      // Update menu counts
+      const menuCounts = {}
+      ROUTES.forEach(route => {
+        if (!menuCounts[route.menu]) menuCounts[route.menu] = 0
+        menuCounts[route.menu]++
+      })
+
+      document.getElementById('count-all').textContent = ROUTES.length
+      Object.keys(menuCounts).forEach(menu => {
+        const el = document.getElementById(`count-${menu}`)
+        if (el) el.textContent = menuCounts[menu]
+      })
+    }
+
+    // Filter by menu
+    function filterByMenu(menu) {
+      currentFilter = menu
+
+      // Update active menu
+      document.querySelectorAll('.menu-title').forEach(el => {
+        el.classList.remove('active')
+      })
+      event.target.classList.add('active')
+
+      // Update section title
+      const titles = {
+        all: 'TOUTES LES ROUTES',
+        dashboard: '📊 DASHBOARD',
+        messages: '💬 MESSAGES',
+        analyses: '📈 ANALYSES CLIENT',
+        vopay: '💰 VOPAY',
+        support: '🛠️ SUPPORT',
+        webhooks: '🔗 WEBHOOKS',
+        applications: '📝 APPLICATIONS',
+        memory: '🧠 MEMORY SYSTEM',
+        activity: '📡 ACTIVITY',
+        network: '🌐 NETWORK',
+        downloads: '📥 DOWNLOADS'
+      }
+
+      const descriptions = {
+        all: 'Vue d\'ensemble de toutes les routes API du système',
+        dashboard: 'Routes pour le dashboard admin et analytics',
+        messages: 'Gestion des messages clients',
+        analyses: 'Routes pour l\'analyse client et vérifications',
+        vopay: 'Intégration VoPay pour les transactions',
+        support: 'Système de tickets de support',
+        webhooks: 'Gestion et monitoring des webhooks',
+        applications: 'Soumission et gestion des demandes de prêt',
+        memory: 'Système de mémoire et contexte',
+        activity: 'Logs et activités système',
+        network: 'Diagnostic et monitoring réseau',
+        downloads: 'Statistiques de téléchargements'
+      }
+
+      document.getElementById('section-title').textContent = titles[menu] || menu.toUpperCase()
+      document.getElementById('section-description').textContent = descriptions[menu] || ''
+
+      renderRoutes(menu)
+    }
+
+    // Refresh data
+    async function refreshData() {
+      await fetchPerformanceData()
+      renderRoutes(currentFilter)
+    }
+
+    // Initial load
+    fetchPerformanceData().then(() => {
+      renderRoutes()
+      // Auto-refresh every 10 seconds
+      setInterval(refreshData, 10000)
+    })
+  </script>
+</body>
+</html>

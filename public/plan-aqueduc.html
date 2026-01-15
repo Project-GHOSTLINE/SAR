@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏗️ SAR Aqueduc System - Plan Technique</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0e27;
+      color: #00ff41;
+      overflow-x: auto;
+      padding: 20px;
+    }
+
+    .blueprint-container {
+      background:
+        linear-gradient(90deg, rgba(0, 255, 65, 0.05) 1px, transparent 1px),
+        linear-gradient(rgba(0, 255, 65, 0.05) 1px, transparent 1px);
+      background-size: 20px 20px;
+      min-width: 100%;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .header {
+      text-align: center;
+      padding: 20px;
+      border: 2px solid #00ff41;
+      margin-bottom: 30px;
+      background: rgba(0, 255, 65, 0.05);
+    }
+
+    .header h1 {
+      font-size: 32px;
+      text-shadow: 0 0 10px #00ff41;
+      margin-bottom: 10px;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 15px;
+      font-size: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend-box {
+      width: 20px;
+      height: 20px;
+      border: 2px solid;
+    }
+
+    .system-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 30px;
+      padding: 20px;
+    }
+
+    .system-section {
+      border: 2px solid #00ff41;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .system-title {
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #00ff41;
+      background: rgba(0, 255, 65, 0.1);
+      text-transform: uppercase;
+    }
+
+    .pipe-container {
+      margin: 10px 0;
+      position: relative;
+    }
+
+    .pipe {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border: 2px solid;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 40px;
+    }
+
+    .pipe:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 20px currentColor;
+    }
+
+    /* Status colors */
+    .pipe.fast {
+      border-color: #00ff41;
+      background: linear-gradient(90deg, rgba(0, 255, 65, 0.1) 0%, transparent 100%);
+      color: #00ff41;
+    }
+
+    .pipe.good {
+      border-color: #ffeb3b;
+      background: linear-gradient(90deg, rgba(255, 235, 59, 0.1) 0%, transparent 100%);
+      color: #ffeb3b;
+    }
+
+    .pipe.slow {
+      border-color: #ff9800;
+      background: linear-gradient(90deg, rgba(255, 152, 0, 0.1) 0%, transparent 100%);
+      color: #ff9800;
+    }
+
+    .pipe.critical {
+      border-color: #f44336;
+      background: linear-gradient(90deg, rgba(244, 67, 54, 0.1) 0%, transparent 100%);
+      color: #f44336;
+    }
+
+    .pipe.error {
+      border-color: #e91e63;
+      background: linear-gradient(90deg, rgba(233, 30, 99, 0.1) 0%, transparent 100%);
+      color: #e91e63;
+    }
+
+    .pipe.untested {
+      border-color: #666;
+      background: rgba(100, 100, 100, 0.1);
+      color: #999;
+      border-style: dashed;
+    }
+
+    /* Flow animation */
+    .pipe::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        currentColor 50%,
+        transparent 100%
+      );
+      opacity: 0;
+      animation: flow 2s linear infinite;
+    }
+
+    .pipe.active::before {
+      opacity: 0.3;
+    }
+
+    @keyframes flow {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Pulse for errors */
+    .pipe.error {
+      animation: pulse-error 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse-error {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .pipe-route {
+      flex: 1;
+      font-weight: bold;
+      font-size: 13px;
+      z-index: 1;
+    }
+
+    .pipe-stats {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      font-size: 11px;
+      z-index: 1;
+    }
+
+    .stat-badge {
+      padding: 3px 8px;
+      border: 1px solid currentColor;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .pipe-emoji {
+      font-size: 16px;
+      margin-right: 8px;
+    }
+
+    .stats-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      border: 2px solid #00ff41;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 15px;
+      font-size: 12px;
+      z-index: 1000;
+    }
+
+    .stats-panel h3 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 16px;
+      border-bottom: 1px solid #00ff41;
+      padding-bottom: 10px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+    }
+
+    .refresh-indicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 15px;
+      background: rgba(0, 255, 65, 0.1);
+      border: 2px solid #00ff41;
+      font-size: 12px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .method-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border: 1px solid;
+      margin-left: 8px;
+      opacity: 0.7;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 50px;
+      font-size: 18px;
+      animation: pulse 1s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="blueprint-container">
+    <div class="header">
+      <h1>🏗️ SAR AQUEDUC SYSTEM - PLAN TECHNIQUE</h1>
+      <div style="font-size: 14px; opacity: 0.8; margin-top: 5px;">
+        Système de monitoring en temps réel | Restructuration Database P0-P6
+      </div>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-box" style="border-color: #00ff41; background: rgba(0, 255, 65, 0.1);"></div>
+          <span>&lt;50ms RAPIDE</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="border-color: #ffeb3b; background: rgba(255, 235, 59, 0.1);"></div>
+          <span>50-150ms BON</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="border-color: #ff9800; background: rgba(255, 152, 0, 0.1);"></div>
+          <span>150-300ms LENT</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="border-color: #f44336; background: rgba(244, 67, 54, 0.1);"></div>
+          <span>&gt;300ms CRITIQUE</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="border-color: #e91e63; background: rgba(233, 30, 99, 0.1);"></div>
+          <span>ERREUR</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="border-color: #666; border-style: dashed;"></div>
+          <span>NON TESTÉ</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-panel">
+      <h3>📊 STATISTIQUES GLOBALES</h3>
+      <div class="stat-row">
+        <span>Total Routes:</span>
+        <strong id="total-routes">0</strong>
+      </div>
+      <div class="stat-row">
+        <span>✅ Actives:</span>
+        <strong id="active-routes" style="color: #00ff41;">0</strong>
+      </div>
+      <div class="stat-row">
+        <span>❌ Erreurs:</span>
+        <strong id="error-routes" style="color: #e91e63;">0</strong>
+      </div>
+      <div class="stat-row">
+        <span>⏳ Non testées:</span>
+        <strong id="untested-routes" style="color: #999;">0</strong>
+      </div>
+      <div class="stat-row">
+        <span>⚡ Temps moyen:</span>
+        <strong id="avg-time">--</strong>
+      </div>
+      <div class="stat-row">
+        <span>🚀 Plus rapide:</span>
+        <strong id="fastest" style="color: #00ff41;">--</strong>
+      </div>
+      <div class="stat-row">
+        <span>🐌 Plus lente:</span>
+        <strong id="slowest" style="color: #f44336;">--</strong>
+      </div>
+      <div class="stat-row">
+        <span>📈 Total requêtes:</span>
+        <strong id="total-requests">0</strong>
+      </div>
+    </div>
+
+    <div class="refresh-indicator">
+      🔄 Auto-refresh: 5s
+    </div>
+
+    <div id="system-grid" class="system-grid">
+      <div class="loading">⏳ Chargement du plan d'aqueduc...</div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://dllyzfuqjzuhvshrlmuq.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsbHl6ZnVxanp1aHZzaHJsbXVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5OTU5ODEsImV4cCI6MjA4MTU3MTk4MX0.xskVblRlKdbTST1Mdgz76oR7N2rDq8ZOUgaN-f_TTM4'
+
+    // Toutes les routes du système
+    const ALL_ROUTES = [
+      // Admin routes
+      { route: '/api/admin/analytics', category: 'Admin Core', emoji: '📊' },
+      { route: '/api/admin/analytics/dashboard', category: 'Admin Core', emoji: '📊' },
+      { route: '/api/admin/messages', category: 'Admin Core', emoji: '💬' },
+      { route: '/api/admin/messages/assign', category: 'Admin Core', emoji: '💬' },
+      { route: '/api/admin/login', category: 'Admin Auth', emoji: '🔐' },
+      { route: '/api/admin/logout', category: 'Admin Auth', emoji: '🔐' },
+      { route: '/api/admin/send', category: 'Admin Core', emoji: '📧' },
+      { route: '/api/admin/client-analysis', category: 'Admin Core', emoji: '👤' },
+
+      // Support
+      { route: '/api/admin/support/tickets', category: 'Support', emoji: '🎫' },
+      { route: '/api/admin/support/tickets/[id]', category: 'Support', emoji: '🎫' },
+      { route: '/api/admin/support/messages', category: 'Support', emoji: '💬' },
+      { route: '/api/admin/support/stats', category: 'Support', emoji: '📈' },
+
+      // VoPay
+      { route: '/api/admin/vopay', category: 'VoPay', emoji: '💰' },
+      { route: '/api/admin/vopay-debug', category: 'VoPay', emoji: '💰' },
+      { route: '/api/admin/vopay/transactions', category: 'VoPay', emoji: '💳' },
+      { route: '/api/admin/vopay/real-transactions', category: 'VoPay', emoji: '💳' },
+      { route: '/api/webhooks/vopay', category: 'VoPay', emoji: '🔔' },
+
+      // Webhooks
+      { route: '/api/admin/webhooks/debug', category: 'Webhooks', emoji: '🔔' },
+      { route: '/api/admin/webhooks/list', category: 'Webhooks', emoji: '🔔' },
+      { route: '/api/admin/webhooks/send-alert', category: 'Webhooks', emoji: '🔔' },
+      { route: '/api/admin/webhooks/stats', category: 'Webhooks', emoji: '📊' },
+
+      // Database
+      { route: '/api/admin/database/explore', category: 'Database', emoji: '🗄️' },
+      { route: '/api/admin/downloads/stats', category: 'Database', emoji: '📥' },
+      { route: '/api/admin/metrics/inspect', category: 'Database', emoji: '🔍' },
+
+      // Memory System
+      { route: '/api/memory/context', category: 'Memory', emoji: '🧠' },
+      { route: '/api/memory/doc-read', category: 'Memory', emoji: '🧠' },
+      { route: '/api/memory/recall', category: 'Memory', emoji: '🧠' },
+      { route: '/api/memory/session', category: 'Memory', emoji: '🧠' },
+      { route: '/api/memory/store', category: 'Memory', emoji: '🧠' },
+
+      // Sentinel System
+      { route: '/api/sentinel/execute', category: 'Sentinel', emoji: '🛡️' },
+      { route: '/api/sentinel/execute-command', category: 'Sentinel', emoji: '🛡️' },
+      { route: '/api/sentinel/fleet', category: 'Sentinel', emoji: '🛡️' },
+      { route: '/api/sentinel/network-monitor', category: 'Sentinel', emoji: '🛡️' },
+      { route: '/api/sentinel/orchestrator', category: 'Sentinel', emoji: '🛡️' },
+      { route: '/api/sentinel/scan-project', category: 'Sentinel', emoji: '🛡️' },
+      { route: '/api/sentinel/scoring', category: 'Sentinel', emoji: '🛡️' },
+
+      // OSINT
+      { route: '/api/osint/scan', category: 'OSINT', emoji: '🔎' },
+      { route: '/api/osint/advanced', category: 'OSINT', emoji: '🔎' },
+      { route: '/api/osint/bypass-tests', category: 'OSINT', emoji: '🔎' },
+      { route: '/api/osint/exploit-chains', category: 'OSINT', emoji: '🔎' },
+      { route: '/api/osint/lab-scan', category: 'OSINT', emoji: '🔎' },
+      { route: '/api/osint/network-scan', category: 'OSINT', emoji: '🔎' },
+      { route: '/api/osint/vulnerabilities', category: 'OSINT', emoji: '🔎' },
+
+      // Network
+      { route: '/api/network/active-recon', category: 'Network', emoji: '🌐' },
+      { route: '/api/network/packet-capture', category: 'Network', emoji: '🌐' },
+      { route: '/api/network/trace', category: 'Network', emoji: '🌐' },
+
+      // Security & Device
+      { route: '/api/anonymity/check', category: 'Security', emoji: '🕵️' },
+      { route: '/api/device/deep-inspector', category: 'Security', emoji: '🔬' },
+      { route: '/api/fingerprint/deep-scan', category: 'Security', emoji: '👆' },
+      { route: '/api/seo/exploit-secrets', category: 'Security', emoji: '🔓' },
+
+      // Activity
+      { route: '/api/activity/log', category: 'Activity', emoji: '📝' },
+      { route: '/api/activity/recent', category: 'Activity', emoji: '📝' },
+      { route: '/api/activity/stats', category: 'Activity', emoji: '📊' },
+
+      // Applications
+      { route: '/api/applications/submit', category: 'Applications', emoji: '📋' },
+      { route: '/api/contact', category: 'Applications', emoji: '📧' },
+      { route: '/api/contact-analyse', category: 'Applications', emoji: '📧' },
+
+      // Downloads
+      { route: '/api/download/[filename]', category: 'Downloads', emoji: '📥' },
+      { route: '/api/download/track', category: 'Downloads', emoji: '📥' },
+
+      // Routes & Cortex
+      { route: '/api/routes/discover', category: 'System', emoji: '🗺️' },
+      { route: '/api/routes/expand', category: 'System', emoji: '🗺️' },
+      { route: '/api/cortex/sync-miro', category: 'System', emoji: '🧠' },
+
+      // Monitoring
+      { route: '/api/performance-diagnostic', category: 'Monitoring', emoji: '⚡' },
+
+      // Test
+      { route: '/api/test-tool', category: 'Test', emoji: '🧪' },
+      { route: '/api/test/demo', category: 'Test', emoji: '🧪' }
+    ]
+
+    let performanceData = {}
+    let stats = {
+      totalRoutes: ALL_ROUTES.length,
+      activeRoutes: 0,
+      errorRoutes: 0,
+      untestedRoutes: ALL_ROUTES.length,
+      avgTime: 0,
+      fastest: null,
+      slowest: null,
+      totalRequests: 0
+    }
+
+    async function fetchPerformanceData() {
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/vw_route_performance?select=*`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        })
+
+        if (!response.ok) throw new Error('Failed to fetch')
+
+        const data = await response.json()
+
+        // Map data by route
+        performanceData = {}
+        data.forEach(item => {
+          performanceData[item.route] = item
+        })
+
+        // Calculate stats
+        stats.activeRoutes = data.filter(d => d.error_count === 0).length
+        stats.errorRoutes = data.filter(d => d.error_count > 0).length
+        stats.untestedRoutes = ALL_ROUTES.length - data.length
+
+        const avgMs = data.map(d => d.avg_ms)
+        stats.avgTime = avgMs.length ? Math.round(avgMs.reduce((a,b) => a+b, 0) / avgMs.length) : 0
+
+        const sortedBySpeed = [...data].sort((a,b) => a.avg_ms - b.avg_ms)
+        stats.fastest = sortedBySpeed[0]?.avg_ms || null
+        stats.slowest = sortedBySpeed[sortedBySpeed.length - 1]?.avg_ms || null
+        stats.totalRequests = data.reduce((sum, d) => sum + d.total_requests, 0)
+
+        updateStats()
+        renderAqueduc()
+      } catch (error) {
+        console.error('Error fetching performance data:', error)
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('total-routes').textContent = stats.totalRoutes
+      document.getElementById('active-routes').textContent = stats.activeRoutes
+      document.getElementById('error-routes').textContent = stats.errorRoutes
+      document.getElementById('untested-routes').textContent = stats.untestedRoutes
+      document.getElementById('avg-time').textContent = stats.avgTime ? `${stats.avgTime}ms` : '--'
+      document.getElementById('fastest').textContent = stats.fastest ? `${stats.fastest}ms` : '--'
+      document.getElementById('slowest').textContent = stats.slowest ? `${stats.slowest}ms` : '--'
+      document.getElementById('total-requests').textContent = stats.totalRequests
+    }
+
+    function getRouteClass(route) {
+      const perf = performanceData[route]
+
+      if (!perf) return { class: 'untested', status: '⏳', statusText: 'NON TESTÉ' }
+
+      if (perf.error_count > 0) {
+        return {
+          class: 'error',
+          status: '❌',
+          statusText: 'ERREUR',
+          avgMs: perf.avg_ms,
+          requests: perf.total_requests,
+          errors: perf.error_count
+        }
+      }
+
+      const ms = perf.avg_ms
+
+      if (ms < 50) return {
+        class: 'fast active',
+        status: '✅',
+        statusText: 'RAPIDE',
+        avgMs: ms,
+        requests: perf.total_requests,
+        p95: perf.p95_ms
+      }
+      if (ms < 150) return {
+        class: 'good active',
+        status: '✅',
+        statusText: 'BON',
+        avgMs: ms,
+        requests: perf.total_requests,
+        p95: perf.p95_ms
+      }
+      if (ms < 300) return {
+        class: 'slow active',
+        status: '⚠️',
+        statusText: 'LENT',
+        avgMs: ms,
+        requests: perf.total_requests,
+        p95: perf.p95_ms
+      }
+
+      return {
+        class: 'critical active',
+        status: '🔴',
+        statusText: 'CRITIQUE',
+        avgMs: ms,
+        requests: perf.total_requests,
+        p95: perf.p95_ms
+      }
+    }
+
+    function renderAqueduc() {
+      const grid = document.getElementById('system-grid')
+
+      // Group routes by category
+      const categories = {}
+      ALL_ROUTES.forEach(route => {
+        if (!categories[route.category]) {
+          categories[route.category] = []
+        }
+        categories[route.category].push(route)
+      })
+
+      // Render each category as a system section
+      let html = ''
+      Object.keys(categories).sort().forEach(category => {
+        html += `
+          <div class="system-section">
+            <div class="system-title">${category}</div>
+            <div class="pipe-container">
+        `
+
+        categories[category].forEach(route => {
+          const info = getRouteClass(route.route)
+
+          let statsHtml = ''
+          if (info.avgMs !== undefined) {
+            statsHtml = `
+              <div class="pipe-stats">
+                <span class="stat-badge">${info.avgMs}ms avg</span>
+                ${info.p95 ? `<span class="stat-badge">P95: ${info.p95}ms</span>` : ''}
+                ${info.requests ? `<span class="stat-badge">${info.requests} req</span>` : ''}
+                ${info.errors ? `<span class="stat-badge">${info.errors} err</span>` : ''}
+              </div>
+            `
+          } else {
+            statsHtml = `
+              <div class="pipe-stats">
+                <span class="stat-badge">${info.statusText}</span>
+              </div>
+            `
+          }
+
+          html += `
+            <div class="pipe ${info.class}" title="${route.route}">
+              <span class="pipe-emoji">${route.emoji}</span>
+              <span class="pipe-route">${route.route}</span>
+              ${statsHtml}
+              <span style="margin-left: auto; font-size: 18px;">${info.status}</span>
+            </div>
+          `
+        })
+
+        html += `
+            </div>
+          </div>
+        `
+      })
+
+      grid.innerHTML = html
+    }
+
+    // Initial load
+    fetchPerformanceData()
+
+    // Auto-refresh every 5 seconds
+    setInterval(fetchPerformanceData, 5000)
+  </script>
+</body>
+</html>
