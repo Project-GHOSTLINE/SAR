@@ -67,23 +67,49 @@ export async function GET(request: NextRequest) {
 
     // Store tokens in database
     console.log('Storing tokens in database...')
-    const { error: dbError } = await supabase
+
+    // Prepare token data
+    const tokenData = {
+      realm_id: realmId,
+      company_name: companyInfo?.CompanyName || 'Unknown',
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+      token_type: tokens.token_type,
+      expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+      refresh_token_expires_at: new Date(Date.now() + tokens.x_refresh_token_expires_in * 1000).toISOString(),
+      updated_at: new Date().toISOString()
+    }
+
+    // Check if token already exists for this realm
+    const { data: existingToken } = await supabase
       .from('quickbooks_tokens')
-      .upsert({
-        realm_id: realmId,
-        company_name: companyInfo?.CompanyName || 'Unknown',
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-        token_type: tokens.token_type,
-        expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
-        refresh_token_expires_at: new Date(Date.now() + tokens.x_refresh_token_expires_in * 1000).toISOString(),
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'realm_id'
-      })
+      .select('id')
+      .eq('realm_id', realmId)
+      .single()
+
+    let dbError
+    if (existingToken) {
+      // Update existing token
+      console.log('Updating existing token for realm:', realmId)
+      const { error } = await supabase
+        .from('quickbooks_tokens')
+        .update(tokenData)
+        .eq('realm_id', realmId)
+      dbError = error
+    } else {
+      // Insert new token
+      console.log('Inserting new token for realm:', realmId)
+      const { error } = await supabase
+        .from('quickbooks_tokens')
+        .insert(tokenData)
+      dbError = error
+    }
 
     if (dbError) {
       console.error('Database error:', dbError)
+      console.error('Error code:', dbError.code)
+      console.error('Error message:', dbError.message)
+      console.error('Error details:', dbError.details)
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_APP_URL}/admin/quickbooks?error=db_error`
       )
