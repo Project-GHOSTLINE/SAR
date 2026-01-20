@@ -4,11 +4,6 @@ import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 /**
  * Verify QuickBooks webhook signature
  * https://developer.intuit.com/app/developer/qbo/docs/develop/webhooks#verify-the-payload
@@ -32,6 +27,11 @@ function verifyWebhookSignature(
  */
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
     const signature = request.headers.get('intuit-signature')
     const body = await request.text()
 
@@ -106,6 +106,11 @@ export async function POST(request: NextRequest) {
  */
 async function processWebhookEvent(realmId: string, entity: any) {
   try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
     const operation = entity.operation // Create, Update, Delete, Merge
     const entityName = entity.name // Customer, Invoice, Payment, etc.
     const entityId = entity.id
@@ -223,6 +228,11 @@ async function fetchEntityFromQuickBooks(
  * Sync customer to database
  */
 async function syncCustomer(customer: any) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   await supabase
     .from('quickbooks_customers')
     .upsert({
@@ -251,6 +261,11 @@ async function syncCustomer(customer: any) {
  * Sync invoice to database
  */
 async function syncInvoice(invoice: any) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   await supabase
     .from('quickbooks_invoices')
     .upsert({
@@ -277,6 +292,11 @@ async function syncInvoice(invoice: any) {
  * Sync payment to database
  */
 async function syncPayment(payment: any) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   await supabase
     .from('quickbooks_payments')
     .upsert({
@@ -301,6 +321,11 @@ async function syncPayment(payment: any) {
  * Sync account to database
  */
 async function syncAccount(account: any) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   await supabase
     .from('quickbooks_accounts')
     .upsert({
@@ -324,6 +349,11 @@ async function syncAccount(account: any) {
  * Sync vendor to database
  */
 async function syncVendor(vendor: any) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   await supabase
     .from('quickbooks_vendors')
     .upsert({

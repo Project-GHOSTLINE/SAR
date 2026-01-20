@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+export const dynamic = 'force-dynamic'
 
 /**
  * Refresh QuickBooks Access Token
@@ -12,6 +9,11 @@ const supabase = createClient(
  */
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
     // Get current tokens from database
     const { data: tokens, error } = await supabase
       .from('quickbooks_tokens')
@@ -52,7 +54,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Update tokens in database
-    await supabase
+    const supabaseUpdate = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    await supabaseUpdate
       .from('quickbooks_tokens')
       .update({
         access_token: newTokens.access_token,
