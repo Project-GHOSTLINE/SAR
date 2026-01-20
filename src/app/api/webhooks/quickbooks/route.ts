@@ -177,7 +177,12 @@ async function processWebhookEvent(realmId: string, entity: any) {
     console.error('Error processing webhook event:', error)
 
     // Log error in database
-    await supabase
+    const supabaseError = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    await supabaseError
       .from('quickbooks_webhooks')
       .update({
         error_message: error.message
