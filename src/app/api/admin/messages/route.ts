@@ -39,67 +39,112 @@ async function handleGET(request: NextRequest) {
     const supabase = getSupabaseServer()
     const { searchParams } = new URL(request.url)
     const messageId = searchParams.get('messageId')
+    const status = searchParams.get('status')
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 100
 
     // Si on demande un message specifique avec ses emails/notes
-    // OPTIMIZED: Use RPC function (1 query instead of 2)
     if (messageId) {
-      const { data, error } = await supabase
-        .rpc('get_message_emails_and_notes', {
-          p_message_id: parseInt(messageId)
-        })
+      // Fetch emails for this message
+      const { data: emails, error: emailsError } = await supabase
+        .from('emails_envoyes')
+        .select('*')
+        .eq('message_id', parseInt(messageId))
+        .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error('RPC error:', error)
-        throw error
+      if (emailsError) {
+        console.error('Emails error:', emailsError)
+        throw emailsError
       }
 
-      // Group results by email/note
-      const emails: any[] = []
-      const notes: any[] = []
+      // Fetch notes for this message
+      const { data: notes, error: notesError } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('message_id', parseInt(messageId))
+        .order('created_at', { ascending: false })
 
-      data?.forEach((row: any) => {
-        if (row.email_id && !emails.find(e => e.id === row.email_id.toString())) {
-          emails.push({
-            id: row.email_id.toString(),
-            messageId: messageId,
-            type: row.email_type,
-            to: row.email_to,
-            subject: row.email_subject,
-            content: row.email_content,
-            sentBy: row.email_sent_by,
-            date: row.email_date
-          })
-        }
-        if (row.note_id && !notes.find(n => n.id === row.note_id.toString())) {
-          notes.push({
-            id: row.note_id.toString(),
-            messageId: messageId,
-            from: row.note_from,
-            to: row.note_to,
-            content: row.note_content,
-            date: row.note_date
-          })
-        }
+      if (notesError) {
+        console.error('Notes error:', notesError)
+        throw notesError
+      }
+
+      // Format response
+      const formattedEmails = (emails || []).map(e => ({
+        id: e.id.toString(),
+        messageId: messageId,
+        type: e.type,
+        to: e.destinataire,
+        subject: e.sujet,
+        content: e.contenu,
+        sentBy: e.envoye_par,
+        date: e.created_at
+      }))
+
+      const formattedNotes = (notes || []).map(n => ({
+        id: n.id.toString(),
+        messageId: messageId,
+        from: n.de,
+        to: n.a,
+        content: n.contenu,
+        date: n.created_at
+      }))
+
+      return NextResponse.json({
+        emails: formattedEmails,
+        notes: formattedNotes
       })
-
-      return NextResponse.json({ emails, notes })
     }
 
-    // OPTIMIZED: Use RPC function (1 query instead of 2 + N)
-    const { data: messages, error } = await supabase
-      .rpc('get_messages_with_details', {
-        p_limit: 100,
-        p_offset: 0
-      })
+    // Build query for all messages
+    let query = supabase
+      .from('contact_messages')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    // Filter by status if provided
+    if (status) {
+      query = query.eq('status', status)
+    }
+
+    const { data: messages, error, count } = await query
 
     if (error) {
-      console.error('RPC error:', error)
+      console.error('Messages error:', error)
       throw error
     }
 
-    // Format messages (RPC already returns most fields in correct format)
+    // Get counts of emails and notes for each message
+    const messageIds = messages?.map(m => m.id) || []
+
+    let emailCounts: Record<number, number> = {}
+    let noteCounts: Record<number, number> = {}
+
+    if (messageIds.length > 0) {
+      // Get email counts
+      const { data: emailCountsData } = await supabase
+        .from('emails_envoyes')
+        .select('message_id')
+        .in('message_id', messageIds)
+
+      emailCountsData?.forEach(e => {
+        emailCounts[e.message_id] = (emailCounts[e.message_id] || 0) + 1
+      })
+
+      // Get note counts
+      const { data: noteCountsData } = await supabase
+        .from('notes')
+        .select('message_id')
+        .in('message_id', messageIds)
+
+      noteCountsData?.forEach(n => {
+        noteCounts[n.message_id] = (noteCounts[n.message_id] || 0) + 1
+      })
+    }
+
+    // Format messages
     const formattedMessages = (messages || []).map((m: any) => ({
-      id: m.message_id.toString(),
+      id: m.id.toString(),
       nom: m.nom,
       email: m.email,
       telephone: m.telephone,
@@ -107,23 +152,25 @@ async function handleGET(request: NextRequest) {
       date: m.created_at,
       lu: m.lu,
       status: m.status,
-      reference: m.reference,
+      reference: m.reference || generateReference(m.id),
       assigned_to: m.assigned_to,
       assigned_at: m.assigned_at,
       assigned_by: m.assigned_by,
       system_responded: m.system_responded,
-      // Counts from RPC
-      email_count: m.email_count,
-      note_count: m.note_count
+      email_count: emailCounts[m.id] || 0,
+      note_count: noteCounts[m.id] || 0
     }))
 
-    // Get total_unread from first row (or 0 if no messages)
-    const totalUnread = messages?.[0]?.total_unread || 0
+    // Count unread messages
+    const { count: unreadCount } = await supabase
+      .from('contact_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('lu', false)
 
     return NextResponse.json({
       messages: formattedMessages,
-      total: messages?.length || 0,
-      nonLus: totalUnread
+      total: count || 0,
+      nonLus: unreadCount || 0
     })
   } catch (error) {
     console.error('Error fetching messages:', error)

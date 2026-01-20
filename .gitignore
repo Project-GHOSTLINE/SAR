@@ -47,3 +47,4 @@ src/generated/
 public/deep-recon-report.json
 .env.local.backup
 .env.local.test
+.env*.bak*
