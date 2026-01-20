@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { createClient } from '@supabase/supabase-js'
 import { jwtVerify } from 'jose'
+import { getSupabaseServer } from '@/lib/supabase-server'
+import { withPerf } from '@/lib/perf'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 
@@ -21,25 +22,13 @@ async function verifyAuth() {
   }
 }
 
-// Creer le client Supabase
-function getSupabase() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY
-
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Supabase credentials not configured')
-  }
-
-  return createClient(supabaseUrl, supabaseKey)
-}
-
 // Generer reference unique
 function generateReference(id: number | string) {
   return `SAR-${id.toString().padStart(6, '0')}`
 }
 
 // GET - Recuperer tous les messages avec emails et notes
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   const isAuth = await verifyAuth()
 
   if (!isAuth) {
@@ -47,100 +36,94 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = getSupabase()
+    const supabase = getSupabaseServer()
     const { searchParams } = new URL(request.url)
     const messageId = searchParams.get('messageId')
 
     // Si on demande un message specifique avec ses emails/notes
+    // OPTIMIZED: Use RPC function (1 query instead of 2)
     if (messageId) {
-      const [emailsResult, notesResult] = await Promise.all([
-        supabase
-          .from('emails_envoyes')
-          .select('*')
-          .eq('message_id', parseInt(messageId))
-          .order('created_at', { ascending: true }),
-        supabase
-          .from('notes_internes')
-          .select('*')
-          .eq('message_id', parseInt(messageId))
-          .order('created_at', { ascending: true })
-      ])
+      const { data, error } = await supabase
+        .rpc('get_message_emails_and_notes', {
+          p_message_id: parseInt(messageId)
+        })
 
-      return NextResponse.json({
-        emails: (emailsResult.data || []).map(e => ({
-          id: e.id.toString(),
-          messageId: e.message_id.toString(),
-          type: e.type,
-          to: e.destinataire,
-          subject: e.sujet,
-          content: e.contenu,
-          sentBy: e.envoye_par,
-          date: e.created_at
-        })),
-        notes: (notesResult.data || []).map(n => ({
-          id: n.id.toString(),
-          messageId: n.message_id.toString(),
-          from: n.de,
-          to: n.a,
-          content: n.contenu,
-          date: n.created_at
-        }))
+      if (error) {
+        console.error('RPC error:', error)
+        throw error
+      }
+
+      // Group results by email/note
+      const emails: any[] = []
+      const notes: any[] = []
+
+      data?.forEach((row: any) => {
+        if (row.email_id && !emails.find(e => e.id === row.email_id.toString())) {
+          emails.push({
+            id: row.email_id.toString(),
+            messageId: messageId,
+            type: row.email_type,
+            to: row.email_to,
+            subject: row.email_subject,
+            content: row.email_content,
+            sentBy: row.email_sent_by,
+            date: row.email_date
+          })
+        }
+        if (row.note_id && !notes.find(n => n.id === row.note_id.toString())) {
+          notes.push({
+            id: row.note_id.toString(),
+            messageId: messageId,
+            from: row.note_from,
+            to: row.note_to,
+            content: row.note_content,
+            date: row.note_date
+          })
+        }
       })
+
+      return NextResponse.json({ emails, notes })
     }
 
-    // Recuperer tous les messages
+    // OPTIMIZED: Use RPC function (1 query instead of 2 + N)
     const { data: messages, error } = await supabase
-      .from('contact_messages')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(100)
+      .rpc('get_messages_with_details', {
+        p_limit: 100,
+        p_offset: 0
+      })
 
     if (error) {
-      console.error('Supabase error:', error)
+      console.error('RPC error:', error)
       throw error
     }
 
-    // Compter les non lus
-    const { count: nonLusCount } = await supabase
-      .from('contact_messages')
-      .select('*', { count: 'exact', head: true })
-      .eq('lu', false)
-
-    // Formater les messages
-    const formattedMessages = (messages || []).map(m => ({
-      id: m.id.toString(),
+    // Format messages (RPC already returns most fields in correct format)
+    const formattedMessages = (messages || []).map((m: any) => ({
+      id: m.message_id.toString(),
       nom: m.nom,
       email: m.email,
       telephone: m.telephone,
       question: m.question,
       date: m.created_at,
       lu: m.lu,
-      status: m.status || (m.lu ? 'traite' : 'nouveau'),
-      reference: generateReference(m.id),
-      // Assignation et réponse système
+      status: m.status,
+      reference: m.reference,
       assigned_to: m.assigned_to,
       assigned_at: m.assigned_at,
       assigned_by: m.assigned_by,
-      system_responded: m.system_responded || false,
-      // Métriques de connexion client
-      client_ip: m.client_ip,
-      client_user_agent: m.client_user_agent,
-      client_device: m.client_device,
-      client_browser: m.client_browser,
-      client_os: m.client_os,
-      client_timezone: m.client_timezone,
-      client_language: m.client_language,
-      client_screen_resolution: m.client_screen_resolution,
-      referrer: m.referrer,
-      utm_source: m.utm_source,
-      utm_medium: m.utm_medium,
-      utm_campaign: m.utm_campaign
+      system_responded: m.system_responded,
+      // Counts from RPC
+      email_count: m.email_count,
+      note_count: m.note_count
     }))
+
+    // Get total_unread from first row (or 0 if no messages)
+    const totalUnread = messages?.[0]?.total_unread || 0
 
     return NextResponse.json({
       messages: formattedMessages,
       total: messages?.length || 0,
-      nonLus: nonLusCount || 0
+      nonLus: totalUnread
     })
   } catch (error) {
     console.error('Error fetching messages:', error)
@@ -148,13 +131,15 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export const GET = withPerf('admin/messages', handleGET)
+
 // POST - Ajouter un message (appele par l'API contact)
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json()
     const { nom, email, telephone, question } = body
 
-    const supabase = getSupabase()
+    const supabase = getSupabaseServer()
 
     // Inserer le message
     const { data, error } = await supabase
@@ -233,8 +218,10 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
   }
 }
 
+export const POST = withPerf('admin/messages', handlePOST)
+
 // PATCH - Mettre a jour un message (lu, status)
-export async function PATCH(request: NextRequest) {
+async function handlePATCH(request: NextRequest) {
   const isAuth = await verifyAuth()
 
   if (!isAuth) {
@@ -244,7 +231,7 @@ export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json()
     const { id, status } = body
-    const supabase = getSupabase()
+    const supabase = getSupabaseServer()
 
     const updateData: Record<string, unknown> = { lu: true }
     if (status) {
@@ -267,3 +254,5 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
+
+export const PATCH = withPerf('admin/messages', handlePATCH)

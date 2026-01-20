@@ -8,7 +8,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { getSupabase } from '@/lib/supabase'
+import { getSupabaseServer } from '@/lib/supabase-server'
+import { withPerf } from '@/lib/perf'
 
 // Types pour les webhooks VoPay
 interface VoPayWebhookPayload {
@@ -54,7 +55,7 @@ function validateWebhookSignature(
  * POST /api/webhooks/vopay
  * Reçoit et enregistre les webhooks VoPay
  */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
 
   try {
     // 1. Parser le payload
@@ -87,147 +88,52 @@ export async function POST(request: NextRequest) {
 
 
     // 4. Connexion Supabase
-    const supabase = getSupabase()
-    if (!supabase) {
-      console.error('[VoPay Webhook] Supabase not configured')
-      return NextResponse.json(
-        { error: 'Database unavailable' },
-        { status: 500 }
-      )
-    }
+    const supabase = getSupabaseServer()
 
-    // 5. Enregistrer dans la base de données
-    const { data, error } = await supabase
-      .from('vopay_webhook_logs')
-      .insert({
-        transaction_id: payload.TransactionID,
-        transaction_type: payload.TransactionType,
-        transaction_amount: parseFloat(payload.TransactionAmount),
-        status: payload.Status.toLowerCase(),
-        failure_reason: payload.FailureReason || null,
-        environment: payload.Environment,
-        validation_key: payload.ValidationKey,
-        is_validated: true,
-        raw_payload: payload,
-        updated_at: payload.UpdatedAt,
-        processed_at: new Date().toISOString(),
+    // 5. OPTIMIZED: Use RPC function (1 atomic call instead of 10 waterfall queries)
+    // This RPC handles: webhook logging, vopay_objects insert, client matching, loan matching
+    const { data: rpcData, error: rpcError } = await supabase
+      .rpc('process_vopay_webhook', {
+        p_transaction_id: payload.TransactionID,
+        p_transaction_type: payload.TransactionType,
+        p_amount: parseFloat(payload.TransactionAmount),
+        p_status: payload.Status.toLowerCase(),
+        p_failure_reason: payload.FailureReason || null,
+        p_environment: payload.Environment,
+        p_validation_key: payload.ValidationKey,
+        p_updated_at: payload.UpdatedAt,
+        p_payload: payload as any
       })
-      .select()
-      .single()
 
-    if (error) {
-      console.error('[VoPay Webhook] Database error:', error)
+    if (rpcError || !rpcData?.[0]) {
+      console.error('[VoPay Webhook] RPC error:', rpcError)
       return NextResponse.json(
-        { error: 'Database error', details: error.message },
+        { error: 'Database error', details: rpcError?.message || 'RPC failed' },
         { status: 500 }
       )
     }
 
-    // 5.5. Insérer AUSSI dans vopay_objects (table normalisée)
-    let voPayObjectId: string | null = null
-    let clientId: string | null = null
-    let loanId: string | null = null
+    // Extract results from RPC
+    const result = rpcData[0]
+    const voPayObjectId = result.vopay_object_id
+    const clientId = result.client_id
+    const loanId = result.loan_id
+    const logId = result.webhook_log_id
 
-    try {
-      const { data: voData, error: voError } = await supabase
-        .from('vopay_objects')
-        .insert({
-          object_type: payload.TransactionType || 'unknown',
-          vopay_id: payload.TransactionID,
-          status: payload.Status?.toLowerCase() || null,
-          amount: parseFloat(payload.TransactionAmount) || null,
-          payload: payload,
-          occurred_at: payload.UpdatedAt || new Date().toISOString(),
-          raw_log_id: data.id,
-        })
-        .select()
-        .single()
-
-      if (voError) {
-        console.warn('[VoPay Webhook] vopay_objects insertion warning:', voError.message)
-      } else {
-        voPayObjectId = voData.id
-        console.log('[VoPay Webhook] vopay_objects created:', voData.id)
-      }
-    } catch (voInsertError) {
-      console.warn('[VoPay Webhook] vopay_objects insert failed:', voInsertError)
+    if (!result.success) {
+      console.error('[VoPay Webhook] RPC returned error:', result.error_message)
+      return NextResponse.json(
+        { error: 'Processing failed', details: result.error_message },
+        { status: 500 }
+      )
     }
 
-    // 5.6. Tenter matching automatique client_id (si email présent)
-    if (voPayObjectId) {
-      // Extraire email depuis plusieurs chemins possibles
-      const email = (payload as any).email ||
-                    (payload as any).EmailAddress ||
-                    (payload as any).ClientInfo?.email
-
-      if (email) {
-        try {
-          const { data: clientData } = await supabase
-            .from('clients')
-            .select('id')
-            .ilike('primary_email', email.trim())
-            .single()
-
-          if (clientData?.id) {
-            await supabase
-              .from('vopay_objects')
-              .update({ client_id: clientData.id })
-              .eq('id', voPayObjectId)
-
-            clientId = clientData.id
-            console.log('[VoPay Webhook] Auto-matched client:', clientData.id)
-          }
-        } catch (matchError) {
-          console.debug('[VoPay Webhook] Client matching skipped')
-        }
-      }
-    }
-
-    // 5.7. Tenter matching automatique loan_id (si référence présente)
-    if (voPayObjectId) {
-      const reference = (payload as any).ClientReferenceNumber ||
-                        (payload as any).Notes ||
-                        (payload as any).Description
-
-      if (reference) {
-        try {
-          const referenceStr = String(reference).toUpperCase()
-          const sarMatch = referenceStr.match(/SAR-LP-\d+/)
-
-          if (sarMatch) {
-            const { data: appData } = await supabase
-              .from('loan_applications')
-              .select('id')
-              .eq('reference', sarMatch[0])
-              .single()
-
-            if (appData?.id) {
-              const { data: loanData } = await supabase
-                .from('loans')
-                .select('id, client_id')
-                .eq('application_id', appData.id)
-                .single()
-
-              if (loanData?.id) {
-                await supabase
-                  .from('vopay_objects')
-                  .update({
-                    loan_id: loanData.id,
-                    client_id: loanData.client_id
-                  })
-                  .eq('id', voPayObjectId)
-
-                loanId = loanData.id
-                clientId = clientId || loanData.client_id
-                console.log('[VoPay Webhook] Auto-matched loan:', loanData.id)
-              }
-            }
-          }
-        } catch (matchError) {
-          console.debug('[VoPay Webhook] Loan matching skipped')
-        }
-      }
-    }
+    console.log('[VoPay Webhook] Processed via RPC:', {
+      logId,
+      voPayObjectId,
+      clientId,
+      loanId
+    })
 
     // 6. Traitement selon le statut
     switch (payload.Status.toLowerCase()) {
@@ -340,7 +246,7 @@ export async function POST(request: NextRequest) {
       message: 'Webhook processed',
       transactionId: payload.TransactionID,
       status: payload.Status,
-      logId: data.id,
+      logId,
     })
   } catch (error) {
     console.error('[VoPay Webhook] Error:', error)
@@ -353,6 +259,8 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export const POST = withPerf('webhooks/vopay', handlePOST)
 
 /**
  * GET /api/webhooks/vopay

@@ -1,0 +1,7 @@
+# Ignore all log files
+*.ndjson
+*.log
+*.json
+
+# But track this .gitignore
+!.gitignore

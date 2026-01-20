@@ -37,20 +37,16 @@ CREATE INDEX idx_security_logs_path ON security_logs(request_path);
 -- Index composite pour analytics
 CREATE INDEX idx_security_logs_type_time ON security_logs(event_type, timestamp DESC);
 
--- RLS Policies (lecture admin seulement)
+-- RLS Policies (lecture authentifiée seulement)
 ALTER TABLE security_logs ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Admins can read all security logs"
+-- NOTE: Policy simplifiée car pas de table profiles dans le schéma actuel.
+-- TODO: Restreindre aux admins quand système de rôles sera implémenté.
+CREATE POLICY "Authenticated users can read security logs"
   ON security_logs
   FOR SELECT
   TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role = 'admin'
-    )
-  );
+  USING (true);
 
 -- Fonction pour nettoyer vieux logs (> 90 jours)
 CREATE OR REPLACE FUNCTION cleanup_old_security_logs()

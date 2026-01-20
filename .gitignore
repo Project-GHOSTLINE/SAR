@@ -45,3 +45,5 @@ temp/
 # Generated reports with sensitive data
 src/generated/
 public/deep-recon-report.json
+.env.local.backup
+.env.local.test

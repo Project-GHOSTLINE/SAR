@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { AnalyticsDashboardData, AnalyticsDeviceSummary, AnalyticsTopPage, AnalyticsTrafficSource, AnalyticsGeography } from '@/types/analytics'
+import { getOrSet } from '@/lib/cache'
+import { withPerf } from '@/lib/perf'
 
 // Force dynamic rendering (uses cookies for auth)
 export const dynamic = 'force-dynamic'
@@ -17,8 +19,10 @@ function isAuthenticated(request: NextRequest): boolean {
  *
  * Query params:
  * - period: '7d' | '30d' | '90d' (default: '7d')
+ *
+ * OPTIMIZED: Uses 5-minute cache to avoid hitting Google Analytics API on every request
  */
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     // Vérifier authentification
     if (!isAuthenticated(request)) {
@@ -40,26 +44,36 @@ export async function GET(request: NextRequest) {
 
     const startDate = dateRangeMap[period] || '7daysAgo'
 
-    // Récupérer les données brutes via l'API principale
-    const baseUrl = new URL(request.url).origin
-    const analyticsResponse = await fetch(
-      `${baseUrl}/api/admin/analytics?startDate=${startDate}&endDate=today`,
-      {
-        headers: {
-          Cookie: request.headers.get('cookie') || ''
+    // OPTIMIZED: Cache expensive Google Analytics API call (5 min TTL)
+    // Key: dashboard:{period} ensures separate cache per time period
+    const analyticsData = await getOrSet(
+      `dashboard:${period}`,
+      async () => {
+        // Récupérer les données brutes via l'API principale
+        const baseUrl = new URL(request.url).origin
+        const analyticsResponse = await fetch(
+          `${baseUrl}/api/admin/analytics?startDate=${startDate}&endDate=today`,
+          {
+            headers: {
+              Cookie: request.headers.get('cookie') || ''
+            }
+          }
+        )
+
+        if (!analyticsResponse.ok) {
+          throw new Error('Erreur lors de la récupération des données Analytics')
         }
-      }
+
+        const data = await analyticsResponse.json()
+
+        if (!data.success) {
+          throw new Error(data.error || 'Erreur Analytics')
+        }
+
+        return data
+      },
+      300 // 5 minutes cache
     )
-
-    if (!analyticsResponse.ok) {
-      throw new Error('Erreur lors de la récupération des données Analytics')
-    }
-
-    const analyticsData = await analyticsResponse.json()
-
-    if (!analyticsData.success) {
-      throw new Error(analyticsData.error || 'Erreur Analytics')
-    }
 
     // Agréger les données par device
     const deviceMap = new Map<string, AnalyticsDeviceSummary>()
@@ -189,3 +203,5 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export const GET = withPerf('admin/analytics/dashboard', handleGET)

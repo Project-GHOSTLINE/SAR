@@ -6,10 +6,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
--- Cleanup si existe
-DROP TRIGGER IF EXISTS update_loan_applications_updated_at ON loan_applications CASCADE;
-DROP TRIGGER IF EXISTS update_loan_objectives_updated_at ON loan_objectives CASCADE;
-DROP TRIGGER IF EXISTS update_cortex_rules_updated_at ON cortex_rules CASCADE;
+-- Cleanup safe (drop tables d'abord; triggers partent avec CASCADE)
 DROP TABLE IF EXISTS cortex_execution_logs CASCADE;
 DROP TABLE IF EXISTS cortex_rules CASCADE;
 DROP TABLE IF EXISTS loan_objectives CASCADE;

@@ -5,7 +5,8 @@ import { useRouter, usePathname } from 'next/navigation'
 import {
   LayoutDashboard, MessageSquare, DollarSign, FileText,
   Wrench, Webhook, BarChart3, LogOut, Menu, X,
-  ChevronDown, User, Clock, Bell, Shield, Database, Download, Zap
+  ChevronDown, User, Clock, Bell, Shield, Database, Download, Zap,
+  Receipt
 } from 'lucide-react'
 
 interface AdminNavProps {
@@ -112,6 +113,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       badge: null
     },
     {
+      name: 'QuickBooks',
+      href: '/admin/quickbooks',
+      icon: Receipt,
+      badge: null
+    },
+    {
       name: 'Support',
       href: '/admin/dashboard?tab=support',
       icon: Wrench,
@@ -182,7 +189,10 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                 <span className="text-white font-bold text-base sm:text-lg">$</span>
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-sm sm:text-base font-bold text-gray-900 leading-tight">SAR Admin</h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-sm sm:text-base font-bold text-gray-900 leading-tight">SAR Admin</h1>
+                  <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-bold rounded">v2.1.0</span>
+                </div>
                 <p className="text-[9px] sm:text-[10px] text-gray-500 hidden xl:block">Solution Argent Rapide</p>
               </div>
             </button>
