@@ -60,7 +60,7 @@ function buildAuthUrl(
 
   const params = new URLSearchParams({
     client_id: clientId,
-    scope: 'com.intuit.quickbooks.accounting openid profile email',
+    scope: 'com.intuit.quickbooks.accounting',
     redirect_uri: redirectUri,
     response_type: 'code',
     state: state
