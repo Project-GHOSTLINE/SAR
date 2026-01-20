@@ -3,22 +3,25 @@ import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 /**
  * QuickBooks OAuth 2.0 Callback
  * Exchanges authorization code for access token
  */
 export async function GET(request: NextRequest) {
   try {
+    // Create Supabase client at runtime
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
     const searchParams = request.nextUrl.searchParams
     const code = searchParams.get('code')
     const state = searchParams.get('state')
     const realmId = searchParams.get('realmId')
     const error = searchParams.get('error')
+
+    console.log('QuickBooks callback received:', { code: !!code, state: !!state, realmId, error })
 
     // Check for OAuth errors
     if (error) {
@@ -30,6 +33,8 @@ export async function GET(request: NextRequest) {
 
     // Verify state parameter
     const storedState = request.cookies.get('qb_oauth_state')?.value
+    console.log('State verification:', { received: state, stored: storedState })
+
     if (!state || state !== storedState) {
       console.error('Invalid OAuth state')
       return NextResponse.redirect(
@@ -38,25 +43,31 @@ export async function GET(request: NextRequest) {
     }
 
     if (!code || !realmId) {
+      console.error('Missing code or realmId')
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_APP_URL}/admin/quickbooks?error=missing_params`
       )
     }
 
     // Exchange code for tokens
+    console.log('Exchanging code for tokens...')
     const tokens = await exchangeCodeForTokens(code, realmId)
 
     if (!tokens) {
+      console.error('Token exchange failed')
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_APP_URL}/admin/quickbooks?error=token_exchange_failed`
       )
     }
 
+    console.log('Tokens received, fetching company info...')
     // Get company info from QuickBooks
     const companyInfo = await getCompanyInfo(tokens.access_token, realmId)
+    console.log('Company info:', companyInfo?.CompanyName)
 
     // Store tokens in database
-    await supabase
+    console.log('Storing tokens in database...')
+    const { error: dbError } = await supabase
       .from('quickbooks_tokens')
       .upsert({
         realm_id: realmId,
@@ -71,6 +82,13 @@ export async function GET(request: NextRequest) {
         onConflict: 'realm_id'
       })
 
+    if (dbError) {
+      console.error('Database error:', dbError)
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_APP_URL}/admin/quickbooks?error=db_error`
+      )
+    }
+
     console.log('✅ QuickBooks connected successfully:', realmId)
 
     // Redirect to QuickBooks admin page
@@ -84,7 +102,7 @@ export async function GET(request: NextRequest) {
     return response
 
   } catch (error: any) {
-    console.error('Error in QuickBooks callback:', error)
+    console.error('Error in QuickBooks callback:', error.message, error.stack)
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_APP_URL}/admin/quickbooks?error=callback_failed`
     )
