@@ -143,8 +143,24 @@ export default function QuickBooksPage() {
   ])
 
   const [activeCategory, setActiveCategory] = useState<string>('all')
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   useEffect(() => {
+    // Check for OAuth callback params
+    const params = new URLSearchParams(window.location.search)
+    const success = params.get('success')
+    const error = params.get('error')
+
+    if (success === 'connected') {
+      setMessage({ type: 'success', text: 'QuickBooks connecté avec succès!' })
+      // Clear URL params
+      window.history.replaceState({}, '', '/admin/quickbooks')
+    } else if (error) {
+      setMessage({ type: 'error', text: `Erreur: ${error.replace(/_/g, ' ')}` })
+      // Clear URL params
+      window.history.replaceState({}, '', '/admin/quickbooks')
+    }
+
     checkConnection()
   }, [])
 
@@ -282,6 +298,30 @@ export default function QuickBooksPage() {
             </button>
           </div>
         </div>
+
+        {/* Success/Error Message */}
+        {message && (
+          <div className={`mb-6 p-4 rounded-lg border ${
+            message.type === 'success'
+              ? 'bg-green-50 border-green-200 text-green-800'
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}>
+            <div className="flex items-center gap-3">
+              {message.type === 'success' ? (
+                <CheckCircle className="w-5 h-5" />
+              ) : (
+                <AlertCircle className="w-5 h-5" />
+              )}
+              <p className="font-medium">{message.text}</p>
+              <button
+                onClick={() => setMessage(null)}
+                className="ml-auto text-sm underline hover:no-underline"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Connection Status Card */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
