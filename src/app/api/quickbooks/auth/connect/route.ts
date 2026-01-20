@@ -25,8 +25,10 @@ export async function GET(request: NextRequest) {
     // Build auth URL
     const authUrl = buildAuthUrl(clientId, redirectUri, state, environment)
 
-    // Redirect to QuickBooks with state cookie
-    const response = NextResponse.redirect(authUrl)
+    // Return JSON with authUrl for frontend to redirect
+    const response = NextResponse.json({
+      authUrl
+    })
 
     response.cookies.set('qb_oauth_state', state, {
       httpOnly: true,
