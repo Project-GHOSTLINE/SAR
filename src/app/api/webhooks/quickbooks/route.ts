@@ -35,16 +35,23 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('intuit-signature')
     const body = await request.text()
 
+    // Signature is required for security
+    if (!signature) {
+      console.error('Missing webhook signature')
+      return NextResponse.json(
+        { error: 'Missing signature' },
+        { status: 401 }
+      )
+    }
+
     // Verify webhook signature
-    if (signature) {
-      const webhookToken = process.env.INTUIT_WEBHOOK_TOKEN || ''
-      if (!verifyWebhookSignature(body, signature, webhookToken)) {
-        console.error('Invalid webhook signature')
-        return NextResponse.json(
-          { error: 'Invalid signature' },
-          { status: 401 }
-        )
-      }
+    const webhookToken = process.env.INTUIT_WEBHOOK_TOKEN || ''
+    if (!verifyWebhookSignature(body, signature, webhookToken)) {
+      console.error('Invalid webhook signature')
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      )
     }
 
     const payload = JSON.parse(body)

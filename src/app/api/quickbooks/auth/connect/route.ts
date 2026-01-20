@@ -22,10 +22,11 @@ export async function GET(request: NextRequest) {
     // Generate random state for CSRF protection
     const state = crypto.randomUUID()
 
-    // Store state in cookie for verification
-    const response = NextResponse.json({
-      authUrl: buildAuthUrl(clientId, redirectUri, state, environment)
-    })
+    // Build auth URL
+    const authUrl = buildAuthUrl(clientId, redirectUri, state, environment)
+
+    // Redirect to QuickBooks with state cookie
+    const response = NextResponse.redirect(authUrl)
 
     response.cookies.set('qb_oauth_state', state, {
       httpOnly: true,
