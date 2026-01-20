@@ -11,7 +11,9 @@ export async function POST(request: NextRequest) {
 
     console.log('Starting full QuickBooks sync...')
 
-    const results = {
+    const results: {
+      [key: string]: { success: boolean; count: number; error: string | null }
+    } = {
       customers: { success: false, count: 0, error: null },
       invoices: { success: false, count: 0, error: null },
       payments: { success: false, count: 0, error: null },
