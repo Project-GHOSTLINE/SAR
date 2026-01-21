@@ -97,6 +97,7 @@ export class QuickBooksConnectionManager {
    */
   async getConnectionStatus(): Promise<ConnectionStatus> {
     try {
+      console.log('[QB] getConnectionStatus: Querying Supabase...');
       const { data: tokens, error } = await supabase
         .from('quickbooks_tokens')
         .select('*')
@@ -104,7 +105,10 @@ export class QuickBooksConnectionManager {
         .limit(1)
         .single();
 
+      console.log('[QB] Query result:', { hasTokens: !!tokens, hasError: !!error, errorMessage: error?.message });
+
       if (error || !tokens) {
+        console.log('[QB] NO TOKENS - returning connected: false');
         return {
           connected: false,
           realmId: null,
@@ -116,6 +120,8 @@ export class QuickBooksConnectionManager {
           error: error?.message || null
         };
       }
+
+      console.log('[QB] TOKENS FOUND - realm:', tokens.realm_id);
 
       const expiresAt = new Date(tokens.expires_at);
       const now = new Date();
