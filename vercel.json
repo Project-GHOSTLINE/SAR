@@ -4,6 +4,12 @@
       "main": true
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/seo-collect",
+      "schedule": "0 6 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/performance-diagnostic.html",
