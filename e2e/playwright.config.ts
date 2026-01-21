@@ -76,6 +76,13 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
 
+    // GA4 Validation: No setup dependency (handles its own auth)
+    {
+      name: 'ga4-validation',
+      testMatch: /.*ga4.*validation\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+
     // Main tests: Chrome
     {
       name: 'chromium',

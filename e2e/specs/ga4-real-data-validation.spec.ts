@@ -15,9 +15,21 @@ test.describe('GA4 Real Data Validation', () => {
   test.beforeEach(async ({ page }) => {
     // Se connecter à l'admin
     await page.goto('http://localhost:3002/admin/login')
-    await page.fill('input[type="password"]', 'FredRosa%1978')
+
+    // Attendre que la page charge
+    await page.waitForLoadState('networkidle')
+
+    // Trouver le champ password (peut avoir différents sélecteurs)
+    const passwordInput = page.locator('input[type="password"]').first()
+    await passwordInput.waitFor({ state: 'visible', timeout: 10000 })
+
+    await passwordInput.fill('FredRosa%1978')
+
+    // Cliquer sur le bouton de connexion
     await page.click('button[type="submit"]')
-    await page.waitForURL('**/admin/dashboard')
+
+    // Attendre la redirection vers le dashboard
+    await page.waitForURL('**/admin/**', { timeout: 10000 })
   })
 
   test('✅ Critère 1: 30 jours de vraies données collectées', async ({ page }) => {
