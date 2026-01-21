@@ -12,19 +12,19 @@ interface SEOMetrics {
     records: number
     summary: any
     latest: any
-    trend: string
+    trend: 'up' | 'down' | 'stable'
   }
   gsc?: {
     records: number
     summary: any
     latest: any
-    trend: string
+    trend: 'up' | 'down' | 'stable'
   }
   semrush?: {
     records: number
     summary: any
     latest: any
-    trend: string
+    trend: 'up' | 'down' | 'stable'
   }
   keywords?: {
     total: number
