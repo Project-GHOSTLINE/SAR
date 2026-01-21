@@ -1,0 +1,206 @@
+name: API Tests (Newman)
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to test'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+        default: 'dev'
+
+jobs:
+  api-tests:
+    name: Run API Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        environment: [dev, staging]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install -g newman newman-reporter-htmlextra
+
+      - name: Create reports directory
+        run: mkdir -p postman/reports
+
+      - name: Prepare environment file
+        env:
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        run: |
+          # For dev environment, use localhost (assuming app runs in CI)
+          if [ "${{ matrix.environment }}" == "dev" ]; then
+            echo '{
+              "id": "sar-env-dev-ci",
+              "name": "SAR - Development CI",
+              "values": [
+                {"key": "BASE_URL", "value": "http://localhost:4000", "enabled": true},
+                {"key": "ADMIN_PASSWORD", "value": "'"$ADMIN_PASSWORD"'", "enabled": true},
+                {"key": "QB_CONNECTED", "value": "false", "enabled": true},
+                {"key": "ENVIRONMENT", "value": "development", "enabled": true}
+              ]
+            }' > postman/environments/dev-ci.json
+          fi
+
+      - name: Start application (dev only)
+        if: matrix.environment == 'dev'
+        run: |
+          npm run build
+          npm run start &
+          sleep 10
+          curl --retry 5 --retry-delay 2 --retry-connrefused http://localhost:4000 || exit 1
+
+      - name: Run Newman API tests
+        run: |
+          if [ "${{ matrix.environment }}" == "dev" ]; then
+            ENV_FILE="postman/environments/dev-ci.json"
+          else
+            ENV_FILE="postman/environments/${{ matrix.environment }}.json"
+          fi
+
+          newman run postman/collections/SAR-API-Tests.postman_collection.json \
+            --environment "$ENV_FILE" \
+            --reporters cli,json,htmlextra \
+            --reporter-json-export "postman/reports/${{ matrix.environment }}_ci.json" \
+            --reporter-htmlextra-export "postman/reports/${{ matrix.environment }}_ci.html" \
+            --reporter-htmlextra-title "SAR API Tests - ${{ matrix.environment }} (CI)" \
+            --reporter-htmlextra-showEnvironmentData \
+            --color on \
+            --timeout-request 30000
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-reports-${{ matrix.environment }}
+          path: postman/reports/
+          retention-days: 30
+
+      - name: Upload JSON results for summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-results-${{ matrix.environment }}
+          path: postman/reports/${{ matrix.environment }}_ci.json
+          retention-days: 7
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = `postman/reports/${{ matrix.environment }}_ci.json`;
+
+            if (fs.existsSync(reportPath)) {
+              const results = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              const run = results.run;
+
+              const totalTests = run.stats.tests.total;
+              const passedTests = run.stats.tests.passed;
+              const failedTests = run.stats.tests.failed;
+              const skippedTests = run.stats.tests.skipped || 0;
+
+              const successRate = ((passedTests / totalTests) * 100).toFixed(1);
+              const emoji = failedTests === 0 ? '✅' : '⚠️';
+
+              const comment = `## ${emoji} API Tests Results - ${{ matrix.environment }}
+
+              | Metric | Value |
+              |--------|-------|
+              | **Total Tests** | ${totalTests} |
+              | **Passed** | ${passedTests} ✅ |
+              | **Failed** | ${failedTests} ${failedTests > 0 ? '❌' : ''} |
+              | **Skipped** | ${skippedTests} ⏭️ |
+              | **Success Rate** | ${successRate}% |
+              | **Duration** | ${(run.timings.completed - run.timings.started) / 1000}s |
+
+              [View detailed HTML report in artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              `;
+
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+
+  # Production tests (manual trigger only)
+  api-tests-prod:
+    name: Run API Tests (Production)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install -g newman newman-reporter-htmlextra
+
+      - name: Create reports directory
+        run: mkdir -p postman/reports
+
+      - name: Prepare production environment
+        env:
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD_PROD }}
+        run: |
+          echo '{
+            "id": "sar-env-prod-ci",
+            "name": "SAR - Production CI",
+            "values": [
+              {"key": "BASE_URL", "value": "https://admin.solutionargentrapide.ca", "enabled": true},
+              {"key": "ADMIN_PASSWORD", "value": "'"$ADMIN_PASSWORD"'", "enabled": true},
+              {"key": "QB_CONNECTED", "value": "false", "enabled": true},
+              {"key": "ENVIRONMENT", "value": "production", "enabled": true}
+            ]
+          }' > postman/environments/prod-ci.json
+
+      - name: Run Newman API tests (Production)
+        run: |
+          newman run postman/collections/SAR-API-Tests.postman_collection.json \
+            --environment "postman/environments/prod-ci.json" \
+            --reporters cli,json,htmlextra \
+            --reporter-json-export "postman/reports/prod_ci.json" \
+            --reporter-htmlextra-export "postman/reports/prod_ci.html" \
+            --reporter-htmlextra-title "SAR API Tests - Production (CI)" \
+            --reporter-htmlextra-showEnvironmentData \
+            --color on \
+            --timeout-request 30000
+
+      - name: Upload production test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-reports-production
+          path: postman/reports/
+          retention-days: 90

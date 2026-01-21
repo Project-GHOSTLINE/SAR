@@ -25,11 +25,12 @@ function getSupabaseClient() {
 /**
  * GET /api/seo/metrics
  *
- * Récupère un résumé complet des métriques SEO
+ * Récupère un résumé complet des métriques SEO avec détails multi-périodes
  *
  * Query params:
  * - period: '7d' | '30d' | '90d' (défaut: 30d)
  * - source: 'ga4' | 'gsc' | 'semrush' | 'all' (défaut: all)
+ * - detailed: 'true' | 'false' (défaut: true) - Retourne les données détaillées par période
  */
 export async function GET(request: NextRequest) {
   try {
@@ -43,66 +44,131 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const period = searchParams.get('period') || '30d'
     const source = searchParams.get('source') || 'all'
-
-    const daysAgo = period === '7d' ? 7 : period === '90d' ? 90 : 30
-    const startDate = getDaysAgo(daysAgo)
-    const endDate = getDaysAgo(1) // Hier
+    const detailed = searchParams.get('detailed') !== 'false'
 
     const supabase = getSupabaseClient()
     const response: any = {
       success: true,
-      period: `${daysAgo}d`,
-      dateRange: { startDate, endDate }
+      period
     }
 
     // Google Analytics 4
     if (source === 'all' || source === 'ga4') {
-      const { data: ga4Data } = await supabase
-        .from('seo_ga4_metrics_daily')
-        .select('*')
-        .gte('date', startDate)
-        .lte('date', endDate)
-        .order('date', { ascending: false })
+      const ga4Periods = await fetchMultiPeriodData(
+        supabase,
+        'seo_ga4_metrics_daily',
+        detailed
+      )
 
       response.ga4 = {
-        records: ga4Data?.length || 0,
-        summary: calculateGA4Summary(ga4Data || []),
-        latest: ga4Data?.[0] || null,
-        trend: calculateTrend(ga4Data || [], 'users')
+        today: {
+          data: ga4Periods.today[0] || null,
+          summary: calculateGA4Summary(ga4Periods.today),
+          description: 'Données Google Analytics 4 pour aujourd\'hui'
+        },
+        yesterday: {
+          data: ga4Periods.yesterday[0] || null,
+          summary: calculateGA4Summary(ga4Periods.yesterday),
+          description: 'Données Google Analytics 4 pour hier'
+        },
+        last_week: {
+          records: ga4Periods.last_week.length,
+          summary: calculateGA4Summary(ga4Periods.last_week),
+          trend: calculateTrend(ga4Periods.last_week, 'users'),
+          description: 'Données agrégées des 7 derniers jours'
+        },
+        last_month: {
+          records: ga4Periods.last_month.length,
+          summary: calculateGA4Summary(ga4Periods.last_month),
+          trend: calculateTrend(ga4Periods.last_month, 'users'),
+          description: 'Données agrégées des 30 derniers jours'
+        },
+        last_year: {
+          records: ga4Periods.last_year.length,
+          summary: calculateGA4Summary(ga4Periods.last_year),
+          trend: calculateTrend(ga4Periods.last_year, 'users'),
+          description: 'Données agrégées des 365 derniers jours'
+        }
       }
     }
 
     // Google Search Console
     if (source === 'all' || source === 'gsc') {
-      const { data: gscData } = await supabase
-        .from('seo_gsc_metrics_daily')
-        .select('*')
-        .gte('date', startDate)
-        .lte('date', endDate)
-        .order('date', { ascending: false })
+      const gscPeriods = await fetchMultiPeriodData(
+        supabase,
+        'seo_gsc_metrics_daily',
+        detailed
+      )
 
       response.gsc = {
-        records: gscData?.length || 0,
-        summary: calculateGSCSummary(gscData || []),
-        latest: gscData?.[0] || null,
-        trend: calculateTrend(gscData || [], 'clicks')
+        today: {
+          data: gscPeriods.today[0] || null,
+          summary: calculateGSCSummary(gscPeriods.today),
+          description: 'Données Google Search Console pour aujourd\'hui'
+        },
+        yesterday: {
+          data: gscPeriods.yesterday[0] || null,
+          summary: calculateGSCSummary(gscPeriods.yesterday),
+          description: 'Données Google Search Console pour hier'
+        },
+        last_week: {
+          records: gscPeriods.last_week.length,
+          summary: calculateGSCSummary(gscPeriods.last_week),
+          trend: calculateTrend(gscPeriods.last_week, 'clicks'),
+          description: 'Données agrégées des 7 derniers jours'
+        },
+        last_month: {
+          records: gscPeriods.last_month.length,
+          summary: calculateGSCSummary(gscPeriods.last_month),
+          trend: calculateTrend(gscPeriods.last_month, 'clicks'),
+          description: 'Données agrégées des 30 derniers jours'
+        },
+        last_year: {
+          records: gscPeriods.last_year.length,
+          summary: calculateGSCSummary(gscPeriods.last_year),
+          trend: calculateTrend(gscPeriods.last_year, 'clicks'),
+          description: 'Données agrégées des 365 derniers jours'
+        }
       }
     }
 
     // Semrush
     if (source === 'all' || source === 'semrush') {
-      const { data: semrushData } = await supabase
-        .from('seo_semrush_domain_daily')
-        .select('*')
-        .gte('date', startDate)
-        .lte('date', endDate)
-        .order('date', { ascending: false })
+      const semrushPeriods = await fetchMultiPeriodData(
+        supabase,
+        'seo_semrush_domain_daily',
+        detailed
+      )
 
       response.semrush = {
-        records: semrushData?.length || 0,
-        summary: calculateSemrushSummary(semrushData || []),
-        latest: semrushData?.[0] || null,
-        trend: calculateTrend(semrushData || [], 'organic_keywords')
+        today: {
+          data: semrushPeriods.today[0] || null,
+          summary: calculateSemrushSummary(semrushPeriods.today),
+          description: 'Données Semrush pour aujourd\'hui'
+        },
+        yesterday: {
+          data: semrushPeriods.yesterday[0] || null,
+          summary: calculateSemrushSummary(semrushPeriods.yesterday),
+          description: 'Données Semrush pour hier'
+        },
+        last_week: {
+          records: semrushPeriods.last_week.length,
+          summary: calculateSemrushSummary(semrushPeriods.last_week),
+          trend: calculateTrend(semrushPeriods.last_week, 'organic_keywords'),
+          description: 'Données agrégées des 7 derniers jours'
+        },
+        last_month: {
+          records: semrushPeriods.last_month.length,
+          summary: calculateSemrushSummary(semrushPeriods.last_month),
+          trend: calculateTrend(semrushPeriods.last_month, 'organic_keywords'),
+          description: 'Données agrégées des 30 derniers jours'
+        },
+        last_year: {
+          records: semrushPeriods.last_year.length,
+          summary: calculateSemrushSummary(semrushPeriods.last_year),
+          trend: calculateTrend(semrushPeriods.last_year, 'organic_keywords'),
+          description: 'Données agrégées des 365 derniers jours'
+        }
       }
     }
 
@@ -121,7 +187,12 @@ export async function GET(request: NextRequest) {
         top10: keywords?.filter(k => k.current_position && k.current_position <= 10).length || 0,
         improved: keywords?.filter(k => k.position_change && k.position_change > 0).length || 0,
         declined: keywords?.filter(k => k.position_change && k.position_change < 0).length || 0,
-        topKeywords: keywords?.slice(0, 10) || []
+        topKeywords: keywords?.slice(0, 10) || [],
+        description: `Suivi de ${keywords?.length || 0} mots-clés stratégiques sur ${(keywords && keywords.length > 0) ? Math.max(...keywords.map(k => {
+          const lastCheck = new Date(k.last_checked_at || k.updated_at)
+          const now = new Date()
+          return Math.floor((now.getTime() - lastCheck.getTime()) / (1000 * 60 * 60 * 24))
+        })) : 0} jours`
       }
     }
 
@@ -156,6 +227,71 @@ export async function GET(request: NextRequest) {
       },
       { status: 500 }
     )
+  }
+}
+
+// ============================================
+// FONCTIONS UTILITAIRES
+// ============================================
+
+async function fetchMultiPeriodData(supabase: any, tableName: string, detailed: boolean) {
+  const today = new Date().toISOString().split('T')[0]
+  const yesterday = getDaysAgo(1)
+  const weekAgo = getDaysAgo(7)
+  const monthAgo = getDaysAgo(30)
+  const yearAgo = getDaysAgo(365)
+
+  const [todayData, yesterdayData, weekData, monthData, yearData] = await Promise.all([
+    // Today
+    supabase
+      .from(tableName)
+      .select('*')
+      .eq('date', today)
+      .order('date', { ascending: false })
+      .then((r: any) => r.data || []),
+
+    // Yesterday
+    supabase
+      .from(tableName)
+      .select('*')
+      .eq('date', yesterday)
+      .order('date', { ascending: false })
+      .then((r: any) => r.data || []),
+
+    // Last 7 days
+    supabase
+      .from(tableName)
+      .select('*')
+      .gte('date', weekAgo)
+      .lte('date', yesterday)
+      .order('date', { ascending: false })
+      .then((r: any) => r.data || []),
+
+    // Last 30 days
+    supabase
+      .from(tableName)
+      .select('*')
+      .gte('date', monthAgo)
+      .lte('date', yesterday)
+      .order('date', { ascending: false })
+      .then((r: any) => r.data || []),
+
+    // Last 365 days
+    supabase
+      .from(tableName)
+      .select('*')
+      .gte('date', yearAgo)
+      .lte('date', yesterday)
+      .order('date', { ascending: false })
+      .then((r: any) => r.data || [])
+  ])
+
+  return {
+    today: todayData,
+    yesterday: yesterdayData,
+    last_week: weekData,
+    last_month: monthData,
+    last_year: yearData
   }
 }
 

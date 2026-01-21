@@ -1,0 +1,25 @@
+{
+  "name": "sar-e2e-tests",
+  "version": "1.0.0",
+  "description": "E2E tests for SAR admin dashboard",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:quickbooks": "playwright test --grep @quickbooks",
+    "report": "playwright show-report ../test-artifacts/playwright-report",
+    "trace": "playwright show-trace"
+  },
+  "keywords": [],
+  "author": "SAR Team",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.5"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  }
+}

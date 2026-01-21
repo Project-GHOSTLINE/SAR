@@ -14,7 +14,17 @@
     "test:routes": "node scripts/verify-all-routes.js",
     "test:view": "open public/route-test-report.html",
     "recon": "node scripts/deep-recon.js",
-    "recon:view": "open public/deep-recon-viewer.html"
+    "recon:view": "open public/deep-recon-viewer.html",
+    "api:test": "bash postman/run.sh dev",
+    "api:test:dev": "bash postman/run.sh dev",
+    "api:test:staging": "bash postman/run.sh staging",
+    "api:test:prod": "bash postman/run.sh prod",
+    "api:test:quick": "newman run postman/collections/SAR-API-Tests.postman_collection.json -e postman/environments/dev.json",
+    "api:report": "open postman/reports/latest.html",
+    "analyze:site": "cd e2e && npx playwright test site-analyzer --project=chromium",
+    "analyze:report": "open test-artifacts/site-analysis/report.html",
+    "analyze:quickbooks": "cd e2e && npx playwright test admin-quickbooks-analyzer --project=chromium",
+    "analyze:quickbooks-report": "open test-artifacts/quickbooks-analysis/quickbooks-analysis.html"
   },
   "dependencies": {
     "@google-analytics/data": "^5.2.1",
@@ -41,6 +51,8 @@
     "@types/react-dom": "^19.2.3",
     "@types/web-push": "^3.6.4",
     "autoprefixer": "^10.4.23",
+    "newman": "^6.2.2",
+    "newman-reporter-htmlextra": "^1.23.1",
     "pg": "^8.16.3",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.0",

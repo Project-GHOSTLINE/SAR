@@ -119,4 +119,75 @@ Si un rapport montre:
 
 ---
 
-**Dernière mise à jour**: 2026-01-14
+## 🧪 E2E Testing Scripts
+
+Ce dossier contient également les scripts de tests E2E automatisés.
+
+### Scripts disponibles
+
+#### `reset_env.sh`
+Nettoie tous les artifacts de test (rapports, traces, screenshots, logs).
+
+```bash
+./tools/reset_env.sh
+# Ou via Makefile
+make reset
+```
+
+#### `run_e2e.sh`
+Lance la suite complète de tests E2E avec Playwright.
+
+```bash
+./tools/run_e2e.sh
+# Ou via Makefile
+make e2e
+```
+
+**Prérequis**:
+- App doit tourner sur http://localhost:3000
+- Dépendances installées: `cd e2e && npm ci`
+
+#### `run_smoke.sh`
+Lance uniquement les tests smoke (critiques, rapides).
+
+```bash
+./tools/run_smoke.sh
+# Ou via Makefile
+make smoke
+```
+
+Tests exécutés: Environ 4-5 tests critiques en ~1-2 minutes.
+
+#### `collect_artifacts.sh`
+Package tous les artifacts de test dans un tarball horodaté.
+
+```bash
+./tools/collect_artifacts.sh
+# Ou via Makefile
+make collect
+```
+
+Crée: `test-artifacts-YYYYMMDD_HHMMSS.tar.gz`
+
+### Variables d'environnement
+
+Les scripts utilisent `.env.test` à la racine:
+- `BASE_URL`: URL de l'app à tester (localhost ou staging)
+- `ADMIN_PASSWORD`: Password admin pour auth
+- `INTUIT_*`: Credentials QuickBooks sandbox
+
+### Logs et artifacts
+
+Tous les résultats sont dans `test-artifacts/`:
+- `logs/*.log` - Logs texte des exécutions
+- `playwright-report/` - Rapport HTML interactif
+- `traces/` - Traces Playwright (debugging)
+- `screenshots/` - Screenshots des failures
+
+### Pour plus d'infos
+
+Voir `CLAUDE_TOOLS.md` et `E2E-TESTING-SETUP.md` à la racine.
+
+---
+
+**Dernière mise à jour**: 2026-01-21

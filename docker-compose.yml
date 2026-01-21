@@ -1,0 +1,46 @@
+# SAR - E2E Testing Stack
+# n8n (orchestration) + Playwright Runner (isolated)
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: sar-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=America/Montreal
+      - N8N_LOG_LEVEL=info
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/backup:ro
+    restart: unless-stopped
+    networks:
+      - sar-test
+
+  playwright-runner:
+    image: mcr.microsoft.com/playwright:v1.49.0-jammy
+    container_name: sar-playwright-runner
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+      - /workspace/node_modules
+    environment:
+      - NODE_ENV=test
+      - CI=true
+    entrypoint: ["bash", "-lc", "echo 'Playwright runner ready for execution' && tail -f /dev/null"]
+    networks:
+      - sar-test
+
+volumes:
+  n8n_data:
+    driver: local
+
+networks:
+  sar-test:
+    driver: bridge

@@ -5,6 +5,12 @@ node_modules
 
 # Testing
 coverage
+test-artifacts/
+e2e/storage/*.json
+playwright-report/
+test-results/
+*.trace.zip
+postman/reports/
 
 # Next.js
 .next/
@@ -40,6 +46,7 @@ next-env.d.ts
 .env*.local
 .env.production
 .env.vercel-prod
+.env.test
 temp/
 
 # Generated reports with sensitive data
@@ -48,3 +55,6 @@ public/deep-recon-report.json
 .env.local.backup
 .env.local.test
 .env*.bak*
+
+# Docker volumes
+n8n_data/
