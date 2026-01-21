@@ -15,7 +15,10 @@ export default function AdminLoginPage() {
     setLoading(true)
     setError('')
 
+    console.log('[Admin Login] Starting login process...')
+
     try {
+      console.log('[Admin Login] Fetching /api/admin/login...')
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -23,13 +26,16 @@ export default function AdminLoginPage() {
       })
 
       const data = await res.json()
+      console.log('[Admin Login] Response:', { ok: res.ok, data })
 
       if (!res.ok) {
         throw new Error(data.error || 'Erreur de connexion')
       }
 
+      console.log('[Admin Login] Login successful, redirecting to /admin/dashboard')
       router.push('/admin/dashboard')
     } catch (err) {
+      console.error('[Admin Login] Error:', err)
       setError(err instanceof Error ? err.message : 'Erreur')
     } finally {
       setLoading(false)
@@ -74,7 +80,7 @@ export default function AdminLoginPage() {
                 </div>
               </div>
 
-              <form onSubmit={handleLogin} className="space-y-6">
+              <form onSubmit={handleLogin} className="space-y-6" data-hydrated="true">
                 {error && (
                   <div className="bg-red-50 border-l-4 border-red-500 px-4 py-3">
                     <p className="text-red-700 text-sm">{error}</p>
@@ -94,6 +100,7 @@ export default function AdminLoginPage() {
                     className="w-full px-4 py-3 border border-gray-300 rounded text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00874e] focus:border-[#00874e] transition-all"
                     autoFocus
                     required
+                    data-testid="admin-password"
                   />
                 </div>
 
@@ -101,6 +108,7 @@ export default function AdminLoginPage() {
                   type="submit"
                   disabled={loading}
                   className="w-full py-3 bg-[#00874e] hover:bg-[#006d3f] text-white font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  data-testid="admin-submit"
                 >
                   {loading ? (
                     <>

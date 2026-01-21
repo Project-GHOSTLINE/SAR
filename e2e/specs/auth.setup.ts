@@ -13,7 +13,7 @@ setup('authenticate as admin', async ({ page }) => {
   console.log('🔐 Setting up admin authentication...');
 
   // Navigate to admin login
-  await page.goto('/admin');
+  await page.goto('/admin', { waitUntil: 'networkidle' });
 
   // Check if already logged in
   const isLoggedIn = await page.locator('text=Dashboard').isVisible({ timeout: 2000 })
@@ -25,8 +25,16 @@ setup('authenticate as admin', async ({ page }) => {
     return;
   }
 
+  // Wait for page to be fully loaded and hydrated
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('networkidle');
+
+  // Wait for form to be hydrated (increased timeout for dev mode)
+  await page.waitForSelector('form[data-hydrated="true"]', { timeout: 10000 });
+
   // Login form should be visible
-  await expect(page.locator('input[type="password"]')).toBeVisible({ timeout: 5000 });
+  const passwordInput = page.getByTestId('admin-password');
+  await expect(passwordInput).toBeVisible({ timeout: 5000 });
 
   // Fill password
   const password = process.env.ADMIN_PASSWORD;
@@ -34,10 +42,14 @@ setup('authenticate as admin', async ({ page }) => {
     throw new Error('ADMIN_PASSWORD not set in environment');
   }
 
-  await page.fill('input[type="password"]', password);
+  await passwordInput.fill(password);
 
-  // Submit login
-  await page.click('button[type="submit"]');
+  // Submit login and wait for API response
+  const submitButton = page.getByTestId('admin-submit');
+  await Promise.all([
+    page.waitForResponse(resp => resp.url().includes('/api/admin/login') && resp.status() === 200, { timeout: 10000 }),
+    submitButton.click()
+  ]);
 
   // Wait for redirect to dashboard
   await expect(page).toHaveURL(/\/admin\/dashboard/, { timeout: 10000 });
