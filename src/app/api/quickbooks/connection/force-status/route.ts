@@ -40,7 +40,8 @@ export async function GET(request: NextRequest) {
       console.log('[FORCE-STATUS] NO TOKENS - Generating OAuth URL...');
 
       const clientId = process.env.INTUIT_CLIENT_ID;
-      const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL}/api/quickbooks/auth/callback`;
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://admin.solutionargentrapide.ca';
+      const redirectUri = `${baseUrl}/api/quickbooks/auth/callback`;
       const state = `force-${Date.now()}`;
       const scope = 'com.intuit.quickbooks.accounting openid profile email';
 
