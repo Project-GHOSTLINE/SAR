@@ -6,7 +6,7 @@ import {
   LayoutDashboard, MessageSquare, DollarSign, FileText,
   Wrench, Webhook, BarChart3, LogOut, Menu, X,
   ChevronDown, User, Clock, Bell, Shield, Database, Download, Zap,
-  Receipt
+  Receipt, TrendingUp
 } from 'lucide-react'
 
 interface AdminNavProps {
@@ -146,6 +146,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       name: 'Performance',
       href: '/admin/performance',
       icon: Zap,
+      badge: null
+    },
+    {
+      name: 'SEO',
+      href: '/admin/seo',
+      icon: TrendingUp,
       badge: null
     }
   ]
