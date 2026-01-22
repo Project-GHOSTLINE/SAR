@@ -203,7 +203,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
               <div className="hidden sm:block">
                 <div className="flex items-center gap-2">
                   <h1 className="text-sm sm:text-base font-bold text-gray-900 leading-tight">SAR Admin</h1>
-                  <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-bold rounded">v2.1.0</span>
+                  <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-bold rounded">v2.0.0</span>
                 </div>
                 <p className="text-[9px] sm:text-[10px] text-gray-500 hidden xl:block">Solution Argent Rapide</p>
               </div>
