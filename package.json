@@ -24,7 +24,10 @@
     "analyze:site": "cd e2e && npx playwright test site-analyzer --project=chromium",
     "analyze:report": "open test-artifacts/site-analysis/report.html",
     "analyze:quickbooks": "cd e2e && npx playwright test admin-quickbooks-analyzer --project=chromium",
-    "analyze:quickbooks-report": "open test-artifacts/quickbooks-analysis/quickbooks-analysis.html"
+    "analyze:quickbooks-report": "open test-artifacts/quickbooks-analysis/quickbooks-analysis.html",
+    "webhook:configure": "npx tsx scripts/configure-vopay-webhooks.ts",
+    "webhook:test": "npx tsx scripts/test-vopay-webhooks.ts local",
+    "webhook:test:prod": "npx tsx scripts/test-vopay-webhooks.ts prod"
   },
   "dependencies": {
     "@google-analytics/data": "^5.2.1",

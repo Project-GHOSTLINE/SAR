@@ -1335,7 +1335,7 @@ function AnalysePageContent() {
                           </div>
                         )}
 
-                        {daysDetected && (
+                        {daysDetected && typeof daysDetected === 'number' && (
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center shrink-0">
                               <Calendar size={14} className="text-gray-600" />
@@ -1415,20 +1415,8 @@ function AnalysePageContent() {
                   // Si tout est vide, afficher le texte brut de manière plus lisible
                   const hasValidData = employerInfo !== 'N/A' || employerIncome !== 'N/A' || nonEmployerIncome !== 'N/A' || governmentIncome !== 'N/A'
 
-                  if (!hasValidData && daysDetectedText) {
-                    return (
-                      <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
-                        <h3 className="text-xs font-semibold text-purple-700 uppercase tracking-wide flex items-center gap-2 mb-3">
-                          <TrendingUp size={12} />
-                          Analyse de revenus (Flinks)
-                        </h3>
-                        <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                          <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-mono">
-                            {daysDetectedText}
-                          </p>
-                        </div>
-                      </div>
-                    )
+                  if (!hasValidData) {
+                    return null
                   }
 
                   return (
