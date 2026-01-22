@@ -6,12 +6,16 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Dynamic from 'next/dynamic'
 import AdminNav from '@/components/admin/AdminNav'
+import ScoreDisplay from '@/components/admin/ScoreDisplay'
+import RecommendationCard from '@/components/admin/RecommendationCard'
+import MetricsPanel from '@/components/admin/MetricsPanel'
 import {
   ArrowLeft, Building, DollarSign, TrendingUp, CreditCard,
   Calendar, User, Mail, Phone, MapPin, RefreshCw, Loader2,
   Search, Filter, ChevronLeft, ChevronRight, FileText, Download, BarChart3,
   Tag, Flag, Menu, X, Briefcase, Wallet, Landmark, Check
 } from 'lucide-react'
+import type { AnalysisScore, AnalysisRecommendation, AnalysisJob } from '@/types/analysis'
 
 interface ClientAnalysis {
   id: string
@@ -29,6 +33,11 @@ interface ClientAnalysis {
   total_transactions: number
   status: string
   created_at: string
+  // Nouveaux champs pour analyse automatique
+  scores?: AnalysisScore | null
+  recommendation?: AnalysisRecommendation | null
+  job?: AnalysisJob | null
+  analyzed_at?: string | null
 }
 
 function AnalysePageContent() {
@@ -52,6 +61,10 @@ function AnalysePageContent() {
   const [showDebugModal, setShowDebugModal] = useState(false)
   const [debugCopied, setDebugCopied] = useState(false)
   const transactionsPerPage = 2500
+
+  // États pour l'analyse automatique
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null)
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -225,6 +238,64 @@ function AnalysePageContent() {
   useEffect(() => {
     fetchAnalysis()
   }, [fetchAnalysis])
+
+  // Polling pour vérifier la complétion de l'analyse automatique
+  useEffect(() => {
+    // Vérifier si l'analyse a un job en cours
+    const hasActiveJob = analysis?.job &&
+      (analysis.job.status === 'pending' || analysis.job.status === 'processing')
+
+    if (hasActiveJob && !pollingInterval) {
+      setIsAnalyzing(true)
+
+      // Démarrer le polling toutes les 3 secondes
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/admin/client-analysis?id=${analysisId}`, {
+            credentials: 'include'
+          })
+
+          if (res.ok) {
+            const data = await res.json()
+            const updatedAnalysis = data.data
+
+            // Mettre à jour l'analyse
+            setAnalysis(prev => ({
+              ...prev!,
+              ...updatedAnalysis
+            }))
+
+            // Si le job est complété, arrêter le polling
+            if (updatedAnalysis.job?.status === 'completed' ||
+                updatedAnalysis.job?.status === 'failed' ||
+                updatedAnalysis.scores) {
+              setIsAnalyzing(false)
+              if (pollingInterval) {
+                clearInterval(pollingInterval)
+                setPollingInterval(null)
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Erreur polling:', err)
+        }
+      }, 3000)
+
+      setPollingInterval(interval)
+    } else if (!hasActiveJob && pollingInterval) {
+      // Arrêter le polling si plus de job actif
+      clearInterval(pollingInterval)
+      setPollingInterval(null)
+      setIsAnalyzing(false)
+    }
+
+    // Cleanup
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval)
+      }
+    }
+  }, [analysis?.job, analysisId, pollingInterval])
 
   // Get debug data object
   const getDebugData = () => {
@@ -781,6 +852,40 @@ function AnalysePageContent() {
           </div>
 
           {/* Comptes Bancaires removed - now in sidebar as mini checks */}
+
+          {/* Section Analyse Automatique SAR */}
+          {isAnalyzing && (
+            <div className="bg-blue-50 rounded-lg shadow-sm border border-blue-200 p-4 mb-4">
+              <div className="flex items-center space-x-3">
+                <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+                <div>
+                  <h3 className="text-base font-semibold text-blue-900">Analyse automatique en cours...</h3>
+                  <p className="text-sm text-blue-700 mt-1">
+                    Calcul du SAR Score et génération de recommandation en cours. Cela peut prendre quelques secondes.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {analysis?.scores && (
+            <div className="space-y-4 mb-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* SAR Score Display */}
+                <div className="lg:col-span-1">
+                  <ScoreDisplay scores={analysis.scores} isLoading={isAnalyzing} />
+                </div>
+
+                {/* Recommendation Card */}
+                <div className="lg:col-span-2">
+                  <RecommendationCard recommendation={analysis.recommendation || null} isLoading={isAnalyzing} />
+                </div>
+              </div>
+
+              {/* Financial Metrics Panel */}
+              <MetricsPanel scores={analysis.scores} isLoading={isAnalyzing} />
+            </div>
+          )}
 
           {/* Analyse Mensuelle Section - MOVED FROM SIDEBAR */}
           {selectedAccount && selectedAccount.transactions && selectedAccount.transactions.length > 0 && (

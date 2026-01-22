@@ -179,7 +179,11 @@ export async function POST(request: NextRequest) {
       total_balance: totalBalance,
       total_transactions: totalTransactions,
       status: 'pending',
-      assigned_to: body.assigned_to || null
+      assigned_to: body.assigned_to || null,
+      // Nouvelles colonnes pour Inverite risk score et microloans
+      inverite_risk_score: body.inverite_risk_score || null,
+      risk_level: body.risk_level || null,
+      microloans_data: body.microloans_data || null
     }
 
     let data, error
@@ -197,6 +201,9 @@ export async function POST(request: NextRequest) {
           total_accounts: analysisData.total_accounts,
           total_balance: analysisData.total_balance,
           total_transactions: analysisData.total_transactions,
+          inverite_risk_score: analysisData.inverite_risk_score,
+          risk_level: analysisData.risk_level,
+          microloans_data: analysisData.microloans_data,
           updated_at: new Date().toISOString()
         })
         .eq('id', existingAnalysis.id)
@@ -235,6 +242,31 @@ export async function POST(request: NextRequest) {
       }
     } catch (processErr) {
       // Continuer quand même - les données sont dans raw_data
+    }
+
+    // Créer un job d'analyse automatique pour calculer SAR score et recommandation
+    try {
+      // Vérifier si un job existe déjà pour cette analyse
+      const { data: existingJob } = await supabase
+        .from('analysis_jobs')
+        .select('id, status')
+        .eq('analysis_id', data.id)
+        .in('status', ['pending', 'processing'])
+        .maybeSingle()
+
+      if (!existingJob) {
+        // Créer un nouveau job avec priorité haute pour analyses nouvelles/mises à jour
+        await supabase
+          .from('analysis_jobs')
+          .insert({
+            analysis_id: data.id,
+            status: 'pending',
+            priority: existingAnalysis ? 'normal' : 'high'
+          })
+      }
+    } catch (jobErr) {
+      // Ne pas bloquer si la création du job échoue - l'analyse est sauvegardée
+      console.error('Erreur création analysis_job:', jobErr)
     }
 
     return NextResponse.json(
@@ -303,11 +335,16 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    // Si ID fourni, retourner directement cette analyse
+    // Si ID fourni, retourner directement cette analyse avec ses scores et recommandation
     if (id) {
       const { data: singleData, error: singleError } = await supabase
         .from('client_analyses')
-        .select('*')
+        .select(`
+          *,
+          scores:analysis_scores(*),
+          recommendation:analysis_recommendations(*),
+          job:analysis_jobs(*)
+        `)
         .eq('id', id)
         .is('deleted_at', null)
         .single()
@@ -320,9 +357,28 @@ export async function GET(request: NextRequest) {
         )
       }
 
+      // Formater la réponse avec les données jointes
+      const formattedData = {
+        ...singleData,
+        // Prendre le dernier score si plusieurs existent
+        scores: Array.isArray(singleData.scores) && singleData.scores.length > 0
+          ? singleData.scores[singleData.scores.length - 1]
+          : null,
+        // Prendre la dernière recommandation si plusieurs existent
+        recommendation: Array.isArray(singleData.recommendation) && singleData.recommendation.length > 0
+          ? singleData.recommendation[singleData.recommendation.length - 1]
+          : null,
+        // Prendre le dernier job si plusieurs existent
+        job: Array.isArray(singleData.job) && singleData.job.length > 0
+          ? singleData.job.sort((a: any, b: any) =>
+              new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            )[0]
+          : null
+      }
+
       return NextResponse.json({
         success: true,
-        data: singleData
+        data: formattedData
       })
     }
 

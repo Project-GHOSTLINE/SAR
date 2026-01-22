@@ -35,13 +35,13 @@ export default function DownloadsPage() {
   const [loadingStats, setLoadingStats] = useState(true)
 
   const extensionInfo = {
-    name: 'IBV Crawler V2.15 - SAR PRODUCTION',
-    version: '2.1.5',
-    description: 'Support Flinks + Inverite → admin.solutionargentrapide.ca - Robust findValue() for Customer Info',
+    name: 'IBV Crawler V2.16 - SAR Analyse Automatique',
+    version: '2.16.0',
+    description: 'Extension avec analyse automatique SAR Score - Support Flinks + Inverite avec upload automatique et calcul de risque',
     id: 'icjjhbknppfpnfiooooajaggbmlbeagh',
-    downloadUrl: '/api/download/ibv-crawler-v2.15.zip',
-    fileName: 'ibv-crawler-v2.15.zip',
-    fileSize: '75 KB',
+    downloadUrl: '/api/download/ibv-crawler-v2.16.zip',
+    fileName: 'ibv-crawler-v2.16.zip',
+    fileSize: '52 KB',
     compatibility: 'Chrome, Edge, Brave (Chromium-based browsers)'
   }
 

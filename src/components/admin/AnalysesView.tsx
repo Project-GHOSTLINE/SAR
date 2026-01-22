@@ -569,7 +569,7 @@ export default function AnalysesView() {
                   </td>
                   <td className="px-6 py-4">
                     <button
-                      onClick={() => router.push(`/analyse?id=${analysis.id}`)}
+                      onClick={() => router.push(`/admin/analyse?id=${analysis.id}`)}
                       className="px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#059669] transition-colors text-sm font-medium"
                     >
                       Voir le rapport

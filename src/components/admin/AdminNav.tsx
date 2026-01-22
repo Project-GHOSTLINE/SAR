@@ -6,7 +6,7 @@ import {
   LayoutDashboard, MessageSquare, DollarSign, FileText,
   Wrench, Webhook, BarChart3, LogOut, Menu, X,
   ChevronDown, User, Clock, Bell, Shield, Database, Download, Zap,
-  Receipt, TrendingUp
+  Receipt, TrendingUp, Users
 } from 'lucide-react'
 
 interface AdminNavProps {
@@ -35,36 +35,36 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
     return () => clearInterval(timer)
   }, [])
 
-  // Fetch notifications counts
-  useEffect(() => {
-    const fetchCounts = async () => {
-      try {
-        // Messages non lus
-        const messagesRes = await fetch('/api/admin/messages?status=nouveau&limit=1', {
-          credentials: 'include'
-        })
-        if (messagesRes.ok) {
-          const data = await messagesRes.json()
-          setMessagesCount(data.stats?.nonLus || 0)
-        }
+  // Fetch notifications counts - DÉSACTIVÉ
+  // useEffect(() => {
+  //   const fetchCounts = async () => {
+  //     try {
+  //       // Messages non lus
+  //       const messagesRes = await fetch('/api/admin/messages?status=nouveau&limit=1', {
+  //         credentials: 'include'
+  //       })
+  //       if (messagesRes.ok) {
+  //         const data = await messagesRes.json()
+  //         setMessagesCount(data.stats?.nonLus || 0)
+  //       }
 
-        // Support tickets non résolus
-        const supportRes = await fetch('/api/admin/support/tickets?status=nouveau&limit=1', {
-          credentials: 'include'
-        })
-        if (supportRes.ok) {
-          const data = await supportRes.json()
-          setSupportCount(data.stats?.nouveau || 0)
-        }
-      } catch (error) {
-        console.error('Erreur fetch counts:', error)
-      }
-    }
+  //       // Support tickets non résolus
+  //       const supportRes = await fetch('/api/admin/support/tickets?status=nouveau&limit=1', {
+  //         credentials: 'include'
+  //       })
+  //       if (supportRes.ok) {
+  //         const data = await supportRes.json()
+  //         setSupportCount(data.stats?.nouveau || 0)
+  //       }
+  //     } catch (error) {
+  //       console.error('Erreur fetch counts:', error)
+  //     }
+  //   }
 
-    fetchCounts()
-    const interval = setInterval(fetchCounts, 60000) // Refresh every minute
-    return () => clearInterval(interval)
-  }, [])
+  //   fetchCounts()
+  //   const interval = setInterval(fetchCounts, 60000) // Refresh every minute
+  //   return () => clearInterval(interval)
+  // }, [])
 
   const handleLogout = async () => {
     try {
@@ -134,6 +134,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       name: 'Blacklist',
       href: '/admin/blacklist',
       icon: Shield,
+      badge: null
+    },
+    {
+      name: 'Clients SAR',
+      href: '/admin/clients-sar',
+      icon: Users,
       badge: null
     },
     {

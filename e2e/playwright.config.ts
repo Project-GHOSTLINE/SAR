@@ -83,6 +83,13 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
 
+    // SEO Analysis: No setup dependency (handles its own auth)
+    {
+      name: 'seo-analysis',
+      testMatch: /.*seo-complete-analysis\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+
     // Main tests: Chrome
     {
       name: 'chromium',
