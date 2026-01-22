@@ -11,7 +11,7 @@ import {
   DollarSign, Calendar, Clock, CheckCircle, XCircle,
   X, User, Send, MessageSquare, Tag, ExternalLink,
   Monitor, Smartphone, Globe, Chrome, MapPin, Languages,
-  Maximize2, Link2, TrendingUp as Campaign, Target
+  Maximize2, Link2, TrendingUp as Campaign, Target, Download
 } from 'lucide-react'
 import AdminNav from '@/components/admin/AdminNav'
 import SupportView from '@/components/admin/SupportView'
@@ -278,6 +278,7 @@ function AdminDashboardContent() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [vopayLoading, setVopayLoading] = useState(false)
   const [vopayError, setVopayError] = useState<string | null>(null)
+  const [selectedVoPayTab, setSelectedVoPayTab] = useState<'overview' | 'transactions' | 'releves'>('overview')
 
   // Detail panel states
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null)
@@ -2367,6 +2368,34 @@ function AdminDashboardContent() {
               )}
             </div>
 
+            {/* Tabs */}
+            <div className="bg-white rounded-lg border border-gray-200 mb-6">
+              <div className="border-b border-gray-200">
+                <div className="flex gap-1 p-2">
+                  {[
+                    { id: 'overview', label: 'Vue d\'ensemble' },
+                    { id: 'transactions', label: 'Transactions' },
+                    { id: 'releves', label: 'Relevés Bancaires' }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setSelectedVoPayTab(tab.id as any)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        selectedVoPayTab === tab.id
+                          ? 'bg-[#00874e] text-white'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-6">
+                {/* Overview & Transactions Tab Content */}
+                {(selectedVoPayTab === 'overview' || selectedVoPayTab === 'transactions') && (
+                  <div>
             <div className="grid grid-cols-4 gap-6 mb-6">
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <span className="text-gray-500 text-sm">Solde total</span>
@@ -3227,6 +3256,46 @@ function AdminDashboardContent() {
                 <p className="text-blue-700">Les statistiques VoPay sont maintenant connectées en temps réel.</p>
               </div>
             )}
+                  </div>
+                )}
+
+                {/* Relevés Bancaires Tab */}
+                {selectedVoPayTab === 'releves' && (
+                  <div className="space-y-6">
+                    {/* Info header */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Download size={20} className="text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-sm font-bold text-gray-900">Relevés Bancaires 2025</h3>
+                          <p className="text-xs text-gray-600">Dernière mise à jour: {new Date().toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        </div>
+                        <a
+                          href="/Releves_Bancaires_2025.html"
+                          target="_blank"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          <Download size={16} />
+                          Ouvrir en plein écran
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* iframe container */}
+                    <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden shadow-sm">
+                      <iframe
+                        src="/Releves_Bancaires_2025.html"
+                        className="w-full border-0"
+                        style={{ height: 'calc(100vh - 400px)', minHeight: '600px' }}
+                        title="Relevés Bancaires 2025"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
