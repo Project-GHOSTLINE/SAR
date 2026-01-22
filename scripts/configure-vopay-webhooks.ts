@@ -3,11 +3,16 @@
  * Usage: npx tsx scripts/configure-vopay-webhooks.ts
  */
 
-import 'dotenv/config'
+import { config } from 'dotenv'
+import { resolve } from 'path'
+
+// Charger .env.local depuis la racine du projet
+config({ path: resolve(__dirname, '../.env.local') })
 
 const VOPAY_API_KEY = process.env.VOPAY_API_KEY
-const VOPAY_API_SECRET = process.env.VOPAY_SECRET_KEY
+const VOPAY_API_SECRET = process.env.VOPAY_SHARED_SECRET
 const VOPAY_ACCOUNT_ID = process.env.VOPAY_ACCOUNT_ID
+const VOPAY_API_URL = process.env.VOPAY_API_URL || 'https://earthnode.vopay.com/api/v2/'
 const BASE_URL = 'https://api.solutionargentrapide.ca'
 
 // Liste complète des webhooks à configurer
@@ -95,7 +100,7 @@ const WEBHOOKS = [
 ]
 
 async function configureWebhook(webhook: typeof WEBHOOKS[0]) {
-  const url = 'https://earthnode-sandbox.vopay.com/api/v2/account/webhook-url'
+  const url = `${VOPAY_API_URL}account/webhook-url`
 
   const response = await fetch(url, {
     method: 'POST',
@@ -127,7 +132,7 @@ async function main() {
   // Vérifier les credentials
   if (!VOPAY_API_KEY || !VOPAY_API_SECRET || !VOPAY_ACCOUNT_ID) {
     console.error('❌ Erreur: Variables d\'environnement VoPay manquantes')
-    console.error('   Vérifiez: VOPAY_API_KEY, VOPAY_SECRET_KEY, VOPAY_ACCOUNT_ID')
+    console.error('   Vérifiez: VOPAY_API_KEY, VOPAY_SHARED_SECRET, VOPAY_ACCOUNT_ID')
     process.exit(1)
   }
 
