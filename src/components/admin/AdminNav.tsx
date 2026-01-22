@@ -112,12 +112,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       icon: DollarSign,
       badge: null
     },
-    {
-      name: 'QuickBooks',
-      href: '/admin/quickbooks',
-      icon: Receipt,
-      badge: null
-    },
+    // {
+    //   name: 'QuickBooks',
+    //   href: '/admin/quickbooks',
+    //   icon: Receipt,
+    //   badge: null
+    // },
     {
       name: 'Support',
       href: '/admin/dashboard?tab=support',
