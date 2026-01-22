@@ -160,7 +160,7 @@ export default function Header() {
           <div className={`lg:hidden overflow-hidden transition-all duration-500 ${
             isMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
           }`}>
-            <nav className="py-4 border-t border-gray-100">
+            <nav className="py-4 border-t border-gray-100 bg-white/95 backdrop-blur-xl shadow-lg rounded-b-2xl">
               {currentNavLinks.map((link) => (
                 <Link
                   key={link.href}
