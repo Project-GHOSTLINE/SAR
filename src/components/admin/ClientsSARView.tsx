@@ -82,6 +82,7 @@ export default function ClientsSARView() {
   const [flagMauvaisCreance, setFlagMauvaisCreance] = useState(false)
   const [filterConcordances, setFilterConcordances] = useState(false)
   const [clientsAvecConcordances, setClientsAvecConcordances] = useState<Set<string>>(new Set())
+  const [activeFilter, setActiveFilter] = useState<'all' | 'sans-ibv' | 'concordances' | 'critique' | 'eleve' | 'mauvaises-creances'>('all')
 
   // Pagination
   const [offset, setOffset] = useState(0)
@@ -209,6 +210,9 @@ export default function ClientsSARView() {
     setFlagMauvaisCreance(false)
     setFilterConcordances(false)
     setOffset(0)
+
+    // Mettre à jour le filtre actif
+    setActiveFilter(filterType)
 
     // Appliquer le filtre spécifique
     switch (filterType) {
@@ -381,6 +385,7 @@ export default function ClientsSARView() {
           concordancesLoading={concordancesLoading}
           setSelectedClient={setSelectedClient}
           applyStatFilter={applyStatFilter}
+          activeFilter={activeFilter}
           getRiskColor={getRiskColor}
           getRiskLabel={getRiskLabel}
         />
@@ -402,7 +407,7 @@ export default function ClientsSARView() {
 }
 
 // Composant Onglet Recherche
-function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setSearchQuery, minScore, setMinScore, etatDossier, setEtatDossier, flagIBV, setFlagIBV, flagMauvaisCreance, setFlagMauvaisCreance, filterConcordances, handleSearch, total, offset, setOffset, limit, selectedClient, handleSelectClient, concordances, concordancesLoading, setSelectedClient, applyStatFilter, getRiskColor, getRiskLabel }: any) {
+function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setSearchQuery, minScore, setMinScore, etatDossier, setEtatDossier, flagIBV, setFlagIBV, flagMauvaisCreance, setFlagMauvaisCreance, filterConcordances, handleSearch, total, offset, setOffset, limit, selectedClient, handleSelectClient, concordances, concordancesLoading, setSelectedClient, applyStatFilter, activeFilter, getRiskColor, getRiskLabel }: any) {
   return (
     <>
       {/* Légende Score de Risque */}
@@ -467,7 +472,9 @@ function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setS
           {/* Total clients */}
           <div
             onClick={() => applyStatFilter('all')}
-            className="bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow border-2 border-transparent hover:border-blue-300"
+            className={`bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow border-2 ${
+              activeFilter === 'all' ? 'border-blue-500 bg-blue-50' : 'border-transparent hover:border-blue-300'
+            }`}
           >
             <div className="p-5">
               <div className="flex items-center">
@@ -487,7 +494,9 @@ function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setS
           {/* Sans IBV */}
           <div
             onClick={() => applyStatFilter('sans-ibv')}
-            className="bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow border-2 border-transparent hover:border-orange-300"
+            className={`bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow border-2 ${
+              activeFilter === 'sans-ibv' ? 'border-orange-500 bg-orange-50' : 'border-transparent hover:border-orange-300'
+            }`}
           >
             <div className="p-5">
               <div className="flex items-center">
@@ -513,7 +522,7 @@ function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setS
           <div
             onClick={() => applyStatFilter('concordances')}
             className={`bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow border-2 ${
-              filterConcordances ? 'border-purple-500 bg-purple-50' : 'border-purple-300 hover:border-purple-500'
+              activeFilter === 'concordances' ? 'border-purple-500 bg-purple-50' : 'border-transparent hover:border-purple-300'
             }`}
           >
             <div className="p-5">
@@ -539,7 +548,9 @@ function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setS
           {/* Risque Critique */}
           <div
             onClick={() => applyStatFilter('critique')}
-            className="bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow border-2 border-transparent hover:border-red-300"
+            className={`bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow border-2 ${
+              activeFilter === 'critique' ? 'border-red-500 bg-red-50' : 'border-transparent hover:border-red-300'
+            }`}
           >
             <div className="p-5">
               <div className="flex items-center">
@@ -561,7 +572,9 @@ function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setS
           {/* Risque Élevé */}
           <div
             onClick={() => applyStatFilter('eleve')}
-            className="bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow border-2 border-transparent hover:border-orange-300"
+            className={`bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow border-2 ${
+              activeFilter === 'eleve' ? 'border-orange-500 bg-orange-50' : 'border-transparent hover:border-orange-300'
+            }`}
           >
             <div className="p-5">
               <div className="flex items-center">
@@ -583,7 +596,9 @@ function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setS
           {/* Mauvaises créances */}
           <div
             onClick={() => applyStatFilter('mauvaises-creances')}
-            className="bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow border-2 border-transparent hover:border-red-300"
+            className={`bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow border-2 ${
+              activeFilter === 'mauvaises-creances' ? 'border-red-500 bg-red-50' : 'border-transparent hover:border-red-300'
+            }`}
           >
             <div className="p-5">
               <div className="flex items-center">
