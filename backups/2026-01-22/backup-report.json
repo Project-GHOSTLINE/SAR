@@ -1,0 +1,140 @@
+{
+  "date": "2026-01-22T23:45:37.149Z",
+  "duration": "2.87s",
+  "tables": 22,
+  "totalRows": 3606,
+  "totalSize": 4478595,
+  "errors": 2,
+  "details": [
+    {
+      "table": "clients",
+      "rows": 1,
+      "size": 416,
+      "file": "clients.json"
+    },
+    {
+      "table": "client_identity_aliases",
+      "rows": 0,
+      "size": 2,
+      "file": "client_identity_aliases.json"
+    },
+    {
+      "table": "loan_applications",
+      "rows": 13,
+      "size": 81577,
+      "file": "loan_applications.json"
+    },
+    {
+      "table": "loans",
+      "rows": 0,
+      "size": 2,
+      "file": "loans.json"
+    },
+    {
+      "table": "payment_schedule_versions",
+      "rows": 0,
+      "size": 2,
+      "file": "payment_schedule_versions.json"
+    },
+    {
+      "table": "payment_installments",
+      "rows": 0,
+      "error": "column payment_installments.created_at does not exist"
+    },
+    {
+      "table": "payment_events",
+      "rows": 0,
+      "size": 2,
+      "file": "payment_events.json"
+    },
+    {
+      "table": "vopay_objects",
+      "rows": 997,
+      "size": 1490398,
+      "file": "vopay_objects.json"
+    },
+    {
+      "table": "vopay_webhook_logs",
+      "rows": 998,
+      "size": 1697384,
+      "file": "vopay_webhook_logs.json"
+    },
+    {
+      "table": "contact_messages",
+      "rows": 513,
+      "size": 510810,
+      "file": "contact_messages.json"
+    },
+    {
+      "table": "support_tickets",
+      "rows": 0,
+      "size": 2,
+      "file": "support_tickets.json"
+    },
+    {
+      "table": "emails_envoyes",
+      "rows": 1031,
+      "size": 649365,
+      "file": "emails_envoyes.json"
+    },
+    {
+      "table": "quickbooks_tokens",
+      "rows": 0,
+      "size": 2,
+      "file": "quickbooks_tokens.json"
+    },
+    {
+      "table": "quickbooks_customers",
+      "rows": 0,
+      "size": 2,
+      "file": "quickbooks_customers.json"
+    },
+    {
+      "table": "quickbooks_invoices",
+      "rows": 0,
+      "size": 2,
+      "file": "quickbooks_invoices.json"
+    },
+    {
+      "table": "quickbooks_payments",
+      "rows": 0,
+      "size": 2,
+      "file": "quickbooks_payments.json"
+    },
+    {
+      "table": "fraud_cases",
+      "rows": 0,
+      "size": 2,
+      "file": "fraud_cases.json"
+    },
+    {
+      "table": "admin_sections",
+      "rows": 8,
+      "size": 3047,
+      "file": "admin_sections.json"
+    },
+    {
+      "table": "metric_registry",
+      "rows": 20,
+      "size": 32014,
+      "file": "metric_registry.json"
+    },
+    {
+      "table": "metric_values",
+      "rows": 14,
+      "size": 6184,
+      "file": "metric_values.json"
+    },
+    {
+      "table": "claude_memory",
+      "rows": 11,
+      "size": 7380,
+      "file": "claude_memory.json"
+    },
+    {
+      "table": "claude_activity_logs",
+      "rows": 0,
+      "error": "Could not find the table 'public.claude_activity_logs' in the schema cache"
+    }
+  ]
+}

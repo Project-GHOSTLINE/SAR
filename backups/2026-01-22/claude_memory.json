@@ -1,0 +1,255 @@
+[
+  {
+    "id": "6bb3550a-ae07-425a-b74f-8a00758bc0e3",
+    "project_name": "sar",
+    "category": "sentinel-garage",
+    "key": "config-1768356366536",
+    "content": {
+      "skin": "⚙️",
+      "armor": 100,
+      "power": 100,
+      "speed": 100,
+      "attack": 55,
+      "weapon": "finder",
+      "defense": 100
+    },
+    "context": null,
+    "tags": [],
+    "importance": 9,
+    "created_at": "2026-01-14T02:06:06.748397+00:00",
+    "updated_at": "2026-01-14T02:06:06.63+00:00",
+    "last_accessed_at": "2026-01-14T02:06:06.748397+00:00",
+    "access_count": 0
+  },
+  {
+    "id": "58dab386-e695-4eae-b0c2-889487e4a51b",
+    "project_name": "sar",
+    "category": "url",
+    "key": "url-1768351560919",
+    "content": {
+      "url": "https://solutionargentrapide.ca/",
+      "type": "article"
+    },
+    "context": null,
+    "tags": [],
+    "importance": 7,
+    "created_at": "2026-01-14T00:46:01.014566+00:00",
+    "updated_at": "2026-01-14T00:46:00.928+00:00",
+    "last_accessed_at": "2026-01-14T00:46:01.014566+00:00",
+    "access_count": 0
+  },
+  {
+    "id": "a2e4a831-97c0-4de3-941d-a9086e916023",
+    "project_name": "sar",
+    "category": "test",
+    "key": "test-1768351325998",
+    "content": {
+      "message": "Test mémoire",
+      "timestamp": "2026-01-14T00:42:05.998Z"
+    },
+    "context": null,
+    "tags": [],
+    "importance": 5,
+    "created_at": "2026-01-14T00:42:06.118963+00:00",
+    "updated_at": "2026-01-14T00:42:06.006+00:00",
+    "last_accessed_at": "2026-01-14T00:42:06.118963+00:00",
+    "access_count": 0
+  },
+  {
+    "id": "ad952ce4-845a-49df-9aec-ee63685a667c",
+    "project_name": "sar",
+    "category": "test",
+    "key": "test-1768351075281",
+    "content": {
+      "message": "Test mémoire",
+      "timestamp": "2026-01-14T00:37:55.281Z"
+    },
+    "context": null,
+    "tags": [],
+    "importance": 5,
+    "created_at": "2026-01-14T00:37:55.382432+00:00",
+    "updated_at": "2026-01-14T00:37:55.291+00:00",
+    "last_accessed_at": "2026-01-14T00:37:55.382432+00:00",
+    "access_count": 0
+  },
+  {
+    "id": "711f9128-5e47-4de9-964e-3fd1485bdff0",
+    "project_name": "sar",
+    "category": "test",
+    "key": "test-1768351028910",
+    "content": {
+      "message": "Test mémoire",
+      "timestamp": "2026-01-14T00:37:08.910Z"
+    },
+    "context": null,
+    "tags": [],
+    "importance": 5,
+    "created_at": "2026-01-14T00:37:09.085288+00:00",
+    "updated_at": "2026-01-14T00:37:08.99+00:00",
+    "last_accessed_at": "2026-01-14T00:37:09.085288+00:00",
+    "access_count": 0
+  },
+  {
+    "id": "c11c3983-e309-4dcd-882f-16e7c4f3d5ce",
+    "project_name": "sar",
+    "category": "test",
+    "key": "test_1768347500789",
+    "content": {
+      "message": "Test de stockage",
+      "timestamp": "2026-01-13T23:38:20.789Z"
+    },
+    "context": "Mémoire de test créée depuis la page de test",
+    "tags": [
+      "test",
+      "demo",
+      "automated"
+    ],
+    "importance": 6,
+    "created_at": "2026-01-13T23:38:20.994999+00:00",
+    "updated_at": "2026-01-13T23:38:20.919+00:00",
+    "last_accessed_at": "2026-01-13T23:38:20.994999+00:00",
+    "access_count": 0
+  },
+  {
+    "id": "df28c86b-54f8-45c8-a450-99914758a19d",
+    "project_name": "sar",
+    "category": "security",
+    "key": "credentials_location",
+    "content": {
+      "apis_doc": "/Users/xunit/Desktop/📁 Projets/outils/APIS-DISPONIBLES.md",
+      "master_env": "/Users/xunit/Desktop/📁 Projets/outils/.env.master",
+      "admin_password": "FredRosa%1978",
+      "credentials_doc": "/Users/xunit/Desktop/📁 Projets/outils/CREDENTIALS-MASTER.md"
+    },
+    "context": "Emplacement des credentials et documentation: outils/.env.master et CREDENTIALS-MASTER.md",
+    "tags": [
+      "security",
+      "credentials",
+      "passwords"
+    ],
+    "importance": 10,
+    "created_at": "2026-01-13T23:17:27.536678+00:00",
+    "updated_at": "2026-01-13T23:17:27.465+00:00",
+    "last_accessed_at": "2026-01-13T23:17:27.536678+00:00",
+    "access_count": 0
+  },
+  {
+    "id": "86c39021-e545-4332-99a6-848a042784ae",
+    "project_name": "sar",
+    "category": "urls",
+    "key": "production_urls",
+    "content": {
+      "main": "https://solutionargentrapide.ca",
+      "admin": "https://admin.solutionargentrapide.ca",
+      "client": "https://client.solutionargentrapide.ca",
+      "preview": "https://sar-nu.vercel.app"
+    },
+    "context": "URLs de production du projet SAR",
+    "tags": [
+      "urls",
+      "production",
+      "domains"
+    ],
+    "importance": 10,
+    "created_at": "2026-01-13T23:17:27.468645+00:00",
+    "updated_at": "2026-01-13T23:17:27.407+00:00",
+    "last_accessed_at": "2026-01-13T23:17:27.468645+00:00",
+    "access_count": 0
+  },
+  {
+    "id": "a3a3c357-ab3c-464e-aa7d-700645c23fd7",
+    "project_name": "sar",
+    "category": "deployment",
+    "key": "workflow",
+    "content": {
+      "steps": [
+        "Faire les changements dans le code",
+        "git add . && git commit -m \"message\"",
+        "git push",
+        "Vercel déploie automatiquement",
+        "Tester sur production"
+      ],
+      "important": "TOUJOURS déployer sur Vercel, JAMAIS en local sauf demande explicite"
+    },
+    "context": "Workflow de déploiement: Git push → Vercel auto-deploy → Test production",
+    "tags": [
+      "deployment",
+      "vercel",
+      "git",
+      "workflow"
+    ],
+    "importance": 10,
+    "created_at": "2026-01-13T23:17:27.391658+00:00",
+    "updated_at": "2026-01-13T23:17:27.323+00:00",
+    "last_accessed_at": "2026-01-13T23:17:27.391658+00:00",
+    "access_count": 0
+  },
+  {
+    "id": "7070f77c-f833-4610-bfef-d23bf6e832ee",
+    "project_name": "sar",
+    "category": "stack",
+    "key": "tech_stack",
+    "content": {
+      "backend": [
+        "Next.js API Routes",
+        "Node.js"
+      ],
+      "database": [
+        "Supabase",
+        "PostgreSQL"
+      ],
+      "frontend": [
+        "Next.js 14",
+        "React 18",
+        "TypeScript",
+        "Tailwind CSS"
+      ],
+      "services": [
+        "VoPay",
+        "Flinks",
+        "Inverite",
+        "Vercel"
+      ],
+      "analytics": [
+        "Google Analytics Data API"
+      ]
+    },
+    "context": "Stack technique du projet SAR: Next.js 14, TypeScript, Supabase, VoPay, Flinks/Inverite",
+    "tags": [
+      "stack",
+      "tech",
+      "nextjs",
+      "typescript",
+      "supabase"
+    ],
+    "importance": 10,
+    "created_at": "2026-01-13T23:17:27.321168+00:00",
+    "updated_at": "2026-01-13T23:17:27.255+00:00",
+    "last_accessed_at": "2026-01-13T23:17:27.321168+00:00",
+    "access_count": 0
+  },
+  {
+    "id": "574223d8-cd14-4625-9abb-ff82513e3e15",
+    "project_name": "sar",
+    "category": "project_info",
+    "key": "project_overview",
+    "content": {
+      "url": "https://admin.solutionargentrapide.ca",
+      "name": "Solution Argent Rapide",
+      "type": "Next.js Application",
+      "status": "Production",
+      "description": "Plateforme de prêts avec IBV (Flinks/Inverite)"
+    },
+    "context": "Solution Argent Rapide (SAR) est une application Next.js de gestion de prêts avec vérification bancaire instantanée.",
+    "tags": [
+      "project",
+      "nextjs",
+      "production"
+    ],
+    "importance": 10,
+    "created_at": "2026-01-13T23:17:03.339841+00:00",
+    "updated_at": "2026-01-13T23:17:27.143+00:00",
+    "last_accessed_at": "2026-01-13T23:17:27.235378+00:00",
+    "access_count": 1
+  }
+]

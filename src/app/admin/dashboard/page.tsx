@@ -16,6 +16,7 @@ import {
 import AdminNav from '@/components/admin/AdminNav'
 import SupportView from '@/components/admin/SupportView'
 import AnalysesView from '@/components/admin/AnalysesView'
+import VoPayMetricsTab from '@/components/admin/VoPayMetricsTab'
 
 interface Message {
   id: string
@@ -2393,8 +2394,13 @@ function AdminDashboardContent() {
               </div>
 
               <div className="p-6">
-                {/* Overview & Transactions Tab Content */}
-                {(selectedVoPayTab === 'overview' || selectedVoPayTab === 'transactions') && (
+                {/* Overview Tab - Professional Metrics */}
+                {selectedVoPayTab === 'overview' && (
+                  <VoPayMetricsTab />
+                )}
+
+                {/* Transactions Tab Content */}
+                {selectedVoPayTab === 'transactions' && (
                   <div>
             <div className="grid grid-cols-4 gap-6 mb-6">
               <div className="bg-white rounded-lg border border-gray-200 p-6">

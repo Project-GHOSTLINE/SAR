@@ -1,0 +1,571 @@
+[
+  {
+    "id": "26d83150-4641-4b71-b908-818fa05d2bb5",
+    "metric_key": "fraud_amount",
+    "label": "Fraud Amount",
+    "description": "Montant total impliqué dans la fraude",
+    "section_key": "fraud",
+    "value_type": "numeric",
+    "unit": "$",
+    "format": "currency_cad",
+    "entity_types": [
+      "fraud_case"
+    ],
+    "supports_periods": false,
+    "available_periods": [],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "red",
+    "icon_name": null,
+    "display_order": 10,
+    "is_visible": true,
+    "tags": [
+      "fraud",
+      "financial"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:27:04.91361"
+  },
+  {
+    "id": "f2d7a416-76b9-42b2-af63-ebc82d6b0500",
+    "metric_key": "fraud_recovered",
+    "label": "Amount Recovered",
+    "description": "Montant récupéré",
+    "section_key": "fraud",
+    "value_type": "numeric",
+    "unit": "$",
+    "format": "currency_cad",
+    "entity_types": [
+      "fraud_case"
+    ],
+    "supports_periods": false,
+    "available_periods": [],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "green",
+    "icon_name": null,
+    "display_order": 20,
+    "is_visible": true,
+    "tags": [
+      "fraud",
+      "financial",
+      "recovery"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:27:04.91361"
+  },
+  {
+    "id": "0e0e2b7e-10c0-4229-b34d-4eb16ecad698",
+    "metric_key": "investigation_days",
+    "label": "Investigation Days",
+    "description": "Nombre de jours depuis la détection",
+    "section_key": "fraud",
+    "value_type": "numeric",
+    "unit": "days",
+    "format": "integer",
+    "entity_types": [
+      "fraud_case"
+    ],
+    "supports_periods": false,
+    "available_periods": [],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "yellow",
+    "icon_name": null,
+    "display_order": 30,
+    "is_visible": true,
+    "tags": [
+      "fraud",
+      "time"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:27:04.91361"
+  },
+  {
+    "id": "939fd4d3-14b9-4d16-9626-9a5f15ce6254",
+    "metric_key": "fraud_severity",
+    "label": "Severity",
+    "description": "Niveau de sévérité du cas",
+    "section_key": "fraud",
+    "value_type": "text",
+    "unit": "",
+    "format": "text",
+    "entity_types": [
+      "fraud_case"
+    ],
+    "supports_periods": false,
+    "available_periods": [],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "red",
+    "icon_name": null,
+    "display_order": 40,
+    "is_visible": true,
+    "tags": [
+      "fraud",
+      "classification"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:27:04.91361"
+  },
+  {
+    "id": "8e73fb07-715c-4c21-b93e-f741ae39fece",
+    "metric_key": "vopay_success_rate",
+    "label": "Success Rate",
+    "description": "Pourcentage de transactions VoPay qui se sont terminées avec succès (status = 'successful') par rapport au total des transactions reçues.\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Un taux de 100% = Toutes les transactions passent sans problème\n- Un taux de 80-95% = Normal, quelques échecs attendus (cartes refusées, fonds insuffisants)\n- Un taux < 80% = Problème potentiel avec l'intégration VoPay ou les clients\n\n💡 COMMENT C'EST CALCULÉ:\n(Nombre de webhooks avec status 'successful') ÷ (Total de tous les webhooks) × 100\n\n🚨 QUAND AGIR:\n- Taux < 70%: Vérifier les logs VoPay pour identifier les causes d'échec\n- Chute soudaine: Incident technique possible avec VoPay ou la plateforme\n- Taux > 95%: Excellent, tout fonctionne normalement\n\n📌 EXEMPLE:\nSi tu as 998 webhooks dont 850 successful:\n850 ÷ 998 × 100 = 85.17% de succès",
+    "section_key": "vopay",
+    "value_type": "numeric",
+    "unit": "%",
+    "format": "percentage",
+    "entity_types": [
+      "global"
+    ],
+    "supports_periods": false,
+    "available_periods": [],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "green",
+    "icon_name": null,
+    "display_order": 10,
+    "is_visible": true,
+    "tags": [
+      "vopay",
+      "performance"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:57:30.048551"
+  },
+  {
+    "id": "f2735036-9498-4d13-bc0f-f105b738f47e",
+    "metric_key": "total_clients",
+    "label": "Total Clients",
+    "description": "Nombre total de clients uniques qui ont complété au moins une analyse IBV/Flinks.\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Compte le nombre d'emails clients distincts dans client_analyses\n- Un client = une personne qui a soumis ses informations bancaires\n\n💡 COMMENT C'EST CALCULÉ:\nCOUNT(DISTINCT client_email) FROM client_analyses WHERE client_email IS NOT NULL\n\n🚨 INDICATEURS:\n- 0-50 clients: Phase de démarrage, augmenter le marketing\n- 50-200 clients: Croissance stable, optimiser la conversion\n- 200-500 clients: Échelle, automatiser les processus\n- > 500 clients: Mature, focus sur rétention et referrals\n\n📈 CROISSANCE SAINE:\n- +10-20% par mois en phase de lancement\n- +5-10% par mois en phase de croissance\n- +2-5% par mois en phase mature\n\n📌 EXEMPLE:\n6 clients = Tu débutes, chaque nouveau client compte!",
+    "section_key": "global",
+    "value_type": "numeric",
+    "unit": "count",
+    "format": "integer",
+    "entity_types": [
+      "global"
+    ],
+    "supports_periods": false,
+    "available_periods": [],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "blue",
+    "icon_name": null,
+    "display_order": 10,
+    "is_visible": true,
+    "tags": [
+      "clients",
+      "kpi"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T19:01:56.848224"
+  },
+  {
+    "id": "b2d13681-0467-4a8d-8d2b-45f101584919",
+    "metric_key": "vopay_pending",
+    "label": "Pending Transactions",
+    "description": "Nombre de transactions VoPay actuellement en cours de traitement (status = 'pending' ou 'in progress'). Ces transactions n'ont pas encore reçu de confirmation finale.\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Transactions qui attendent validation bancaire\n- Transferts bancaires qui prennent 1-3 jours ouvrables\n- Vérifications de compte en cours\n\n💡 COMMENT C'EST CALCULÉ:\nCompte de tous les webhooks avec status IN ('pending', 'in progress')\n\n🚨 QUAND AGIR:\n- 0-5 transactions: Normal, flux régulier de transactions en cours\n- 5-20 transactions: Flux élevé, surveiller si ça augmente\n- > 20 transactions: Possible goulot d'étranglement, contacter VoPay\n- > 50 transactions: Incident probable, vérifier le statut de l'API VoPay\n\n⏱️ DURÉE NORMALE:\n- Interac e-Transfer: 1-2 minutes\n- EFT (virement bancaire): 1-3 jours ouvrables\n- Vérification de compte: 5-10 minutes\n\n📌 EXEMPLE:\nSi tu as 2 pending:\n- Probablement 2 clients qui ont soumis un prêt il y a quelques minutes\n- Attendre 5-10 minutes avant de s'inquiéter",
+    "section_key": "vopay",
+    "value_type": "numeric",
+    "unit": "count",
+    "format": "integer",
+    "entity_types": [
+      "global"
+    ],
+    "supports_periods": false,
+    "available_periods": [],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "yellow",
+    "icon_name": null,
+    "display_order": 20,
+    "is_visible": true,
+    "tags": [
+      "vopay",
+      "status"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:57:30.048551"
+  },
+  {
+    "id": "26a5faf6-7e95-4aef-8790-5798dbaf1387",
+    "metric_key": "vopay_failed",
+    "label": "Failed Transactions",
+    "description": "Nombre total de transactions VoPay qui ont échoué ou été annulées (status = 'failed' ou 'cancelled'). Ces transactions n'ont PAS été complétées.\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Transactions refusées par la banque du client\n- Fonds insuffisants dans le compte\n- Informations bancaires invalides\n- Transactions annulées manuellement\n- Erreurs de l'API VoPay\n\n💡 COMMENT C'EST CALCULÉ:\nCompte de tous les webhooks avec status IN ('failed', 'cancelled')\n\n🚨 RAISONS D'ÉCHEC COURANTES:\n1. Fonds insuffisants (NSF) - 40-50% des échecs\n2. Compte bancaire fermé ou bloqué - 20-30%\n3. Informations bancaires incorrectes - 15-20%\n4. Transaction annulée par le client - 5-10%\n5. Erreur technique VoPay - < 5%\n\n📈 TAUX D'ÉCHEC NORMAL:\n- 5-15%: Normal dans l'industrie des prêts\n- 15-25%: Légèrement élevé, revoir le processus de validation\n- > 25%: Problème sérieux, vérifier la qualité des leads\n\n🔍 ACTION À PRENDRE:\n1. Cliquer sur la métrique pour voir les détails dans failure_reason\n2. Grouper les échecs par type (NSF, invalid account, etc.)\n3. Contacter les clients avec échecs pour mettre à jour leurs infos bancaires\n4. Si > 30 échecs: Analyser le raw_payload dans vopay_webhook_logs\n\n📌 EXEMPLE:\nSi tu as 67 failed sur 998 webhooks:\n67 ÷ 998 = 6.7% de taux d'échec\nC'est EXCELLENT - bien en dessous de la moyenne de l'industrie (10-15%)",
+    "section_key": "vopay",
+    "value_type": "numeric",
+    "unit": "count",
+    "format": "integer",
+    "entity_types": [
+      "global"
+    ],
+    "supports_periods": false,
+    "available_periods": [],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "red",
+    "icon_name": null,
+    "display_order": 30,
+    "is_visible": true,
+    "tags": [
+      "vopay",
+      "errors"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:57:30.048551"
+  },
+  {
+    "id": "79f98a19-904c-4a0a-87be-25c9959a0c7d",
+    "metric_key": "total_revenue_mtd",
+    "label": "Revenue MTD",
+    "description": "Revenu total généré depuis le début du mois en cours (Month-To-Date).\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Somme de tous les revenus du 1er du mois à aujourd'hui\n- Inclut: Frais de prêts, intérêts, frais de service, etc.\n\n💡 COMMENT C'EST CALCULÉ:\nSUM(amount) FROM revenue_transactions WHERE transaction_date >= début_du_mois\n\n⚠️ STATUT ACTUEL:\nCette métrique est à $0 car la table \"revenue_transactions\" n'existe pas encore.\nIl faut créer une table pour tracker les revenus générés par chaque prêt.\n\n🎯 OBJECTIFS TYPIQUES (prêts rapides):\n- Démarrage (0-50 prêts/mois): $5,000 - $15,000 MTD\n- Croissance (50-200 prêts/mois): $15,000 - $60,000 MTD\n- Maturité (200+ prêts/mois): $60,000 - $200,000+ MTD\n\n📊 REVENUS PAR PRÊT:\n- Prêt $500 avec 15% intérêt = $75 revenu\n- Prêt $1000 avec 15% intérêt = $150 revenu\n- Prêt $2000 avec 15% intérêt = $300 revenu\n\n📌 TODO:\nCréer la table revenue_transactions pour activer cette métrique",
+    "section_key": "global",
+    "value_type": "numeric",
+    "unit": "$",
+    "format": "currency_cad",
+    "entity_types": [
+      "global"
+    ],
+    "supports_periods": false,
+    "available_periods": [],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "green",
+    "icon_name": null,
+    "display_order": 20,
+    "is_visible": true,
+    "tags": [
+      "financial",
+      "revenue",
+      "kpi"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T19:01:56.848224"
+  },
+  {
+    "id": "606e80b9-04b0-4587-a0fe-d10d7a8f4488",
+    "metric_key": "active_loans",
+    "label": "Active Loans",
+    "description": "Nombre de prêts actuellement actifs (approuvés et non encore remboursés).\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Prêts qui ont été décaissés au client\n- Client n'a pas encore remboursé complètement\n- Argent actuellement prêté et en circulation\n\n💡 COMMENT C'EST CALCULÉ:\nCOUNT(*) FROM loans WHERE status = 'active' AND balance_remaining > 0\n\n⚠️ STATUT ACTUEL:\nCette métrique est à 0 car la table \"loans\" n'existe pas encore.\nIl faut créer une table pour tracker chaque prêt approuvé.\n\n🎯 RATIO SAIN:\n- Active Loans ÷ Total Clients = Taux de pénétration\n- 30-50%: Excellent (la moitié des clients ont un prêt actif)\n- 20-30%: Bon (augmenter la conversion)\n- < 20%: Faible (problème d'approbation ou de demande)\n\n📊 CAPITAL EN CIRCULATION:\n- 10 prêts × $1,000 moyen = $10,000 capital prêté\n- 50 prêts × $1,000 moyen = $50,000 capital prêté\n- 100 prêts × $1,000 moyen = $100,000 capital prêté\n\n⚖️ GESTION DU RISQUE:\n- < 20 prêts actifs: Risque faible, croissance lente\n- 20-100 prêts actifs: Zone optimale, surveiller le NSF\n- > 100 prêts actifs: Risque élevé, renforcer la validation\n\n📌 TODO:\nCréer la table loans pour activer cette métrique",
+    "section_key": "global",
+    "value_type": "numeric",
+    "unit": "count",
+    "format": "integer",
+    "entity_types": [
+      "global"
+    ],
+    "supports_periods": false,
+    "available_periods": [],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "blue",
+    "icon_name": null,
+    "display_order": 30,
+    "is_visible": true,
+    "tags": [
+      "loans",
+      "kpi"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T19:01:56.848224"
+  },
+  {
+    "id": "4d23f4f7-9102-4352-94c2-9b2e515c330b",
+    "metric_key": "fraud_cases_open",
+    "label": "Open Fraud Cases",
+    "description": "Nombre de cas de fraude actuellement en investigation (status = 'open' ou 'investigating').\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Cas détectés mais pas encore résolus\n- Investigations en cours par l'équipe\n- Fraudes potentielles à confirmer\n\n💡 COMMENT C'EST CALCULÉ:\nCOUNT(*) FROM fraud_cases WHERE status IN ('open', 'investigating') AND closed_at IS NULL\n\n🚨 TYPES DE FRAUDE COURANTS:\n1. Identité volée (40-50% des cas)\n2. Documents falsifiés (20-30%)\n3. Coordonnées bancaires frauduleuses (15-20%)\n4. Applications multiples simultanées (10-15%)\n5. Fraude organisée/réseaux (5-10%)\n\n📊 TAUX NORMAL:\n- 0-2%: Excellent système de détection\n- 2-5%: Normal dans l'industrie\n- 5-10%: Élevé, renforcer la validation\n- > 10%: Critique, revoir tout le processus\n\n⏱️ TEMPS DE RÉSOLUTION:\n- Fraude simple: 1-3 jours\n- Fraude complexe: 5-10 jours\n- Fraude organisée: 2-4 semaines\n\n🎯 OBJECTIF:\n- Maintenir < 2% de fraudes par rapport au total de clients\n- Résoudre 80% des cas en moins de 7 jours\n- Récupérer au moins 30% des montants fraudés\n\n📌 EXEMPLE:\n0 cas ouverts = Excellent! Soit pas de fraude, soit bonne détection préventive",
+    "section_key": "global",
+    "value_type": "numeric",
+    "unit": "count",
+    "format": "integer",
+    "entity_types": [
+      "global"
+    ],
+    "supports_periods": false,
+    "available_periods": [],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "red",
+    "icon_name": null,
+    "display_order": 40,
+    "is_visible": true,
+    "tags": [
+      "fraud",
+      "risk",
+      "kpi"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T19:01:56.848224"
+  },
+  {
+    "id": "e5bbb62e-86df-439c-946f-9e9c4600d142",
+    "metric_key": "nsf_count_30d",
+    "label": "NSF Count (30d)",
+    "description": "Nombre de transactions NSF (Non-Sufficient Funds / chèque sans provision) dans les 30 derniers jours.\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Transactions rejetées par manque de fonds dans le compte\n- Indicateur clé de risque financier du client\n- Affecte directement la décision d'approbation de prêt\n\n💡 COMMENT C'EST CALCULÉ:\nCOUNT(*) FROM client_transactions\nWHERE description LIKE '%NSF%' OR description LIKE '%insufficient%'\nAND transaction_date >= NOW() - INTERVAL '30 days'\n\n🚨 ÉVALUATION DU RISQUE:\n- 0 NSF: ✅ Excellent (risque très faible)\n- 1 NSF: ⚠️ Acceptable (peut être un incident isolé)\n- 2-3 NSF: 🔶 Moyen (client en difficulté financière)\n- 4-5 NSF: 🔴 Élevé (recommander refus ou montant réduit)\n- > 5 NSF: 🚫 Critique (refuser automatiquement)\n\n💰 IMPACT SUR L'APPROBATION:\n- 0 NSF: Approuver montant complet demandé\n- 1 NSF: Approuver avec montant réduit de 20-30%\n- 2+ NSF: Refuser ou exiger co-signataire\n\n📊 FRAIS TYPIQUES:\nChaque NSF coûte au client: $45-$50 en frais bancaires\n3 NSF = $135-$150 de frais = Client vraiment en difficulté\n\n📌 EXEMPLE:\nClient avec 4 NSF en 30 jours = Haut risque de défaut sur le prêt",
+    "section_key": "analyses",
+    "value_type": "numeric",
+    "unit": "count",
+    "format": "integer",
+    "entity_types": [
+      "analysis"
+    ],
+    "supports_periods": true,
+    "available_periods": [
+      "30d"
+    ],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "red",
+    "icon_name": null,
+    "display_order": 10,
+    "is_visible": true,
+    "tags": [
+      "financial",
+      "risk",
+      "nsf"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T19:01:56.848224"
+  },
+  {
+    "id": "50feebfd-5b11-465b-ba42-029e87e3ac86",
+    "metric_key": "nsf_count_60d",
+    "label": "NSF Count (60d)",
+    "description": "Nombre de transactions NSF dans les 60 derniers jours.\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Historique plus long pour détecter les patterns\n- Permet de voir si le client s'améliore ou empire\n- Utilisé en combinaison avec NSF 30d\n\n💡 ANALYSE COMPARATIVE:\n- NSF 60d = NSF 30d: Problème récent seulement\n- NSF 60d > NSF 30d: Client s'améliore (bon signe!)\n- NSF 60d < NSF 30d × 2: Situation qui empire (alerte!)\n\n📊 PATTERNS À DÉTECTER:\n- NSF groupés en début de mois: Problème de timing cash flow\n- NSF aléatoires: Mauvaise gestion financière\n- NSF constants: Revenus insuffisants vs dépenses\n\n🎯 DÉCISION:\nSi NSF 30d = 0 mais NSF 60d = 3:\n→ Client s'est amélioré récemment (bon signe, peut approuver)\n\nSi NSF 30d = 3 et NSF 60d = 3:\n→ Tous les NSF sont récents (mauvais signe, refuser)\n\n📌 EXEMPLE:\nNSF 60d: 2 | NSF 30d: 0 = Client s'est stabilisé",
+    "section_key": "analyses",
+    "value_type": "numeric",
+    "unit": "count",
+    "format": "integer",
+    "entity_types": [
+      "analysis"
+    ],
+    "supports_periods": true,
+    "available_periods": [
+      "60d"
+    ],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "red",
+    "icon_name": null,
+    "display_order": 20,
+    "is_visible": true,
+    "tags": [
+      "financial",
+      "risk",
+      "nsf"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T19:01:56.848224"
+  },
+  {
+    "id": "4cf45ac8-cb7e-4df0-bf1f-51561fca44f7",
+    "metric_key": "nsf_count_90d",
+    "label": "NSF Count (90d)",
+    "description": "Nombre de transactions NSF dans les 90 derniers jours (3 mois).\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Vue complète du comportement financier du client\n- Couvre généralement 3 cycles de paie\n- Métrique la plus fiable pour prédire le risque\n\n💡 SEUILS CRITIQUES (90 jours):\n- 0-1 NSF: Risque FAIBLE (5-10% défaut)\n- 2-4 NSF: Risque MOYEN (15-25% défaut)\n- 5-7 NSF: Risque ÉLEVÉ (30-45% défaut)\n- 8+ NSF: Risque CRITIQUE (50-70% défaut)\n\n📊 CALCUL DU RISQUE SCORE:\nScore = (NSF 90d × 10) + (NSF 30d × 5)\n\nExemple 1: NSF 90d = 2, NSF 30d = 0\nScore = (2 × 10) + (0 × 5) = 20 points (FAIBLE)\n\nExemple 2: NSF 90d = 5, NSF 30d = 3\nScore = (5 × 10) + (3 × 5) = 65 points (ÉLEVÉ)\n\n🎯 RÈGLE D'OR:\nNe JAMAIS prêter à un client avec > 5 NSF en 90 jours\nTaux de défaut trop élevé = perte garantie\n\n📈 TENDANCE:\nComparer avec NSF 60d et 30d pour voir l'évolution:\n- Si décroissant: Client s'améliore ✅\n- Si stable: Situation chronique ⚠️\n- Si croissant: Spirale descendante 🚫\n\n📌 EXEMPLE:\n8 NSF en 90 jours = 1 NSF tous les 11 jours = CRITIQUE",
+    "section_key": "analyses",
+    "value_type": "numeric",
+    "unit": "count",
+    "format": "integer",
+    "entity_types": [
+      "analysis"
+    ],
+    "supports_periods": true,
+    "available_periods": [
+      "90d"
+    ],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "red",
+    "icon_name": null,
+    "display_order": 30,
+    "is_visible": true,
+    "tags": [
+      "financial",
+      "risk",
+      "nsf"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T19:01:56.848224"
+  },
+  {
+    "id": "025bd79e-dad2-481f-afdc-ba9402dc7c9f",
+    "metric_key": "avg_balance",
+    "label": "Average Balance",
+    "description": "Solde moyen du compte bancaire principal du client sur 90 jours.\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Cushion financier du client\n- Capacité à absorber les dépenses imprévues\n- Indicateur de stabilité financière\n\n💡 COMMENT C'EST CALCULÉ:\nAVG(daily_balance) FROM client_accounts WHERE account_type = 'checking' AND date >= NOW() - INTERVAL '90 days'\n\n💰 ÉVALUATION PAR TRANCHE:\n- < $100: 🔴 Critique - Vie de paie en paie\n- $100-$500: 🔶 Faible - Peu de marge d'erreur\n- $500-$1,500: ⚠️ Acceptable - Buffer minimal\n- $1,500-$5,000: ✅ Bon - Gestion stable\n- > $5,000: 💎 Excellent - Très faible risque\n\n🎯 RATIO D'APPROBATION:\nMontant max à prêter = Average Balance × 1.5\n\nExemples:\n- Balance moy. $500 → Prêter max $750\n- Balance moy. $1,000 → Prêter max $1,500\n- Balance moy. $3,000 → Prêter max $4,500\n\n📊 CORRÉLATION AVEC NSF:\n- Balance < $200 + NSF > 2 = 80% chance défaut\n- Balance > $1,000 + NSF = 0 = 95% taux remboursement\n\n⚠️ ATTENTION:\nBalance élevé récent (< 1 semaine) peut être un dépôt temporaire\n→ Vérifier l'historique sur 90 jours complets\n\n📌 EXEMPLE:\nAverage Balance $250 = Prêter max $300-$400 seulement",
+    "section_key": "analyses",
+    "value_type": "numeric",
+    "unit": "$",
+    "format": "currency_cad",
+    "entity_types": [
+      "analysis"
+    ],
+    "supports_periods": false,
+    "available_periods": [],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "green",
+    "icon_name": null,
+    "display_order": 40,
+    "is_visible": true,
+    "tags": [
+      "financial",
+      "balance"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T19:01:56.848224"
+  },
+  {
+    "id": "8bb57793-9e70-4bfa-a6ad-4cd147fef0d0",
+    "metric_key": "total_income_90d",
+    "label": "Total Income (90d)",
+    "description": "Revenu total détecté dans les 90 derniers jours (dépôts de paie, transferts gouvernement, etc).\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Tous les dépôts identifiés comme revenus\n- Salaires, paies, prestations gouvernementales\n- Capacité de remboursement du client\n\n💡 COMMENT C'EST DÉTECTÉ:\nDépôts contenant: \"paie\", \"salary\", \"govt\", \"employment\", \"direct deposit\", etc.\n\n💰 TRANCHES DE REVENUS:\n- < $3,000: 🔴 Très faible (< $1,000/mois)\n- $3,000-$6,000: 🔶 Faible ($1,000-$2,000/mois)\n- $6,000-$12,000: ⚠️ Moyen ($2,000-$4,000/mois)\n- $12,000-$18,000: ✅ Bon ($4,000-$6,000/mois)\n- > $18,000: 💎 Excellent (> $6,000/mois)\n\n🎯 RATIO DETTE/REVENU:\nMontant max à prêter = (Total Income 90d ÷ 3) × 0.15\n\nExemple:\n- Revenu 90d: $12,000 ($4,000/mois)\n- Revenu mensuel: $4,000\n- Max à prêter: $4,000 × 0.15 = $600\n\n📊 RÈGLE INDUSTRIE:\nLe paiement mensuel du prêt ne doit PAS dépasser 15% du revenu mensuel\n\nExemple:\n- Revenu mensuel: $3,000\n- Max paiement prêt: $450/mois\n- Si prêt $1,500 sur 4 mois = $375/mois ✅\n\n⚠️ ATTENTION:\nRevenus irréguliers (freelance, pourboires) = Multiplier par 0.8 pour sécurité\n\n📌 EXEMPLE:\n$9,000 revenus en 90 jours = $3,000/mois = Prêter max $450",
+    "section_key": "analyses",
+    "value_type": "numeric",
+    "unit": "$",
+    "format": "currency_cad",
+    "entity_types": [
+      "analysis"
+    ],
+    "supports_periods": true,
+    "available_periods": [
+      "90d"
+    ],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "green",
+    "icon_name": null,
+    "display_order": 50,
+    "is_visible": true,
+    "tags": [
+      "financial",
+      "income"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T19:01:56.848224"
+  },
+  {
+    "id": "a75acb4e-6bc2-4c85-a5e8-c19235c928d7",
+    "metric_key": "risk_score",
+    "label": "Risk Score",
+    "description": "Score de risque calculé automatiquement basé sur tous les indicateurs financiers (0-100).\n\n📊 CE QUE ÇA REPRÉSENTE:\n- 0 = Risque le plus faible (client parfait)\n- 100 = Risque le plus élevé (refus automatique)\n- Combinaison de tous les facteurs financiers\n\n💡 FORMULE DE CALCUL:\nScore = (NSF 90d × 8) + (NSF 30d × 10) + Balance_Factor + Income_Factor + Transaction_Pattern\n\nBalance_Factor:\n- < $100: +20 points\n- $100-$500: +15 points\n- $500-$1,500: +10 points\n- > $1,500: +0 points\n\nIncome_Factor:\n- < $3,000: +15 points\n- $3,000-$6,000: +10 points\n- $6,000-$12,000: +5 points\n- > $12,000: +0 points\n\n🎯 SEUILS DE DÉCISION:\n- 0-20: ✅ APPROUVER (Risque très faible)\n- 21-40: ✅ APPROUVER montant réduit (Risque faible)\n- 41-60: ⚠️ APPROUVER avec garanties (Risque moyen)\n- 61-80: 🔶 REFUSER ou montant minimal (Risque élevé)\n- 81-100: 🔴 REFUSER automatiquement (Risque critique)\n\n📊 EXEMPLES RÉELS:\n\nClient A:\n- NSF 90d: 0, NSF 30d: 0\n- Balance: $2,000\n- Revenu 90d: $15,000\n→ Score: 0 points = EXCELLENT\n\nClient B:\n- NSF 90d: 3, NSF 30d: 1\n- Balance: $400\n- Revenu 90d: $5,000\n→ Score: (3×8) + (1×10) + 15 + 10 = 59 = MOYEN\n\nClient C:\n- NSF 90d: 8, NSF 30d: 4\n- Balance: $50\n- Revenu 90d: $2,500\n→ Score: (8×8) + (4×10) + 20 + 15 = 139 (plafonné à 100) = CRITIQUE\n\n🚨 ALERTES AUTOMATIQUES:\n- Score > 80: Notifier le superviseur\n- Score > 60: Demander validation manuelle\n- Score < 20: Approbation automatique possible\n\n📈 AMÉLIORATION:\nUn client peut améliorer son score en:\n- Évitant les NSF (−10 points/mois sans NSF)\n- Augmentant son balance moyen\n- Démontrant revenus stables\n\n📌 EXEMPLE:\nScore 35 = Risque faible, approuver $500-$800 max",
+    "section_key": "analyses",
+    "value_type": "numeric",
+    "unit": "score",
+    "format": "integer",
+    "entity_types": [
+      "analysis"
+    ],
+    "supports_periods": false,
+    "available_periods": [],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "yellow",
+    "icon_name": null,
+    "display_order": 60,
+    "is_visible": true,
+    "tags": [
+      "risk",
+      "scoring"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T19:01:56.848224"
+  },
+  {
+    "id": "da1a77c2-de08-4411-a66a-c478d6af71fd",
+    "metric_key": "total_deposits",
+    "label": "Total Deposits",
+    "description": "Somme de tous les dépôts (revenus + autres sources) détectés dans les comptes clients.\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Tout l'argent entrant dans les comptes\n- Indicateur de santé financière globale\n- Base pour calcul capacité de remboursement\n\n💡 COMMENT C'EST CALCULÉ:\nSUM(amount) FROM client_transactions WHERE amount > 0 AND transaction_date >= période\n\n🎯 UTILISATION:\n\nÉvaluation client:\n- Deposits réguliers = Revenu stable ✅\n- Deposits irréguliers = Risque plus élevé ⚠️\n\nAnalyse de patterns:\n- Dépôts bi-hebdomadaires = Salarié\n- Dépôts mensuels = Prestations gouvernement\n- Dépôts aléatoires = Freelance/Cash business\n\n📊 RATIOS IMPORTANTS:\n\n1. Deposit Regularity:\nÉcart-type des dépôts / Moyenne\n- < 0.3: Très régulier ✅\n- 0.3-0.7: Modéré ⚠️\n- > 0.7: Irrégulier 🔴\n\n2. Deposit Frequency:\nNombre de dépôts par mois\n- 2-4: Salaire bi-hebdomadaire/mensuel ✅\n- 5-10: Multiple sources ⚠️\n- 1: Source unique, risqué 🔶\n\n📌 EXEMPLE:\n$15,000 deposits en 90 jours = $5,000/mois moyens",
+    "section_key": "financial",
+    "value_type": "numeric",
+    "unit": "$",
+    "format": "currency_cad",
+    "entity_types": [
+      "global",
+      "analysis"
+    ],
+    "supports_periods": true,
+    "available_periods": [
+      "30d",
+      "60d",
+      "90d"
+    ],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "green",
+    "icon_name": null,
+    "display_order": 10,
+    "is_visible": true,
+    "tags": [
+      "financial",
+      "deposits"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T19:01:56.848224"
+  },
+  {
+    "id": "bdedc405-0b5f-4d08-a555-112c4d629406",
+    "metric_key": "total_withdrawals",
+    "label": "Total Withdrawals",
+    "description": "Somme de tous les retraits et paiements sortants des comptes clients.\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Tout l'argent sortant des comptes\n- Dépenses mensuelles du client\n- Utilisé pour calculer le cash flow net\n\n💡 COMMENT C'EST CALCULÉ:\nSUM(ABS(amount)) FROM client_transactions WHERE amount < 0 AND transaction_date >= période\n\n🎯 ANALYSE:\n\nCash Flow Net:\nTotal Deposits − Total Withdrawals = Épargne/Déficit\n\nExemple:\n- Deposits: $5,000\n- Withdrawals: $4,800\n- Net: +$200 (client épargne) ✅\n\nExemple 2:\n- Deposits: $5,000\n- Withdrawals: $5,200\n- Net: −$200 (client en déficit) 🔴\n\n📊 SPENDING RATIO:\n\nWithdrawals ÷ Deposits:\n- < 0.85 (85%): Excellent, épargne 15%+ ✅\n- 0.85-0.95: Bon, épargne 5-15% ✅\n- 0.95-1.00: Limite, épargne < 5% ⚠️\n- > 1.00: Déficit, dépense plus que revenus 🔴\n\n⚠️ PATTERNS INQUIÉTANTS:\n\n- Withdrawals > Deposits régulièrement\n- Transferts vers comptes inconnus\n- Retraits ATM multiples (cash business?)\n- Paiements e-transfer suspects\n\n📌 EXEMPLE:\n$4,800 withdrawals vs $5,000 deposits = 96% ratio (limite)",
+    "section_key": "financial",
+    "value_type": "numeric",
+    "unit": "$",
+    "format": "currency_cad",
+    "entity_types": [
+      "global",
+      "analysis"
+    ],
+    "supports_periods": true,
+    "available_periods": [
+      "30d",
+      "60d",
+      "90d"
+    ],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "blue",
+    "icon_name": null,
+    "display_order": 20,
+    "is_visible": true,
+    "tags": [
+      "financial",
+      "withdrawals"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T19:01:56.848224"
+  },
+  {
+    "id": "71d1b8d9-d422-481d-908d-a9d0bb91766c",
+    "metric_key": "transaction_volume",
+    "label": "Transaction Volume",
+    "description": "Nombre total de transactions (dépôts + retraits) sur la période analysée.\n\n📊 CE QUE ÇA REPRÉSENTE:\n- Niveau d'activité bancaire\n- Indicateur de comportement financier\n- Détection d'anomalies de patterns\n\n💡 COMMENT C'EST CALCULÉ:\nCOUNT(*) FROM client_transactions WHERE transaction_date >= période\n\n📊 INTERPRÉTATION:\n\nFaible volume (< 30 tx/mois):\n- Prestations gouvernement uniquement\n- Revenus fixes, peu de dépenses\n- Ou compte peu utilisé (suspect) 🔶\n\nVolume moyen (30-80 tx/mois):\n- Usage normal, salarié typique\n- Paiements réguliers de bills\n- Pattern prévisible ✅\n\nVolume élevé (> 80 tx/mois):\n- Business owner / Freelance\n- Lifestyle actif\n- Vérifier si légitimes ⚠️\n\nVolume très élevé (> 200 tx/mois):\n- Potentiel blanchiment d'argent 🚨\n- Business cash intensif\n- Investigation requise\n\n🎯 ANALYSE COMBINÉE:\n\nVolume + Montants:\n- 200 tx × $20 moy = $4,000 (normal)\n- 10 tx × $500 moy = $5,000 (suspect)\n\n📌 EXEMPLE:\n120 transactions en 90 jours = 40 tx/mois (normal)",
+    "section_key": "financial",
+    "value_type": "numeric",
+    "unit": "count",
+    "format": "integer",
+    "entity_types": [
+      "global",
+      "analysis"
+    ],
+    "supports_periods": true,
+    "available_periods": [
+      "30d",
+      "60d",
+      "90d"
+    ],
+    "calculation_function": null,
+    "depends_on": [],
+    "color_scheme": "blue",
+    "icon_name": null,
+    "display_order": 30,
+    "is_visible": true,
+    "tags": [
+      "financial",
+      "volume"
+    ],
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T19:01:56.848224"
+  }
+]

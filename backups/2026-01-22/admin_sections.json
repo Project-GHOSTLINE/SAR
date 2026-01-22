@@ -1,0 +1,98 @@
+[
+  {
+    "id": "bd45c477-f27f-481f-b3ec-14477d39f3f6",
+    "section_key": "global",
+    "label": "Dashboard Global",
+    "description": "Vue d'ensemble globale de tous les KPIs",
+    "icon_name": "LayoutDashboard",
+    "route_path": "/admin/dashboard",
+    "sort_order": 10,
+    "is_active": true,
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:27:04.91361"
+  },
+  {
+    "id": "6c16016c-31d9-4c11-8364-c76c5eab6862",
+    "section_key": "analyses",
+    "label": "Analyses Client",
+    "description": "Métriques par analyse client (IBV/Flinks)",
+    "icon_name": "BarChart3",
+    "route_path": "/admin/analyses",
+    "sort_order": 20,
+    "is_active": true,
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:27:04.91361"
+  },
+  {
+    "id": "7dccf819-5f5c-4481-807d-09a83dd3727e",
+    "section_key": "fraud",
+    "label": "Fraude & Risque",
+    "description": "Détection et investigation de fraude",
+    "icon_name": "Shield",
+    "route_path": "/admin/fraud",
+    "sort_order": 30,
+    "is_active": true,
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:27:04.91361"
+  },
+  {
+    "id": "794739b0-5a5e-4792-8796-032fce950dff",
+    "section_key": "financial",
+    "label": "Métriques Financières",
+    "description": "Revenus, transactions, NSF, volumes",
+    "icon_name": "DollarSign",
+    "route_path": "/admin/financial",
+    "sort_order": 40,
+    "is_active": true,
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:27:04.91361"
+  },
+  {
+    "id": "ba57056b-3cf2-42a6-bb07-e374542110ef",
+    "section_key": "vopay",
+    "label": "VoPay",
+    "description": "Intégration VoPay et webhooks",
+    "icon_name": "Webhook",
+    "route_path": "/admin/vopay",
+    "sort_order": 50,
+    "is_active": true,
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:27:04.91361"
+  },
+  {
+    "id": "f304cf4e-f327-4eaa-aabf-b80510c391f3",
+    "section_key": "support",
+    "label": "Support",
+    "description": "Tickets et demandes clients",
+    "icon_name": "Wrench",
+    "route_path": "/admin/support",
+    "sort_order": 60,
+    "is_active": true,
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:27:04.91361"
+  },
+  {
+    "id": "f5d7e108-6c65-4820-8a86-e268bd2d1e6b",
+    "section_key": "performance",
+    "label": "Performance",
+    "description": "Métriques de performance système",
+    "icon_name": "TrendingUp",
+    "route_path": "/admin/performance",
+    "sort_order": 70,
+    "is_active": true,
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:27:04.91361"
+  },
+  {
+    "id": "04d7867b-8cd5-4383-999f-bdafd52ff93d",
+    "section_key": "compliance",
+    "label": "Conformité",
+    "description": "GDPR, AML, audit logs",
+    "icon_name": "FileCheck",
+    "route_path": "/admin/compliance",
+    "sort_order": 80,
+    "is_active": true,
+    "created_at": "2026-01-13T18:27:04.91361",
+    "updated_at": "2026-01-13T18:27:04.91361"
+  }
+]
