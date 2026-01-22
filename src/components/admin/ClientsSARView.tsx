@@ -979,7 +979,7 @@ function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setS
                     </span>
                   </h3>
                   <div className="space-y-3">
-                    {concordances.map((concordance, idx) => {
+                    {concordances.map((concordance: Concordance, idx: number) => {
                       const risqueColors = {
                         critique: 'bg-red-600 text-white',
                         eleve: 'bg-orange-600 text-white',
