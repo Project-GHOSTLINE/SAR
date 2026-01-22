@@ -1360,37 +1360,75 @@ function AnalysePageContent() {
                   // Parser le texte daysDetected qui contient toutes les infos
                   const daysDetectedText = clientInfo.daysDetected || rawData.daysDetected || ''
 
-                  // Fonction pour extraire les valeurs entre les labels
+                  // Fonction améliorée pour extraire les valeurs entre les labels
                   const extractValue = (text: string, label: string, nextLabel?: string) => {
-                    const labelIndex = text.indexOf(label)
+                    // Chercher le label avec différentes variations
+                    let labelIndex = text.indexOf(label)
+                    if (labelIndex === -1) {
+                      // Essayer sans espaces
+                      labelIndex = text.indexOf(label.replace(/\s/g, ''))
+                    }
                     if (labelIndex === -1) return 'N/A'
 
-                    const startIndex = labelIndex + label.length
+                    // Commencer après le label
+                    let startIndex = labelIndex + label.length
+
+                    // Sauter les espaces et caractères spéciaux au début
+                    while (startIndex < text.length && (text[startIndex] === ' ' || text[startIndex] === '\n' || text[startIndex] === '\r')) {
+                      startIndex++
+                    }
+
                     let endIndex = text.length
 
                     // Trouver le prochain label pour délimiter
                     if (nextLabel) {
                       const nextIndex = text.indexOf(nextLabel, startIndex)
-                      if (nextIndex !== -1) endIndex = nextIndex
+                      if (nextIndex !== -1) {
+                        endIndex = nextIndex
+                      }
                     }
 
-                    return text.substring(startIndex, endIndex).trim() || 'N/A'
-                  }
+                    let value = text.substring(startIndex, endIndex).trim()
 
-                  // Extraire chaque valeur
-                  const employerInfo = extractValue(daysDetectedText, 'Employer Info', 'Employer Income')
-                  const employerIncome = extractValue(daysDetectedText, 'Employer Income(Average Monthly)', 'Employer Inc. Trend')
-                  const employerIncTrend = extractValue(daysDetectedText, 'Employer Inc. Trend', 'Non-Employer Info')
-                  const nonEmployerInfo = extractValue(daysDetectedText, 'Non-Employer Info', 'Non-Employer Income')
-                  const nonEmployerIncome = extractValue(daysDetectedText, 'Non-Employer Income(Average Monthly)', 'Government Income')
-                  const governmentIncome = extractValue(daysDetectedText, 'Government Income(Average Monthly)', 'Total Deposits Trend')
-                  const totalDepositsTrend = extractValue(daysDetectedText, 'Total Deposits Trend', undefined)
+                    // Nettoyer la valeur
+                    value = value.replace(/\s+/g, ' ') // Remplacer les espaces multiples par un seul
+
+                    return value || 'N/A'
+                  }
 
                   // Extraire le nombre de jours détectés (avant "Employer Info")
                   let daysDetected = 'N/A'
                   const employerInfoIndex = daysDetectedText.indexOf('Employer Info')
                   if (employerInfoIndex > 0) {
                     daysDetected = daysDetectedText.substring(0, employerInfoIndex).trim()
+                  }
+
+                  // Extraire chaque valeur avec les bons labels
+                  const employerInfo = extractValue(daysDetectedText, 'Employer Info', 'Employer Income')
+                  const employerIncome = extractValue(daysDetectedText, 'Employer Income(Average Monthly)', 'Employer Inc.')
+                  const employerIncTrend = extractValue(daysDetectedText, 'Employer Inc. Trend', 'Non-Employer')
+                  const nonEmployerInfo = extractValue(daysDetectedText, 'Non-Employer Info', 'Non-Employer Income')
+                  const nonEmployerIncome = extractValue(daysDetectedText, 'Non-Employer Income(Average Monthly)', 'Government')
+                  const governmentIncome = extractValue(daysDetectedText, 'Government Income(Average Monthly)', 'Total Deposits')
+                  const totalDepositsTrend = extractValue(daysDetectedText, 'Total Deposits Trend', 'Account Name')
+
+                  // Si tout est vide, afficher le texte brut de manière plus lisible
+                  const hasValidData = employerInfo !== 'N/A' || employerIncome !== 'N/A' || nonEmployerIncome !== 'N/A' || governmentIncome !== 'N/A'
+
+                  if (!hasValidData && daysDetectedText) {
+                    return (
+                      <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
+                        <h3 className="text-xs font-semibold text-purple-700 uppercase tracking-wide flex items-center gap-2 mb-3">
+                          <TrendingUp size={12} />
+                          Analyse de revenus (Flinks)
+                        </h3>
+                        <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                          <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-mono">
+                            {daysDetectedText}
+                          </p>
+                        </div>
+                      </div>
+                    )
                   }
 
                   return (
@@ -1400,52 +1438,55 @@ function AnalysePageContent() {
                         Analyse de revenus (Flinks)
                       </h3>
 
-                      {/* Jours détectés */}
-                      <div className="bg-purple-50 rounded-lg p-2">
-                        <p className="text-[10px] text-purple-600 font-bold uppercase mb-0.5">Jours détectés</p>
-                        <p className="text-sm text-gray-900 font-semibold">{daysDetected}</p>
-                      </div>
+                      {/* Grille 2 colonnes pour un meilleur affichage */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {/* Jours détectés */}
+                        <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                          <p className="text-[10px] text-purple-600 font-bold uppercase mb-1">Jours détectés</p>
+                          <p className="text-base text-gray-900 font-bold">{daysDetected}</p>
+                        </div>
 
-                      {/* Employer Info */}
-                      <div className="bg-blue-50 rounded-lg p-2">
-                        <p className="text-[10px] text-blue-600 font-bold uppercase mb-0.5">Employer Info</p>
-                        <p className="text-sm text-gray-900 font-medium">{employerInfo}</p>
-                      </div>
+                        {/* Employer Info */}
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                          <p className="text-[10px] text-blue-600 font-bold uppercase mb-1">Employer Info</p>
+                          <p className="text-sm text-gray-900 font-medium">{employerInfo}</p>
+                        </div>
 
-                      {/* Employer Income */}
-                      <div className="bg-green-50 rounded-lg p-2">
-                        <p className="text-[10px] text-green-600 font-bold uppercase mb-0.5">Employer Income (Average Monthly)</p>
-                        <p className="text-sm text-gray-900 font-semibold">{employerIncome}</p>
-                      </div>
+                        {/* Employer Income */}
+                        <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                          <p className="text-[10px] text-green-600 font-bold uppercase mb-1">Employer Income (Monthly)</p>
+                          <p className="text-base text-gray-900 font-bold">{employerIncome}</p>
+                        </div>
 
-                      {/* Employer Inc. Trend */}
-                      <div className="bg-emerald-50 rounded-lg p-2">
-                        <p className="text-[10px] text-emerald-600 font-bold uppercase mb-0.5">Employer Inc. Trend</p>
-                        <p className="text-sm text-gray-900 font-medium">{employerIncTrend}</p>
-                      </div>
+                        {/* Employer Inc. Trend */}
+                        <div className="bg-emerald-50 rounded-lg p-3 border border-emerald-200">
+                          <p className="text-[10px] text-emerald-600 font-bold uppercase mb-1">Employer Inc. Trend</p>
+                          <p className="text-sm text-gray-900 font-medium">{employerIncTrend}</p>
+                        </div>
 
-                      {/* Non-Employer Info */}
-                      <div className="bg-amber-50 rounded-lg p-2">
-                        <p className="text-[10px] text-amber-600 font-bold uppercase mb-0.5">Non-Employer Info</p>
-                        <p className="text-sm text-gray-900 font-medium">{nonEmployerInfo}</p>
-                      </div>
+                        {/* Non-Employer Info */}
+                        <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                          <p className="text-[10px] text-amber-600 font-bold uppercase mb-1">Non-Employer Info</p>
+                          <p className="text-sm text-gray-900 font-medium">{nonEmployerInfo}</p>
+                        </div>
 
-                      {/* Non-Employer Income */}
-                      <div className="bg-orange-50 rounded-lg p-2">
-                        <p className="text-[10px] text-orange-600 font-bold uppercase mb-0.5">Non-Employer Income (Average Monthly)</p>
-                        <p className="text-sm text-gray-900 font-semibold">{nonEmployerIncome}</p>
-                      </div>
+                        {/* Non-Employer Income */}
+                        <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                          <p className="text-[10px] text-orange-600 font-bold uppercase mb-1">Non-Employer Income (Monthly)</p>
+                          <p className="text-base text-gray-900 font-bold">{nonEmployerIncome}</p>
+                        </div>
 
-                      {/* Government Income */}
-                      <div className="bg-red-50 rounded-lg p-2">
-                        <p className="text-[10px] text-red-600 font-bold uppercase mb-0.5">Government Income (Average Monthly)</p>
-                        <p className="text-sm text-gray-900 font-semibold">{governmentIncome}</p>
-                      </div>
+                        {/* Government Income */}
+                        <div className="bg-red-50 rounded-lg p-3 border border-red-200">
+                          <p className="text-[10px] text-red-600 font-bold uppercase mb-1">Government Income (Monthly)</p>
+                          <p className="text-base text-gray-900 font-bold">{governmentIncome}</p>
+                        </div>
 
-                      {/* Total Deposits Trend */}
-                      <div className="bg-indigo-50 rounded-lg p-2">
-                        <p className="text-[10px] text-indigo-600 font-bold uppercase mb-0.5">Total Deposits Trend</p>
-                        <p className="text-sm text-gray-900 font-medium">{totalDepositsTrend}</p>
+                        {/* Total Deposits Trend */}
+                        <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-200">
+                          <p className="text-[10px] text-indigo-600 font-bold uppercase mb-1">Total Deposits Trend</p>
+                          <p className="text-sm text-gray-900 font-medium">{totalDepositsTrend}</p>
+                        </div>
                       </div>
                     </div>
                   )
