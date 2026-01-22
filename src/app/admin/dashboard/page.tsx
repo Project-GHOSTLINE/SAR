@@ -3273,8 +3273,9 @@ function AdminDashboardContent() {
                           <p className="text-xs text-gray-600">Dernière mise à jour: {new Date().toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                         </div>
                         <a
-                          href="/Releves_Bancaires_2025.html"
+                          href="https://dllyzfuqjzuhvshrlmuq.supabase.co/storage/v1/object/public/documents/Releves_Bancaires_2025.html"
                           target="_blank"
+                          rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
                         >
                           <Download size={16} />
@@ -3286,7 +3287,7 @@ function AdminDashboardContent() {
                     {/* iframe container */}
                     <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden shadow-sm">
                       <iframe
-                        src="/Releves_Bancaires_2025.html"
+                        src="https://dllyzfuqjzuhvshrlmuq.supabase.co/storage/v1/object/public/documents/Releves_Bancaires_2025.html"
                         className="w-full border-0"
                         style={{ height: 'calc(100vh - 400px)', minHeight: '600px' }}
                         title="Relevés Bancaires 2025"
