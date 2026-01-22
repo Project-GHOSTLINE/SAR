@@ -542,8 +542,8 @@ export default function Home() {
                     Chez Solution Argent Rapide, nous établissons vos paiements minimums en fonction de votre
                     capacité de paiement et de la durée de remboursement que vous préférez.
                   </p>
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                    <p className="text-yellow-800 text-sm">
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mt-4">
+                    <p className="text-gray-500 text-xs">
                       <strong>Remarque :</strong> Les frais d&apos;adhésion sont applicables tant qu&apos;il reste
                       un solde à rembourser sur votre crédit.
                     </p>
@@ -606,15 +606,15 @@ export default function Home() {
       </section>
 
       {/* Warning */}
-      <section className="py-8 md:py-12">
+      <section className="py-6 md:py-8">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <div className="glass-warning rounded-2xl p-5 md:p-6">
-              <div className="flex gap-4">
-                <span className="text-2xl flex-shrink-0">⚠️</span>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <div className="flex gap-3">
+                <span className="text-base flex-shrink-0 opacity-60">ℹ️</span>
                 <div>
-                  <h3 className="font-semibold text-yellow-800 mb-2">Empruntez responsablement</h3>
-                  <p className="text-yellow-700 text-sm leading-relaxed">
+                  <h3 className="font-medium text-gray-600 text-sm mb-1">Empruntez responsablement</h3>
+                  <p className="text-gray-500 text-xs leading-relaxed">
                     Nos solutions sont pour les urgences ponctuelles. Les taux sont plus élevés que les banques traditionnelles.
                     Assurez-vous de pouvoir rembourser avant de faire une demande.
                   </p>
