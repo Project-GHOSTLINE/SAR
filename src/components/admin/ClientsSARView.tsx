@@ -15,6 +15,8 @@ interface ClientSAR {
   province?: string
   employeur?: string
   banque_institution?: string
+  banque_transit?: string
+  banque_compte?: string
   capital_origine?: number
   etat_dossier?: string
   score_fraude: number
@@ -27,6 +29,7 @@ interface ClientSAR {
   solde_actuel?: number
   date_creation_dossier?: string
   lien_ibv?: string
+  autres_contrats?: number
 }
 
 interface Stats {
@@ -73,6 +76,8 @@ export default function ClientsSARView() {
   const [selectedClient, setSelectedClient] = useState<ClientSAR | null>(null)
   const [concordances, setConcordances] = useState<Concordance[]>([])
   const [concordancesLoading, setConcordancesLoading] = useState(false)
+  const [autresContrats, setAutresContrats] = useState<any[]>([])
+  const [autresContratsLoading, setAutresContratsLoading] = useState(false)
 
   // Filtres
   const [searchQuery, setSearchQuery] = useState('')
@@ -195,10 +200,29 @@ export default function ClientsSARView() {
     }
   }
 
+  const loadAutresContrats = async (margillId: string) => {
+    setAutresContratsLoading(true)
+    try {
+      const res = await fetch(`/api/admin/clients-sar/autres-contrats?margill_id=${margillId}`)
+      const data = await res.json()
+
+      if (data.success) {
+        setAutresContrats(data.contrats || [])
+      }
+    } catch (error) {
+      console.error('Erreur chargement autres contrats:', error)
+      setAutresContrats([])
+    } finally {
+      setAutresContratsLoading(false)
+    }
+  }
+
   const handleSelectClient = (client: ClientSAR) => {
     setSelectedClient(client)
     setConcordances([])
+    setAutresContrats([])
     loadConcordances(client.margill_id)
+    loadAutresContrats(client.margill_id)
   }
 
   const applyStatFilter = (filterType: 'all' | 'sans-ibv' | 'concordances' | 'critique' | 'eleve' | 'mauvaises-creances') => {
@@ -383,6 +407,8 @@ export default function ClientsSARView() {
           handleSelectClient={handleSelectClient}
           concordances={concordances}
           concordancesLoading={concordancesLoading}
+          autresContrats={autresContrats}
+          autresContratsLoading={autresContratsLoading}
           setSelectedClient={setSelectedClient}
           applyStatFilter={applyStatFilter}
           activeFilter={activeFilter}
@@ -407,7 +433,7 @@ export default function ClientsSARView() {
 }
 
 // Composant Onglet Recherche
-function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setSearchQuery, minScore, setMinScore, etatDossier, setEtatDossier, flagIBV, setFlagIBV, flagMauvaisCreance, setFlagMauvaisCreance, filterConcordances, handleSearch, total, offset, setOffset, limit, selectedClient, handleSelectClient, concordances, concordancesLoading, setSelectedClient, applyStatFilter, activeFilter, getRiskColor, getRiskLabel }: any) {
+function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setSearchQuery, minScore, setMinScore, etatDossier, setEtatDossier, flagIBV, setFlagIBV, flagMauvaisCreance, setFlagMauvaisCreance, filterConcordances, handleSearch, total, offset, setOffset, limit, selectedClient, handleSelectClient, concordances, concordancesLoading, autresContrats, autresContratsLoading, setSelectedClient, applyStatFilter, activeFilter, getRiskColor, getRiskLabel }: any) {
   return (
     <>
       {/* Légende Score de Risque */}
@@ -752,13 +778,13 @@ function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setS
                       Risque
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Client
+                      ID / Contrat
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      Compte Bancaire
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Contact
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Localisation
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Dossier
@@ -775,89 +801,99 @@ function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setS
                       onClick={() => handleSelectClient(client)}
                       className="hover:bg-gray-50 cursor-pointer transition-colors duration-150 border-l-2 border-transparent hover:border-blue-400"
                     >
-                      {/* Score de fraude + ID */}
+                      {/* Score de fraude */}
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div>
-                            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ${
-                              client.score_fraude >= 80 ? 'bg-red-50 text-red-700 border border-red-200' :
-                              client.score_fraude >= 60 ? 'bg-orange-50 text-orange-700 border border-orange-200' :
-                              client.score_fraude >= 40 ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
-                              'bg-green-50 text-green-700 border border-green-200'
-                            }`}>
-                              <span className="font-bold text-base">{client.score_fraude}</span>
-                              <span className="text-xs">
-                                {client.score_fraude >= 80 ? 'Critique' :
-                                 client.score_fraude >= 60 ? 'Élevé' :
-                                 client.score_fraude >= 40 ? 'Moyen' :
-                                 'Faible'}
-                              </span>
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1">ID: {client.margill_id}</div>
-                          </div>
+                        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ${
+                          client.score_fraude >= 80 ? 'bg-red-50 text-red-700 border border-red-200' :
+                          client.score_fraude >= 60 ? 'bg-orange-50 text-orange-700 border border-orange-200' :
+                          client.score_fraude >= 40 ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
+                          'bg-green-50 text-green-700 border border-green-200'
+                        }`}>
+                          <span className="font-bold text-lg">{client.score_fraude}</span>
+                          <span className="text-xs">
+                            {client.score_fraude >= 80 ? 'Critique' :
+                             client.score_fraude >= 60 ? 'Élevé' :
+                             client.score_fraude >= 40 ? 'Moyen' :
+                             'Faible'}
+                          </span>
                         </div>
                       </td>
 
-                      {/* Client */}
+                      {/* ID / Contrat */}
                       <td className="px-4 py-3">
-                        <div className="flex items-start gap-2">
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-semibold text-gray-900 truncate">{client.nom_complet || 'N/A'}</div>
-                            {client.employeur && (
-                              <div className="text-xs text-gray-500 mt-0.5 truncate">
-                                {client.employeur}
-                              </div>
-                            )}
-                            {client.banque_institution && (
-                              <div className="text-xs text-gray-400 mt-0.5 truncate">
-                                {client.banque_institution}
-                              </div>
-                            )}
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-gray-500">ID:</span>
+                            <span className="text-sm font-mono font-bold text-gray-900">{client.margill_id}</span>
                           </div>
+                          {client.dossier_id && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-gray-500">Contrat:</span>
+                              <span className="text-sm font-mono font-bold text-blue-600">#{client.dossier_id}</span>
+                            </div>
+                          )}
+                          <div className="text-sm font-semibold text-gray-900 mt-2">{client.nom_complet || 'N/A'}</div>
+                        </div>
+                      </td>
+
+                      {/* Compte Bancaire */}
+                      <td className="px-4 py-3">
+                        <div className="space-y-1 font-mono text-xs">
+                          {client.banque_institution && (
+                            <div className="flex items-start gap-2">
+                              <span className="text-gray-500 font-semibold min-w-[60px]">Institution:</span>
+                              <span className="text-gray-900 font-medium">{client.banque_institution}</span>
+                            </div>
+                          )}
+                          {client.banque_transit && (
+                            <div className="flex items-start gap-2">
+                              <span className="text-gray-500 font-semibold min-w-[60px]">Transit:</span>
+                              <span className="text-gray-900 font-bold">{client.banque_transit}</span>
+                            </div>
+                          )}
+                          {client.banque_compte && (
+                            <div className="flex items-start gap-2">
+                              <span className="text-gray-500 font-semibold min-w-[60px]">Compte:</span>
+                              <span className="text-gray-900 font-bold">{client.banque_compte}</span>
+                            </div>
+                          )}
+                          {!client.banque_institution && !client.banque_transit && !client.banque_compte && (
+                            <span className="text-gray-400 italic">Aucune info</span>
+                          )}
                         </div>
                       </td>
 
                       {/* Contact */}
                       <td className="px-4 py-3">
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                           {client.email && (
-                            <div className="text-xs text-gray-700 truncate max-w-[180px]">
-                              {client.email}
+                            <div className="flex items-center gap-1.5">
+                              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                              </svg>
+                              <span className="text-xs text-gray-700 truncate max-w-[180px]">{client.email}</span>
                             </div>
                           )}
                           {(client.telephone || client.telephone_mobile) && (
-                            <div className="text-xs text-gray-600">
-                              {client.telephone_mobile || client.telephone}
+                            <div className="flex items-center gap-1.5">
+                              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                              </svg>
+                              <span className="text-xs font-medium text-gray-900">{client.telephone_mobile || client.telephone}</span>
                             </div>
                           )}
                         </div>
-                      </td>
-
-                      {/* Localisation */}
-                      <td className="px-4 py-3">
-                        {client.ville && client.province ? (
-                          <div className="text-sm text-gray-700">
-                            {client.ville}, {client.province}
-                          </div>
-                        ) : (
-                          <span className="text-xs text-gray-400">N/A</span>
-                        )}
                       </td>
 
                       {/* Dossier */}
                       <td className="px-4 py-3">
-                        <div className="space-y-1.5">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            client.etat_dossier === 'Actif'
-                              ? 'bg-green-50 text-green-700 border border-green-200'
-                              : 'bg-gray-50 text-gray-600 border border-gray-200'
-                          }`}>
-                            {client.etat_dossier || 'N/A'}
-                          </span>
-                          {client.dossier_id && (
-                            <div className="text-xs text-gray-500">#{client.dossier_id}</div>
-                          )}
-                        </div>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
+                          client.etat_dossier === 'Actif'
+                            ? 'bg-green-50 text-green-700 border-2 border-green-200'
+                            : 'bg-gray-50 text-gray-600 border-2 border-gray-200'
+                        }`}>
+                          {client.etat_dossier || 'N/A'}
+                        </span>
                       </td>
 
                       {/* Alertes */}
@@ -883,7 +919,18 @@ function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setS
                               Docs email
                             </span>
                           )}
-                          {!client.flag_pas_ibv && !client.flag_mauvaise_creance && !client.flag_paiement_rate_precoce && !client.flag_documents_email && (
+                          {client.autres_contrats && client.autres_contrats > 0 && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleSelectClient(client)
+                              }}
+                              className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-purple-50 text-purple-700 border-2 border-purple-300 hover:bg-purple-100 transition-colors"
+                            >
+                              🔗 {client.autres_contrats} autre{client.autres_contrats > 1 ? 's' : ''} contrat{client.autres_contrats > 1 ? 's' : ''}
+                            </button>
+                          )}
+                          {!client.flag_pas_ibv && !client.flag_mauvaise_creance && !client.flag_paiement_rate_precoce && !client.flag_documents_email && !client.autres_contrats && (
                             <span className="text-xs text-gray-400 italic">Aucune alerte</span>
                           )}
                         </div>
@@ -1066,6 +1113,98 @@ function RechercheTab({ clients, stats, statsLoading, loading, searchQuery, setS
                         </div>
                       )
                     })}
+                  </div>
+                </div>
+              )}
+
+              {/* Autres contrats du même client */}
+              {autresContratsLoading && (
+                <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+                    <span className="text-sm text-blue-900">Recherche d'autres contrats...</span>
+                  </div>
+                </div>
+              )}
+
+              {!autresContratsLoading && autresContrats.length > 0 && (
+                <div className="mb-6 bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-300 rounded-lg p-4">
+                  <h3 className="text-base font-bold text-purple-900 mb-3 flex items-center">
+                    🔗 Autres Contrats Trouvés ({autresContrats.length})
+                    <span className="ml-2 text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">
+                      Même personne
+                    </span>
+                  </h3>
+                  <div className="space-y-3">
+                    {autresContrats.map((contrat: any, idx: number) => (
+                      <div
+                        key={idx}
+                        className="bg-white border-2 border-purple-200 rounded-lg p-4 hover:border-purple-400 hover:shadow-md transition-all cursor-pointer"
+                        onClick={() => {
+                          const client = clients.find((c: any) => c.margill_id === contrat.margill_id)
+                          if (client) handleSelectClient(client)
+                        }}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-sm font-bold text-gray-900">
+                                {contrat.nom_complet || 'N/A'}
+                              </span>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                                contrat.etat_dossier === 'Actif'
+                                  ? 'bg-green-100 text-green-700 border border-green-300'
+                                  : 'bg-gray-100 text-gray-600 border border-gray-300'
+                              }`}>
+                                {contrat.etat_dossier || 'N/A'}
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-500 font-semibold">ID:</span>
+                                <span className="font-mono font-bold text-gray-900">{contrat.margill_id}</span>
+                              </div>
+                              {contrat.dossier_id && (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-gray-500 font-semibold">Contrat:</span>
+                                  <span className="font-mono font-bold text-blue-600">#{contrat.dossier_id}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-500 font-semibold">Détecté par:</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 border border-indigo-200">
+                                  {contrat.match_type === 'email' ? '📧 Email' :
+                                   contrat.match_type === 'telephone' ? '☎️ Téléphone' :
+                                   contrat.match_type === 'mobile' ? '📱 Mobile' :
+                                   contrat.match_type === 'nom' ? '👤 Nom' : contrat.match_type}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-500 font-semibold">Score:</span>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${
+                                  contrat.score_fraude >= 80 ? 'bg-red-100 text-red-700 border border-red-200' :
+                                  contrat.score_fraude >= 60 ? 'bg-orange-100 text-orange-700 border border-orange-200' :
+                                  contrat.score_fraude >= 40 ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' :
+                                  'bg-green-100 text-green-700 border border-green-200'
+                                }`}>
+                                  {contrat.score_fraude}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            className="ml-3 px-3 py-1 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-700 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              const client = clients.find((c: any) => c.margill_id === contrat.margill_id)
+                              if (client) handleSelectClient(client)
+                            }}
+                          >
+                            Voir la fiche →
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

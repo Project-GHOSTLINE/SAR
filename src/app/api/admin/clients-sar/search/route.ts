@@ -84,17 +84,49 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Calculer les niveaux de risque
-    const clients = (data || []).map(client => ({
-      ...client,
-      niveau_risque: client.score_fraude >= 80 ? 'CRITIQUE' :
-                     client.score_fraude >= 60 ? 'ÉLEVÉ' :
-                     client.score_fraude >= 40 ? 'MOYEN' : 'FAIBLE'
+    // Calculer les niveaux de risque et autres contrats
+    const clientsWithExtras = await Promise.all((data || []).map(async (client) => {
+      // Compter les autres contrats pour ce client (par email, téléphone, ou nom)
+      let autresContratsCount = 0
+
+      try {
+        const conditions = []
+
+        if (client.email) {
+          conditions.push(`email.eq.${client.email}`)
+        }
+        if (client.telephone) {
+          conditions.push(`telephone.eq.${client.telephone}`)
+        }
+        if (client.telephone_mobile) {
+          conditions.push(`telephone_mobile.eq.${client.telephone_mobile}`)
+        }
+
+        if (conditions.length > 0) {
+          const { count: autresCount } = await supabase
+            .from('clients_sar')
+            .select('margill_id', { count: 'exact', head: true })
+            .or(conditions.join(','))
+            .neq('margill_id', client.margill_id)
+
+          autresContratsCount = autresCount || 0
+        }
+      } catch (error) {
+        console.error('Erreur comptage autres contrats:', error)
+      }
+
+      return {
+        ...client,
+        niveau_risque: client.score_fraude >= 80 ? 'CRITIQUE' :
+                       client.score_fraude >= 60 ? 'ÉLEVÉ' :
+                       client.score_fraude >= 40 ? 'MOYEN' : 'FAIBLE',
+        autres_contrats: autresContratsCount
+      }
     }))
 
     return NextResponse.json({
       success: true,
-      data: clients,
+      data: clientsWithExtras,
       pagination: {
         total: count || 0,
         limit,
