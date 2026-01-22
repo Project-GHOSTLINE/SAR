@@ -140,7 +140,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       name: 'Clients SAR',
       href: '/admin/clients-sar',
       icon: Users,
-      badge: null
+      badge: 'new'
     },
     {
       name: 'Explorer',
@@ -239,7 +239,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                 >
                   <Icon size={14} className="flex-shrink-0 md:w-4 md:h-4" />
                   <span className="text-[10px] md:text-xs">{item.name}</span>
-                  {item.badge !== null && item.badge > 0 && (
+                  {item.badge === 'new' && (
+                    <span className="absolute -top-1 -right-1 px-2 py-0.5 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-[length:200%_100%] animate-[shimmer_2s_ease-in-out_infinite] text-white text-[9px] font-black rounded-full shadow-lg border-2 border-white uppercase tracking-wider">
+                      New
+                    </span>
+                  )}
+                  {item.badge !== null && item.badge !== 'new' && typeof item.badge === 'number' && item.badge > 0 && (
                     <span className={`
                       absolute -top-1 -right-1 min-w-[18px] h-5 px-1.5 flex items-center justify-center
                       rounded-full text-xs font-bold
@@ -316,7 +321,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                 >
                   <Icon size={18} className="sm:w-5 sm:h-5 flex-shrink-0" />
                   <span className="flex-1 text-left text-sm">{item.name}</span>
-                  {item.badge !== null && item.badge > 0 && (
+                  {item.badge === 'new' && (
+                    <span className="px-3 py-1 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-[length:200%_100%] animate-[shimmer_2s_ease-in-out_infinite] text-white text-[10px] font-black rounded-full shadow-lg border-2 border-white uppercase tracking-wider">
+                      Nouveau
+                    </span>
+                  )}
+                  {item.badge !== null && item.badge !== 'new' && typeof item.badge === 'number' && item.badge > 0 && (
                     <span className={`
                       min-w-[24px] h-6 px-2 flex items-center justify-center
                       rounded-full text-xs font-bold
