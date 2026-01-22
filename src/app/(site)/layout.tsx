@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
@@ -10,6 +11,8 @@ export default function SiteLayout({
   children: React.ReactNode
 }) {
   const [mounted, setMounted] = useState(false)
+  const pathname = usePathname()
+  const isFormPage = pathname === '/demande-de-pret-en-ligne-formulaire'
 
   useEffect(() => {
     setMounted(true)
@@ -18,8 +21,8 @@ export default function SiteLayout({
   return (
     <>
       {mounted && <Header />}
-      <main className="pt-[104px]">{children}</main>
-      {mounted && <Footer />}
+      <main className={isFormPage ? '' : 'pt-[72px]'}>{children}</main>
+      {mounted && !isFormPage && <Footer />}
     </>
   )
 }

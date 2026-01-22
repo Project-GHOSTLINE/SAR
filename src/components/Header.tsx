@@ -3,13 +3,11 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { Menu, X, Phone, MessageCircle } from 'lucide-react'
-import ContactModal from './ContactModal'
+import { Menu, X } from 'lucide-react'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false)
   const [isClientSubdomain, setIsClientSubdomain] = useState(false)
   const pathname = usePathname()
   const isHomepage = pathname === '/'
@@ -53,6 +51,9 @@ export default function Header() {
     return null
   }
 
+  // Vérifier si on est sur la page du formulaire
+  const isFormPage = pathname === '/demande-de-pret-en-ligne-formulaire'
+
   return (
     <>
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
@@ -60,44 +61,16 @@ export default function Header() {
         ? 'bg-transparent'
         : 'bg-white/95 backdrop-blur-xl shadow-lg shadow-black/5'
     }`}>
-      {/* Top bar */}
-      <div className={`transition-all duration-500 ${
-        isScrolled
-          ? 'bg-sar-green/90 backdrop-blur-sm'
-          : 'bg-sar-green'
-      } text-white py-2`}>
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:justify-center md:items-center gap-1 md:gap-8 text-sm">
-            <button
-              onClick={() => setIsContactModalOpen(true)}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
-            >
-              <MessageCircle size={16} className="shrink-0 text-white" />
-              <span className="text-white">
-                <strong>Analyse et suivi</strong>
-              </span>
-              <span className="bg-white text-sar-green text-xs font-bold px-3 py-1 rounded-full">DISCUTER</span>
-            </button>
-            <span className="hidden md:inline text-white/50">|</span>
-            <a href="tel:4509991107" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <Phone size={14} className="shrink-0 text-white" />
-              <span className="text-white">
-                <strong>Administration et comptabilite:</strong>
-              </span>
-              <span className="bg-white text-sar-green font-bold px-2 py-0.5 rounded">450 999-1107</span>
-            </a>
-          </div>
-        </div>
-      </div>
-
       {/* Main header */}
       <div className="container mx-auto px-4">
           <div className="flex items-center justify-between py-4">
-            {/* Logo */}
-            <Link href="/" className="flex items-center group">
-              <span className={`text-2xl font-bold transition-all duration-300 ${useWhiteText ? 'text-white' : 'text-sar-green'}`}>Solution</span>
-              <span className={`text-2xl font-bold ml-1 transition-all duration-300 ${useWhiteText ? 'text-white' : 'text-sar-gold'}`}>Argent Rapide</span>
-            </Link>
+            {/* Logo - Caché sur la page formulaire */}
+            {!isFormPage && (
+              <Link href="/" className="flex items-center group">
+                <span className={`text-2xl font-bold transition-all duration-300 ${useWhiteText ? 'text-white' : 'text-sar-green'}`}>Solution</span>
+                <span className={`text-2xl font-bold ml-1 transition-all duration-300 ${useWhiteText ? 'text-white' : 'text-sar-gold'}`}>Argent Rapide</span>
+              </Link>
+            )}
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
@@ -171,13 +144,6 @@ export default function Header() {
                   {link.label}
                 </Link>
               ))}
-              <button
-                onClick={() => { setIsMenuOpen(false); setIsContactModalOpen(true); }}
-                className="w-full mt-4 py-3 px-4 bg-sar-gold/10 text-sar-gold text-center rounded-xl font-semibold flex items-center justify-center gap-2"
-              >
-                <MessageCircle size={18} />
-                Analyse 24/7
-              </button>
               <a
                 href="https://client.solutionargentrapide.ca"
                 target="_blank"
@@ -198,12 +164,6 @@ export default function Header() {
           </div>
         </div>
     </header>
-
-    {/* Contact Modal - Outside header for proper z-index */}
-    <ContactModal
-      isOpen={isContactModalOpen}
-      onClose={() => setIsContactModalOpen(false)}
-    />
     </>
   )
 }

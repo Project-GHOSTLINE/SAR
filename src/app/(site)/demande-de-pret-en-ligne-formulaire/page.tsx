@@ -25,32 +25,18 @@ export default function CreditRequestPage() {
   }, [])
 
   return (
-    <div className="py-12 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 min-h-screen">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            Demandez votre crédit
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Remplissez le formulaire ci-dessous pour faire votre demande
-          </p>
-        </div>
-
-        {/* Iframe Margill */}
-        <div className="flex justify-center">
-          <iframe
-            src="https://argentrapide.margill.com/myform.htm?origin=argentrapide&langue=Français"
-            style={{
-              border: 'none',
-              height: '900px',
-              width: '1250px',
-              maxWidth: '100%',
-              overflow: 'hidden'
-            }}
-            title="Formulaire de demande de prêt"
-          />
-        </div>
-      </div>
+    <div className="bg-white dark:bg-gray-900 min-h-screen pt-[72px]">
+      {/* Iframe Margill - Optimisé pour mobile et desktop */}
+      <iframe
+        src="https://argentrapide.margill.com/myform.htm?origin=argentrapide&langue=Français"
+        className="w-full"
+        style={{
+          border: 'none',
+          height: 'calc(100vh - 72px)',
+          overflow: 'hidden'
+        }}
+        title="Formulaire de demande de prêt"
+      />
     </div>
   )
 }
