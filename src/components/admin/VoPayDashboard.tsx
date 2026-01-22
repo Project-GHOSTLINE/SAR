@@ -47,7 +47,7 @@ export default function VoPayDashboard() {
   })
   const [vopayLoading, setVopayLoading] = useState(false)
   const [vopayError, setVopayError] = useState<string | null>(null)
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'transactions' | 'send'>('overview')
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'transactions' | 'send' | 'releves'>('overview')
   const [filterStatus, setFilterStatus] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -220,7 +220,8 @@ export default function VoPayDashboard() {
           <div className="flex gap-1 p-2">
             {[
               { id: 'overview', label: 'Vue d\'ensemble' },
-              { id: 'transactions', label: 'Transactions' }
+              { id: 'transactions', label: 'Transactions' },
+              { id: 'releves', label: 'Relevés Bancaires' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -380,6 +381,42 @@ export default function VoPayDashboard() {
                   <p className="text-gray-500">Aucune transaction trouvée</p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Relevés Bancaires Tab */}
+          {selectedTab === 'releves' && (
+            <div className="space-y-6">
+              {/* Info header */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Download size={20} className="text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-bold text-gray-900">Relevés Bancaires 2025</h3>
+                    <p className="text-xs text-gray-600">Dernière mise à jour: {new Date().toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  </div>
+                  <a
+                    href="/Releves_Bancaires_2025.html"
+                    target="_blank"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Download size={16} />
+                    Ouvrir en plein écran
+                  </a>
+                </div>
+              </div>
+
+              {/* iframe container */}
+              <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden shadow-sm">
+                <iframe
+                  src="/Releves_Bancaires_2025.html"
+                  className="w-full border-0"
+                  style={{ height: 'calc(100vh - 400px)', minHeight: '600px' }}
+                  title="Relevés Bancaires 2025"
+                />
+              </div>
             </div>
           )}
         </div>
