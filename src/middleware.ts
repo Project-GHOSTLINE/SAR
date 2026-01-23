@@ -1,12 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
+import { randomUUID } from 'crypto'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'sar-admin-secret-key-2024'
+
+/**
+ * Hash value with salt for anonymization
+ */
+function hashWithSalt(value: string): string {
+  const crypto = require('crypto')
+  const salt = process.env.TELEMETRY_HASH_SALT || 'sar-telemetry-2026'
+  return crypto
+    .createHash('sha256')
+    .update(value + salt)
+    .digest('hex')
+    .substring(0, 16) // 16 chars = 64 bits entropy
+}
 
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || ''
   const { pathname } = request.nextUrl
   const isApiRoute = pathname.startsWith('/api/')
+
+  // TELEMETRY: Generate trace_id for request tracing
+  const traceId = randomUUID()
+
+  // Extract request metadata (anonymized)
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || request.headers.get('x-real-ip')
+    || 'unknown'
+  const ua = request.headers.get('user-agent') || 'unknown'
+  const vercelId = request.headers.get('x-vercel-id') || undefined
+  const vercelRegion = request.headers.get('x-vercel-deployment-url')?.split('.')[0] || undefined
+
+  // Hash IP and UA for privacy
+  const ipHash = ip !== 'unknown' ? hashWithSalt(ip) : undefined
+  const uaHash = ua !== 'unknown' ? hashWithSalt(ua) : undefined
+
+  // Will be set after auth check
+  let userRole: 'admin' | 'user' | 'anonymous' = 'anonymous'
+  let userId: string | undefined
 
   // CHECK AUTHENTICATION FIRST - before any rewrite
   // Protect ALL admin pages except login page and public report page (/analyse)
@@ -28,7 +61,11 @@ export async function middleware(request: NextRequest) {
 
     try {
       const secret = new TextEncoder().encode(JWT_SECRET)
-      await jwtVerify(token, secret)
+      const verified = await jwtVerify(token, secret)
+
+      // Extract user context from JWT payload
+      userRole = 'admin'  // JWT verified = admin role
+      userId = (verified.payload as any).userId  // If present in JWT
     } catch {
       const response = NextResponse.redirect(new URL(hostname.startsWith('admin.') ? '/' : '/admin', request.url))
       response.cookies.delete('admin-session')
@@ -56,7 +93,27 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next()
+  // Create response with telemetry headers
+  const response = NextResponse.next()
+
+  // Add trace_id to response headers (for client-side tracking)
+  response.headers.set('x-trace-id', traceId)
+
+  // Add telemetry context header (for API routes to read)
+  const telemetryContext = JSON.stringify({
+    traceId,
+    method: request.method,
+    path: pathname,
+    ipHash,
+    uaHash,
+    vercelId,
+    vercelRegion,
+    role: userRole,
+    userId
+  })
+  response.headers.set('x-telemetry-context', Buffer.from(telemetryContext).toString('base64'))
+
+  return response
 }
 
 export const config = {
