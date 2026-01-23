@@ -250,10 +250,7 @@ CREATE TABLE IF NOT EXISTS telemetry_alerts (
   notification_channels JSONB, -- ['email', 'slack']
 
   -- Metadata
-  meta_redacted JSONB,         -- Alert-specific context
-
-  -- Unique constraint per alert key (prevent duplicates)
-  UNIQUE(alert_key, state) WHERE state = 'open'
+  meta_redacted JSONB          -- Alert-specific context
 );
 
 -- Indexes for alert dashboard
@@ -272,6 +269,11 @@ CREATE INDEX IF NOT EXISTS idx_telemetry_alerts_last_seen
 -- Open alerts index (most important for dashboard)
 CREATE INDEX IF NOT EXISTS idx_telemetry_alerts_open
   ON telemetry_alerts(created_at DESC, severity)
+  WHERE state = 'open';
+
+-- Unique constraint per alert key (prevent duplicates of open alerts)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_telemetry_alerts_unique_open
+  ON telemetry_alerts(alert_key)
   WHERE state = 'open';
 
 -- ============================================================================
