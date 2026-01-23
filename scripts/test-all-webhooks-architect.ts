@@ -30,10 +30,12 @@ const WEBHOOK_TESTS: WebhookTest[] = [
     name: '01 - Transaction Status',
     endpoint: '/api/webhooks/vopay',
     payload: {
+      Success: true,
       TransactionID: `TEST-TX-${Date.now()}`,
       TransactionType: 'EFT Out',
       TransactionAmount: '100.00',
-      TransactionStatus: 'completed',
+      Status: 'successful',
+      UpdatedAt: new Date().toISOString(),
       FullName: 'Test Client Architect',
       Currency: 'CAD',
       Environment: 'Production'
@@ -425,7 +427,8 @@ async function main() {
 
   // Export results
   const reportPath = './WEBHOOK-ARCHITECT-REPORT.json'
-  await Bun.write(reportPath, JSON.stringify({
+  const fs = await import('fs/promises')
+  await fs.writeFile(reportPath, JSON.stringify({
     timestamp: new Date().toISOString(),
     baseUrl: BASE_URL,
     summary: {
