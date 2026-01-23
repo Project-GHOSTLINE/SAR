@@ -27,6 +27,10 @@ const LiveStreamTimeline = dynamic(
   () => import('@/components/admin/dataflow/LiveStreamTimeline'),
   { ssr: false }
 )
+const GA4Analytics = dynamic(
+  () => import('@/components/admin/dataflow/GA4Analytics'),
+  { ssr: false }
+)
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -447,15 +451,7 @@ export default function DataflowHealthPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <Card className="bg-white/5 border-white/20 backdrop-blur-xl">
-                <CardHeader>
-                  <CardTitle className="text-white">Analytics Cross-Reference</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-white/70">Corrélation GA4, Vercel Analytics et Telemetry interne...</p>
-                  {/* TODO: Implémenter */}
-                </CardContent>
-              </Card>
+              <GA4Analytics />
             </motion.div>
           </TabsContent>
         </Tabs>
