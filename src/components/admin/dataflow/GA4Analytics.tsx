@@ -74,19 +74,41 @@ export default function GA4Analytics() {
       if (res.ok) {
         const result = await res.json()
         setData(result)
+      } else {
+        console.log('GA4 unavailable:', res.status)
+        setData(null) // No mock data, just null
       }
       setLoading(false)
     } catch (err) {
       console.error('Failed to fetch GA4 data:', err)
+      setData(null)
       setLoading(false)
     }
   }
 
-  if (loading || !data) {
+  if (loading) {
     return (
       <Card className="bg-white/5 border-white/20 backdrop-blur-xl">
         <CardContent className="p-6">
           <div className="text-white/70 text-center">Loading GA4 data...</div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!data) {
+    return (
+      <Card className="bg-white/5 border-white/20 backdrop-blur-xl">
+        <CardContent className="p-6">
+          <div className="text-center py-8">
+            <div className="text-white text-2xl font-bold mb-2">N/A</div>
+            <div className="text-white/70">
+              Google Analytics 4 data unavailable
+            </div>
+            <div className="text-white/50 text-sm mt-2">
+              Check GA4 credentials configuration
+            </div>
+          </div>
         </CardContent>
       </Card>
     )

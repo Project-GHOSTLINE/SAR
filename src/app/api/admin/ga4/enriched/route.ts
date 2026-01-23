@@ -49,12 +49,12 @@ export async function GET(request: NextRequest) {
 
     if (!client) {
       console.log('[GA4 Enriched] No GA client - credentials missing or invalid')
-      return NextResponse.json(getMockData())
+      return NextResponse.json({ error: 'GA4 credentials not configured', unavailable: true }, { status: 503 })
     }
 
     if (!process.env.GA_PROPERTY_ID) {
-      console.log('[GA4 Enriched] No GA_PROPERTY_ID - returning mock data')
-      return NextResponse.json(getMockData())
+      console.log('[GA4 Enriched] No GA_PROPERTY_ID')
+      return NextResponse.json({ error: 'GA4 Property ID not configured', unavailable: true }, { status: 503 })
     }
 
     console.log('[GA4 Enriched] Client initialized, Property ID:', process.env.GA_PROPERTY_ID)
@@ -146,8 +146,10 @@ export async function GET(request: NextRequest) {
         code: gaError.code,
         details: gaError.details
       })
-      console.log('[GA4 Enriched] Returning mock data')
-      return NextResponse.json(getMockData())
+      return NextResponse.json({
+        error: `GA4 API error: ${gaError.message}`,
+        unavailable: true
+      }, { status: 503 })
     }
 
     // Parse summary
