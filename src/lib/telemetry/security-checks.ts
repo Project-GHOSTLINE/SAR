@@ -272,7 +272,7 @@ export async function checkRateLimit(
 
     // Clean up expired counters periodically
     if (Math.random() < 0.01) {  // 1% chance
-      for (const [key, value] of rateLimitCounters.entries()) {
+      for (const [key, value] of Array.from(rateLimitCounters.entries())) {
         if (value.resetAt < now) {
           rateLimitCounters.delete(key)
         }

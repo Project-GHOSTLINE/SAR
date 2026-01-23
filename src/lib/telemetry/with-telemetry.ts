@@ -80,7 +80,7 @@ export function withTelemetry<T extends (req: NextRequest) => Promise<Response>>
     const source = classifySource(path)
 
     let response: Response
-    let status: number
+    let status: number = 500  // Default to 500, will be overwritten by actual response
     let error: Error | null = null
     let bytesIn: number | undefined
     let bytesOut: number | undefined
