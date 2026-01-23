@@ -1,0 +1,9 @@
+{
+  "date": "2026-01-22T23:52:09.104Z",
+  "total_indexes": 12,
+  "existing": 0,
+  "missing": 0,
+  "status": "ready_to_execute",
+  "sql_file": "phase3-indexes.sql",
+  "dashboard_url": "https://supabase.com/dashboard/project/dllyzfuqjzuhvshrlmuq/editor"
+}

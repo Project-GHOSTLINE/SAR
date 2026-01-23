@@ -1,0 +1,386 @@
+{
+  "info": {
+    "name": "VoPay Webhooks - Complete Test Suite",
+    "description": "Test all 16 VoPay webhook endpoints with real data validation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - Transaction Status",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"TransactionID\": \"test-{{$timestamp}}\",\n  \"TransactionType\": \"EFT Out\",\n  \"TransactionAmount\": \"100.00\",\n  \"TransactionStatus\": \"completed\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "02 - eLinx Status",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"TransactionID\": \"elinx-{{$timestamp}}\",\n  \"ELinxTransactionID\": \"EL-{{$timestamp}}\",\n  \"Status\": \"connected\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"AccountToken\": \"token-test\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/elinx",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "elinx"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "03 - Account Status",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"AccountID\": \"ACC-{{$timestamp}}\",\n  \"Status\": \"active\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/account-status",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "account-status"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "04 - Batch Requests",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"BatchID\": \"BATCH-{{$timestamp}}\",\n  \"Status\": \"processing\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"TotalTransactions\": 10,\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/batch",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "batch"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "05 - Bank Account Creation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"AccountID\": \"BA-{{$timestamp}}\",\n  \"Status\": \"created\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"AccountNumber\": \"****1234\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/bank-account",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "bank-account"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "06 - Batch Detail",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"BatchDetailID\": \"BD-{{$timestamp}}\",\n  \"BatchID\": \"BATCH-123\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"Status\": \"completed\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/batch-detail",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "batch-detail"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "07 - Scheduled Transaction",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ScheduleID\": \"SCH-{{$timestamp}}\",\n  \"Status\": \"scheduled\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"NextRunDate\": \"2026-01-30\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/scheduled",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "scheduled"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "08 - Account Verification",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"VerificationID\": \"VER-{{$timestamp}}\",\n  \"Status\": \"verified\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"AccountID\": \"ACC-123\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/account-verification",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "account-verification"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "09 - Transaction Group",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"GroupID\": \"GRP-{{$timestamp}}\",\n  \"Status\": \"processing\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"TransactionCount\": 5,\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/transaction-group",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "transaction-group"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10 - Account Balance",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"AccountID\": \"ACC-{{$timestamp}}\",\n  \"Balance\": \"5000.00\",\n  \"Available\": \"4500.00\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"Currency\": \"CAD\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/account-balance",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "account-balance"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "11 - Client Account Balance",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ClientAccountID\": \"CLI-{{$timestamp}}\",\n  \"Balance\": \"1200.00\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"Currency\": \"CAD\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/client-account-balance",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "client-account-balance"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "12 - Payment Received",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"PaymentID\": \"PAY-{{$timestamp}}\",\n  \"Amount\": \"250.00\",\n  \"Status\": \"received\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"PaymentMethod\": \"Interac\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/payment-received",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "payment-received"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "13 - Account Limit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"AccountID\": \"ACC-{{$timestamp}}\",\n  \"DailyLimit\": \"10000.00\",\n  \"RemainingLimit\": \"7500.00\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/account-limit",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "account-limit"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "14 - Virtual Accounts",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"VirtualAccountID\": \"VA-{{$timestamp}}\",\n  \"Status\": \"active\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"AccountNumber\": \"VA-****5678\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/virtual-accounts",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "virtual-accounts"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "15 - Credit Card Connection",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"CardID\": \"CC-{{$timestamp}}\",\n  \"Status\": \"connected\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"LastFourDigits\": \"4242\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/credit-card",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "credit-card"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "16 - Debit Card Connection",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"CardID\": \"DC-{{$timestamp}}\",\n  \"Status\": \"connected\",\n  \"ValidationKey\": \"{{validation_key}}\",\n  \"LastFourDigits\": \"1234\",\n  \"Environment\": \"Production\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay/debit-card",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay", "debit-card"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Health Check - All Webhooks",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/webhooks/vopay",
+          "host": ["{{base_url}}"],
+          "path": ["api", "webhooks", "vopay"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.solutionargentrapide.ca",
+      "type": "string"
+    },
+    {
+      "key": "validation_key",
+      "value": "test-signature-key",
+      "type": "string"
+    }
+  ]
+}

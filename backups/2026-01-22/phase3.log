@@ -1,0 +1,126 @@
+📈 PHASE 3: AJOUTER INDEXES DE PERFORMANCE
+=========================================
+Date: 2026-01-22T23:51:15.057Z
+Indexes à créer: 12
+
+🔍 Vérification des indexes...
+
+📋 COMMANDES SQL À EXÉCUTER DANS SUPABASE SQL EDITOR:
+================================================================================
+CREATE INDEX IF NOT EXISTS idx_loan_applications_client_id ON loan_applications(client_id);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_client_id ON contact_messages(client_id);
+CREATE INDEX IF NOT EXISTS idx_vopay_objects_client_id ON vopay_objects(client_id);
+CREATE INDEX IF NOT EXISTS idx_vopay_objects_loan_id ON vopay_objects(loan_id);
+CREATE INDEX IF NOT EXISTS idx_loan_applications_status ON loan_applications(status);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_status ON contact_messages(status);
+CREATE INDEX IF NOT EXISTS idx_vopay_objects_status ON vopay_objects(status);
+CREATE INDEX IF NOT EXISTS idx_clients_primary_email ON clients(primary_email);
+CREATE INDEX IF NOT EXISTS idx_clients_primary_phone ON clients(primary_phone);
+CREATE INDEX IF NOT EXISTS idx_loan_applications_status_created ON loan_applications(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_status_created ON contact_messages(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_vopay_objects_type_status ON vopay_objects(object_type, status);
+================================================================================
+
+📊 RÉSUMÉ
+=========================================
+Total indexes: 12
+
+⚠️  IMPORTANT:
+Ces indexes doivent être créés via le SQL Editor de Supabase.
+Raison: Le client JS Supabase ne supporte pas les commandes DDL.
+
+📝 INSTRUCTIONS:
+1. Ouvrir Supabase Dashboard
+2. Aller dans SQL Editor
+3. Copier-coller les commandes SQL ci-dessus
+4. Exécuter le script
+
+🎉 PHASE 3 PRÉPARÉE!
+Prêt à exécuter dans Supabase SQL Editor.
+
+📄 Fichier SQL créé: /Users/xunit/Desktop/📁 Projets/sar/backups/2026-01-22/phase3-indexes.sql
+
+📈 PHASE 3: EXÉCUTER INDEXES DE PERFORMANCE
+=========================================
+Date: 2026-01-22T23:52:08.892Z
+Indexes à créer: 12
+
+🔍 Vérification des indexes existants...
+⚠️  Impossible de vérifier via Supabase JS
+   Utilisez la requête SQL ci-dessous dans le Dashboard:
+
+   SELECT schemaname, tablename, indexname
+   FROM pg_indexes
+   WHERE schemaname = 'public'
+   ORDER BY tablename, indexname;
+
+📊 MÉTHODE D'EXÉCUTION RECOMMANDÉE:
+=========================================
+
+Supabase JS ne supporte pas les commandes DDL.
+Vous devez exécuter le script SQL manuellement.
+
+📝 INSTRUCTIONS:
+1. Ouvrir: https://supabase.com/dashboard/project/dllyzfuqjzuhvshrlmuq/editor
+2. Créer une nouvelle query
+3. Copier le contenu de: phase3-indexes.sql
+4. Exécuter le script
+5. Vérifier les résultats
+
+⏱️  Temps estimé: 30 secondes
+⚠️  Impact: Aucun (indexes en background)
+
+📋 INDEXES À CRÉER:
+=========================================
+📝 À créer - idx_loan_applications_client_id
+📝 À créer - idx_contact_messages_client_id
+📝 À créer - idx_vopay_objects_client_id
+📝 À créer - idx_vopay_objects_loan_id
+📝 À créer - idx_loan_applications_status
+📝 À créer - idx_contact_messages_status
+📝 À créer - idx_vopay_objects_status
+📝 À créer - idx_clients_primary_email
+📝 À créer - idx_clients_primary_phone
+📝 À créer - idx_loan_applications_status_created
+📝 À créer - idx_contact_messages_status_created
+📝 À créer - idx_vopay_objects_type_status
+
+🎉 PHASE 3 PRÉPARÉE!
+📄 Rapport: phase3-report.json
+📄 Script SQL: phase3-indexes.sql
+
+⚠️  12 indexes à créer manuellement
+📈 PHASE 3: EXÉCUTER INDEXES VIA POSTGRESQL
+=========================================
+Date: 2026-01-22T23:53:08.790Z
+Indexes à créer: 12
+
+🔌 Connexion à Supabase PostgreSQL...
+❌ ERREUR FATALE: Tenant or user not found
+error: Tenant or user not found
+    at Parser.parseErrorMessage (/Users/xunit/Desktop/📁 Projets/sar/node_modules/pg-protocol/dist/parser.js:285:98)
+    at Parser.handlePacket (/Users/xunit/Desktop/📁 Projets/sar/node_modules/pg-protocol/dist/parser.js:122:29)
+    at Parser.parse (/Users/xunit/Desktop/📁 Projets/sar/node_modules/pg-protocol/dist/parser.js:35:38)
+    at TLSSocket.<anonymous> (/Users/xunit/Desktop/📁 Projets/sar/node_modules/pg-protocol/dist/index.js:11:42)
+    at TLSSocket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23)
+📈 PHASE 3: EXÉCUTER INDEXES VIA POSTGRESQL
+=========================================
+Date: 2026-01-22T23:53:26.465Z
+Indexes à créer: 12
+
+🔌 Connexion à Supabase PostgreSQL...
+❌ ERREUR FATALE: password authentication failed for user "postgres"
+error: password authentication failed for user "postgres"
+    at Parser.parseErrorMessage (/Users/xunit/Desktop/📁 Projets/sar/node_modules/pg-protocol/dist/parser.js:285:98)
+    at Parser.handlePacket (/Users/xunit/Desktop/📁 Projets/sar/node_modules/pg-protocol/dist/parser.js:122:29)
+    at Parser.parse (/Users/xunit/Desktop/📁 Projets/sar/node_modules/pg-protocol/dist/parser.js:35:38)
+    at TLSSocket.<anonymous> (/Users/xunit/Desktop/📁 Projets/sar/node_modules/pg-protocol/dist/index.js:11:42)
+    at TLSSocket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23)

@@ -27,7 +27,9 @@
     "analyze:quickbooks-report": "open test-artifacts/quickbooks-analysis/quickbooks-analysis.html",
     "webhook:configure": "npx tsx scripts/configure-vopay-webhooks.ts",
     "webhook:test": "npx tsx scripts/test-vopay-webhooks.ts local",
-    "webhook:test:prod": "npx tsx scripts/test-vopay-webhooks.ts prod"
+    "webhook:test:prod": "npx tsx scripts/test-vopay-webhooks.ts prod",
+    "webhook:architect": "npx tsx scripts/test-all-webhooks-architect.ts",
+    "webhook:curl": "bash docs/WEBHOOK-CURL-TESTS.sh"
   },
   "dependencies": {
     "@google-analytics/data": "^5.2.1",

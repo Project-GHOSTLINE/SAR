@@ -2374,9 +2374,9 @@ function AdminDashboardContent() {
               <div className="border-b border-gray-200">
                 <div className="flex gap-1 p-2">
                   {[
-                    { id: 'overview', label: 'Vue d\'ensemble' },
-                    { id: 'transactions', label: 'Transactions' },
-                    { id: 'releves', label: 'Relevés Bancaires' }
+                    { id: 'overview', label: '📊 Analytics & Metrics' },
+                    { id: 'transactions', label: '🔧 Architect Mode' },
+                    { id: 'releves', label: '📄 Bank Statements' }
                   ].map(tab => (
                     <button
                       key={tab.id}
