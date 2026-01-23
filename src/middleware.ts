@@ -119,6 +119,54 @@ export async function middleware(request: NextRequest) {
   })
   response.headers.set('x-telemetry-context', Buffer.from(telemetryContext).toString('base64'))
 
+  // TELEMETRY: Write request to DB (async, non-blocking)
+  // Note: Using waitUntil() to ensure write completes even after response
+  const startTime = Date.now()
+
+  // Execute after response is sent (non-blocking)
+  if (typeof request.waitUntil === 'function') {
+    request.waitUntil(
+      (async () => {
+        try {
+          const duration_ms = Date.now() - startTime
+
+          // Write to Supabase using edge-compatible fetch
+          await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/telemetry_requests`, {
+            method: 'POST',
+            headers: {
+              'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+              'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY || ''}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+              trace_id: traceId,
+              method: request.method,
+              path: pathname,
+              status: 200, // Will be updated by API routes if different
+              duration_ms,
+              source: pathname.startsWith('/api/webhooks') ? 'webhook' :
+                      pathname.startsWith('/api/cron') ? 'cron' :
+                      pathname.startsWith('/api/') ? 'internal' : 'web',
+              env: process.env.NODE_ENV === 'production' ? 'production' : 'development',
+              ip_hash: ipHash,
+              ua_hash: uaHash,
+              region: vercelRegion,
+              user_id: userId,
+              role: userRole,
+              vercel_id: vercelId,
+              vercel_region: vercelRegion,
+              created_at: new Date().toISOString()
+            })
+          })
+        } catch (err) {
+          // Silently fail - don't break request
+          console.error('[Telemetry] Failed to write:', err)
+        }
+      })()
+    )
+  }
+
   return response
 }
 
