@@ -119,18 +119,16 @@ export async function middleware(request: NextRequest) {
   })
   response.headers.set('x-telemetry-context', Buffer.from(telemetryContext).toString('base64'))
 
-  // TELEMETRY: Write request to DB (async, fire-and-forget)
-  // Note: Fire-and-forget approach for edge compatibility
+  // TELEMETRY: Write request to DB via internal API (async, fire-and-forget)
+  // Using internal API route because Edge Runtime can't reliably write to DB
   const startTime = Date.now()
+  const baseUrl = request.nextUrl.origin
 
-  // Fire-and-forget: don't await, let it run in background
-  fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/telemetry_requests`, {
+  // Fire-and-forget: call internal API, don't await
+  fetch(`${baseUrl}/api/telemetry/write`, {
     method: 'POST',
     headers: {
-      'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-      'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY || ''}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=minimal'
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       trace_id: traceId,
@@ -159,5 +157,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon-|sw.js|manifest.json|downloads/).*)']
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon-|sw.js|manifest.json|downloads/|api/telemetry/write).*)']
 }
