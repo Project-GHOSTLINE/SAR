@@ -556,11 +556,11 @@ export default function WebhooksPage() {
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
                               className="bg-blue-600 h-2 rounded-full transition-all"
-                              style={{ width: `${(count / stats.total) * 100}%` }}
+                              style={{ width: stats?.total ? `${(count / stats.total) * 100}%` : '0%' }}
                             />
                           </div>
                           <p className="text-sm text-gray-600 mt-1">
-                            {((count / stats.total) * 100).toFixed(1)}% of total webhooks
+                            {stats?.total ? ((count / stats.total) * 100).toFixed(1) : '0'}% of total webhooks
                           </p>
                         </div>
                       ))}

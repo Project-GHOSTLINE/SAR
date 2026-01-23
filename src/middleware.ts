@@ -1,20 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
-import { randomUUID } from 'crypto'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'sar-admin-secret-key-2024'
 
 /**
- * Hash value with salt for anonymization
+ * Generate UUID v4 (compatible with Edge Runtime)
  */
-function hashWithSalt(value: string): string {
-  const crypto = require('crypto')
+function generateUUID(): string {
+  return crypto.randomUUID()
+}
+
+/**
+ * Hash value with salt for anonymization (using Web Crypto API)
+ */
+async function hashWithSalt(value: string): Promise<string> {
   const salt = process.env.TELEMETRY_HASH_SALT || 'sar-telemetry-2026'
-  return crypto
-    .createHash('sha256')
-    .update(value + salt)
-    .digest('hex')
-    .substring(0, 16) // 16 chars = 64 bits entropy
+  const encoder = new TextEncoder()
+  const data = encoder.encode(value + salt)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  return hashHex.substring(0, 16) // 16 chars = 64 bits entropy
 }
 
 export async function middleware(request: NextRequest) {
@@ -23,7 +29,7 @@ export async function middleware(request: NextRequest) {
   const isApiRoute = pathname.startsWith('/api/')
 
   // TELEMETRY: Generate trace_id for request tracing
-  const traceId = randomUUID()
+  const traceId = generateUUID()
 
   // Extract request metadata (anonymized)
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
@@ -34,8 +40,8 @@ export async function middleware(request: NextRequest) {
   const vercelRegion = request.headers.get('x-vercel-deployment-url')?.split('.')[0] || undefined
 
   // Hash IP and UA for privacy
-  const ipHash = ip !== 'unknown' ? hashWithSalt(ip) : undefined
-  const uaHash = ua !== 'unknown' ? hashWithSalt(ua) : undefined
+  const ipHash = ip !== 'unknown' ? await hashWithSalt(ip) : undefined
+  const uaHash = ua !== 'unknown' ? await hashWithSalt(ua) : undefined
 
   // Will be set after auth check
   let userRole: 'admin' | 'user' | 'anonymous' = 'anonymous'
