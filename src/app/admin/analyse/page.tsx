@@ -876,50 +876,6 @@ function AnalysePageContent() {
 
           {/* Comptes Bancaires removed - now in sidebar as mini checks */}
 
-          {/* Section Analyse Automatique SAR */}
-          {isAnalyzing && (
-            <div className="bg-blue-50 rounded-lg shadow-sm border border-blue-200 p-4 mb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
-                  <div>
-                    <h3 className="text-base font-semibold text-blue-900">Analyse automatique en cours...</h3>
-                    <p className="text-sm text-blue-700 mt-1">
-                      Calcul du SAR Score et génération de recommandation en cours. Cela peut prendre quelques secondes.
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={triggerWorkerManually}
-                  disabled={manualTriggerLoading}
-                  className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  <RefreshCw className={`w-4 h-4 ${manualTriggerLoading ? 'animate-spin' : ''}`} />
-                  {manualTriggerLoading ? 'Relance...' : 'Relancer'}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {analysis?.scores && (
-            <div className="space-y-4 mb-4">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* SAR Score Display */}
-                <div className="lg:col-span-1">
-                  <ScoreDisplay scores={analysis.scores} isLoading={isAnalyzing} />
-                </div>
-
-                {/* Recommendation Card */}
-                <div className="lg:col-span-2">
-                  <RecommendationCard recommendation={analysis.recommendation || null} isLoading={isAnalyzing} />
-                </div>
-              </div>
-
-              {/* Financial Metrics Panel */}
-              <MetricsPanel scores={analysis.scores} isLoading={isAnalyzing} />
-            </div>
-          )}
-
           {/* Analyse Mensuelle Section - MOVED FROM SIDEBAR */}
           {selectedAccount && selectedAccount.transactions && selectedAccount.transactions.length > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mb-4">
@@ -1940,6 +1896,50 @@ function AnalysePageContent() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Section Analyse Automatique SAR */}
+          {isAnalyzing && (
+            <div className="bg-blue-50 rounded-lg shadow-sm border border-blue-200 p-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+                  <div>
+                    <h3 className="text-base font-semibold text-blue-900">Analyse automatique en cours...</h3>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Calcul du SAR Score et génération de recommandation en cours. Cela peut prendre quelques secondes.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={triggerWorkerManually}
+                  disabled={manualTriggerLoading}
+                  className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <RefreshCw className={`w-4 h-4 ${manualTriggerLoading ? 'animate-spin' : ''}`} />
+                  {manualTriggerLoading ? 'Relance...' : 'Relancer'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {analysis?.scores && (
+            <div className="space-y-4 mb-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* SAR Score Display */}
+                <div className="lg:col-span-1">
+                  <ScoreDisplay scores={analysis.scores} isLoading={isAnalyzing} />
+                </div>
+
+                {/* Recommendation Card */}
+                <div className="lg:col-span-2">
+                  <RecommendationCard recommendation={analysis.recommendation || null} isLoading={isAnalyzing} />
+                </div>
+              </div>
+
+              {/* Financial Metrics Panel */}
+              <MetricsPanel scores={analysis.scores} isLoading={isAnalyzing} />
             </div>
           )}
 
