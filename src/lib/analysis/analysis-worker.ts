@@ -91,8 +91,9 @@ async function fetchAnalysisData(
  */
 function validateInveriteData(rawData: any): rawData is InveriteFetchResponse {
   if (!rawData) return false;
-  if (!rawData.name) return false;
+  // Vérifier qu'il y a au moins des comptes (le champ name n'est pas toujours présent)
   if (!rawData.accounts || !Array.isArray(rawData.accounts)) return false;
+  if (rawData.accounts.length === 0) return false;
   return true;
 }
 

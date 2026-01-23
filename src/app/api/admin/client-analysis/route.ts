@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase'
 import { jwtVerify } from 'jose'
+import { processAnalysisJob } from '@/lib/analysis/analysis-worker'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -256,23 +257,27 @@ export async function POST(request: NextRequest) {
 
       if (!existingJob) {
         // Créer un nouveau job avec priorité haute pour analyses nouvelles/mises à jour
-        await supabase
+        const { data: newJob } = await supabase
           .from('analysis_jobs')
           .insert({
             analysis_id: data.id,
             status: 'pending',
             priority: existingAnalysis ? 'normal' : 'high'
           })
+          .select('id')
+          .single()
 
         // Déclencher le worker automatiquement pour traiter le job immédiatement
-        // Fire-and-forget: ne pas attendre la réponse pour ne pas bloquer
-        const workerUrl = process.env.NEXT_PUBLIC_BASE_URL
-          ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/worker/process-jobs`
-          : `${request.nextUrl.origin}/api/worker/process-jobs`
-
-        fetch(workerUrl, { method: 'GET' }).catch(err => {
-          console.error('Erreur déclenchement worker:', err)
-        })
+        // Fire-and-forget: ne pas attendre la réponse pour ne pas bloquer la requête
+        if (newJob?.id) {
+          Promise.resolve().then(async () => {
+            try {
+              await processAnalysisJob(newJob.id)
+            } catch (err) {
+              console.error('Erreur traitement job en background:', err)
+            }
+          })
+        }
       }
     } catch (jobErr) {
       // Ne pas bloquer si la création du job échoue - l'analyse est sauvegardée
