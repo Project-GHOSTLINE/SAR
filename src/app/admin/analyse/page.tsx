@@ -65,6 +65,7 @@ function AnalysePageContent() {
   // États pour l'analyse automatique
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null)
+  const [manualTriggerLoading, setManualTriggerLoading] = useState(false)
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -238,6 +239,28 @@ function AnalysePageContent() {
   useEffect(() => {
     fetchAnalysis()
   }, [fetchAnalysis])
+
+  // Fonction pour déclencher manuellement le worker
+  const triggerWorkerManually = async () => {
+    setManualTriggerLoading(true)
+    try {
+      const res = await fetch('/api/worker/process-jobs', {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (res.ok) {
+        // Rafraîchir l'analyse pour voir si le job a été traité
+        setTimeout(() => {
+          fetchAnalysis()
+        }, 2000)
+      }
+    } catch (err) {
+      console.error('Erreur déclenchement worker:', err)
+    } finally {
+      setManualTriggerLoading(false)
+    }
+  }
 
   // Polling pour vérifier la complétion de l'analyse automatique
   useEffect(() => {
@@ -856,14 +879,24 @@ function AnalysePageContent() {
           {/* Section Analyse Automatique SAR */}
           {isAnalyzing && (
             <div className="bg-blue-50 rounded-lg shadow-sm border border-blue-200 p-4 mb-4">
-              <div className="flex items-center space-x-3">
-                <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
-                <div>
-                  <h3 className="text-base font-semibold text-blue-900">Analyse automatique en cours...</h3>
-                  <p className="text-sm text-blue-700 mt-1">
-                    Calcul du SAR Score et génération de recommandation en cours. Cela peut prendre quelques secondes.
-                  </p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+                  <div>
+                    <h3 className="text-base font-semibold text-blue-900">Analyse automatique en cours...</h3>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Calcul du SAR Score et génération de recommandation en cours. Cela peut prendre quelques secondes.
+                    </p>
+                  </div>
                 </div>
+                <button
+                  onClick={triggerWorkerManually}
+                  disabled={manualTriggerLoading}
+                  className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <RefreshCw className={`w-4 h-4 ${manualTriggerLoading ? 'animate-spin' : ''}`} />
+                  {manualTriggerLoading ? 'Relance...' : 'Relancer'}
+                </button>
               </div>
             </div>
           )}

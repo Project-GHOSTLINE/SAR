@@ -58,7 +58,7 @@ export default function ScoreDisplay({ scores, isLoading = false }: ScoreDisplay
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">SAR Score</h3>
           <p className="text-sm text-gray-500">Score de risque automatisé</p>
@@ -66,6 +66,19 @@ export default function ScoreDisplay({ scores, isLoading = false }: ScoreDisplay
         <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${scoreInfo.bgColor} ${scoreInfo.textColor}`}>
           {scoreInfo.level}
         </span>
+      </div>
+
+      {/* Disclaimer BETA */}
+      <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+        <div className="flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-medium text-amber-900">VERSION BÊTA</p>
+            <p className="text-xs text-amber-700 mt-1">
+              Ce système d'analyse automatique est en phase de test. Les résultats sont générés par des algorithmes de programmation et peuvent contenir des erreurs. Veuillez toujours vérifier manuellement avant toute décision.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Score principal avec gauge */}

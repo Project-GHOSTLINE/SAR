@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle, XCircle, AlertTriangle, DollarSign, Info } from 'lucide-react'
+import { CheckCircle, XCircle, AlertTriangle, DollarSign, Info, AlertCircle } from 'lucide-react'
 import type { AnalysisRecommendation, RedFlag } from '@/types/analysis'
 
 interface RecommendationCardProps {
@@ -129,6 +129,19 @@ export default function RecommendationCard({ recommendation, isLoading = false }
             <div className="text-xs text-gray-500">CAD</div>
           </div>
         )}
+      </div>
+
+      {/* Disclaimer BETA */}
+      <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+        <div className="flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-medium text-amber-900">VERSION BÊTA</p>
+            <p className="text-xs text-amber-700 mt-1">
+              Cette recommandation est générée automatiquement par des algorithmes de programmation. Des erreurs sont possibles. Veuillez toujours effectuer une revue manuelle complète avant toute décision finale.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Raisonnement */}

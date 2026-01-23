@@ -263,6 +263,16 @@ export async function POST(request: NextRequest) {
             status: 'pending',
             priority: existingAnalysis ? 'normal' : 'high'
           })
+
+        // Déclencher le worker automatiquement pour traiter le job immédiatement
+        // Fire-and-forget: ne pas attendre la réponse pour ne pas bloquer
+        const workerUrl = process.env.NEXT_PUBLIC_BASE_URL
+          ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/worker/process-jobs`
+          : `${request.nextUrl.origin}/api/worker/process-jobs`
+
+        fetch(workerUrl, { method: 'GET' }).catch(err => {
+          console.error('Erreur déclenchement worker:', err)
+        })
       }
     } catch (jobErr) {
       // Ne pas bloquer si la création du job échoue - l'analyse est sauvegardée
