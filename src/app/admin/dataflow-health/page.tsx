@@ -11,10 +11,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import AdminNav from '@/components/admin/AdminNav'
-import AnimatedDataflowDiagram from '@/components/admin/dataflow/AnimatedDataflowDiagram'
-import AnimatedKPICard from '@/components/admin/dataflow/AnimatedKPICard'
-import LiveStreamTimeline from '@/components/admin/dataflow/LiveStreamTimeline'
+
+// Dynamic imports with SSR disabled for React Flow and animations
+const AnimatedDataflowDiagram = dynamic(
+  () => import('@/components/admin/dataflow/AnimatedDataflowDiagram'),
+  { ssr: false }
+)
+const AnimatedKPICard = dynamic(
+  () => import('@/components/admin/dataflow/AnimatedKPICard'),
+  { ssr: false }
+)
+const LiveStreamTimeline = dynamic(
+  () => import('@/components/admin/dataflow/LiveStreamTimeline'),
+  { ssr: false }
+)
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
