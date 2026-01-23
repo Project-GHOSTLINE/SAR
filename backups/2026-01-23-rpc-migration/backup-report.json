@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-01-23T00:05:21.351Z",
+  "purpose": "Backup before updating process_vopay_webhook RPC function",
+  "migration": "20260123000000_update_vopay_webhook_rpc.sql",
+  "tables": [
+    {
+      "table": "vopay_webhook_logs",
+      "rows": 998,
+      "size": "1.62"
+    },
+    {
+      "table": "webhook_logs",
+      "rows": 10,
+      "size": "0.01"
+    },
+    {
+      "table": "vopay_objects",
+      "rows": 997,
+      "size": "1.42"
+    }
+  ],
+  "backupDir": "/Users/xunit/Desktop/📁 Projets/sar/backups/2026-01-23-rpc-migration"
+}
