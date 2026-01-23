@@ -58,3 +58,4 @@ public/deep-recon-report.json
 
 # Docker volumes
 n8n_data/
+.env.vercel.*

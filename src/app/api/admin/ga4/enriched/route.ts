@@ -47,11 +47,17 @@ export async function GET(request: NextRequest) {
 
     const client = getAnalyticsClient()
 
-    if (!client || !process.env.GA_PROPERTY_ID) {
-      // Return mock data for development
-      console.log('[GA4 Enriched] No credentials - returning mock data')
+    if (!client) {
+      console.log('[GA4 Enriched] No GA client - credentials missing or invalid')
       return NextResponse.json(getMockData())
     }
+
+    if (!process.env.GA_PROPERTY_ID) {
+      console.log('[GA4 Enriched] No GA_PROPERTY_ID - returning mock data')
+      return NextResponse.json(getMockData())
+    }
+
+    console.log('[GA4 Enriched] Client initialized, Property ID:', process.env.GA_PROPERTY_ID)
 
     const propertyId = process.env.GA_PROPERTY_ID
 
@@ -133,8 +139,14 @@ export async function GET(request: NextRequest) {
         metrics: [{ name: 'activeUsers' }],
       }).catch(() => null), // Realtime might not be available
     ])
+      console.log('[GA4 Enriched] ✅ GA4 API call successful')
     } catch (gaError: any) {
-      console.error('[GA4 Enriched] GA4 API failed, returning mock data:', gaError.message)
+      console.error('[GA4 Enriched] ❌ GA4 API failed:', {
+        message: gaError.message,
+        code: gaError.code,
+        details: gaError.details
+      })
+      console.log('[GA4 Enriched] Returning mock data')
       return NextResponse.json(getMockData())
     }
 
