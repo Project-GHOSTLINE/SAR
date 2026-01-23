@@ -6,13 +6,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServer } from '@/lib/supabase-server'
+import { getSupabaseServer } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createSupabaseServer()
+    const supabase = getSupabaseServer()
     const { searchParams } = new URL(req.url)
 
     const timeRange = searchParams.get('timeRange') || '1h'

@@ -5,7 +5,7 @@
  * Auto-flushes on: batch size threshold OR time interval
  */
 
-import { createSupabaseServer } from '@/lib/supabase-server'
+import { getSupabaseServer } from '@/lib/supabase-server'
 
 interface TelemetryRequest {
   trace_id: string
@@ -160,7 +160,7 @@ class TelemetryBatcher {
     }
 
     try {
-      const supabase = createSupabaseServer()
+      const supabase = getSupabaseServer()
 
       // Parallel bulk inserts
       const promises = []

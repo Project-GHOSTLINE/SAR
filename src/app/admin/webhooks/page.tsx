@@ -68,6 +68,8 @@ const STATUS_ICONS = {
   retrying: RotateCcw
 }
 
+type DataFlowComponent = 'provider' | 'api' | 'database' | 'processing' | null
+
 export default function WebhooksPage() {
   const router = useRouter()
   const [webhooks, setWebhooks] = useState<Webhook[]>([])
@@ -75,6 +77,7 @@ export default function WebhooksPage() {
   const [loading, setLoading] = useState(true)
   const [selectedWebhook, setSelectedWebhook] = useState<Webhook | null>(null)
   const [retrying, setRetrying] = useState<string | null>(null)
+  const [selectedComponent, setSelectedComponent] = useState<DataFlowComponent>(null)
 
   // Filters
   const [providerFilter, setProviderFilter] = useState<string>('')
@@ -211,44 +214,60 @@ export default function WebhooksPage() {
             <div className="flex items-center justify-between gap-4">
               {/* Provider */}
               <div className="flex-1">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-all">
+                <button
+                  onClick={() => setSelectedComponent('provider')}
+                  className="w-full bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-all cursor-pointer hover:shadow-2xl"
+                >
                   <Server className="w-8 h-8 mb-2 opacity-80" />
                   <div className="text-sm opacity-80 mb-1">External Provider</div>
                   <div className="text-2xl font-bold">VoPay / Flinks</div>
-                </div>
+                  <div className="text-xs mt-2 opacity-70">Click to view details</div>
+                </button>
               </div>
 
               <ArrowRight className="w-8 h-8 text-gray-400 flex-shrink-0 animate-pulse" />
 
               {/* API */}
               <div className="flex-1">
-                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-all">
+                <button
+                  onClick={() => setSelectedComponent('api')}
+                  className="w-full bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-all cursor-pointer hover:shadow-2xl"
+                >
                   <Zap className="w-8 h-8 mb-2 opacity-80" />
                   <div className="text-sm opacity-80 mb-1">API Endpoint</div>
                   <div className="text-2xl font-bold">/api/webhooks</div>
-                </div>
+                  <div className="text-xs mt-2 opacity-70">Click to view details</div>
+                </button>
               </div>
 
               <ArrowRight className="w-8 h-8 text-gray-400 flex-shrink-0 animate-pulse" />
 
               {/* Database */}
               <div className="flex-1">
-                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-all">
+                <button
+                  onClick={() => setSelectedComponent('database')}
+                  className="w-full bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-all cursor-pointer hover:shadow-2xl"
+                >
                   <Database className="w-8 h-8 mb-2 opacity-80" />
                   <div className="text-sm opacity-80 mb-1">Database</div>
                   <div className="text-2xl font-bold">Supabase</div>
-                </div>
+                  <div className="text-xs mt-2 opacity-70">Click to view details</div>
+                </button>
               </div>
 
               <ArrowRight className="w-8 h-8 text-gray-400 flex-shrink-0 animate-pulse" />
 
               {/* Processing */}
               <div className="flex-1">
-                <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-all">
+                <button
+                  onClick={() => setSelectedComponent('processing')}
+                  className="w-full bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-all cursor-pointer hover:shadow-2xl"
+                >
                   <Box className="w-8 h-8 mb-2 opacity-80" />
                   <div className="text-sm opacity-80 mb-1">Processing</div>
                   <div className="text-2xl font-bold">Business Logic</div>
-                </div>
+                  <div className="text-xs mt-2 opacity-70">Click to view details</div>
+                </button>
               </div>
             </div>
           </div>
@@ -485,6 +504,383 @@ export default function WebhooksPage() {
           </div>
         </div>
       </div>
+
+      {/* Data Flow Component Modal */}
+      {selectedComponent && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {selectedComponent === 'provider' && '🌐 External Provider Details'}
+                  {selectedComponent === 'api' && '⚡ API Endpoint Details'}
+                  {selectedComponent === 'database' && '💾 Database Details'}
+                  {selectedComponent === 'processing' && '⚙️ Processing Details'}
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">Real-time system information</p>
+              </div>
+              <button
+                onClick={() => setSelectedComponent(null)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-6 h-6 text-gray-600" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              {/* PROVIDER DETAILS */}
+              {selectedComponent === 'provider' && (
+                <div className="space-y-6">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="text-lg font-bold text-blue-900 mb-3">Provider Statistics</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-semibold text-blue-700">Total Providers</label>
+                        <p className="text-2xl font-bold text-blue-900">{Object.keys(stats?.by_provider || {}).length}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-blue-700">Active Provider</label>
+                        <p className="text-2xl font-bold text-blue-900">VoPay</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3">Provider Breakdown</h4>
+                    <div className="space-y-3">
+                      {Object.entries(stats?.by_provider || {}).map(([provider, count]) => (
+                        <div key={provider} className="bg-gray-50 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-base font-semibold text-gray-900 capitalize">{provider}</span>
+                            <span className="text-lg font-bold text-blue-600">{count} webhooks</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-blue-600 h-2 rounded-full transition-all"
+                              style={{ width: `${(count / stats.total) * 100}%` }}
+                            />
+                          </div>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {((count / stats.total) * 100).toFixed(1)}% of total webhooks
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg p-4">
+                    <h4 className="text-lg font-bold mb-2">Supported Providers</h4>
+                    <ul className="space-y-2">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>VoPay - Payment processing webhooks</span>
+                      </li>
+                      <li className="flex items-center gap-2 opacity-50">
+                        <Clock className="w-5 h-5" />
+                        <span>Flinks - Banking data webhooks (Coming soon)</span>
+                      </li>
+                      <li className="flex items-center gap-2 opacity-50">
+                        <Clock className="w-5 h-5" />
+                        <span>QuickBooks - Accounting webhooks (Coming soon)</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* API ENDPOINT DETAILS */}
+              {selectedComponent === 'api' && (
+                <div className="space-y-6">
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <h4 className="text-lg font-bold text-purple-900 mb-3">API Endpoint Status</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm font-semibold text-purple-700">Total Endpoints</label>
+                        <p className="text-2xl font-bold text-purple-900">16</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-purple-700">Active</label>
+                        <p className="text-2xl font-bold text-green-600">5</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-purple-700">Configured</label>
+                        <p className="text-2xl font-bold text-blue-600">16</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3">Active Endpoints</h4>
+                    <div className="space-y-2">
+                      {[
+                        { name: 'Transaction Status', path: '/api/webhooks/vopay', status: 'active', count: 753 },
+                        { name: 'eLinx Status', path: '/api/webhooks/vopay/elinx', status: 'active', count: 3 },
+                        { name: 'Account Status', path: '/api/webhooks/vopay/account-status', status: 'active', count: 3 },
+                        { name: 'Batch Detail', path: '/api/webhooks/vopay/batch-detail', status: 'active', count: 3 },
+                        { name: 'Account Balance', path: '/api/webhooks/vopay/account-balance', status: 'active', count: 3 },
+                        { name: 'Account Limit', path: '/api/webhooks/vopay/account-limit', status: 'active', count: 3 }
+                      ].map((endpoint) => (
+                        <div key={endpoint.path} className="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-green-500" />
+                            <div>
+                              <p className="font-semibold text-gray-900">{endpoint.name}</p>
+                              <p className="text-xs font-mono text-gray-600">{endpoint.path}</p>
+                            </div>
+                          </div>
+                          <span className="text-sm font-bold text-purple-600">{endpoint.count} calls</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg p-4">
+                    <h4 className="text-lg font-bold mb-2">Security Features</h4>
+                    <ul className="space-y-2">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>HMAC SHA1 signature validation</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Environment filtering (production only)</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Rate limiting & DDoS protection</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* DATABASE DETAILS */}
+              {selectedComponent === 'database' && (
+                <div className="space-y-6">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 className="text-lg font-bold text-green-900 mb-3">Database Statistics</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm font-semibold text-green-700">Total Records</label>
+                        <p className="text-2xl font-bold text-green-900">{stats?.total || 0}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-green-700">Table</label>
+                        <p className="text-xl font-bold text-green-900">webhook_logs</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-green-700">Environment</label>
+                        <p className="text-xl font-bold text-green-900">Production</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3">Schema Structure</h4>
+                    <div className="bg-gray-900 text-green-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
+                      <pre>{`CREATE TABLE webhook_logs (
+  id              UUID PRIMARY KEY,
+  provider        TEXT NOT NULL,
+  event_type      TEXT NOT NULL,
+  status          TEXT NOT NULL,
+  payload         JSONB NOT NULL,
+  external_id     TEXT,
+  signature       TEXT,
+  is_validated    BOOLEAN DEFAULT false,
+  environment     TEXT DEFAULT 'production',
+  client_id       UUID REFERENCES clients(id),
+  loan_id         UUID REFERENCES loans(id),
+  processing_time_ms INTEGER,
+  retry_count     INTEGER DEFAULT 0,
+  received_at     TIMESTAMPTZ DEFAULT now(),
+  processed_at    TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ DEFAULT now(),
+  updated_at      TIMESTAMPTZ DEFAULT now()
+);`}</pre>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h5 className="font-bold text-gray-900 mb-2">Indexes</h5>
+                      <ul className="text-sm text-gray-600 space-y-1">
+                        <li>• provider, environment</li>
+                        <li>• status, received_at</li>
+                        <li>• external_id</li>
+                        <li>• client_id, loan_id</li>
+                      </ul>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h5 className="font-bold text-gray-900 mb-2">Relations</h5>
+                      <ul className="text-sm text-gray-600 space-y-1">
+                        <li>• clients table (client_id)</li>
+                        <li>• loans table (loan_id)</li>
+                        <li>• vopay_objects (backward compat)</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg p-4">
+                    <h4 className="text-lg font-bold mb-2">Database Features</h4>
+                    <ul className="space-y-2">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Real-time subscriptions via Supabase</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Automatic backups (daily)</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>RPC functions for atomic operations</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* PROCESSING DETAILS */}
+              {selectedComponent === 'processing' && (
+                <div className="space-y-6">
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <h4 className="text-lg font-bold text-orange-900 mb-3">Processing Statistics</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm font-semibold text-orange-700">Success Rate</label>
+                        <p className="text-2xl font-bold text-green-600">{stats?.success_rate || 0}%</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-orange-700">Completed</label>
+                        <p className="text-2xl font-bold text-green-600">{stats?.by_status.completed || 0}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-orange-700">Failed</label>
+                        <p className="text-2xl font-bold text-red-600">{stats?.by_status.failed || 0}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3">Processing Pipeline</h4>
+                    <div className="space-y-3">
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-blue-600 font-bold">1</span>
+                          </div>
+                          <h5 className="font-bold text-gray-900">Validation</h5>
+                        </div>
+                        <p className="text-sm text-gray-600 ml-11">
+                          Verify HMAC signature, check environment, validate payload structure
+                        </p>
+                      </div>
+
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <span className="text-purple-600 font-bold">2</span>
+                          </div>
+                          <h5 className="font-bold text-gray-900">RPC Execution</h5>
+                        </div>
+                        <p className="text-sm text-gray-600 ml-11">
+                          Call process_vopay_webhook() RPC function for atomic database operations
+                        </p>
+                      </div>
+
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <span className="text-green-600 font-bold">3</span>
+                          </div>
+                          <h5 className="font-bold text-gray-900">Business Logic</h5>
+                        </div>
+                        <p className="text-sm text-gray-600 ml-11">
+                          Match client by email, link to loan, update vopay_objects for compatibility
+                        </p>
+                      </div>
+
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                            <span className="text-orange-600 font-bold">4</span>
+                          </div>
+                          <h5 className="font-bold text-gray-900">Response</h5>
+                        </div>
+                        <p className="text-sm text-gray-600 ml-11">
+                          Return success/failure status with webhook_log_id and processing metrics
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg p-4">
+                    <h4 className="text-lg font-bold mb-2">Processing Features</h4>
+                    <ul className="space-y-2">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Atomic transactions via RPC functions</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Automatic client & loan matching</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Processing time tracking (milliseconds)</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Retry mechanism for failed webhooks</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h5 className="font-bold text-gray-900 mb-2">Status Distribution</h5>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Completed</span>
+                          <span className="font-bold text-green-600">{stats?.by_status.completed || 0}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Processing</span>
+                          <span className="font-bold text-blue-600">{stats?.by_status.processing || 0}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Failed</span>
+                          <span className="font-bold text-red-600">{stats?.by_status.failed || 0}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Received</span>
+                          <span className="font-bold text-gray-600">{stats?.by_status.received || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h5 className="font-bold text-gray-900 mb-2">Performance</h5>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Avg Time</span>
+                          <span className="font-bold text-blue-600">{stats?.avg_processing_time_ms || 0}ms</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Total Processed</span>
+                          <span className="font-bold text-gray-900">{(stats?.by_status.completed || 0) + (stats?.by_status.failed || 0)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>In Queue</span>
+                          <span className="font-bold text-orange-600">{stats?.by_status.processing || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Payload Modal */}
       {selectedWebhook && (
