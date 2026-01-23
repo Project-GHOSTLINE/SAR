@@ -19,7 +19,22 @@ function isAuthenticated(request: NextRequest): boolean {
 function getAnalyticsClient() {
   if (process.env.GA_SERVICE_ACCOUNT_JSON) {
     try {
-      const credentials = JSON.parse(process.env.GA_SERVICE_ACCOUNT_JSON)
+      // Fix malformed JSON by replacing literal newlines with \n escape sequences
+      let jsonString = process.env.GA_SERVICE_ACCOUNT_JSON
+
+      // Check if JSON has literal newlines (bad) and fix them
+      if (jsonString.includes('\n') && !jsonString.includes('\\n')) {
+        console.log('[GA4] Fixing malformed JSON with literal newlines')
+        jsonString = jsonString.replace(/\n/g, '\\n')
+      }
+
+      const credentials = JSON.parse(jsonString)
+
+      // Ensure private_key has actual newlines for the crypto library
+      if (credentials.private_key && !credentials.private_key.includes('\n')) {
+        credentials.private_key = credentials.private_key.replace(/\\n/g, '\n')
+      }
+
       return new BetaAnalyticsDataClient({ credentials })
     } catch (error) {
       console.error('Error parsing GA credentials:', error)
