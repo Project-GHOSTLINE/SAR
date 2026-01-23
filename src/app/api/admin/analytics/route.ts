@@ -112,8 +112,8 @@ export async function GET(request: NextRequest) {
     const analyticsClient = getAnalyticsClient()
 
     if (!analyticsClient) {
-      // Mode mock pour développement
-      return NextResponse.json(getMockData(startDate, endDate))
+      // Retourner N/A au lieu de mock data
+      return NextResponse.json(getNoDataResponse(startDate, endDate))
     }
 
     const propertyId = process.env.GA_PROPERTY_ID!
@@ -211,7 +211,29 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * Données mock pour le développement
+ * Réponse N/A quand les credentials Google Analytics ne sont pas configurés
+ */
+function getNoDataResponse(startDate: string, endDate: string): AnalyticsResponse {
+  return {
+    success: false,
+    data: [],
+    totalRows: 0,
+    dateRange: { startDate, endDate },
+    summary: {
+      totalUsers: 0,
+      totalSessions: 0,
+      totalPageViews: 0,
+      totalConversions: 0,
+      totalRevenue: 0,
+      averageSessionDuration: 0,
+      bounceRate: 0
+    },
+    error: 'Google Analytics credentials not configured. Please add GA_SERVICE_ACCOUNT_JSON to .env.local'
+  }
+}
+
+/**
+ * Données mock pour le développement (deprecated - utilisez getNoDataResponse)
  */
 function getMockData(startDate: string, endDate: string): AnalyticsResponse {
   const mockRows: AnalyticsRow[] = [

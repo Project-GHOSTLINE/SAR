@@ -5,8 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import {
   LayoutDashboard, MessageSquare, DollarSign, FileText,
   Wrench, Webhook, BarChart3, LogOut, Menu, X,
-  ChevronDown, User, Clock, Bell, Shield, Database, Download, Zap,
-  Receipt, TrendingUp, Users, Activity
+  ChevronDown, User, Clock, Bell, Shield, Database, Download, Zap, TrendingUp
 } from 'lucide-react'
 
 interface AdminNavProps {
@@ -35,36 +34,36 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
     return () => clearInterval(timer)
   }, [])
 
-  // Fetch notifications counts - DÉSACTIVÉ
-  // useEffect(() => {
-  //   const fetchCounts = async () => {
-  //     try {
-  //       // Messages non lus
-  //       const messagesRes = await fetch('/api/admin/messages?status=nouveau&limit=1', {
-  //         credentials: 'include'
-  //       })
-  //       if (messagesRes.ok) {
-  //         const data = await messagesRes.json()
-  //         setMessagesCount(data.stats?.nonLus || 0)
-  //       }
+  // Fetch notifications counts
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        // Messages non lus
+        const messagesRes = await fetch('/api/admin/messages?status=nouveau&limit=1', {
+          credentials: 'include'
+        })
+        if (messagesRes.ok) {
+          const data = await messagesRes.json()
+          setMessagesCount(data.stats?.nonLus || 0)
+        }
 
-  //       // Support tickets non résolus
-  //       const supportRes = await fetch('/api/admin/support/tickets?status=nouveau&limit=1', {
-  //         credentials: 'include'
-  //       })
-  //       if (supportRes.ok) {
-  //         const data = await supportRes.json()
-  //         setSupportCount(data.stats?.nouveau || 0)
-  //       }
-  //     } catch (error) {
-  //       console.error('Erreur fetch counts:', error)
-  //     }
-  //   }
+        // Support tickets non résolus
+        const supportRes = await fetch('/api/admin/support/tickets?status=nouveau&limit=1', {
+          credentials: 'include'
+        })
+        if (supportRes.ok) {
+          const data = await supportRes.json()
+          setSupportCount(data.stats?.nouveau || 0)
+        }
+      } catch (error) {
+        console.error('Erreur fetch counts:', error)
+      }
+    }
 
-  //   fetchCounts()
-  //   const interval = setInterval(fetchCounts, 60000) // Refresh every minute
-  //   return () => clearInterval(interval)
-  // }, [])
+    fetchCounts()
+    const interval = setInterval(fetchCounts, 60000) // Refresh every minute
+    return () => clearInterval(interval)
+  }, [])
 
   const handleLogout = async () => {
     try {
@@ -112,12 +111,6 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       icon: DollarSign,
       badge: null
     },
-    // {
-    //   name: 'QuickBooks',
-    //   href: '/admin/quickbooks',
-    //   icon: Receipt,
-    //   badge: null
-    // },
     {
       name: 'Support',
       href: '/admin/dashboard?tab=support',
@@ -137,12 +130,6 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       badge: null
     },
     {
-      name: 'Clients SAR',
-      href: '/admin/clients-sar',
-      icon: Users,
-      badge: 'new'
-    },
-    {
       name: 'Explorer',
       href: '/admin/data-explorer',
       icon: Database,
@@ -152,12 +139,6 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       name: 'Performance',
       href: '/admin/performance',
       icon: Zap,
-      badge: null
-    },
-    {
-      name: 'Dataflow Health',
-      href: '/admin/dataflow-health',
-      icon: Activity,
       badge: null
     },
     {
@@ -207,10 +188,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                 <span className="text-white font-bold text-base sm:text-lg">$</span>
               </div>
               <div className="hidden sm:block">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-sm sm:text-base font-bold text-gray-900 leading-tight">SAR Admin</h1>
-                  <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-bold rounded">v2.0.0</span>
-                </div>
+                <h1 className="text-sm sm:text-base font-bold text-gray-900 leading-tight">SAR Admin</h1>
                 <p className="text-[9px] sm:text-[10px] text-gray-500 hidden xl:block">Solution Argent Rapide</p>
               </div>
             </button>
@@ -245,12 +223,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                 >
                   <Icon size={14} className="flex-shrink-0 md:w-4 md:h-4" />
                   <span className="text-[10px] md:text-xs">{item.name}</span>
-                  {item.badge === 'new' && (
-                    <span className="absolute -top-1 -right-1 px-2 py-0.5 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-[length:200%_100%] animate-[shimmer_2s_ease-in-out_infinite] text-white text-[9px] font-black rounded-full shadow-lg border-2 border-white uppercase tracking-wider">
-                      New
-                    </span>
-                  )}
-                  {item.badge !== null && item.badge !== 'new' && typeof item.badge === 'number' && item.badge > 0 && (
+                  {item.badge !== null && item.badge > 0 && (
                     <span className={`
                       absolute -top-1 -right-1 min-w-[18px] h-5 px-1.5 flex items-center justify-center
                       rounded-full text-xs font-bold
@@ -327,12 +300,7 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
                 >
                   <Icon size={18} className="sm:w-5 sm:h-5 flex-shrink-0" />
                   <span className="flex-1 text-left text-sm">{item.name}</span>
-                  {item.badge === 'new' && (
-                    <span className="px-3 py-1 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-[length:200%_100%] animate-[shimmer_2s_ease-in-out_infinite] text-white text-[10px] font-black rounded-full shadow-lg border-2 border-white uppercase tracking-wider">
-                      Nouveau
-                    </span>
-                  )}
-                  {item.badge !== null && item.badge !== 'new' && typeof item.badge === 'number' && item.badge > 0 && (
+                  {item.badge !== null && item.badge > 0 && (
                     <span className={`
                       min-w-[24px] h-6 px-2 flex items-center justify-center
                       rounded-full text-xs font-bold

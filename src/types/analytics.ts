@@ -93,6 +93,7 @@ export interface AnalyticsResponse {
     averageSessionDuration: number
     bounceRate: number
   }
+  error?: string
 }
 
 export interface AnalyticsDeviceSummary {
