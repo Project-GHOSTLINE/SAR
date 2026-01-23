@@ -49,13 +49,17 @@ export async function GET(request: NextRequest) {
 
     if (!client || !process.env.GA_PROPERTY_ID) {
       // Return mock data for development
+      console.log('[GA4 Enriched] No credentials - returning mock data')
       return NextResponse.json(getMockData())
     }
 
     const propertyId = process.env.GA_PROPERTY_ID
 
     // Fetch multiple reports in parallel
-    const [summaryReport, deviceReport, browserReport, locationReport, sourceReport, timeSeriesReport, realtimeReport] = await Promise.all([
+    let summaryReport, deviceReport, browserReport, locationReport, sourceReport, timeSeriesReport, realtimeReport
+
+    try {
+      [summaryReport, deviceReport, browserReport, locationReport, sourceReport, timeSeriesReport, realtimeReport] = await Promise.all([
       // Summary metrics
       client.runReport({
         property: `properties/${propertyId}`,
@@ -129,6 +133,10 @@ export async function GET(request: NextRequest) {
         metrics: [{ name: 'activeUsers' }],
       }).catch(() => null), // Realtime might not be available
     ])
+    } catch (gaError: any) {
+      console.error('[GA4 Enriched] GA4 API failed, returning mock data:', gaError.message)
+      return NextResponse.json(getMockData())
+    }
 
     // Parse summary
     const summaryRow = summaryReport[0].rows?.[0]
