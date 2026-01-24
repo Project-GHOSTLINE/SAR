@@ -68,36 +68,31 @@ export async function GET(request: NextRequest) {
     const metricsParam = searchParams.get('metrics')
     const dimensionsParam = searchParams.get('dimensions')
 
-    // Dimensions par défaut
+    // Dimensions par défaut (Max 9 dimensions pour GA4 API)
     const defaultDimensions = [
       { name: 'deviceCategory' },
       { name: 'operatingSystem' },
-      { name: 'operatingSystemVersion' },
       { name: 'browser' },
-      { name: 'browserVersion' },
-      { name: 'screenResolution' },
       { name: 'country' },
-      { name: 'region' },
       { name: 'city' },
       { name: 'sessionSource' },
       { name: 'sessionMedium' },
-      { name: 'sessionCampaignName' }
+      { name: 'sessionCampaignName' },
+      { name: 'date' }  // 9th dimension
     ]
 
-    // Métriques par défaut
+    // Métriques par défaut (Max 10 metrics pour GA4 API)
     const defaultMetrics = [
       { name: 'activeUsers' },
       { name: 'newUsers' },
       { name: 'totalUsers' },
       { name: 'sessions' },
-      { name: 'sessionsPerUser' },
       { name: 'screenPageViews' },
       { name: 'averageSessionDuration' },
       { name: 'bounceRate' },
       { name: 'engagementRate' },
-      { name: 'eventCount' },
       { name: 'conversions' },
-      { name: 'totalRevenue' }
+      { name: 'totalRevenue' }  // 10th metric
     ]
 
     // Parse custom dimensions/metrics si fournis
@@ -129,43 +124,44 @@ export async function GET(request: NextRequest) {
     })
 
     // Transformer les données
+    // Mapping matches defaultDimensions (9) and defaultMetrics (10)
     const data: AnalyticsRow[] = response.rows?.map(row => {
       const dimensionValues = row.dimensionValues || []
       const metricValues = row.metricValues || []
 
       return {
         device: {
-          category: dimensionValues[0]?.value || 'unknown',
-          os: dimensionValues[1]?.value || 'unknown',
-          osVersion: dimensionValues[2]?.value || 'unknown',
-          browser: dimensionValues[3]?.value || 'unknown',
-          browserVersion: dimensionValues[4]?.value || 'unknown',
-          screenResolution: dimensionValues[5]?.value || 'unknown',
+          category: dimensionValues[0]?.value || 'unknown', // deviceCategory
+          os: dimensionValues[1]?.value || 'unknown', // operatingSystem
+          osVersion: 'unknown', // Removed from dimensions to stay within limit
+          browser: dimensionValues[2]?.value || 'unknown', // browser
+          browserVersion: 'unknown', // Removed from dimensions
+          screenResolution: 'unknown', // Removed from dimensions
           platform: 'web'
         },
         location: {
-          country: dimensionValues[6]?.value || 'unknown',
-          region: dimensionValues[7]?.value || 'unknown',
-          city: dimensionValues[8]?.value || 'unknown'
+          country: dimensionValues[3]?.value || 'unknown', // country
+          region: 'unknown', // Removed from dimensions
+          city: dimensionValues[4]?.value || 'unknown' // city
         },
         source: {
-          source: dimensionValues[9]?.value || 'direct',
-          medium: dimensionValues[10]?.value || 'none',
-          campaign: dimensionValues[11]?.value || undefined
+          source: dimensionValues[5]?.value || 'direct', // sessionSource
+          medium: dimensionValues[6]?.value || 'none', // sessionMedium
+          campaign: dimensionValues[7]?.value || undefined // sessionCampaignName
         },
         metrics: {
           activeUsers: parseInt(metricValues[0]?.value || '0'),
           newUsers: parseInt(metricValues[1]?.value || '0'),
           totalUsers: parseInt(metricValues[2]?.value || '0'),
           sessions: parseInt(metricValues[3]?.value || '0'),
-          sessionsPerUser: parseFloat(metricValues[4]?.value || '0'),
-          screenPageViews: parseInt(metricValues[5]?.value || '0'),
-          averageSessionDuration: parseFloat(metricValues[6]?.value || '0'),
-          bounceRate: parseFloat(metricValues[7]?.value || '0'),
-          engagementRate: parseFloat(metricValues[8]?.value || '0'),
-          eventCount: parseInt(metricValues[9]?.value || '0'),
-          conversions: parseInt(metricValues[10]?.value || '0'),
-          totalRevenue: parseFloat(metricValues[11]?.value || '0'),
+          sessionsPerUser: 0, // Removed from metrics to stay within limit
+          screenPageViews: parseInt(metricValues[4]?.value || '0'),
+          averageSessionDuration: parseFloat(metricValues[5]?.value || '0'),
+          bounceRate: parseFloat(metricValues[6]?.value || '0'),
+          engagementRate: parseFloat(metricValues[7]?.value || '0'),
+          eventCount: 0, // Removed from metrics
+          conversions: parseInt(metricValues[8]?.value || '0'),
+          totalRevenue: parseFloat(metricValues[9]?.value || '0'),
           engagedSessions: 0,
           userEngagementDuration: 0
         },
