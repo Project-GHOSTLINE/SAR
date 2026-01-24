@@ -1,0 +1,117 @@
+%% SEQUENCE DIAGRAM: Admin Login & Session Management
+%% SAR Project - Authentication Flow
+%% Date: 2026-01-23
+
+sequenceDiagram
+    actor Admin as 👨‍💼 Admin User
+    participant Browser as 🌐 Browser
+    participant AdminApp as 💻 Admin Dashboard
+    participant LoginAPI as 🔐 /api/admin/login
+    participant Supabase as 🗄️ Supabase Auth
+    participant JWT as 🎫 JWT Service
+    participant SecLog as 🛡️ security_logs
+    participant Telemetry as 📊 telemetry_requests
+
+    %% === PHASE 1: NAVIGATION INITIALE ===
+    Admin->>Browser: Navigate to admin.solutionargentrapide.ca
+    Browser->>AdminApp: GET /admin
+    AdminApp->>AdminApp: Check session cookie
+    alt No Valid Session
+        AdminApp-->>Browser: Redirect to /admin/login
+    else Valid Session
+        AdminApp-->>Browser: Show Dashboard
+    end
+
+    %% === PHASE 2: LOGIN FLOW ===
+    Note over Admin,Browser: Login Flow Start
+    Admin->>Browser: Enter username + password
+    Browser->>LoginAPI: POST /api/admin/login<br/>{username, password, device_info}
+
+    %% Capture metrics
+    LoginAPI->>Telemetry: Log request<br/>(path, method, ip, user_agent)
+
+    %% Validation
+    LoginAPI->>LoginAPI: Validate inputs
+    alt Invalid Inputs
+        LoginAPI->>SecLog: Log failed attempt<br/>(event_type='login_failed', reason='invalid_input')
+        LoginAPI-->>Browser: 400 Bad Request
+        Browser-->>Admin: "Invalid credentials"
+        Note over Admin: Retry
+    end
+
+    %% Authentication
+    LoginAPI->>Supabase: Verify credentials
+    Supabase->>Supabase: Check user table
+    alt Credentials Invalid
+        Supabase-->>LoginAPI: Authentication failed
+        LoginAPI->>SecLog: Log failed login<br/>(event_type='login_failed', username, ip)
+        LoginAPI-->>Browser: 401 Unauthorized
+        Browser-->>Admin: "Login failed"
+        Note over Admin: Retry or Reset Password
+    else Credentials Valid
+        Supabase-->>LoginAPI: User authenticated ✅
+    end
+
+    %% === PHASE 3: TOKEN GENERATION ===
+    Note over LoginAPI,JWT: Token Generation
+    LoginAPI->>JWT: Generate access token
+    JWT->>JWT: Create JWT payload<br/>{user_id, email, role, exp}
+    JWT->>JWT: Sign with JWT_SECRET
+    JWT-->>LoginAPI: Access Token + Refresh Token
+
+    %% Session creation
+    LoginAPI->>LoginAPI: Create session cookie<br/>(httpOnly, secure, sameSite)
+    LoginAPI->>SecLog: Log successful login<br/>(event_type='login', user_id, ip)
+    LoginAPI->>Telemetry: Log success<br/>(status=200, duration_ms)
+
+    LoginAPI-->>Browser: 200 OK<br/>{token, session}<br/>Set-Cookie: admin-session=xxx
+
+    %% === PHASE 4: DASHBOARD LOADING ===
+    Browser->>Browser: Store session cookie
+    Browser->>AdminApp: Redirect to /admin/dashboard
+    AdminApp->>AdminApp: Check session cookie ✅
+    AdminApp->>AdminApp: GET /api/admin/analytics
+
+    %% Authenticated request
+    AdminApp->>Supabase: Query loan_applications<br/>(with Cookie: admin-session)
+    Supabase->>Supabase: Verify session token
+    alt Token Invalid/Expired
+        Supabase-->>AdminApp: 401 Unauthorized
+        AdminApp-->>Browser: Redirect to /admin/login
+        Note over Admin: Re-authenticate
+    else Token Valid
+        Supabase-->>AdminApp: Return dashboard data
+        AdminApp-->>Browser: Render Dashboard
+        Browser-->>Admin: Show Dashboard ✅
+    end
+
+    %% === PHASE 5: SUBSEQUENT REQUESTS ===
+    Note over Admin,Supabase: Authenticated Session Active
+    loop Every API Request
+        Admin->>Browser: Interact with Dashboard<br/>(view clients, analyses, etc.)
+        Browser->>AdminApp: API Request<br/>(with Cookie: admin-session)
+        AdminApp->>Supabase: Verify session token
+        alt Token Expired
+            Supabase-->>AdminApp: 401 Unauthorized
+            AdminApp-->>Browser: Redirect to login
+        else Token Valid
+            Supabase-->>AdminApp: Process request
+            AdminApp->>Telemetry: Log request
+            AdminApp-->>Browser: Return data
+        end
+    end
+
+    %% === PHASE 6: LOGOUT ===
+    Note over Admin,SecLog: Logout Flow
+    Admin->>Browser: Click Logout
+    Browser->>AdminApp: POST /api/admin/logout
+    AdminApp->>Supabase: Invalidate session
+    AdminApp->>SecLog: Log logout<br/>(event_type='logout', user_id)
+    AdminApp->>Browser: Clear cookie<br/>Set-Cookie: admin-session=; Max-Age=0
+    AdminApp-->>Browser: 200 OK + Redirect to /admin/login
+    Browser-->>Admin: Show Login Page
+
+    %% === ANNOTATIONS ===
+    Note over Admin,Telemetry: Security Features:<br/>✅ HttpOnly cookies (XSS protection)<br/>✅ Secure flag (HTTPS only)<br/>✅ SameSite=Strict (CSRF protection)<br/>✅ JWT expiration (24h)<br/>✅ IP tracking (fraud detection)<br/>✅ Rate limiting (brute-force protection)
+
+    Note over SecLog,Telemetry: Monitoring KPIs:<br/>• Failed login attempts / hour<br/>• Successful logins / hour<br/>• Session duration average<br/>• Unauthorized access attempts<br/>• Suspicious IP patterns

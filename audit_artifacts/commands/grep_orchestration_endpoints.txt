@@ -1,0 +1,17 @@
+src/app/api/admin/analytics/dashboard/route.ts
+src/app/api/admin/analytics/route.ts
+src/app/api/admin/clients-sar/autres-contrats/route.ts
+src/app/api/admin/clients-sar/concordances/route.ts
+src/app/api/admin/clients-sar/search/route.ts
+src/app/api/admin/clients-sar/stats/route.ts
+src/app/api/admin/ga4/enriched/route.ts
+src/app/api/admin/metrics/inspect/route.ts
+src/app/api/applications/submit/route.ts
+src/app/api/metrics/all/route.ts
+src/app/api/routes/expand/route.ts
+src/app/api/sentinel/orchestrator/route.ts
+src/app/api/seo/analytics/detailed/route.ts
+src/app/api/seo/collect/ga4/route.ts
+src/app/api/seo/collect/gsc/route.ts
+src/app/api/seo/health/route.ts
+src/app/api/seo/metrics/route.ts

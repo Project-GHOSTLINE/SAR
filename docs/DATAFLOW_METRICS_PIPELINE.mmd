@@ -1,0 +1,164 @@
+%% DATAFLOW: Metrics Pipeline - Collect → Enrich → Store → Aggregate → Serve
+%% SAR Project - Complete observability and analytics pipeline
+%% Date: 2026-01-23
+
+flowchart TB
+    subgraph COLLECTION["📊 COLLECTION LAYER"]
+        direction TB
+        FRONTEND_GA4["🌐 Frontend Events<br/>- Page views<br/>- Form interactions<br/>- Button clicks<br/>- UTM capture<br/>- Device fingerprinting"]
+        API_TELEMETRY["⚡ API Telemetry<br/>- Request logs<br/>- Response times<br/>- Error rates<br/>- Status codes<br/>- Headers"]
+        WEBHOOK_EVENTS["🔔 Webhook Events<br/>- VoPay transactions<br/>- QuickBooks updates<br/>- External callbacks<br/>- Payload snapshots"]
+        CRON_COLLECTORS["⏰ Cron Jobs<br/>- GA4 API pull<br/>- GSC API pull<br/>- Semrush API pull<br/>- Daily at 2h AM"]
+        USER_ACTIONS["👤 User Actions<br/>- Admin logins<br/>- Document downloads<br/>- Email opens<br/>- SMS responses"]
+    end
+
+    subgraph ENRICHMENT["🔍 ENRICHMENT LAYER"]
+        direction TB
+        IP_GEO["🌍 IP Geolocation<br/>- City, Region, Country<br/>- ISP detection<br/>- VPN/Proxy detection<br/>- Timezone inference"]
+        UA_PARSE["📱 User-Agent Parsing<br/>- Browser type/version<br/>- OS type/version<br/>- Device type<br/>- Bot detection"]
+        CLIENT_MATCH["🔗 Client Matching<br/>- Match to loan_applications<br/>- Link to client_analyses<br/>- Resolve external IDs<br/>- Build unified timeline"]
+        UTM_EXTRACT["🎯 UTM Extraction<br/>- Source, Medium, Campaign<br/>- Content, Term<br/>- Attribution logic<br/>- Conversion tracking"]
+        CORTEX_CONTEXT["🤖 Cortex Context<br/>- Application status<br/>- Score history<br/>- Risk indicators<br/>- Previous interactions"]
+    end
+
+    subgraph STORAGE_RAW["💾 STORAGE: RAW DATA"]
+        direction TB
+        TELEMETRY_REQ[("telemetry_requests<br/>JSONB: full request<br/>Indexed: timestamp, path<br/>Retention: 90 days")]
+        TELEMETRY_SPAN[("telemetry_spans<br/>JSONB: full trace<br/>Indexed: trace_id, parent_id<br/>Retention: 30 days")]
+        WEBHOOK_LOGS[("webhook_logs<br/>JSONB: full payload<br/>Indexed: source, event_type<br/>Retention: 365 days")]
+        CLIENT_EVENTS[("client_events<br/>JSONB: event data<br/>Indexed: client_id, timestamp<br/>Retention: Forever")]
+        EMAIL_MESSAGES[("email_messages<br/>JSONB: headers + body<br/>Indexed: to_email, timestamp<br/>Retention: 365 days")]
+    end
+
+    subgraph STORAGE_STRUCTURED["📊 STORAGE: STRUCTURED"]
+        direction TB
+        SEO_GA4[("seo_ga4_metrics_daily<br/>Columns: sessions, users, etc.<br/>Indexed: metric_date<br/>Partitioned: monthly")]
+        SEO_GSC[("seo_gsc_metrics_daily<br/>Columns: clicks, impressions<br/>Indexed: metric_date, query<br/>Partitioned: monthly")]
+        SEO_SEMRUSH[("seo_semrush_metrics_daily<br/>Columns: keyword, position<br/>Indexed: metric_date, keyword<br/>Partitioned: monthly")]
+        DOWNLOAD_LOGS[("download_logs<br/>Columns: user_id, file_id<br/>Indexed: created_at<br/>Retention: Forever")]
+        SECURITY_LOGS[("security_logs<br/>Columns: event_type, ip<br/>Indexed: created_at, event_type<br/>Retention: 365 days")]
+    end
+
+    subgraph AGGREGATION["📈 AGGREGATION LAYER"]
+        direction TB
+        DAILY_ROLLUP["📅 Daily Rollups<br/>- Aggregate by day<br/>- Sum, Avg, Count, Percentiles<br/>- Store in metrics tables"]
+        MATVIEW_REFRESH["🔄 Materialized Views<br/>- refresh_applications_summary<br/>- refresh_client_timeline<br/>- refresh_webhook_stats<br/>- Cron: Every 5 minutes"]
+        RPC_ANALYTICS["⚙️ RPC Functions<br/>- get_client_metrics(id)<br/>- get_funnel_conversion()<br/>- get_performance_kpis()<br/>- Real-time compute"]
+        COST_CALC["💰 Cost Calculation<br/>- API call count<br/>- Storage usage<br/>- Bandwidth usage<br/>- Forecasting"]
+    end
+
+    subgraph SERVING["🚀 SERVING LAYER"]
+        direction TB
+        DASHBOARD_API["📊 Dashboard APIs<br/>/api/admin/analytics<br/>/api/admin/metrics/summary<br/>/api/admin/dataflow/health<br/>Response: Aggregated KPIs"]
+        CLIENT_API["👤 Client APIs<br/>/api/admin/client/:id/timeline<br/>/api/admin/client/:id/metrics<br/>Response: Client 360°"]
+        EXPORT_API["📥 Export APIs<br/>/api/admin/export/applications<br/>/api/admin/export/metrics<br/>Response: CSV/Excel"]
+        HEALTH_CHECK["🏥 Health Check<br/>/api/health<br/>/api/admin/dataflow/health<br/>Response: System status"]
+        REAL_TIME["⚡ Real-Time Stream<br/>SSE: /api/admin/events/stream<br/>WebSocket: Future<br/>Push: New events"]
+    end
+
+    subgraph VISUALIZATION["📺 VISUALIZATION"]
+        direction TB
+        ADMIN_DASH["👨‍💼 Admin Dashboard<br/>- KPI cards<br/>- Conversion funnel<br/>- Time series charts<br/>- Real-time counters"]
+        DATAFLOW_HEALTH["🏥 Dataflow Health<br/>- Webhook lag<br/>- Error rates<br/>- DB query times<br/>- Alert thresholds"]
+        CLIENT_PROFILE["👤 Client Profile<br/>- Unified timeline<br/>- Activity heatmap<br/>- Engagement score<br/>- Risk indicators"]
+        SEO_DASHBOARD["🔍 SEO Dashboard<br/>- Traffic trends<br/>- Keyword rankings<br/>- Conversion attribution<br/>- ROI metrics"]
+    end
+
+    %% === COLLECTION → ENRICHMENT ===
+    FRONTEND_GA4 -->|Raw events| IP_GEO
+    FRONTEND_GA4 -->|User-Agent| UA_PARSE
+    FRONTEND_GA4 -->|UTM params| UTM_EXTRACT
+
+    API_TELEMETRY -->|Request data| IP_GEO
+    API_TELEMETRY -->|User-Agent| UA_PARSE
+    API_TELEMETRY -->|Client ID| CLIENT_MATCH
+
+    WEBHOOK_EVENTS -->|Payload| CLIENT_MATCH
+    WEBHOOK_EVENTS -->|Event type| CORTEX_CONTEXT
+
+    USER_ACTIONS -->|User ID| CLIENT_MATCH
+    USER_ACTIONS -->|Action type| CORTEX_CONTEXT
+
+    %% === ENRICHMENT → STORAGE RAW ===
+    IP_GEO -->|Enriched data| TELEMETRY_REQ
+    UA_PARSE -->|Enriched data| TELEMETRY_REQ
+    CLIENT_MATCH -->|Linked events| CLIENT_EVENTS
+    UTM_EXTRACT -->|Attribution| CLIENT_EVENTS
+    CORTEX_CONTEXT -->|Context added| CLIENT_EVENTS
+
+    WEBHOOK_EVENTS -->|Store full payload| WEBHOOK_LOGS
+    API_TELEMETRY -->|Store spans| TELEMETRY_SPAN
+    USER_ACTIONS -->|Store events| CLIENT_EVENTS
+
+    %% === CRON → STORAGE STRUCTURED ===
+    CRON_COLLECTORS -->|Daily metrics| SEO_GA4
+    CRON_COLLECTORS -->|Daily metrics| SEO_GSC
+    CRON_COLLECTORS -->|Daily metrics| SEO_SEMRUSH
+
+    %% === STORAGE → AGGREGATION ===
+    TELEMETRY_REQ -->|Aggregate| DAILY_ROLLUP
+    TELEMETRY_SPAN -->|Aggregate| RPC_ANALYTICS
+    WEBHOOK_LOGS -->|Aggregate| MATVIEW_REFRESH
+    CLIENT_EVENTS -->|Aggregate| MATVIEW_REFRESH
+    SEO_GA4 -->|Compute trends| RPC_ANALYTICS
+    SEO_GSC -->|Compute trends| RPC_ANALYTICS
+
+    TELEMETRY_REQ -->|Count calls| COST_CALC
+    WEBHOOK_LOGS -->|Count events| COST_CALC
+
+    %% === AGGREGATION → SERVING ===
+    DAILY_ROLLUP -->|Serve metrics| DASHBOARD_API
+    MATVIEW_REFRESH -->|Serve summaries| DASHBOARD_API
+    RPC_ANALYTICS -->|Real-time compute| CLIENT_API
+    COST_CALC -->|Budget alerts| HEALTH_CHECK
+
+    CLIENT_EVENTS -->|Stream events| REAL_TIME
+    WEBHOOK_LOGS -->|Stream updates| REAL_TIME
+
+    %% === SERVING → VISUALIZATION ===
+    DASHBOARD_API -->|Render KPIs| ADMIN_DASH
+    DASHBOARD_API -->|Render status| DATAFLOW_HEALTH
+    CLIENT_API -->|Render profile| CLIENT_PROFILE
+    DASHBOARD_API -->|Render charts| SEO_DASHBOARD
+
+    HEALTH_CHECK -->|System status| DATAFLOW_HEALTH
+    REAL_TIME -->|Live updates| ADMIN_DASH
+
+    %% === MONITORING LOOPS ===
+    DATAFLOW_HEALTH -.->|Alert on errors| SECURITY_LOGS
+    DATAFLOW_HEALTH -.->|Alert on lag| WEBHOOK_LOGS
+    COST_CALC -.->|Budget warnings| ADMIN_DASH
+
+    %% === DATA QUALITY ===
+    QUALITY["🔍 DATA QUALITY CHECKS<br/>- Schema validation<br/>- Duplicate detection<br/>- Completeness checks<br/>- Anomaly detection<br/>- SLA monitoring"]
+
+    TELEMETRY_REQ -.->|Validate| QUALITY
+    WEBHOOK_LOGS -.->|Validate| QUALITY
+    CLIENT_EVENTS -.->|Validate| QUALITY
+    QUALITY -.->|Alert on issues| DATAFLOW_HEALTH
+
+    %% === RETENTION POLICY ===
+    RETENTION["🗑️ RETENTION POLICY<br/>- telemetry_requests: 90 days<br/>- telemetry_spans: 30 days<br/>- webhook_logs: 365 days<br/>- client_events: Forever<br/>- seo_*: Forever"]
+
+    TELEMETRY_REQ -.->|Auto-delete| RETENTION
+    TELEMETRY_SPAN -.->|Auto-delete| RETENTION
+
+    %% === NOTES ===
+    Note1["💡 PIPELINE CHARACTERISTICS:<br/>- Latency: <100ms (p95)<br/>- Throughput: 1000 events/min<br/>- Storage: ~5GB/month growth<br/>- Cost: ~$20/month Supabase<br/>- Reliability: 99.9% uptime target"]
+
+    Note2["🎯 KEY METRICS TRACKED:<br/>- Application funnel (150+ metrics)<br/>- Client behavior (50+ metrics)<br/>- Financial tracking (30+ metrics)<br/>- SEO performance (200+ metrics)<br/>- System health (40+ metrics)"]
+
+    %% === STYLES ===
+    classDef collectionStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef enrichStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef storageStyle fill:#fff3e0,stroke:#f57c00,stroke-width:3px
+    classDef aggStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    classDef servingStyle fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    classDef vizStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+
+    class COLLECTION,FRONTEND_GA4,API_TELEMETRY,WEBHOOK_EVENTS collectionStyle
+    class ENRICHMENT,IP_GEO,UA_PARSE,CLIENT_MATCH,UTM_EXTRACT enrichStyle
+    class STORAGE_RAW,STORAGE_STRUCTURED,TELEMETRY_REQ,WEBHOOK_LOGS,SEO_GA4 storageStyle
+    class AGGREGATION,DAILY_ROLLUP,MATVIEW_REFRESH,RPC_ANALYTICS aggStyle
+    class SERVING,DASHBOARD_API,CLIENT_API,EXPORT_API,HEALTH_CHECK servingStyle
+    class VISUALIZATION,ADMIN_DASH,DATAFLOW_HEALTH,CLIENT_PROFILE vizStyle

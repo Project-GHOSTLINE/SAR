@@ -1,0 +1,217 @@
+[
+  {
+    "file": "src/app/admin/analyse/page.tsx",
+    "fetch_calls": 3,
+    "use_effects": 4,
+    "api_endpoints": [
+      "/api/admin/client-analysis?id=${analysisId}",
+      "/api/worker/process-jobs"
+    ],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/analyses/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 0,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/blacklist/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 0,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/clients-sar/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 0,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/dashboard/page.tsx",
+    "fetch_calls": 8,
+    "use_effects": 3,
+    "api_endpoints": [
+      "/api/admin/messages/assign",
+      "/api/admin/vopay",
+      "/api/admin/messages",
+      "/api/admin/logout",
+      "/api/admin/messages?messageId=${message.id}",
+      "/api/admin/webhooks/stats"
+    ],
+    "supabase_queries": 0,
+    "potential_n_plus_1": true
+  },
+  {
+    "file": "src/app/admin/data-explorer/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 0,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/database-explorer/page.tsx",
+    "fetch_calls": 1,
+    "use_effects": 1,
+    "api_endpoints": [
+      "/api/admin/database/explore"
+    ],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/dataflow-health/page.tsx",
+    "fetch_calls": 3,
+    "use_effects": 1,
+    "api_endpoints": [
+      "/api/admin/dataflow-health/traces?timeRange=${timeRange}&source=${sourceFilter}&limit=50",
+      "/api/admin/dataflow-health/kpis?timeRange=${timeRange}",
+      "/api/admin/dataflow-health/alerts?state=open"
+    ],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/downloads/page.tsx",
+    "fetch_calls": 1,
+    "use_effects": 1,
+    "api_endpoints": [
+      "/api/admin/downloads/stats?fileName=${encodeURIComponent(extensionInfo.fileName)}"
+    ],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/exemple-widgets/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 0,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/extension-token/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 1,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/margill/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 0,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/messages/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 0,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/metric-inspector/page.tsx",
+    "fetch_calls": 1,
+    "use_effects": 1,
+    "api_endpoints": [
+      "/api/admin/metrics/inspect"
+    ],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/monitoring/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 5,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/page.tsx",
+    "fetch_calls": 1,
+    "use_effects": 0,
+    "api_endpoints": [
+      "/api/admin/login"
+    ],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/performance/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 0,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/quickbooks/page.tsx",
+    "fetch_calls": 5,
+    "use_effects": 2,
+    "api_endpoints": [
+      "/api/quickbooks/connection/status",
+      "/api/quickbooks/connection/test",
+      "/api/quickbooks/connection/disconnect",
+      "/api/quickbooks/auth/connect",
+      "/api/quickbooks/connection/refresh"
+    ],
+    "supabase_queries": 0,
+    "potential_n_plus_1": true
+  },
+  {
+    "file": "src/app/admin/seo/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 1,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/support/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 0,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/vopay/orphans/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 1,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/vopay/page.tsx",
+    "fetch_calls": 0,
+    "use_effects": 0,
+    "api_endpoints": [],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  },
+  {
+    "file": "src/app/admin/webhooks/page.tsx",
+    "fetch_calls": 2,
+    "use_effects": 1,
+    "api_endpoints": [
+      "/api/admin/webhooks/list?${params.toString()}",
+      "/api/admin/webhooks/retry"
+    ],
+    "supabase_queries": 0,
+    "potential_n_plus_1": false
+  }
+]

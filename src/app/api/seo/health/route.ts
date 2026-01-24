@@ -54,7 +54,7 @@ function checkGoogleAnalytics(): {
     return {
       configured: true,
       credentials_valid: true,
-      property_id: process.env.GA_PROPERTY_ID || null,
+      property_id: process.env.GA_PROPERTY_ID?.trim() || null,
       status: 'operational'
     }
   } catch (error) {
@@ -88,15 +88,17 @@ function checkSemrush(): {
     }
   }
 
-  // Vérifier format basique de la clé (32 caractères hexadécimaux)
-  const isValidFormat = /^[a-f0-9]{32}$/.test(apiKey)
+  // Vérifier format basique de la clé (au moins 20 caractères alphanumériques)
+  // Note: Semrush API keys peuvent varier en format, on vérifie juste une longueur minimale
+  const trimmedKey = apiKey.trim()
+  const isValidFormat = trimmedKey.length >= 20 && /^[a-zA-Z0-9]+$/.test(trimmedKey)
 
   if (!isValidFormat) {
     return {
       configured: true,
       api_key_valid: false,
       status: 'degraded',
-      details: 'Format de clé API invalide'
+      details: `Format de clé API invalide (length: ${trimmedKey.length})`
     }
   }
 

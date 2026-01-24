@@ -1,0 +1,8 @@
+{
+  "success": false,
+  "error": "Could not find the function public.get_client_dossier_unified(identifier) in the schema cache",
+  "rpc": "get_client_dossier_unified",
+  "params": {
+    "identifier": "test@example.com"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "success": false,
+  "error": "Could not find the function public.calculate_overall_health_score without parameters in the schema cache",
+  "rpc": "calculate_overall_health_score",
+  "params": {}
+}

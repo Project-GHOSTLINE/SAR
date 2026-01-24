@@ -1,0 +1,174 @@
+%% DATAFLOW OVERVIEW - SAR Project
+%% Architecture End-to-End complète
+%% Date: 2026-01-23
+
+flowchart TB
+    subgraph PUBLIC["🌐 SITE PUBLIC solutionargentrapide.ca"]
+        VISITOR["👤 Visiteur"]
+        FORM["📝 Formulaire Demande"]
+        GA4["📊 GA4 Tracking"]
+    end
+
+    subgraph FRONTEND["💻 FRONTEND"]
+        UTM["🎯 UTM Capture"]
+        FINGERPRINT["🔍 Fingerprinting"]
+        ANALYTICS["📈 Analytics Client-Side"]
+    end
+
+    subgraph API["⚡ API LAYER Next.js"]
+        APP_SUBMIT["/api/applications/submit"]
+        METRICS_API["/api/metrics/*"]
+        WEBHOOK_API["/api/webhooks/*"]
+        ADMIN_API["/api/admin/*"]
+        WORKER_API["/api/worker/process-jobs"]
+    end
+
+    subgraph PROCESSING["🔄 PROCESSING LAYER"]
+        CORTEX["🤖 Cortex Scoring Engine"]
+        SAR_WORKER["⚙️ SAR Score Worker"]
+        EMAIL_PROCESSOR["📧 Email Classifier"]
+        WEBHOOK_PROCESSOR["🔔 Webhook Processor"]
+    end
+
+    subgraph EXTERNAL["🔌 EXTERNAL SERVICES"]
+        MARGILL["💼 Margill (Loan Management)"]
+        INVERITE["🏦 Inverite (IBV)"]
+        VOPAY["💳 VoPay (Payments)"]
+        QUICKBOOKS["💰 QuickBooks (Accounting)"]
+        GA4_API["📊 Google Analytics 4 API"]
+        GSC_API["🔍 Google Search Console API"]
+        SEMRUSH_API["🌐 Semrush API"]
+        TWILIO["📱 Twilio (SMS)"]
+        SENDGRID["📧 SendGrid (Email)"]
+    end
+
+    subgraph DATABASE["🗄️ SUPABASE POSTGRESQL"]
+        LOAN_APPS[("loan_applications")]
+        CLIENT_EVENTS[("client_events")]
+        CLIENT_ANALYSES[("client_analyses")]
+        ANALYSIS_JOBS[("analysis_jobs")]
+        ANALYSIS_SCORES[("analysis_scores")]
+        WEBHOOK_LOGS[("webhook_logs")]
+        EMAIL_MESSAGES[("email_messages")]
+        TELEMETRY[("telemetry_*")]
+        SEO_METRICS[("seo_*_metrics_daily")]
+        QUICKBOOKS_DATA[("quickbooks_*")]
+    end
+
+    subgraph ADMIN_DASHBOARD["👨‍💼 ADMIN DASHBOARD admin.solutionargentrapide.ca"]
+        DASH_OVERVIEW["📊 Dashboard"]
+        DASH_CLIENTS["👥 Clients SAR"]
+        DASH_ANALYSES["🔍 Analyses"]
+        DASH_MESSAGES["💬 Messages"]
+        DASH_VOPAY["💳 VoPay"]
+        DASH_WEBHOOKS["🔔 Webhooks"]
+        DASH_DOWNLOADS["📥 Downloads"]
+        DASH_DATAFLOW["🏥 Dataflow Health"]
+    end
+
+    subgraph CRON["⏰ CRON JOBS Vercel"]
+        CRON_SEO["/api/cron/seo-collect"]
+        CRON_WORKER["Worker Auto-Trigger"]
+        CRON_CLEANUP["Data Cleanup"]
+    end
+
+    %% === FLUX PRINCIPAL: DEMANDE DE PRÊT ===
+    VISITOR -->|Visite site| GA4
+    VISITOR -->|Remplit formulaire| FORM
+    FORM -->|Capture| UTM
+    FORM -->|Device info| FINGERPRINT
+    FORM -->|Submit| APP_SUBMIT
+
+    UTM -->|utm_source, utm_medium, utm_campaign| APP_SUBMIT
+    FINGERPRINT -->|ip_address, user_agent, device_id| APP_SUBMIT
+
+    APP_SUBMIT -->|INSERT + Metadata| LOAN_APPS
+    APP_SUBMIT -->|INSERT event| CLIENT_EVENTS
+    APP_SUBMIT -->|Trigger| CORTEX
+
+    CORTEX -->|Calculate score| LOAN_APPS
+    CORTEX -->|Log execution| TELEMETRY
+
+    APP_SUBMIT -.->|Submit application| MARGILL
+    MARGILL -.->|Approval/Decline| LOAN_APPS
+
+    %% === FLUX: ANALYSE BANCAIRE (IBV) ===
+    INVERITE -->|Extension Chrome| ADMIN_API
+    ADMIN_API -->|POST /client-analysis| CLIENT_ANALYSES
+    ADMIN_API -->|CREATE job| ANALYSIS_JOBS
+    ADMIN_API -->|Trigger| SAR_WORKER
+
+    SAR_WORKER -->|Process job| ANALYSIS_JOBS
+    SAR_WORKER -->|Calculate SAR Score| ANALYSIS_SCORES
+    SAR_WORKER -->|Generate recommendation| CLIENT_ANALYSES
+
+    %% === FLUX: WEBHOOKS ENTRANTS ===
+    VOPAY -->|Webhook events| WEBHOOK_API
+    QUICKBOOKS -->|Webhook events| WEBHOOK_API
+
+    WEBHOOK_API -->|INSERT| WEBHOOK_LOGS
+    WEBHOOK_API -->|Trigger| WEBHOOK_PROCESSOR
+
+    WEBHOOK_PROCESSOR -->|Process payload| CLIENT_EVENTS
+    WEBHOOK_PROCESSOR -->|Update status| LOAN_APPS
+
+    %% === FLUX: COLLECTION SEO ===
+    CRON_SEO -->|Daily 2h AM| GA4_API
+    CRON_SEO -->|Daily 2h AM| GSC_API
+    CRON_SEO -->|Daily 2h AM| SEMRUSH_API
+
+    GA4_API -->|Fetch metrics| SEO_METRICS
+    GSC_API -->|Fetch metrics| SEO_METRICS
+    SEMRUSH_API -->|Fetch metrics| SEO_METRICS
+
+    %% === FLUX: SYNC QUICKBOOKS ===
+    QUICKBOOKS -->|Webhook trigger| ADMIN_API
+    ADMIN_API -->|/quickbooks/sync/*| QUICKBOOKS_DATA
+
+    %% === FLUX: EMAIL PROCESSING ===
+    EMAIL_MESSAGES -->|Classify| EMAIL_PROCESSOR
+    EMAIL_PROCESSOR -->|Category + Priority| CLIENT_EVENTS
+    EMAIL_PROCESSOR -->|Create ticket| DASH_MESSAGES
+
+    %% === FLUX: DASHBOARD ADMIN ===
+    DASH_OVERVIEW -->|Query| LOAN_APPS
+    DASH_OVERVIEW -->|Query| SEO_METRICS
+    DASH_OVERVIEW -->|Query| QUICKBOOKS_DATA
+
+    DASH_CLIENTS -->|Search| LOAN_APPS
+    DASH_CLIENTS -->|Timeline| CLIENT_EVENTS
+    DASH_CLIENTS -->|Concordances| LOAN_APPS
+
+    DASH_ANALYSES -->|View| CLIENT_ANALYSES
+    DASH_ANALYSES -->|View scores| ANALYSIS_SCORES
+
+    DASH_VOPAY -->|View| WEBHOOK_LOGS
+    DASH_WEBHOOKS -->|View all| WEBHOOK_LOGS
+
+    DASH_DATAFLOW -->|Monitor| TELEMETRY
+    DASH_DATAFLOW -->|Alerts| WEBHOOK_LOGS
+
+    %% === FLUX: TELEMETRY ===
+    API -->|Log requests| TELEMETRY
+    PROCESSING -->|Log spans| TELEMETRY
+    EXTERNAL -.->|Monitor errors| TELEMETRY
+
+    %% === FLUX: COMMUNICATIONS SORTANTES ===
+    LOAN_APPS -.->|Send confirmation| SENDGRID
+    LOAN_APPS -.->|Send SMS| TWILIO
+    CLIENT_EVENTS -.->|Send notification| SENDGRID
+
+    %% === STYLES ===
+    classDef publicStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef apiStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef dbStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+    classDef externalStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    classDef processingStyle fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    classDef adminStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+
+    class PUBLIC,VISITOR,FORM publicStyle
+    class API,APP_SUBMIT,METRICS_API,WEBHOOK_API,ADMIN_API apiStyle
+    class DATABASE,LOAN_APPS,CLIENT_EVENTS,CLIENT_ANALYSES,WEBHOOK_LOGS,TELEMETRY dbStyle
+    class EXTERNAL,MARGILL,INVERITE,VOPAY,QUICKBOOKS,GA4_API,GSC_API,SEMRUSH_API externalStyle
+    class PROCESSING,CORTEX,SAR_WORKER,EMAIL_PROCESSOR,WEBHOOK_PROCESSOR processingStyle
+    class ADMIN_DASHBOARD,DASH_OVERVIEW,DASH_CLIENTS,DASH_ANALYSES adminStyle

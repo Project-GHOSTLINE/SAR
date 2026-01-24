@@ -1,0 +1,5 @@
+{
+  "success": false,
+  "exists": false,
+  "error": "Could not find the function public.resolve_client_id(identifier) in the schema cache"
+}

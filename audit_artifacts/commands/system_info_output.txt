@@ -1,0 +1,17 @@
+audit_artifacts/commands/system_info.txt: ligne 1: ===: commande introuvable
+audit_artifacts/commands/system_info.txt: ligne 2: Date:: commande introuvable
+audit_artifacts/commands/system_info.txt: ligne 3: Hostname:: commande introuvable
+audit_artifacts/commands/system_info.txt: ligne 4: OS:: commande introuvable
+audit_artifacts/commands/system_info.txt: ligne 5: Node:: commande introuvable
+audit_artifacts/commands/system_info.txt: ligne 6: NPM:: commande introuvable
+audit_artifacts/commands/system_info.txt: ligne 7: PNPM:: commande introuvable
+audit_artifacts/commands/system_info.txt: ligne 8: Yarn:: commande introuvable
+git : 'Commit:' n'est pas une commande git. Voir 'git --help'.
+
+La commande la plus ressemblante est
+	commit
+git : 'Branch:' n'est pas une commande git. Voir 'git --help'.
+
+La commande la plus ressemblante est
+	branch
+audit_artifacts/commands/system_info.txt: ligne 11: Repo: commande introuvable

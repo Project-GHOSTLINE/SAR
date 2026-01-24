@@ -1,0 +1,1101 @@
+[
+  {
+    "path": "/api/activity/log",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/activity/log/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/activity/recent",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/activity/recent/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/activity/stats",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/activity/stats/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/admin/analytics/dashboard",
+    "methods": [],
+    "file": "src/app/api/admin/analytics/dashboard/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/analytics",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/analytics/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/client-analysis",
+    "methods": [
+      "GET",
+      "POST",
+      "PATCH",
+      "DELETE",
+      "OPTIONS"
+    ],
+    "file": "src/app/api/admin/client-analysis/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/clients-sar/autres-contrats",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/clients-sar/autres-contrats/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/clients-sar/concordances-stats",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/clients-sar/concordances-stats/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/clients-sar/concordances",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/clients-sar/concordances/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/clients-sar/search",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/clients-sar/search/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/clients-sar/stats",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/clients-sar/stats/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/database/explore",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/database/explore/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/dataflow-health/alerts",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/admin/dataflow-health/alerts/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/dataflow-health/kpis",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/dataflow-health/kpis/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/dataflow-health/traces",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/dataflow-health/traces/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/downloads/stats",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/downloads/stats/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/ga4/enriched",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/ga4/enriched/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/login",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/admin/login/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/logout",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/admin/logout/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/messages/assign",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/admin/messages/assign/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/messages",
+    "methods": [],
+    "file": "src/app/api/admin/messages/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/metrics/inspect",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/metrics/inspect/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/send",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/admin/send/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/support/messages",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/admin/support/messages/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/support/stats",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/support/stats/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/support/tickets/[id]",
+    "methods": [
+      "GET",
+      "PATCH"
+    ],
+    "file": "src/app/api/admin/support/tickets/[id]/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/support/tickets",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/admin/support/tickets/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/vopay-debug",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/vopay-debug/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/vopay/real-transactions",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/vopay/real-transactions/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/vopay",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/vopay/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/vopay/transactions",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/vopay/transactions/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/webhooks/debug",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/webhooks/debug/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/webhooks/export",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/webhooks/export/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/webhooks/list",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/webhooks/list/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/webhooks/retry",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/admin/webhooks/retry/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/webhooks/send-alert",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/admin/webhooks/send-alert/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/admin/webhooks/stats",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/admin/webhooks/stats/route.ts",
+    "category": "admin"
+  },
+  {
+    "path": "/api/anonymity/check",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/anonymity/check/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/applications/submit",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/applications/submit/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/audit/[clientId]",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/audit/[clientId]/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/audit/stats",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/audit/stats/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/contact-analyse",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/contact-analyse/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/contact",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/contact/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/cortex/sync-miro",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/cortex/sync-miro/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/cron/seo-collect",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/cron/seo-collect/route.ts",
+    "category": "cron"
+  },
+  {
+    "path": "/api/device/deep-inspector",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/device/deep-inspector/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/download/[filename]",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/download/[filename]/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/download/track",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/download/track/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/fingerprint/deep-scan",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/fingerprint/deep-scan/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/memory/context",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/memory/context/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/memory/doc-read",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/memory/doc-read/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/memory/recall",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/memory/recall/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/memory/session",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/memory/session/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/memory/store",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/memory/store/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/metrics/all",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/metrics/all/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/network/active-recon",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/network/active-recon/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/network/packet-capture",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/network/packet-capture/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/network/trace",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/network/trace/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/osint/advanced",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/osint/advanced/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/osint/bypass-tests",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/osint/bypass-tests/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/osint/exploit-chains",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/osint/exploit-chains/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/osint/lab-scan",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/osint/lab-scan/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/osint/network-scan",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/osint/network-scan/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/osint/scan",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/osint/scan/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/osint/vulnerabilities",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/osint/vulnerabilities/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/performance-diagnostic",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/performance-diagnostic/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/quickbooks/accounts",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/quickbooks/accounts/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/auth/callback",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/quickbooks/auth/callback/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/auth/connect",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/quickbooks/auth/connect/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/auth/refresh",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/quickbooks/auth/refresh/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/connection/auto-refresh",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/quickbooks/connection/auto-refresh/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/connection/disconnect",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/quickbooks/connection/disconnect/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/connection/force-reconnect",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/quickbooks/connection/force-reconnect/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/connection/force-status",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/quickbooks/connection/force-status/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/connection/refresh",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/quickbooks/connection/refresh/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/connection/status",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/quickbooks/connection/status/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/connection/test",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/quickbooks/connection/test/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/reports/aged-receivables",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/quickbooks/reports/aged-receivables/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/reports/balance-sheet-detailed",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/quickbooks/reports/balance-sheet-detailed/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/reports/balance-sheet",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/quickbooks/reports/balance-sheet/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/reports/cash-flow",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/quickbooks/reports/cash-flow/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/reports/profit-loss",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/quickbooks/reports/profit-loss/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/status",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/quickbooks/status/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/sync/accounts",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/quickbooks/sync/accounts/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/sync/all",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/quickbooks/sync/all/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/sync/customers",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/quickbooks/sync/customers/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/sync/invoices",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/quickbooks/sync/invoices/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/sync/payments",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/quickbooks/sync/payments/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/quickbooks/sync/vendors",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/quickbooks/sync/vendors/route.ts",
+    "category": "quickbooks"
+  },
+  {
+    "path": "/api/routes/discover",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/routes/discover/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/routes/expand",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/routes/expand/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/sentinel/execute-command",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/sentinel/execute-command/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/sentinel/execute",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/sentinel/execute/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/sentinel/fleet",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/sentinel/fleet/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/sentinel/network-monitor",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/sentinel/network-monitor/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/sentinel/orchestrator",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/sentinel/orchestrator/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/sentinel/scan-project",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/sentinel/scan-project/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/sentinel/scoring",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/sentinel/scoring/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/seo/analytics/detailed",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/seo/analytics/detailed/route.ts",
+    "category": "seo"
+  },
+  {
+    "path": "/api/seo/collect/ga4",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/seo/collect/ga4/route.ts",
+    "category": "seo"
+  },
+  {
+    "path": "/api/seo/collect/gsc",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/seo/collect/gsc/route.ts",
+    "category": "seo"
+  },
+  {
+    "path": "/api/seo/collect/semrush",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/seo/collect/semrush/route.ts",
+    "category": "seo"
+  },
+  {
+    "path": "/api/seo/exploit-secrets",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/seo/exploit-secrets/route.ts",
+    "category": "seo"
+  },
+  {
+    "path": "/api/seo/ga4-status",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/seo/ga4-status/route.ts",
+    "category": "seo"
+  },
+  {
+    "path": "/api/seo/health",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/seo/health/route.ts",
+    "category": "seo"
+  },
+  {
+    "path": "/api/seo/keywords",
+    "methods": [
+      "GET",
+      "POST",
+      "PATCH",
+      "DELETE"
+    ],
+    "file": "src/app/api/seo/keywords/route.ts",
+    "category": "seo"
+  },
+  {
+    "path": "/api/seo/metrics",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/seo/metrics/route.ts",
+    "category": "seo"
+  },
+  {
+    "path": "/api/seo/semrush/backlinks",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/seo/semrush/backlinks/route.ts",
+    "category": "seo"
+  },
+  {
+    "path": "/api/seo/semrush/competitors",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/seo/semrush/competitors/route.ts",
+    "category": "seo"
+  },
+  {
+    "path": "/api/seo/semrush/keyword-research",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/seo/semrush/keyword-research/route.ts",
+    "category": "seo"
+  },
+  {
+    "path": "/api/telemetry/write",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/telemetry/write/route.ts",
+    "category": "telemetry"
+  },
+  {
+    "path": "/api/test-db",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/test-db/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/test-insert",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/test-insert/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/test-tool",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/test-tool/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/test/demo",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/test/demo/route.ts",
+    "category": "misc"
+  },
+  {
+    "path": "/api/vopay/stats/[clientId]",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/vopay/stats/[clientId]/route.ts",
+    "category": "vopay"
+  },
+  {
+    "path": "/api/vopay/stats",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/vopay/stats/route.ts",
+    "category": "vopay"
+  },
+  {
+    "path": "/api/webhooks/quickbooks",
+    "methods": [
+      "POST"
+    ],
+    "file": "src/app/api/webhooks/quickbooks/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/account-balance",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/account-balance/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/account-limit",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/account-limit/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/account-status",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/account-status/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/account-verification",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/account-verification/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/bank-account",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/bank-account/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/batch-detail",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/batch-detail/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/batch",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/batch/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/client-account-balance",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/client-account-balance/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/credit-card",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/credit-card/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/debit-card",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/debit-card/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/elinx",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/elinx/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/payment-received",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/payment-received/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/scheduled",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/scheduled/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/transaction-group",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/transaction-group/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/webhooks/vopay/virtual-accounts",
+    "methods": [
+      "GET"
+    ],
+    "file": "src/app/api/webhooks/vopay/virtual-accounts/route.ts",
+    "category": "webhook"
+  },
+  {
+    "path": "/api/worker/process-jobs",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "file": "src/app/api/worker/process-jobs/route.ts",
+    "category": "worker"
+  }
+]

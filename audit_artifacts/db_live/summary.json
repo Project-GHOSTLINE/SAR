@@ -1,0 +1,139 @@
+{
+  "audit_timestamp": "2026-01-24T22:20:45.265Z",
+  "connection_method": "Supabase Client (service_role or anon)",
+  "scope": "public schema only",
+  "tables": {
+    "total_verified": 19,
+    "existing": 19,
+    "missing": 0,
+    "total_rows": 26674,
+    "list": [
+      {
+        "name": "clients",
+        "exists": true,
+        "rows": 383,
+        "columns": 11
+      },
+      {
+        "name": "client_external_ids",
+        "exists": true,
+        "rows": null,
+        "columns": 0
+      },
+      {
+        "name": "client_events",
+        "exists": true,
+        "rows": null,
+        "columns": 0
+      },
+      {
+        "name": "client_addresses",
+        "exists": true,
+        "rows": null,
+        "columns": 0
+      },
+      {
+        "name": "loan_applications",
+        "exists": true,
+        "rows": 13,
+        "columns": 64
+      },
+      {
+        "name": "client_analyses",
+        "exists": true,
+        "rows": 458,
+        "columns": 33
+      },
+      {
+        "name": "analysis_jobs",
+        "exists": true,
+        "rows": 78,
+        "columns": 8
+      },
+      {
+        "name": "analysis_scores",
+        "exists": true,
+        "rows": 65,
+        "columns": 14
+      },
+      {
+        "name": "analysis_recommendations",
+        "exists": true,
+        "rows": 65,
+        "columns": 8
+      },
+      {
+        "name": "webhook_logs",
+        "exists": true,
+        "rows": 979,
+        "columns": 22
+      },
+      {
+        "name": "email_messages",
+        "exists": true,
+        "rows": null,
+        "columns": 0
+      },
+      {
+        "name": "download_logs",
+        "exists": true,
+        "rows": 1,
+        "columns": 14
+      },
+      {
+        "name": "quickbooks_invoices",
+        "exists": true,
+        "rows": 0,
+        "columns": 0
+      },
+      {
+        "name": "quickbooks_customers",
+        "exists": true,
+        "rows": 0,
+        "columns": 0
+      },
+      {
+        "name": "telemetry_requests",
+        "exists": true,
+        "rows": 24602,
+        "columns": 24
+      },
+      {
+        "name": "telemetry_spans",
+        "exists": true,
+        "rows": 0,
+        "columns": 0
+      },
+      {
+        "name": "seo_ga4_metrics_daily",
+        "exists": true,
+        "rows": 30,
+        "columns": 34
+      },
+      {
+        "name": "seo_gsc_metrics_daily",
+        "exists": true,
+        "rows": 0,
+        "columns": 0
+      },
+      {
+        "name": "seo_semrush_metrics_daily",
+        "exists": true,
+        "rows": null,
+        "columns": 0
+      }
+    ]
+  },
+  "rpc_functions": {
+    "tested": 4,
+    "existing": 0,
+    "missing": 4
+  },
+  "key_findings": {
+    "clients_table": "EXISTS",
+    "clients_rows": 383,
+    "loan_applications_rows": 13,
+    "webhook_logs_rows": 979,
+    "orchestration_rpc": false
+  }
+}

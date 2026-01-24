@@ -1,0 +1,5 @@
+database/migrations/restructure/010_create_clients.sql:CREATE TABLE IF NOT EXISTS public.clients (
+database/migrations/restructure/010_create_clients_enhanced.sql:CREATE TABLE IF NOT EXISTS public.clients (
+database/migrations/restructure/010_011_VERIFIED.sql:CREATE TABLE IF NOT EXISTS public.clients (
+database/migrations/restructure/010_011_safe.sql:CREATE TABLE IF NOT EXISTS public.clients (
+database/migrations/restructure/010_011_combined.sql:CREATE TABLE IF NOT EXISTS public.clients (

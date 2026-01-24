@@ -1,0 +1,5 @@
+{
+  "success": false,
+  "exists": false,
+  "error": "Could not find the function public.calculate_overall_health_score without parameters in the schema cache"
+}

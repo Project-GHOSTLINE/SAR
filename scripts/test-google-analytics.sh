@@ -3,8 +3,7 @@
 # Google Analytics API Test Script
 # Tests all Google Analytics 4 endpoints and validates data structure
 
-# Temporarily disable set -e for debugging
-# set -e
+set -e
 
 # Load helper functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

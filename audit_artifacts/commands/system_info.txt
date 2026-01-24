@@ -1,0 +1,12 @@
+=== SYSTEM INFO ===
+Date: sam. 24 janv. 2026 17:07:39 EST
+Hostname: MacBookFrederic.localdomain
+OS: Darwin MacBookFrederic.localdomain 25.1.0 Darwin Kernel Version 25.1.0: Mon Oct 20 19:34:05 PDT 2025; root:xnu-12377.41.6~2/RELEASE_ARM64_T6041 arm64
+Node: v25.2.1
+NPM: 11.6.2
+PNPM: 10.19.0
+Yarn: (eval):9: command not found: yarn
+not installed
+Git Commit: e37345c31c941299a2a77aab4484465139457a94
+Git Branch: main
+Repo Root: /Users/xunit/Desktop/📁 Projets/sar

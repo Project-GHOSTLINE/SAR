@@ -1,0 +1,2 @@
+src/app/api/admin/clients-sar/autres-contrats/route.ts:        .eq('email', client.email)
+src/app/api/admin/clients-sar/concordances/route.ts:        .eq('email', client.email)

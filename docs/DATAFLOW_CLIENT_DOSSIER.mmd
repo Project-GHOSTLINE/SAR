@@ -1,0 +1,133 @@
+%% DATAFLOW: Dossier Client Unifié - Exemple "Eric Tremblay"
+%% SAR Project - Vue 360° du client
+%% Date: 2026-01-23
+
+flowchart TB
+    subgraph IDENTIFICATION["🆔 IDENTIFICATION CLIENT"]
+        CLIENT_ID["👤 Client: Eric Tremblay"]
+        EMAIL["📧 eric.tremblay@email.com"]
+        PHONE["📱 +1-514-555-0123"]
+        ADDRESS["🏠 123 Rue Principale, Montréal"]
+        EXTERNAL_IDS["🔗 External IDs:<br/>- Inverite GUID: ABC-123<br/>- VoPay Client ID: VP-456<br/>- QuickBooks ID: QB-789"]
+    end
+
+    subgraph APPLICATION_HISTORY["📝 HISTORIQUE DEMANDES"]
+        APP1["Application #1<br/>SAR-LP-000123<br/>Date: 2025-12-15<br/>Montant: 3,500 CAD<br/>Status: Approved"]
+        APP2["Application #2<br/>SAR-LP-000456<br/>Date: 2026-01-10<br/>Montant: 5,000 CAD<br/>Status: Under Review"]
+        APP_METRICS["📊 Metrics:<br/>- Cortex Score: 75<br/>- Risk Level: Medium<br/>- DTI Ratio: 0.42<br/>- Credit History: Good"]
+    end
+
+    subgraph BANKING_DATA["🏦 DONNÉES BANCAIRES (IBV)"]
+        INVERITE_ANALYSIS["🔍 Analyse Inverite<br/>GUID: ABC-123<br/>Date: 2026-01-10"]
+        ACCOUNTS["Comptes:<br/>- RBC Chequing: 2,500 CAD<br/>- RBC Savings: 8,000 CAD<br/>- Tangerine: 1,200 CAD"]
+        TRANSACTIONS["Transactions (90j):<br/>- Total: 342 tx<br/>- Income: 24,500 CAD<br/>- Expenses: 22,100 CAD"]
+        SAR_SCORE["⭐ SAR Score<br/>Score: 625 / 850<br/>Monthly Income: 3,500 CAD<br/>DTI: 42%<br/>NSF Count: 1<br/>Recommendation: REVIEW"]
+    end
+
+    subgraph FINANCIAL_TRACKING["💰 SUIVI FINANCIER"]
+        VOPAY_TRANS["💳 Transactions VoPay<br/>- Disbursement: 3,500 CAD<br/>  (2025-12-16)<br/>- Payment Received: 400 CAD<br/>  (2026-01-05)<br/>- Balance Due: 3,100 CAD"]
+        QB_INVOICES["📄 Factures QuickBooks<br/>- Invoice #INV-001<br/>  Amount: 3,500 CAD<br/>  Balance: 3,100 CAD<br/>- Last Payment: 400 CAD"]
+        PAYMENTS_SCHEDULE["📅 Schedule Paiements<br/>- Next Payment: 2026-02-05<br/>- Amount: 400 CAD<br/>- Frequency: Monthly<br/>- Remaining: 8 payments"]
+    end
+
+    subgraph COMMUNICATIONS["💬 COMMUNICATIONS"]
+        EMAILS["📧 Emails<br/>- Total: 15 emails<br/>- Last: 2026-01-20<br/>- Categories:<br/>  * Application Inquiry: 5<br/>  * Payment Conf: 3<br/>  * Support: 7"]
+        SMS["📱 SMS<br/>- Total: 8 messages<br/>- Last: 2026-01-18<br/>- Types:<br/>  * Payment Reminders: 4<br/>  * Confirmations: 4"]
+        SUPPORT_TICKETS["🎫 Tickets Support<br/>- Total: 2 tickets<br/>- Open: 0<br/>- Closed: 2<br/>- Avg Response Time: 4h"]
+    end
+
+    subgraph DOCUMENTS["📂 DOCUMENTS & CONTRATS"]
+        CONTRACTS["📜 Contrats<br/>- Loan Agreement #1.pdf<br/>  (Signed: 2025-12-15)<br/>- Amendment #1.pdf<br/>  (Signed: 2026-01-12)"]
+        STATEMENTS["📊 Relevés<br/>- Dec 2025 Statement.pdf<br/>- Jan 2026 Statement.pdf"]
+        DOWNLOADS["📥 Téléchargements<br/>- Total: 12 downloads<br/>- Contract: 4x<br/>- Statement: 8x<br/>- Last: 2026-01-19"]
+    end
+
+    subgraph EVENTS_TIMELINE["📅 TIMELINE UNIFIÉE"]
+        EVENT1["2025-12-15 10:30<br/>📝 Application submitted<br/>Source: Website"]
+        EVENT2["2025-12-15 11:00<br/>🤖 Cortex scored: 75<br/>Source: Auto"]
+        EVENT3["2025-12-15 14:00<br/>✅ Application approved<br/>Source: Admin"]
+        EVENT4["2025-12-16 09:00<br/>💸 Disbursement: 3,500 CAD<br/>Source: VoPay"]
+        EVENT5["2026-01-05 08:45<br/>💰 Payment received: 400 CAD<br/>Source: VoPay"]
+        EVENT6["2026-01-10 16:20<br/>🏦 Banking data analyzed<br/>Source: Inverite"]
+        EVENT7["2026-01-10 16:25<br/>⭐ SAR Score calculated: 625<br/>Source: Worker"]
+        EVENT8["2026-01-10 17:00<br/>📝 New application submitted<br/>Source: Website"]
+        EVENT9["2026-01-18 12:00<br/>📱 SMS reminder sent<br/>Source: System"]
+        EVENT10["2026-01-20 09:30<br/>📧 Email: Payment received<br/>Source: System"]
+    end
+
+    subgraph RELATIONS["🔗 RELATIONS & CONCORDANCES"]
+        COEMPRUNTEUR["👥 Co-emprunteur<br/>Marie Tremblay<br/>Phone: +1-514-555-0124<br/>Relation: Spouse"]
+        REFERENCES["📞 Références<br/>- Ref #1: Jean Dupont<br/>  (Friend, 514-555-0200)<br/>- Ref #2: Sophie Martin<br/>  (Colleague, 514-555-0300)"]
+        DUPLICATES["⚠️ Doublons potentiels<br/>- Same phone: 0<br/>- Same address: 0<br/>- Same email: 0<br/>Status: ✅ Unique"]
+    end
+
+    subgraph RISK_ANALYSIS["🚨 ANALYSE RISQUE"]
+        RED_FLAGS["🚩 Red Flags<br/>- 1 NSF in last 30 days<br/>- DTI ratio: 42% (Acceptable)<br/>- No bankruptcy detected<br/>- No microloans detected"]
+        FRAUD_CHECK["🔍 Fraud Check<br/>- Device fingerprint: Unique<br/>- IP address: 142.x.x.x (Canada)<br/>- VPN/Proxy: Not detected<br/>- Multiple applications: No"]
+        CREDIT_BEHAVIOR["📊 Comportement crédit<br/>- On-time payments: 1/1 (100%)<br/>- Missed payments: 0<br/>- Late payments: 0<br/>- Credit utilization: 35%"]
+    end
+
+    subgraph WEB_ANALYTICS["📈 WEB ANALYTICS"]
+        VISITS["🌐 Visites site<br/>- Total sessions: 8<br/>- First visit: 2025-12-10<br/>- Last visit: 2026-01-10<br/>- Pages viewed: 42"]
+        ATTRIBUTION["🎯 Attribution<br/>- Source: Google Ads<br/>- Medium: CPC<br/>- Campaign: Prêt Rapide 2025<br/>- Keyword: prêt personnel québec"]
+        CONVERSIONS["✅ Conversions<br/>- Form started: 2025-12-15<br/>- Form completed: 2025-12-15<br/>- Time to complete: 8 min<br/>- Conversion rate: 100%"]
+    end
+
+    subgraph AGGREGATED_KPIs["📊 KPIs CLIENT"]
+        LIFETIME_VALUE["💎 Lifetime Value<br/>Total Borrowed: 3,500 CAD<br/>Total Paid: 400 CAD<br/>Interest Paid: 50 CAD<br/>Projected Revenue: 650 CAD"]
+        ENGAGEMENT_SCORE["⭐ Engagement Score<br/>Email opens: 80%<br/>SMS response rate: 100%<br/>Portal logins: 5<br/>Support interactions: 2"]
+        CUSTOMER_HEALTH["🏥 Customer Health<br/>Payment History: Excellent<br/>Communication: Responsive<br/>Satisfaction: 5/5<br/>Churn Risk: Low (5%)"]
+    end
+
+    %% === CONNEXIONS PRINCIPALES ===
+    CLIENT_ID -.->|Identifié par| EMAIL
+    CLIENT_ID -.->|Identifié par| PHONE
+    CLIENT_ID -.->|Identifié par| ADDRESS
+
+    EMAIL -->|Lien vers| APP1
+    EMAIL -->|Lien vers| APP2
+    EMAIL -->|Lien vers| INVERITE_ANALYSIS
+    EMAIL -->|Lien vers| VOPAY_TRANS
+    EMAIL -->|Lien vers| QB_INVOICES
+    EMAIL -->|Lien vers| EMAILS
+
+    APP1 -->|Génère| VOPAY_TRANS
+    APP1 -->|Génère| QB_INVOICES
+    APP1 -->|Génère| CONTRACTS
+
+    APP2 -->|Nécessite| INVERITE_ANALYSIS
+    INVERITE_ANALYSIS -->|Produit| SAR_SCORE
+
+    VOPAY_TRANS -->|Log dans| EVENTS_TIMELINE
+    QB_INVOICES -->|Log dans| EVENTS_TIMELINE
+    INVERITE_ANALYSIS -->|Log dans| EVENTS_TIMELINE
+    EMAILS -->|Log dans| EVENTS_TIMELINE
+    SMS -->|Log dans| EVENTS_TIMELINE
+
+    APP1 -->|Source| WEB_ANALYTICS
+    APP2 -->|Source| WEB_ANALYTICS
+
+    SAR_SCORE -->|Alimente| RISK_ANALYSIS
+    VOPAY_TRANS -->|Alimente| CREDIT_BEHAVIOR
+    EMAILS -->|Alimente| ENGAGEMENT_SCORE
+
+    %% === SOURCES DE DONNÉES ===
+    Note1["💾 DATA SOURCES:<br/>- loan_applications (APP1, APP2)<br/>- client_analyses (Inverite)<br/>- analysis_scores (SAR Score)<br/>- webhook_logs (VoPay)<br/>- email_messages (Emails)<br/>- client_events (Timeline)<br/>- quickbooks_* (Invoices)<br/>- download_logs (Documents)<br/>- seo_ga4_metrics_daily (Analytics)"]
+
+    %% === API ENDPOINTS POUR DOSSIER ===
+    API_ENDPOINTS["🔌 API ENDPOINTS:<br/>GET /api/admin/client/:id/summary<br/>GET /api/admin/client/:id/timeline<br/>GET /api/admin/client/:id/metrics<br/>GET /api/admin/client/:id/documents<br/>GET /api/admin/client/:id/relations"]
+
+    %% === STYLES ===
+    classDef idStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef dataStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef finStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef commStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    classDef riskStyle fill:#ffebee,stroke:#c62828,stroke-width:2px
+    classDef kpiStyle fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+
+    class IDENTIFICATION,CLIENT_ID,EMAIL,PHONE idStyle
+    class BANKING_DATA,INVERITE_ANALYSIS,SAR_SCORE dataStyle
+    class FINANCIAL_TRACKING,VOPAY_TRANS,QB_INVOICES finStyle
+    class COMMUNICATIONS,EMAILS,SMS,SUPPORT_TICKETS commStyle
+    class RISK_ANALYSIS,RED_FLAGS,FRAUD_CHECK riskStyle
+    class AGGREGATED_KPIs,LIFETIME_VALUE,CUSTOMER_HEALTH kpiStyle

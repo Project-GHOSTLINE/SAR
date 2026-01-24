@@ -1,0 +1,5 @@
+{
+  "success": false,
+  "exists": false,
+  "error": "Could not find the function public.get_client_summary(client_id) in the schema cache"
+}
