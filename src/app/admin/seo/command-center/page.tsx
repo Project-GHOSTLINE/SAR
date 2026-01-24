@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft,
@@ -34,19 +34,22 @@ interface RequestTrace {
   status: number
   duration: number
   ip: string
-  userAgent: string
-  location: string
-  dataFlow: string[]
+  region: string
+  source: string
+  errorCode?: string
+  bytesIn: number
+  bytesOut: number
 }
 
 interface DataPipeline {
   id: string
   name: string
   source: string
-  transformations: string[]
-  destination: string
+  type: string
   status: 'active' | 'idle' | 'error'
   throughput: number
+  avgDuration: number
+  errorCount: number
 }
 
 interface SystemMetrics {
@@ -54,7 +57,31 @@ interface SystemMetrics {
   requests: number
   errors: number
   avgLatency: number
-  dataTransferred: number
+}
+
+interface RealTelemetryData {
+  success: boolean
+  timeWindow: string
+  timestamp: string
+  metrics: {
+    totalRequests: number
+    totalErrors: number
+    errorRate: string
+    avgLatency: number
+    totalDataTransferred: number
+  }
+  systemStatus: 'operational' | 'degraded' | 'critical'
+  timeSeries: Array<{
+    timestamp: number
+    requests: number
+    errors: number
+    avgLatency: number
+  }>
+  requestTraces: RequestTrace[]
+  pipelines: DataPipeline[]
+  endpointDistribution: Array<{ endpoint: string; count: number }>
+  statusDistribution: Array<{ status: number; count: number }>
+  activeAlerts: any[]
 }
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
@@ -62,354 +89,264 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
 export default function CommandCenterPage() {
   const router = useRouter()
   const [viewMode, setViewMode] = useState<ViewMode>('data-flow')
-  const [requestTraces, setRequestTraces] = useState<RequestTrace[]>([])
-  const [pipelines, setPipelines] = useState<DataPipeline[]>([])
-  const [metrics, setMetrics] = useState<SystemMetrics[]>([])
-  const [liveRequests, setLiveRequests] = useState<number>(0)
-  const [systemStatus, setSystemStatus] = useState<'operational' | 'degraded' | 'critical'>('operational')
+  const [timeWindow, setTimeWindow] = useState<string>('1h')
+  const [telemetryData, setTelemetryData] = useState<RealTelemetryData | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Simulation de données en temps réel
+  // ========================================================================
+  // REAL DATA FETCHING - NO MOCK DATA
+  // ========================================================================
+  async function fetchRealTelemetryData() {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const response = await fetch(`/api/admin/telemetry/command-center?window=${timeWindow}`, {
+        cache: 'no-store',
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch telemetry data: ${response.status}`)
+      }
+
+      const data: RealTelemetryData = await response.json()
+      setTelemetryData(data)
+    } catch (err) {
+      console.error('[command-center] Fetch error:', err)
+      setError(err instanceof Error ? err.message : 'Unknown error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Initial load + auto-refresh every 5 seconds
   useEffect(() => {
-    const interval = setInterval(() => {
-      generateMockData()
-    }, 2000)
+    fetchRealTelemetryData()
 
-    generateInitialData()
+    const interval = setInterval(() => {
+      fetchRealTelemetryData()
+    }, 5000) // 5 seconds
 
     return () => clearInterval(interval)
-  }, [])
+  }, [timeWindow])
 
-  function generateInitialData() {
-    // Pipelines de données
-    const mockPipelines: DataPipeline[] = [
-      {
-        id: 'p1',
-        name: 'Analytics Data Pipeline',
-        source: 'Google Analytics API',
-        transformations: ['Parse', 'Aggregate', 'Normalize', 'Enrich'],
-        destination: 'Supabase (seo_ga4_metrics_daily)',
-        status: 'active',
-        throughput: 1247
-      },
-      {
-        id: 'p2',
-        name: 'Semrush Data Pipeline',
-        source: 'Semrush API',
-        transformations: ['Fetch CSV', 'Parse', 'Transform', 'Store'],
-        destination: 'Supabase (seo_semrush_domain_daily)',
-        status: 'active',
-        throughput: 342
-      },
-      {
-        id: 'p3',
-        name: 'User Tracking Pipeline',
-        source: 'Client Browser',
-        transformations: ['Capture Event', 'Sanitize', 'Deduplicate', 'Batch'],
-        destination: 'Analytics Warehouse',
-        status: 'active',
-        throughput: 8934
-      },
-      {
-        id: 'p4',
-        name: 'Admin Auth Pipeline',
-        source: 'Login Request',
-        transformations: ['Validate', 'Hash', 'Verify JWT', 'Set Cookie'],
-        destination: 'Session Store',
-        status: 'idle',
-        throughput: 12
-      },
-      {
-        id: 'p5',
-        name: 'SEO Metrics Aggregation',
-        source: 'Multiple Sources (GA4, Semrush, GSC)',
-        transformations: ['Fetch', 'Join', 'Calculate', 'Cache'],
-        destination: 'Dashboard API',
-        status: 'active',
-        throughput: 567
-      }
-    ]
-
-    setPipelines(mockPipelines)
-
-    // Métriques historiques
-    const now = Date.now()
-    const mockMetrics: SystemMetrics[] = []
-    for (let i = 60; i >= 0; i--) {
-      mockMetrics.push({
-        timestamp: now - i * 60000,
-        requests: Math.floor(Math.random() * 100 + 50),
-        errors: Math.floor(Math.random() * 5),
-        avgLatency: Math.floor(Math.random() * 200 + 100),
-        dataTransferred: Math.floor(Math.random() * 500 + 200)
-      })
-    }
-    setMetrics(mockMetrics)
+  // Loading state
+  if (loading && !telemetryData) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-lg">
+          <Activity className="animate-spin inline-block mr-2" size={24} />
+          Chargement des données de télémétrie réelles...
+        </div>
+      </div>
+    )
   }
 
-  function generateMockData() {
-    // Nouvelles traces de requêtes
-    const endpoints = [
-      '/api/admin/analytics',
-      '/api/admin/analytics/dashboard',
-      '/api/seo/collect/ga4',
-      '/api/seo/collect/semrush',
-      '/api/seo/semrush/keyword-research',
-      '/api/seo/semrush/backlinks',
-      '/api/admin/client/list',
-      '/api/webhooks/vopay'
-    ]
-
-    const newTrace: RequestTrace = {
-      id: `req-${Date.now()}`,
-      timestamp: Date.now(),
-      method: ['GET', 'POST'][Math.floor(Math.random() * 2)],
-      endpoint: endpoints[Math.floor(Math.random() * endpoints.length)],
-      status: Math.random() > 0.95 ? 500 : Math.random() > 0.9 ? 404 : 200,
-      duration: Math.floor(Math.random() * 500 + 50),
-      ip: `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-      userAgent: ['Chrome/120', 'Safari/17', 'Firefox/121', 'Edge/120'][Math.floor(Math.random() * 4)],
-      location: ['Montreal, CA', 'Toronto, CA', 'Vancouver, CA', 'Calgary, CA'][Math.floor(Math.random() * 4)],
-      dataFlow: generateDataFlow()
-    }
-
-    setRequestTraces(prev => [newTrace, ...prev].slice(0, 100))
-    setLiveRequests(prev => prev + 1)
-
-    // Mise à jour des métriques
-    const newMetric: SystemMetrics = {
-      timestamp: Date.now(),
-      requests: Math.floor(Math.random() * 100 + 50),
-      errors: Math.floor(Math.random() * 5),
-      avgLatency: Math.floor(Math.random() * 200 + 100),
-      dataTransferred: Math.floor(Math.random() * 500 + 200)
-    }
-
-    setMetrics(prev => [...prev.slice(-59), newMetric])
-
-    // Mise à jour du statut système
-    const errorRate = newMetric.errors / newMetric.requests
-    if (errorRate > 0.1) {
-      setSystemStatus('critical')
-    } else if (errorRate > 0.05 || newMetric.avgLatency > 500) {
-      setSystemStatus('degraded')
-    } else {
-      setSystemStatus('operational')
-    }
+  // Error state
+  if (error && !telemetryData) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-red-500 text-lg">
+          <AlertCircle className="inline-block mr-2" size={24} />
+          Erreur: {error}
+        </div>
+      </div>
+    )
   }
 
-  function generateDataFlow(): string[] {
-    const flows = [
-      ['Client', 'Next.js API', 'Supabase', 'Response'],
-      ['Client', 'Next.js API', 'Google Analytics', 'Transform', 'Supabase', 'Cache', 'Response'],
-      ['Client', 'Auth Middleware', 'Verify JWT', 'Next.js API', 'Response'],
-      ['Cron', 'Next.js API', 'Semrush API', 'Parse CSV', 'Supabase', 'Response'],
-      ['Client', 'Next.js API', 'Redis Cache', 'Response'],
-      ['Client', 'Next.js API', 'Supabase RPC', 'Response']
-    ]
-    return flows[Math.floor(Math.random() * flows.length)]
+  if (!telemetryData) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-400">Aucune donnée disponible</div>
+      </div>
+    )
   }
 
-  const statusColor = {
-    operational: 'text-green-500 bg-green-100',
-    degraded: 'text-yellow-500 bg-yellow-100',
-    critical: 'text-red-500 bg-red-100'
-  }
+  const {
+    metrics,
+    systemStatus,
+    timeSeries,
+    requestTraces,
+    pipelines,
+    endpointDistribution,
+    statusDistribution,
+    activeAlerts
+  } = telemetryData
 
-  const totalRequests = metrics.reduce((sum, m) => sum + m.requests, 0)
-  const totalErrors = metrics.reduce((sum, m) => sum + m.errors, 0)
-  const avgLatency = metrics.length > 0
-    ? Math.round(metrics.reduce((sum, m) => sum + m.avgLatency, 0) / metrics.length)
-    : 0
-  const totalData = metrics.reduce((sum, m) => sum + m.dataTransferred, 0)
+  // Calculate real-time stats
+  const totalRequests = metrics.totalRequests
+  const totalErrors = metrics.totalErrors
+  const avgLatency = metrics.avgLatency
+  const dataTransferred = metrics.totalDataTransferred
 
-  // Distribution des requêtes par endpoint
-  const endpointDistribution = requestTraces.slice(0, 50).reduce((acc, req) => {
-    acc[req.endpoint] = (acc[req.endpoint] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
-
-  const pieData = Object.entries(endpointDistribution).map(([name, value]) => ({
-    name: name.split('/').pop() || name,
-    value
+  // Pie chart data for endpoints
+  const pieData = endpointDistribution.slice(0, 6).map((item, idx) => ({
+    name: item.endpoint.split('/').slice(-1)[0] || 'root',
+    value: item.count,
+    fullPath: item.endpoint,
   }))
 
-  // Données pour graphique status
-  const statusData = [
-    { name: '2xx Success', value: requestTraces.filter(r => r.status >= 200 && r.status < 300).length },
-    { name: '4xx Client Error', value: requestTraces.filter(r => r.status >= 400 && r.status < 500).length },
-    { name: '5xx Server Error', value: requestTraces.filter(r => r.status >= 500).length }
-  ]
+  // Bar chart data for status codes
+  const barData = statusDistribution.map(item => ({
+    status: item.status.toString(),
+    count: item.count,
+    fill: item.status >= 500 ? '#ef4444' : item.status >= 400 ? '#f59e0b' : '#10b981'
+  }))
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <AdminNav currentPage="/admin/seo" />
+      <AdminNav />
 
-      <main className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="p-6">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.push('/admin/seo')}
-              className="p-2 hover:bg-gray-800 rounded-lg text-gray-400 hover:text-white transition-colors"
+              onClick={() => router.back()}
+              className="text-gray-400 hover:text-white transition-colors"
             >
               <ArrowLeft size={24} />
             </button>
             <div>
               <h1 className="text-3xl font-bold text-white flex items-center gap-3">
                 <Shield className="text-blue-500" size={32} />
-                COMMAND CENTER
-                <span className="text-sm font-normal text-gray-400 ml-2">/ Real-Time Data Intelligence</span>
+                NSA Command Center
               </h1>
-              <p className="mt-1 text-gray-400 font-mono text-sm">
-                CLASSIFICATION: INTERNAL • SYSTEM STATUS: {systemStatus.toUpperCase()}
-              </p>
+              <p className="text-gray-400 mt-1">Real-time telemetry • 100% authentic data • No mocks</p>
             </div>
           </div>
-          <div className={`px-4 py-2 rounded-lg font-mono text-sm font-bold ${statusColor[systemStatus]}`}>
-            <Radio className="inline mr-2" size={16} />
-            {systemStatus === 'operational' ? '● OPERATIONAL' : systemStatus === 'degraded' ? '⚠ DEGRADED' : '🔴 CRITICAL'}
+
+          {/* Time Window Selector */}
+          <div className="flex items-center gap-2 bg-gray-800 rounded-lg p-1">
+            {['5m', '15m', '1h', '6h', '24h'].map((window) => (
+              <button
+                key={window}
+                onClick={() => setTimeWindow(window)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  timeWindow === window
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                }`}
+              >
+                {window}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* System Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        {/* System Status Banner */}
+        <div className={`mb-6 p-4 rounded-lg border-2 ${
+          systemStatus === 'operational'
+            ? 'bg-green-900/20 border-green-500'
+            : systemStatus === 'degraded'
+            ? 'bg-yellow-900/20 border-yellow-500'
+            : 'bg-red-900/20 border-red-500'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {systemStatus === 'operational' ? (
+                <CheckCircle className="text-green-500" size={24} />
+              ) : (
+                <AlertCircle className={systemStatus === 'degraded' ? 'text-yellow-500' : 'text-red-500'} size={24} />
+              )}
+              <div>
+                <h3 className="text-white font-semibold">
+                  System Status: {systemStatus.toUpperCase()}
+                </h3>
+                <p className="text-gray-400 text-sm">
+                  {systemStatus === 'operational' && 'All systems operational'}
+                  {systemStatus === 'degraded' && 'Performance degradation detected'}
+                  {systemStatus === 'critical' && 'Critical issues detected - immediate attention required'}
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-gray-400 text-sm">Error Rate</div>
+              <div className={`text-2xl font-bold ${
+                systemStatus === 'operational' ? 'text-green-500' :
+                systemStatus === 'degraded' ? 'text-yellow-500' : 'text-red-500'
+              }`}>
+                {metrics.errorRate}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Metrics Cards */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
           <MetricCard
             icon={<Activity size={24} />}
             label="Total Requests"
             value={totalRequests.toLocaleString()}
-            sublabel="Last 60 minutes"
+            sublabel={`Last ${timeWindow}`}
             color="blue"
           />
           <MetricCard
             icon={<AlertCircle size={24} />}
             label="Total Errors"
             value={totalErrors.toLocaleString()}
-            sublabel={`${((totalErrors / totalRequests) * 100).toFixed(2)}% error rate`}
+            sublabel={`${totalRequests > 0 ? ((totalErrors / totalRequests) * 100).toFixed(2) : 0}% error rate`}
             color="red"
           />
           <MetricCard
             icon={<Clock size={24} />}
             label="Avg Latency"
             value={`${avgLatency}ms`}
-            sublabel="Response time"
-            color="purple"
+            sublabel="Average response time"
+            color="yellow"
           />
           <MetricCard
             icon={<Database size={24} />}
             label="Data Transferred"
-            value={`${(totalData / 1024).toFixed(1)} MB`}
-            sublabel="Total throughput"
+            value={`${dataTransferred}MB`}
+            sublabel="Total outbound data"
             color="green"
           />
         </div>
 
         {/* View Mode Tabs */}
-        <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
-          <ViewTab
-            active={viewMode === 'data-flow'}
-            onClick={() => setViewMode('data-flow')}
-            icon={<GitBranch size={16} />}
-            label="Data Flow"
-          />
-          <ViewTab
-            active={viewMode === 'request-flow'}
-            onClick={() => setViewMode('request-flow')}
-            icon={<Zap size={16} />}
-            label="Request Flow"
-          />
-          <ViewTab
-            active={viewMode === 'sequence'}
-            onClick={() => setViewMode('sequence')}
-            icon={<TrendingUp size={16} />}
-            label="Sequence Diagram"
-          />
-          <ViewTab
-            active={viewMode === 'architecture'}
-            onClick={() => setViewMode('architecture')}
-            icon={<Server size={16} />}
-            label="Architecture"
-          />
-          <ViewTab
-            active={viewMode === 'tracing'}
-            onClick={() => setViewMode('tracing')}
-            icon={<Target size={16} />}
-            label="Tracing"
-          />
-          <ViewTab
-            active={viewMode === 'pipeline'}
-            onClick={() => setViewMode('pipeline')}
-            icon={<Wifi size={16} />}
-            label="Pipeline"
-          />
+        <div className="mb-6 flex gap-2 bg-gray-800 p-2 rounded-lg overflow-x-auto">
+          {[
+            { id: 'data-flow', label: 'Data Flow', icon: GitBranch },
+            { id: 'request-flow', label: 'Request Flow', icon: Radio },
+            { id: 'sequence', label: 'Sequence Diagram', icon: Terminal },
+            { id: 'architecture', label: 'Architecture', icon: Server },
+            { id: 'tracing', label: 'Tracing', icon: Eye },
+            { id: 'pipeline', label: 'Pipeline', icon: Wifi }
+          ].map((mode) => (
+            <button
+              key={mode.id}
+              onClick={() => setViewMode(mode.id as ViewMode)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors whitespace-nowrap ${
+                viewMode === mode.id
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
+              }`}
+            >
+              <mode.icon size={16} />
+              {mode.label}
+            </button>
+          ))}
         </div>
 
         {/* Main Content Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left: Main Visualization */}
-          <div className="lg:col-span-2 space-y-6">
-            {viewMode === 'data-flow' && <DataFlowView metrics={metrics} />}
-            {viewMode === 'request-flow' && <RequestFlowView traces={requestTraces} />}
+        <div className="grid grid-cols-3 gap-6">
+          {/* Left Column - Main Visualization */}
+          <div className="col-span-2 bg-gray-800 rounded-lg p-6">
+            {viewMode === 'data-flow' && <DataFlowView timeSeries={timeSeries} />}
+            {viewMode === 'request-flow' && <RequestFlowView traces={requestTraces.slice(0, 20)} />}
             {viewMode === 'sequence' && <SequenceDiagramView traces={requestTraces.slice(0, 10)} />}
             {viewMode === 'architecture' && <ArchitectureView />}
-            {viewMode === 'tracing' && <TracingView traces={requestTraces} />}
+            {viewMode === 'tracing' && <TracingView traces={requestTraces.slice(0, 15)} />}
             {viewMode === 'pipeline' && <PipelineView pipelines={pipelines} />}
           </div>
 
-          {/* Right: Live Feed & Stats */}
+          {/* Right Column - Stats & Live Feed */}
           <div className="space-y-6">
-            {/* Live Request Feed */}
-            <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-              <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-                <h3 className="font-bold text-white flex items-center gap-2">
-                  <Terminal size={16} className="text-green-500" />
-                  LIVE REQUEST FEED
-                </h3>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-gray-400 font-mono">{liveRequests} reqs</span>
-                </div>
-              </div>
-              <div className="h-[400px] overflow-y-auto p-4 space-y-2 font-mono text-xs">
-                {requestTraces.slice(0, 20).map((trace) => (
-                  <div
-                    key={trace.id}
-                    className={`p-2 rounded border ${
-                      trace.status >= 500
-                        ? 'bg-red-900/20 border-red-700/50'
-                        : trace.status >= 400
-                        ? 'bg-yellow-900/20 border-yellow-700/50'
-                        : 'bg-green-900/20 border-green-700/50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className={`font-bold ${
-                        trace.method === 'GET' ? 'text-blue-400' : 'text-purple-400'
-                      }`}>
-                        {trace.method}
-                      </span>
-                      <span className={`text-xs ${
-                        trace.status >= 500
-                          ? 'text-red-400'
-                          : trace.status >= 400
-                          ? 'text-yellow-400'
-                          : 'text-green-400'
-                      }`}>
-                        {trace.status}
-                      </span>
-                    </div>
-                    <div className="text-gray-300 truncate">{trace.endpoint}</div>
-                    <div className="flex items-center justify-between mt-1 text-gray-500">
-                      <span>{trace.duration}ms</span>
-                      <span>{trace.location}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Distribution Charts */}
-            <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
-              <h3 className="font-bold text-white mb-4">Endpoint Distribution</h3>
+            {/* Endpoint Distribution */}
+            <div className="bg-gray-800 rounded-lg p-6">
+              <h3 className="text-white font-semibold mb-4">Endpoint Distribution</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie
@@ -431,41 +368,109 @@ export default function CommandCenterPage() {
               </ResponsiveContainer>
             </div>
 
-            {/* Status Distribution */}
-            <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
-              <h3 className="font-bold text-white mb-4">Status Code Distribution</h3>
+            {/* Status Codes */}
+            <div className="bg-gray-800 rounded-lg p-6">
+              <h3 className="text-white font-semibold mb-4">Status Code Distribution</h3>
               <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={statusData}>
+                <BarChart data={barData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis dataKey="name" stroke="#9ca3af" tick={{ fontSize: 10 }} />
+                  <XAxis dataKey="status" stroke="#9ca3af" />
                   <YAxis stroke="#9ca3af" />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                    labelStyle={{ color: '#fff' }}
+                    contentStyle={{ backgroundColor: '#1f2937', border: 'none' }}
+                    labelStyle={{ color: '#f3f4f6' }}
                   />
-                  <Bar dataKey="value" fill="#3b82f6" />
+                  <Bar dataKey="count" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
+
+            {/* Live Request Feed */}
+            <div className="bg-gray-800 rounded-lg p-6">
+              <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                <Radio className="text-green-500 animate-pulse" size={16} />
+                Live Request Feed
+              </h3>
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {requestTraces.slice(0, 10).map((trace) => (
+                  <div
+                    key={trace.id}
+                    className="text-xs p-2 bg-gray-900 rounded border-l-2"
+                    style={{
+                      borderLeftColor: trace.status >= 500 ? '#ef4444' : trace.status >= 400 ? '#f59e0b' : '#10b981'
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-gray-400">{new Date(trace.timestamp).toLocaleTimeString()}</span>
+                      <span className={`font-mono ${
+                        trace.status >= 500 ? 'text-red-500' :
+                        trace.status >= 400 ? 'text-yellow-500' : 'text-green-500'
+                      }`}>
+                        {trace.status}
+                      </span>
+                    </div>
+                    <div className="text-white font-mono">{trace.method} {trace.endpoint}</div>
+                    <div className="text-gray-500 mt-1">{trace.duration}ms • {trace.region}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }
 
-// Components for each view mode
+// ============================================================================
+// METRIC CARD COMPONENT
+// ============================================================================
+function MetricCard({
+  icon,
+  label,
+  value,
+  sublabel,
+  color
+}: {
+  icon: React.ReactNode
+  label: string
+  value: string
+  sublabel: string
+  color: 'blue' | 'red' | 'yellow' | 'green'
+}) {
+  const colorClasses = {
+    blue: 'text-blue-500',
+    red: 'text-red-500',
+    yellow: 'text-yellow-500',
+    green: 'text-green-500'
+  }
 
-function DataFlowView({ metrics }: { metrics: SystemMetrics[] }) {
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-      <h2 className="text-2xl font-bold text-white mb-6">Real-Time Data Flow Analytics</h2>
+    <div className="bg-gray-800 rounded-lg p-6">
+      <div className="flex items-center gap-3 mb-2">
+        <div className={colorClasses[color]}>{icon}</div>
+        <h3 className="text-gray-400 text-sm">{label}</h3>
+      </div>
+      <div className="text-3xl font-bold text-white mb-1">{value}</div>
+      <div className="text-gray-500 text-xs">{sublabel}</div>
+    </div>
+  )
+}
 
-      {/* Requests Over Time */}
+// ============================================================================
+// VIEW COMPONENTS
+// ============================================================================
+
+function DataFlowView({ timeSeries }: { timeSeries: SystemMetrics[] }) {
+  return (
+    <div>
+      <h2 className="text-xl font-bold text-white mb-4">Real-Time Data Flow Metrics</h2>
+
+      {/* Requests Chart */}
       <div className="mb-8">
-        <h3 className="text-lg font-semibold text-white mb-4">Requests Per Minute</h3>
-        <ResponsiveContainer width="100%" height={250}>
-          <AreaChart data={metrics.slice(-20)}>
+        <h3 className="text-gray-400 text-sm mb-3">Requests per Minute</h3>
+        <ResponsiveContainer width="100%" height={200}>
+          <AreaChart data={timeSeries}>
             <defs>
               <linearGradient id="colorRequests" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
@@ -476,36 +481,37 @@ function DataFlowView({ metrics }: { metrics: SystemMetrics[] }) {
             <XAxis
               dataKey="timestamp"
               stroke="#9ca3af"
-              tickFormatter={(ts) => new Date(ts).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}
+              tickFormatter={(ts) => new Date(ts).toLocaleTimeString()}
             />
             <YAxis stroke="#9ca3af" />
             <Tooltip
-              contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-              labelFormatter={(ts) => new Date(ts).toLocaleTimeString('fr-CA')}
+              contentStyle={{ backgroundColor: '#1f2937', border: 'none' }}
+              labelStyle={{ color: '#f3f4f6' }}
+              labelFormatter={(ts) => new Date(ts).toLocaleTimeString()}
             />
             <Area type="monotone" dataKey="requests" stroke="#3b82f6" fillOpacity={1} fill="url(#colorRequests)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Latency Over Time */}
+      {/* Latency Chart */}
       <div>
-        <h3 className="text-lg font-semibold text-white mb-4">Average Latency (ms)</h3>
-        <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={metrics.slice(-20)}>
+        <h3 className="text-gray-400 text-sm mb-3">Average Latency (ms)</h3>
+        <ResponsiveContainer width="100%" height={200}>
+          <LineChart data={timeSeries}>
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
             <XAxis
               dataKey="timestamp"
               stroke="#9ca3af"
-              tickFormatter={(ts) => new Date(ts).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}
+              tickFormatter={(ts) => new Date(ts).toLocaleTimeString()}
             />
             <YAxis stroke="#9ca3af" />
             <Tooltip
-              contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-              labelFormatter={(ts) => new Date(ts).toLocaleTimeString('fr-CA')}
+              contentStyle={{ backgroundColor: '#1f2937', border: 'none' }}
+              labelStyle={{ color: '#f3f4f6' }}
+              labelFormatter={(ts) => new Date(ts).toLocaleTimeString()}
             />
-            <Line type="monotone" dataKey="avgLatency" stroke="#8b5cf6" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="errors" stroke="#ef4444" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="avgLatency" stroke="#10b981" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -515,48 +521,33 @@ function DataFlowView({ metrics }: { metrics: SystemMetrics[] }) {
 
 function RequestFlowView({ traces }: { traces: RequestTrace[] }) {
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-      <h2 className="text-2xl font-bold text-white mb-6">Request Flow Analysis</h2>
-      <div className="space-y-4">
-        {traces.slice(0, 10).map((trace) => (
-          <div key={trace.id} className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+    <div>
+      <h2 className="text-xl font-bold text-white mb-4">Request Flow Analysis</h2>
+      <div className="space-y-4 max-h-[600px] overflow-y-auto">
+        {traces.map((trace) => (
+          <div key={trace.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
-                <span className={`px-2 py-1 rounded text-xs font-bold ${
-                  trace.method === 'GET' ? 'bg-blue-600' : 'bg-purple-600'
-                } text-white`}>
-                  {trace.method}
-                </span>
-                <span className="text-gray-300 font-mono text-sm">{trace.endpoint}</span>
+                <div className={`w-2 h-2 rounded-full ${
+                  trace.status >= 500 ? 'bg-red-500' :
+                  trace.status >= 400 ? 'bg-yellow-500' : 'bg-green-500'
+                }`}></div>
+                <span className="text-white font-mono text-sm">{trace.method} {trace.endpoint}</span>
               </div>
-              <span className={`text-sm font-semibold ${
-                trace.status >= 500 ? 'text-red-400' :
-                trace.status >= 400 ? 'text-yellow-400' :
-                'text-green-400'
-              }`}>
-                {trace.status}
-              </span>
+              <span className="text-gray-400 text-xs">{trace.duration}ms</span>
             </div>
-
-            {/* Data Flow Visualization */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2">
-              {trace.dataFlow.map((step, idx) => (
-                <div key={idx} className="flex items-center gap-2 flex-shrink-0">
-                  <div className="px-3 py-1 bg-gray-700 rounded text-xs text-gray-300 font-mono whitespace-nowrap">
-                    {step}
-                  </div>
-                  {idx < trace.dataFlow.length - 1 && (
-                    <div className="text-blue-500">→</div>
-                  )}
-                </div>
-              ))}
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <span>{new Date(trace.timestamp).toLocaleString()}</span>
+              <span>•</span>
+              <span>IP: {trace.ip}</span>
+              <span>•</span>
+              <span>{trace.region}</span>
+              <span>•</span>
+              <span>{(trace.bytesOut / 1024).toFixed(2)} KB</span>
             </div>
-
-            <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
-              <span>{trace.ip}</span>
-              <span>{trace.duration}ms</span>
-              <span>{new Date(trace.timestamp).toLocaleTimeString('fr-CA')}</span>
-            </div>
+            {trace.errorCode && (
+              <div className="mt-2 text-red-400 text-xs">Error: {trace.errorCode}</div>
+            )}
           </div>
         ))}
       </div>
@@ -566,114 +557,46 @@ function RequestFlowView({ traces }: { traces: RequestTrace[] }) {
 
 function SequenceDiagramView({ traces }: { traces: RequestTrace[] }) {
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-      <h2 className="text-2xl font-bold text-white mb-6">Sequence Diagram</h2>
-      <div className="overflow-x-auto">
-        <div className="min-w-[800px] space-y-8">
-          {traces.map((trace, idx) => (
-            <div key={trace.id} className="relative">
-              <div className="absolute left-0 top-0 w-1 h-full bg-blue-500"></div>
-              <div className="pl-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-3 h-3 rounded-full bg-blue-500 -ml-[26px]"></div>
-                  <span className="text-gray-400 text-xs font-mono">
-                    T+{((trace.timestamp - traces[0].timestamp) / 1000).toFixed(2)}s
-                  </span>
-                  <span className="text-white font-semibold">{trace.endpoint}</span>
-                </div>
-                <div className="grid grid-cols-4 gap-2 text-xs">
-                  <div className="bg-gray-900 border border-gray-700 rounded p-2">
-                    <div className="text-gray-500 mb-1">Client</div>
-                    <div className="text-white font-mono">{trace.ip}</div>
-                  </div>
-                  <div className="bg-gray-900 border border-gray-700 rounded p-2">
-                    <div className="text-gray-500 mb-1">API Layer</div>
-                    <div className="text-white font-mono">{trace.method}</div>
-                  </div>
-                  <div className="bg-gray-900 border border-gray-700 rounded p-2">
-                    <div className="text-gray-500 mb-1">Processing</div>
-                    <div className="text-white font-mono">{trace.duration}ms</div>
-                  </div>
-                  <div className="bg-gray-900 border border-gray-700 rounded p-2">
-                    <div className="text-gray-500 mb-1">Response</div>
-                    <div className={`font-mono ${
-                      trace.status >= 500 ? 'text-red-400' :
-                      trace.status >= 400 ? 'text-yellow-400' :
-                      'text-green-400'
-                    }`}>
-                      {trace.status}
-                    </div>
-                  </div>
-                </div>
-              </div>
+    <div>
+      <h2 className="text-xl font-bold text-white mb-4">Sequence Diagram</h2>
+      <div className="space-y-6">
+        {traces.map((trace, idx) => (
+          <div key={trace.id} className="border-l-2 border-blue-500 pl-4">
+            <div className="text-gray-400 text-xs mb-1">T+{idx * 100}ms</div>
+            <div className="text-white font-mono text-sm">{trace.endpoint}</div>
+            <div className="text-gray-500 text-xs mt-1">
+              {trace.source} → API → Database → Response ({trace.duration}ms)
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   )
 }
 
 function ArchitectureView() {
-  return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-      <h2 className="text-2xl font-bold text-white mb-6">System Architecture</h2>
-      <div className="space-y-6">
-        {/* Frontend Layer */}
-        <ArchLayer
-          name="Frontend Layer"
-          color="blue"
-          nodes={['Next.js Client', 'React Components', 'TailwindCSS', 'Leaflet Maps']}
-        />
-
-        {/* API Layer */}
-        <ArchLayer
-          name="API Layer"
-          color="purple"
-          nodes={['Next.js API Routes', 'Authentication', 'Rate Limiting', 'Caching (Redis)']}
-        />
-
-        {/* External Services */}
-        <ArchLayer
-          name="External Services"
-          color="green"
-          nodes={['Google Analytics API', 'Semrush API', 'VoPay API', 'Twilio SMS']}
-        />
-
-        {/* Database Layer */}
-        <ArchLayer
-          name="Database Layer"
-          color="orange"
-          nodes={['Supabase PostgreSQL', 'RPC Functions', 'Real-time Subscriptions', 'Storage Buckets']}
-        />
-
-        {/* Infrastructure */}
-        <ArchLayer
-          name="Infrastructure"
-          color="red"
-          nodes={['Vercel Edge Network', 'CDN', 'SSL/TLS', 'Monitoring']}
-        />
-      </div>
-    </div>
-  )
-}
-
-function ArchLayer({ name, color, nodes }: { name: string; color: string; nodes: string[] }) {
-  const colors = {
-    blue: 'border-blue-500 bg-blue-500/10',
-    purple: 'border-purple-500 bg-purple-500/10',
-    green: 'border-green-500 bg-green-500/10',
-    orange: 'border-orange-500 bg-orange-500/10',
-    red: 'border-red-500 bg-red-500/10'
-  }
+  const layers = [
+    { name: 'Frontend', color: '#3b82f6', components: ['React/Next.js', 'Client Browser'] },
+    { name: 'API Layer', color: '#10b981', components: ['Route Handlers', 'Middleware', 'Auth'] },
+    { name: 'External Services', color: '#f59e0b', components: ['Google Analytics', 'Semrush', 'QuickBooks', 'VoPay'] },
+    { name: 'Database', color: '#8b5cf6', components: ['Supabase PostgreSQL', 'RLS Policies'] },
+    { name: 'Infrastructure', color: '#ec4899', components: ['Vercel Edge Network', 'CDN'] }
+  ]
 
   return (
-    <div className={`border-l-4 ${colors[color as keyof typeof colors]} p-4 rounded-r-lg`}>
-      <h3 className="font-bold text-white mb-3">{name}</h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {nodes.map((node, idx) => (
-          <div key={idx} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-gray-300">
-            {node}
+    <div>
+      <h2 className="text-xl font-bold text-white mb-6">System Architecture</h2>
+      <div className="space-y-4">
+        {layers.map((layer) => (
+          <div key={layer.name} className="bg-gray-900 rounded-lg p-4 border-l-4" style={{ borderLeftColor: layer.color }}>
+            <h3 className="text-white font-semibold mb-2">{layer.name}</h3>
+            <div className="flex flex-wrap gap-2">
+              {layer.components.map((comp) => (
+                <span key={comp} className="px-3 py-1 bg-gray-800 rounded-full text-gray-300 text-xs">
+                  {comp}
+                </span>
+              ))}
+            </div>
           </div>
         ))}
       </div>
@@ -683,31 +606,22 @@ function ArchLayer({ name, color, nodes }: { name: string; color: string; nodes:
 
 function TracingView({ traces }: { traces: RequestTrace[] }) {
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-      <h2 className="text-2xl font-bold text-white mb-6">Distributed Tracing</h2>
+    <div>
+      <h2 className="text-xl font-bold text-white mb-4">Distributed Tracing</h2>
       <div className="space-y-3">
-        {traces.slice(0, 15).map((trace) => (
-          <div key={trace.id} className="bg-gray-900 border border-gray-700 rounded p-3">
+        {traces.map((trace) => (
+          <div key={trace.id} className="bg-gray-900 rounded p-3 border border-gray-700">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-white font-mono text-sm">Trace ID: {trace.id}</span>
-              <span className="text-gray-400 text-xs">
-                {new Date(trace.timestamp).toLocaleString('fr-CA')}
+              <span className="text-gray-400 text-xs font-mono">Trace ID: {trace.id.substring(0, 16)}...</span>
+              <span className={`text-xs font-semibold ${
+                trace.status >= 500 ? 'text-red-500' :
+                trace.status >= 400 ? 'text-yellow-500' : 'text-green-500'
+              }`}>
+                {trace.status}
               </span>
             </div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`w-2 h-2 rounded-full ${
-                trace.status >= 500 ? 'bg-red-500' :
-                trace.status >= 400 ? 'bg-yellow-500' :
-                'bg-green-500'
-              }`}></div>
-              <span className="text-gray-300 text-sm">{trace.endpoint}</span>
-              <span className="text-gray-500 text-xs ml-auto">{trace.duration}ms</span>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">IP: {trace.ip}</span>
-              <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">{trace.userAgent}</span>
-              <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">{trace.location}</span>
-            </div>
+            <div className="text-white text-sm">{trace.endpoint}</div>
+            <div className="text-gray-500 text-xs mt-1">Duration: {trace.duration}ms • Region: {trace.region}</div>
           </div>
         ))}
       </div>
@@ -717,103 +631,36 @@ function TracingView({ traces }: { traces: RequestTrace[] }) {
 
 function PipelineView({ pipelines }: { pipelines: DataPipeline[] }) {
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-      <h2 className="text-2xl font-bold text-white mb-6">Data Pipelines</h2>
-      <div className="space-y-6">
+    <div>
+      <h2 className="text-xl font-bold text-white mb-4">Data Pipelines</h2>
+      <div className="space-y-4">
         {pipelines.map((pipeline) => (
-          <div key={pipeline.id} className="bg-gray-900 border border-gray-700 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-4">
+          <div key={pipeline.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+            <div className="flex items-center justify-between mb-3">
               <h3 className="text-white font-semibold">{pipeline.name}</h3>
-              <div className={`px-3 py-1 rounded text-xs font-bold ${
-                pipeline.status === 'active' ? 'bg-green-600' :
-                pipeline.status === 'error' ? 'bg-red-600' :
-                'bg-gray-600'
-              } text-white`}>
-                {pipeline.status.toUpperCase()}
+              <div className={`px-2 py-1 rounded text-xs font-semibold ${
+                pipeline.status === 'active' ? 'bg-green-900 text-green-300' :
+                pipeline.status === 'error' ? 'bg-red-900 text-red-300' :
+                'bg-gray-700 text-gray-300'
+              }`}>
+                {pipeline.status}
               </div>
             </div>
-
-            {/* Pipeline Flow */}
-            <div className="mb-4">
-              <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                <div className="px-3 py-2 bg-blue-900 border border-blue-700 rounded text-xs text-blue-300 font-mono whitespace-nowrap flex-shrink-0">
-                  📥 {pipeline.source}
-                </div>
-                <div className="text-blue-500">→</div>
-                {pipeline.transformations.map((transform, idx) => (
-                  <div key={idx} className="flex items-center gap-2 flex-shrink-0">
-                    <div className="px-3 py-2 bg-purple-900 border border-purple-700 rounded text-xs text-purple-300 font-mono whitespace-nowrap">
-                      ⚙️ {transform}
-                    </div>
-                    {idx < pipeline.transformations.length - 1 && (
-                      <div className="text-purple-500">→</div>
-                    )}
-                  </div>
-                ))}
-                <div className="text-green-500">→</div>
-                <div className="px-3 py-2 bg-green-900 border border-green-700 rounded text-xs text-green-300 font-mono whitespace-nowrap flex-shrink-0">
-                  📤 {pipeline.destination}
-                </div>
-              </div>
-            </div>
-
-            {/* Metrics */}
-            <div className="flex items-center justify-between text-xs text-gray-400">
-              <span>Throughput: <span className="text-white font-semibold">{pipeline.throughput} ops/min</span></span>
-              <span>Status: <span className="text-green-400">✓ {pipeline.status}</span></span>
+            <div className="text-gray-400 text-sm mb-2">Source: {pipeline.source}</div>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <span>{pipeline.throughput} ops</span>
+              <span>•</span>
+              <span>{pipeline.avgDuration}ms avg</span>
+              {pipeline.errorCount > 0 && (
+                <>
+                  <span>•</span>
+                  <span className="text-red-400">{pipeline.errorCount} errors</span>
+                </>
+              )}
             </div>
           </div>
         ))}
       </div>
     </div>
-  )
-}
-
-// Helper Components
-
-function MetricCard({ icon, label, value, sublabel, color }: {
-  icon: React.ReactNode
-  label: string
-  value: string
-  sublabel: string
-  color: 'blue' | 'red' | 'purple' | 'green'
-}) {
-  const colors = {
-    blue: 'bg-blue-900/50 border-blue-700 text-blue-400',
-    red: 'bg-red-900/50 border-red-700 text-red-400',
-    purple: 'bg-purple-900/50 border-purple-700 text-purple-400',
-    green: 'bg-green-900/50 border-green-700 text-green-400'
-  }
-
-  return (
-    <div className={`${colors[color]} rounded-lg border p-4`}>
-      <div className="flex items-center gap-3 mb-2">
-        <div>{icon}</div>
-        <span className="text-sm text-gray-400">{label}</span>
-      </div>
-      <div className="text-3xl font-bold text-white">{value}</div>
-      <div className="text-xs text-gray-500 mt-1">{sublabel}</div>
-    </div>
-  )
-}
-
-function ViewTab({ active, onClick, icon, label }: {
-  active: boolean
-  onClick: () => void
-  icon: React.ReactNode
-  label: string
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors whitespace-nowrap ${
-        active
-          ? 'bg-blue-600 text-white'
-          : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'
-      }`}
-    >
-      {icon}
-      {label}
-    </button>
   )
 }
