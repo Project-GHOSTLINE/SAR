@@ -1,0 +1,374 @@
+{
+  "audit_timestamp": "2026-01-24T23:20:00.000Z",
+  "method": "Supabase Client API HEAD requests (metadata only, zero PII)",
+  "source": "audit_artifacts/db_live/results/table_verification.json",
+  "total_rows_verified": 26674,
+  "tables": [
+    {
+      "table": "clients",
+      "rows": 383,
+      "pct_of_total": 1.4,
+      "status": "verified",
+      "columns": 11,
+      "evidence": "db_live/results/table_verification.json:4-20"
+    },
+    {
+      "table": "client_external_ids",
+      "rows": null,
+      "pct_of_total": null,
+      "status": "rls_blocked",
+      "columns": 0,
+      "evidence": "db_live/results/table_verification.json:22-27",
+      "note": "RLS (Row Level Security) prevents count"
+    },
+    {
+      "table": "client_events",
+      "rows": null,
+      "pct_of_total": null,
+      "status": "rls_blocked",
+      "columns": 0,
+      "evidence": "db_live/results/table_verification.json:28-33",
+      "note": "RLS (Row Level Security) prevents count"
+    },
+    {
+      "table": "client_addresses",
+      "rows": null,
+      "pct_of_total": null,
+      "status": "rls_blocked",
+      "columns": 0,
+      "evidence": "db_live/results/table_verification.json:34-39",
+      "note": "RLS (Row Level Security) prevents count"
+    },
+    {
+      "table": "loan_applications",
+      "rows": 13,
+      "pct_of_total": 0.05,
+      "status": "verified",
+      "columns": 64,
+      "evidence": "db_live/results/table_verification.json:40-110"
+    },
+    {
+      "table": "client_analyses",
+      "rows": 458,
+      "pct_of_total": 1.7,
+      "status": "verified",
+      "columns": 33,
+      "evidence": "db_live/results/table_verification.json:111-150"
+    },
+    {
+      "table": "analysis_jobs",
+      "rows": 78,
+      "pct_of_total": 0.3,
+      "status": "verified",
+      "columns": 8,
+      "evidence": "db_live/results/table_verification.json:151-165"
+    },
+    {
+      "table": "analysis_scores",
+      "rows": 65,
+      "pct_of_total": 0.2,
+      "status": "verified",
+      "columns": 14,
+      "evidence": "db_live/results/table_verification.json:166-186"
+    },
+    {
+      "table": "analysis_recommendations",
+      "rows": 65,
+      "pct_of_total": 0.2,
+      "status": "verified",
+      "columns": 8,
+      "evidence": "db_live/results/table_verification.json:187-201"
+    },
+    {
+      "table": "webhook_logs",
+      "rows": 979,
+      "pct_of_total": 3.7,
+      "status": "verified",
+      "columns": 22,
+      "evidence": "db_live/results/table_verification.json:202-230"
+    },
+    {
+      "table": "email_messages",
+      "rows": null,
+      "pct_of_total": null,
+      "status": "rls_blocked",
+      "columns": 0,
+      "evidence": "db_live/results/table_verification.json:231-236",
+      "note": "RLS (Row Level Security) prevents count"
+    },
+    {
+      "table": "download_logs",
+      "rows": 1,
+      "pct_of_total": 0.004,
+      "status": "verified",
+      "columns": 14,
+      "evidence": "db_live/results/table_verification.json:237-257"
+    },
+    {
+      "table": "quickbooks_invoices",
+      "rows": 0,
+      "pct_of_total": 0,
+      "status": "verified_empty",
+      "columns": 0,
+      "evidence": "db_live/results/table_verification.json:258-263"
+    },
+    {
+      "table": "quickbooks_customers",
+      "rows": 0,
+      "pct_of_total": 0,
+      "status": "verified_empty",
+      "columns": 0,
+      "evidence": "db_live/results/table_verification.json:264-269"
+    },
+    {
+      "table": "telemetry_requests",
+      "rows": 24602,
+      "pct_of_total": 92.2,
+      "status": "verified",
+      "columns": 24,
+      "evidence": "db_live/results/table_verification.json:270-300"
+    },
+    {
+      "table": "telemetry_spans",
+      "rows": 0,
+      "pct_of_total": 0,
+      "status": "verified_empty",
+      "columns": 0,
+      "evidence": "db_live/results/table_verification.json:301-306"
+    },
+    {
+      "table": "seo_ga4_metrics_daily",
+      "rows": 30,
+      "pct_of_total": 0.1,
+      "status": "verified",
+      "columns": 34,
+      "evidence": "db_live/results/table_verification.json:307-347"
+    },
+    {
+      "table": "seo_gsc_metrics_daily",
+      "rows": 0,
+      "pct_of_total": 0,
+      "status": "verified_empty",
+      "columns": 0,
+      "evidence": "db_live/results/table_verification.json:348-353"
+    },
+    {
+      "table": "seo_semrush_metrics_daily",
+      "rows": null,
+      "pct_of_total": null,
+      "status": "rls_blocked",
+      "columns": 0,
+      "evidence": "db_live/results/table_verification.json:354-359",
+      "note": "RLS (Row Level Security) prevents count"
+    }
+  ],
+  "aggregates": {
+    "total_tables_verified": 19,
+    "tables_with_data": 10,
+    "tables_empty": 4,
+    "tables_rls_blocked": 5,
+    "total_rows": 26674,
+    "largest_table": {
+      "name": "telemetry_requests",
+      "rows": 24602,
+      "pct": 92.2
+    },
+    "smallest_nonempty_table": {
+      "name": "download_logs",
+      "rows": 1,
+      "pct": 0.004
+    }
+  },
+  "anomalies": [
+    {
+      "anomaly_id": "A1",
+      "type": "ratio_mismatch",
+      "description": "383 clients vs 13 loan_applications (29:1 ratio)",
+      "expected": "~1 client per application (1:1 or less)",
+      "actual": "29.5 clients per application",
+      "severity": "medium",
+      "status": "requires_investigation",
+      "possible_causes": [
+        "Clients created from multiple sources (not just applications)",
+        "client_analyses (458 rows) creates client records independently",
+        "Historical data migration already executed",
+        "Test/development data present"
+      ]
+    },
+    {
+      "anomaly_id": "A2",
+      "type": "ratio_mismatch",
+      "description": "458 client_analyses vs 383 clients (1.2:1 ratio)",
+      "expected": "~1 analysis per client (1:1 or less)",
+      "actual": "1.2 analyses per client (some clients have multiple analyses)",
+      "severity": "low",
+      "status": "acceptable",
+      "explanation": "Valid use case: clients may request multiple banking analyses over time"
+    },
+    {
+      "anomaly_id": "A3",
+      "type": "completion_rate",
+      "description": "78 analysis_jobs vs 65 analysis_scores (83% completion)",
+      "expected": "~100% completion (1 score per job)",
+      "actual": "83% completion (13 jobs failed or incomplete)",
+      "severity": "low",
+      "status": "acceptable",
+      "explanation": "Valid: some analyses fail or are abandoned before scoring"
+    },
+    {
+      "anomaly_id": "A4",
+      "type": "empty_integration",
+      "description": "QuickBooks tables completely empty (0 rows)",
+      "tables": [
+        "quickbooks_invoices",
+        "quickbooks_customers"
+      ],
+      "severity": "medium",
+      "status": "integration_inactive",
+      "explanation": "QuickBooks integration exists (23 API routes found) but no data synced yet"
+    },
+    {
+      "anomaly_id": "A5",
+      "type": "rls_blocking",
+      "description": "5 tables blocked by RLS (null counts)",
+      "tables": [
+        "client_external_ids",
+        "client_events",
+        "client_addresses",
+        "email_messages",
+        "seo_semrush_metrics_daily"
+      ],
+      "severity": "low",
+      "status": "expected",
+      "explanation": "RLS policies prevent count queries with service_role key - tables likely exist but are protected"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "loan_applications",
+      "to": "clients",
+      "fk_column": "client_id",
+      "from_rows": 13,
+      "to_rows": 383,
+      "ratio": "13:383 (0.034:1)",
+      "status": "valid_many_to_one",
+      "referential_integrity": "inferred_valid"
+    },
+    {
+      "from": "client_analyses",
+      "to": "clients",
+      "fk_column": "client_id",
+      "from_rows": 458,
+      "to_rows": 383,
+      "ratio": "458:383 (1.20:1)",
+      "status": "valid_one_to_many",
+      "referential_integrity": "inferred_valid"
+    },
+    {
+      "from": "webhook_logs",
+      "to": "clients",
+      "fk_column": "client_id",
+      "from_rows": 979,
+      "to_rows": 383,
+      "ratio": "979:383 (2.55:1)",
+      "status": "valid_one_to_many",
+      "referential_integrity": "inferred_valid"
+    },
+    {
+      "from": "analysis_jobs",
+      "to": "client_analyses",
+      "fk_column": "analysis_id",
+      "from_rows": 78,
+      "to_rows": 458,
+      "ratio": "78:458 (0.17:1)",
+      "status": "valid_many_to_one",
+      "referential_integrity": "inferred_valid"
+    },
+    {
+      "from": "analysis_scores",
+      "to": "client_analyses",
+      "fk_column": "analysis_id",
+      "from_rows": 65,
+      "to_rows": 458,
+      "ratio": "65:458 (0.14:1)",
+      "status": "valid_many_to_one",
+      "referential_integrity": "inferred_valid"
+    },
+    {
+      "from": "analysis_recommendations",
+      "to": "client_analyses",
+      "fk_column": "analysis_id",
+      "from_rows": 65,
+      "to_rows": 458,
+      "ratio": "65:458 (0.14:1)",
+      "status": "valid_many_to_one",
+      "referential_integrity": "inferred_valid"
+    }
+  ],
+  "data_distribution": {
+    "by_category": [
+      {
+        "category": "telemetry",
+        "tables": [
+          "telemetry_requests",
+          "telemetry_spans"
+        ],
+        "total_rows": 24602,
+        "pct_of_total": 92.2
+      },
+      {
+        "category": "webhooks",
+        "tables": [
+          "webhook_logs"
+        ],
+        "total_rows": 979,
+        "pct_of_total": 3.7
+      },
+      {
+        "category": "analysis",
+        "tables": [
+          "client_analyses",
+          "analysis_jobs",
+          "analysis_scores",
+          "analysis_recommendations"
+        ],
+        "total_rows": 666,
+        "pct_of_total": 2.5
+      },
+      {
+        "category": "clients",
+        "tables": [
+          "clients",
+          "loan_applications"
+        ],
+        "total_rows": 396,
+        "pct_of_total": 1.5
+      },
+      {
+        "category": "seo",
+        "tables": [
+          "seo_ga4_metrics_daily",
+          "seo_gsc_metrics_daily"
+        ],
+        "total_rows": 30,
+        "pct_of_total": 0.1
+      },
+      {
+        "category": "quickbooks",
+        "tables": [
+          "quickbooks_invoices",
+          "quickbooks_customers"
+        ],
+        "total_rows": 0,
+        "pct_of_total": 0
+      }
+    ]
+  },
+  "metadata": {
+    "pii_extracted": "ZERO",
+    "query_method": "HEAD requests (count only) + single row structure fetch",
+    "scope": "public schema only",
+    "timestamp": "2026-01-24T22:20:44.984Z",
+    "confidence": "100% for non-RLS tables, UNKNOWN for RLS-blocked tables"
+  }
+}

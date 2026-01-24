@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { BarChart3, TrendingUp, Users, MousePointer, Search, Link2, RefreshCw } from 'lucide-react'
+import { BarChart3, TrendingUp, Users, MousePointer, Search, Link2, RefreshCw, X, MapPin, Smartphone, Globe } from 'lucide-react'
 import AdminNav from '@/components/admin/AdminNav'
 
 interface GA4Data {
@@ -18,6 +18,18 @@ interface GA4Data {
     users: number
     sessions: number
   }>
+  geography: Array<{
+    country: string
+    city: string
+    users: number
+    sessions: number
+  }>
+  trafficSources: Array<{
+    source: string
+    medium: string
+    users: number
+    sessions: number
+  }>
 }
 
 interface SemrushData {
@@ -29,12 +41,15 @@ interface SemrushData {
   total_backlinks: number
 }
 
+type DetailView = 'users' | 'devices' | 'geography' | 'traffic' | null
+
 export default function SEOPage() {
   const [ga4Data, setGA4Data] = useState<GA4Data | null>(null)
   const [semrushData, setSemrushData] = useState<SemrushData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [period, setPeriod] = useState('30d')
+  const [detailView, setDetailView] = useState<DetailView>(null)
 
   useEffect(() => {
     fetchData()
@@ -62,7 +77,6 @@ export default function SEOPage() {
       if (semrushResponse.ok) {
         const semrushJson = await semrushResponse.json()
         if (semrushJson.success && semrushJson.data.length > 0) {
-          // Prendre la donnée la plus récente
           setSemrushData(semrushJson.data[0])
         }
       }
@@ -80,7 +94,7 @@ export default function SEOPage() {
     : null
 
   const organicTraffic = ga4Data?.overview.totalSessions
-    ? Math.round(ga4Data.overview.totalSessions * 0.4) // Estimation
+    ? Math.round(ga4Data.overview.totalSessions * 0.4)
     : null
 
   return (
@@ -145,6 +159,8 @@ export default function SEOPage() {
                   value={ga4Data.overview.totalUsers.toLocaleString()}
                   trend={null}
                   color="blue"
+                  onClick={() => setDetailView('users')}
+                  clickable
                 />
                 <MetricCard
                   icon={<MousePointer size={20} />}
@@ -176,19 +192,23 @@ export default function SEOPage() {
                   value={organicTraffic?.toLocaleString() || 'N/A'}
                   trend={null}
                   color="indigo"
+                  onClick={() => setDetailView('traffic')}
+                  clickable
                 />
                 <MetricCard
                   icon={<MousePointer size={20} />}
-                  label="Mobile"
-                  value={mobilePercentage ? `${mobilePercentage}%` : 'N/A'}
+                  label="Appareils"
+                  value={mobilePercentage ? `${mobilePercentage}% mobile` : 'N/A'}
                   trend={null}
                   color="green"
+                  onClick={() => setDetailView('devices')}
+                  clickable
                 />
               </div>
 
               <div className="mt-6 pt-6 border-t border-gray-100">
                 <p className="text-xs text-gray-500">
-                  ✅ Données en temps réel via Google Analytics 4 API
+                  ✅ Données en temps réel via Google Analytics 4 API • Cliquez sur une métrique pour voir les détails
                 </p>
               </div>
             </>
@@ -303,6 +323,15 @@ export default function SEOPage() {
           </div>
         )}
       </main>
+
+      {/* Detail Modal */}
+      {detailView && ga4Data && (
+        <DetailModal
+          view={detailView}
+          data={ga4Data}
+          onClose={() => setDetailView(null)}
+        />
+      )}
     </div>
   )
 }
@@ -313,9 +342,11 @@ interface MetricCardProps {
   value: string
   trend: number | null
   color: 'blue' | 'green' | 'purple' | 'orange' | 'indigo'
+  onClick?: () => void
+  clickable?: boolean
 }
 
-function MetricCard({ icon, label, value, trend, color }: MetricCardProps) {
+function MetricCard({ icon, label, value, trend, color, onClick, clickable }: MetricCardProps) {
   const colorClasses = {
     blue: 'bg-blue-50 text-blue-600',
     green: 'bg-green-50 text-green-600',
@@ -325,7 +356,12 @@ function MetricCard({ icon, label, value, trend, color }: MetricCardProps) {
   }
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+    <div
+      onClick={clickable ? onClick : undefined}
+      className={`bg-gray-50 rounded-lg p-4 border border-gray-200 ${
+        clickable ? 'cursor-pointer hover:shadow-md hover:border-blue-300 transition-all' : ''
+      }`}
+    >
       <div className="flex items-center gap-2 mb-2">
         <div className={`w-8 h-8 rounded ${colorClasses[color]} flex items-center justify-center`}>
           {icon}
@@ -340,6 +376,146 @@ function MetricCard({ icon, label, value, trend, color }: MetricCardProps) {
             {Math.abs(trend)}%
           </span>
         )}
+      </div>
+      {clickable && (
+        <p className="text-xs text-blue-600 mt-2">Cliquer pour voir les détails →</p>
+      )}
+    </div>
+  )
+}
+
+interface DetailModalProps {
+  view: DetailView
+  data: GA4Data
+  onClose: () => void
+}
+
+function DetailModal({ view, data, onClose }: DetailModalProps) {
+  const getTitle = () => {
+    switch (view) {
+      case 'users':
+        return 'Détails des Utilisateurs'
+      case 'devices':
+        return 'Répartition par Appareil'
+      case 'geography':
+        return 'Localisation Géographique'
+      case 'traffic':
+        return 'Sources de Trafic'
+      default:
+        return 'Détails'
+    }
+  }
+
+  const getIcon = () => {
+    switch (view) {
+      case 'users':
+        return <Users className="text-blue-600" size={24} />
+      case 'devices':
+        return <Smartphone className="text-green-600" size={24} />
+      case 'geography':
+        return <MapPin className="text-purple-600" size={24} />
+      case 'traffic':
+        return <Globe className="text-indigo-600" size={24} />
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+              {getIcon()}
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900">{getTitle()}</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(80vh-88px)]">
+          {view === 'users' && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Localisation Géographique</h3>
+                <div className="space-y-2">
+                  {data.geography.slice(0, 10).map((geo, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <MapPin size={16} className="text-gray-400" />
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {geo.city}, {geo.country}
+                          </p>
+                          <p className="text-sm text-gray-500">{geo.sessions} sessions</p>
+                        </div>
+                      </div>
+                      <span className="text-lg font-bold text-blue-600">
+                        {geo.users.toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {view === 'devices' && (
+            <div className="space-y-4">
+              {data.devices.map((device, idx) => (
+                <div key={idx} className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <Smartphone size={20} className="text-gray-400" />
+                      <span className="font-semibold text-gray-900 capitalize">{device.category}</span>
+                    </div>
+                    <span className="text-2xl font-bold text-green-600">
+                      {device.users.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex gap-4 text-sm text-gray-600">
+                    <span>Sessions: {device.sessions.toLocaleString()}</span>
+                    <span>
+                      Part: {Math.round((device.users / data.overview.totalUsers) * 100)}%
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {view === 'traffic' && (
+            <div className="space-y-4">
+              {data.trafficSources.slice(0, 10).map((source, idx) => (
+                <div key={idx} className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <Globe size={20} className="text-gray-400" />
+                      <div>
+                        <p className="font-semibold text-gray-900">{source.source}</p>
+                        <p className="text-sm text-gray-500">{source.medium}</p>
+                      </div>
+                    </div>
+                    <span className="text-2xl font-bold text-indigo-600">
+                      {source.users.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Sessions: {source.sessions.toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

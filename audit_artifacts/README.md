@@ -36,20 +36,31 @@ Cet audit est **100% factuel**. Chaque affirmation est traçable à :
 ```
 audit_artifacts/
 ├── README.md                          (ce fichier)
-├── MANIFEST.json                      (hashes de tous les fichiers)
+├── MANIFEST.json                      (hashes de tous les fichiers - 46 files)
+├── AUDIT_SUMMARY.md                   (résumé exécutif)
+├── VALIDATION_N1_RESULTS.md           (validation mécanique du ZIP)
 │
 ├── api/                               INVENTAIRE API
 │   ├── API_ROUTE_INVENTORY.json      (structure machine)
 │   ├── API_ROUTE_INVENTORY.md        (lisible humain)
 │   └── ORCHESTRATION_ENDPOINTS.md    (endpoints dossier client)
 │
-├── sql/                               INVENTAIRE DATABASE
+├── sql/                               INVENTAIRE DATABASE (STATIC)
 │   ├── DB_SCHEMA_INVENTORY.json      (structure machine)
 │   ├── DB_SCHEMA_INVENTORY.md        (lisible humain)
 │   └── migrations_list.txt           (toutes les migrations trouvées)
 │
+├── db_live/                           VÉRIFICATION RUNTIME (PHASE 9)
+│   ├── SUMMARY.md                     (findings DB live - humain)
+│   ├── summary.json                   (findings DB live - machine)
+│   ├── queries.json                   (log de toutes les queries)
+│   ├── db_audit_v2.js                 (script Node.js utilisé)
+│   └── results/                       (raw outputs)
+│       ├── table_verification.json    (19 tables vérifiées)
+│       └── rpc_*.json                 (tests RPC functions)
+│
 ├── findings/                          RÉSULTATS D'ANALYSE
-│   ├── CHECKLIST_VERIFIED.md         (vrai/faux avec preuves)
+│   ├── CHECKLIST_VERIFIED.md         (vrai/faux avec preuves - 10 sections)
 │   ├── CLIENT_ENTITY_FINDINGS.md     (entité centrale client)
 │   └── OBSERVABILITY_INVENTORY.md    (health/monitoring)
 │
@@ -57,19 +68,11 @@ audit_artifacts/
 │   ├── N_PLUS_ONE_EVIDENCE.md        (preuves de N+1 patterns)
 │   └── PAGE_LOAD_CALL_GRAPH.json     (appels API par page)
 │
-├── security/                          SÉCURITÉ
-│   └── (à venir si nécessaire)
-│
-├── inventory/                         INVENTAIRES GÉNÉRAUX
-│   └── file_tree.txt                 (arborescence complète)
-│
-├── commands/                          OUTPUTS BRUTS
-│   ├── system_info.txt
-│   ├── find_api_routes.txt
-│   ├── find_sql_migrations.txt
-│   └── ... (tous les outputs de commandes)
-│
-└── diagrams/                          DIAGRAMMES (si générés)
+└── commands/                          OUTPUTS BRUTS (PHASE 1-8)
+    ├── system_info.txt
+    ├── find_api_routes.txt
+    ├── find_sql_migrations.txt
+    └── ... (tous les outputs de commandes)
 ```
 
 ---
@@ -110,6 +113,7 @@ Tous les counts et inventaires doivent correspondre aux fichiers générés dans
 
 ## OBJECTIFS DE L'AUDIT
 
+### Phase 1-8: Analyse Statique
 1. ✅ Inventorier toutes les API routes (avec preuves)
 2. ✅ Inventorier le schéma DB (tables, views, RPC, indexes)
 3. ✅ Vérifier l'existence d'une entité centrale `clients`
@@ -117,6 +121,13 @@ Tous les counts et inventaires doivent correspondre aux fichiers générés dans
 5. ✅ Identifier les endpoints d'orchestration
 6. ✅ Évaluer l'observabilité (health, metrics)
 7. ✅ Produire une checklist vérifiable (vrai/faux)
+
+### Phase 9: Vérification Runtime (DB Live)
+8. ✅ Connexion Supabase (service_role key, READ-ONLY)
+9. ✅ Vérification existence tables critiques (19/19)
+10. ✅ Comptage rows (26,674 total)
+11. ✅ Test RPC functions (0/4 déployées)
+12. ✅ Zéro PII extraite (metadata + counts only)
 
 ---
 
@@ -132,7 +143,7 @@ Tous les counts et inventaires doivent correspondre aux fichiers générés dans
 - Performance réelle (temps de réponse)
 - Métriques de production
 - Test de charge
-- Connexion DB live (sauf si safe)
+- ~~Connexion DB live (sauf si safe)~~ ✅ **FAIT** (Phase 9)
 
 ### Marquages UNKNOWN :
 - Tout ce qui nécessite l'exécution de l'app

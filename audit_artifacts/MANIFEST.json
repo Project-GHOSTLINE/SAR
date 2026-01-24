@@ -1,128 +1,295 @@
 {
-  "audit_date": "2026-01-24T17:13:36.085751",
+  "audit_date": "2026-01-24T22:47:00.000000",
   "git_commit": "e37345c31c941299a2a77aab4484465139457a94",
-  "total_files": 24,
-  "total_size_bytes": 119406,
+  "phases": {
+    "phase_1_8": {
+      "description": "Static code analysis",
+      "date": "2026-01-24T17:13:36.085751",
+      "files": 24
+    },
+    "phase_9": {
+      "description": "DB live verification via Supabase Client",
+      "date": "2026-01-24T22:20:00.000000",
+      "files": 17
+    },
+    "validation": {
+      "description": "N1 mechanical validation",
+      "date": "2026-01-24T22:47:00.000000",
+      "files": 1
+    }
+  },
+  "total_files": 46,
+  "total_size_bytes": 159662,
   "files": [
     {
       "path": "README.md",
       "size_bytes": 4500,
-      "sha256": "a841922e2caffc297d966d539213bd68abd531f928b09765015ac5f1f6defffc"
+      "sha256": "a841922e2caffc297d966d539213bd68abd531f928b09765015ac5f1f6defffc",
+      "phase": "1-8"
     },
     {
       "path": "api/API_ROUTE_INVENTORY.json",
       "size_bytes": 23164,
-      "sha256": "8a32c3ee60ae17ba5c56bd054a2aac43c9e8a9f1f749900274a9b8e197342f7f"
+      "sha256": "8a32c3ee60ae17ba5c56bd054a2aac43c9e8a9f1f749900274a9b8e197342f7f",
+      "phase": "1-8"
     },
     {
       "path": "api/API_ROUTE_INVENTORY.md",
       "size_bytes": 13625,
-      "sha256": "4a28fe4baf994ea1704067e7dd50fcf5b0d13618b392af18333be8e508af9bf0"
+      "sha256": "4a28fe4baf994ea1704067e7dd50fcf5b0d13618b392af18333be8e508af9bf0",
+      "phase": "1-8"
     },
     {
       "path": "api/ORCHESTRATION_ENDPOINTS.md",
       "size_bytes": 6081,
-      "sha256": "195fcc9b23a63d0b6b1e16283b963d50549253c963b4faaa2464ac3000167d51"
+      "sha256": "195fcc9b23a63d0b6b1e16283b963d50549253c963b4faaa2464ac3000167d51",
+      "phase": "1-8"
+    },
+    {
+      "path": "AUDIT_SUMMARY.md",
+      "size_bytes": 10052,
+      "sha256": "ae974ff4f83628b3f88e7c1cbd629489edc268da04f22dcb6d04d4c5f25ad60f",
+      "phase": "1-8"
     },
     {
       "path": "commands/analyze_routes.sh",
       "size_bytes": 1412,
-      "sha256": "001a95187669c5650e82f8150af9eb57200cc69e4e182c02a09f2b71071e02d3"
+      "sha256": "001a95187669c5650e82f8150af9eb57200cc69e4e182c02a09f2b71071e02d3",
+      "phase": "1-8"
     },
     {
       "path": "commands/find_admin_pages.txt",
       "size_bytes": 777,
-      "sha256": "4c1b1f5db99486d654476e3571123db1e67bd31280b20165863ad16db0bb4614"
+      "sha256": "4c1b1f5db99486d654476e3571123db1e67bd31280b20165863ad16db0bb4614",
+      "phase": "1-8"
     },
     {
       "path": "commands/find_api_routes.txt",
       "size_bytes": 5767,
-      "sha256": "9733532b5ebd5bf98c98b36df860645c9c349a625996303a146b8f0d9661bba5"
+      "sha256": "9733532b5ebd5bf98c98b36df860645c9c349a625996303a146b8f0d9661bba5",
+      "phase": "1-8"
     },
     {
       "path": "commands/find_sql_migrations.txt",
       "size_bytes": 3933,
-      "sha256": "07fb9cd000c8f27b86410058980af90f322cb962353c4360843fa2bcf35b0357"
+      "sha256": "07fb9cd000c8f27b86410058980af90f322cb962353c4360843fa2bcf35b0357",
+      "phase": "1-8"
     },
     {
       "path": "commands/grep_client_id_queries.txt",
       "size_bytes": 77,
-      "sha256": "91f1f89ce31a47fdc339fb99bb4704a81c8f413cf70a6c47a2c4b43269cd67a7"
+      "sha256": "91f1f89ce31a47fdc339fb99bb4704a81c8f413cf70a6c47a2c4b43269cd67a7",
+      "phase": "1-8"
     },
     {
       "path": "commands/grep_clients_table.txt",
       "size_bytes": 494,
-      "sha256": "84e13cfec74a8b75ac162af7ded69d5aab7aaeaa595522b69e7cb34886fac39c"
+      "sha256": "84e13cfec74a8b75ac162af7ded69d5aab7aaeaa595522b69e7cb34886fac39c",
+      "phase": "1-8"
     },
     {
       "path": "commands/grep_email_joins.txt",
       "size_bytes": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "phase": "1-8"
     },
     {
       "path": "commands/grep_email_queries.txt",
       "size_bytes": 177,
-      "sha256": "634f4e78e6057facb301c1c40955c57271e8fa37aeabad9c43cdae4d8e1c395a"
+      "sha256": "634f4e78e6057facb301c1c40955c57271e8fa37aeabad9c43cdae4d8e1c395a",
+      "phase": "1-8"
     },
     {
       "path": "commands/grep_observability.txt",
       "size_bytes": 1145,
-      "sha256": "b14b624f4a979ec767b59ad13aff53ccdc684382971aa865d15bfcac5359bf74"
+      "sha256": "b14b624f4a979ec767b59ad13aff53ccdc684382971aa865d15bfcac5359bf74",
+      "phase": "1-8"
     },
     {
       "path": "commands/grep_orchestration_endpoints.txt",
       "size_bytes": 700,
-      "sha256": "15eb19e9c1b456bff0187aa74a0059f77077ec0b81b5cee93aa03767ca92339f"
+      "sha256": "15eb19e9c1b456bff0187aa74a0059f77077ec0b81b5cee93aa03767ca92339f",
+      "phase": "1-8"
     },
     {
       "path": "commands/system_info.txt",
       "size_bytes": 463,
-      "sha256": "69abdb36fc07f7724710cc516f7599f2bf42f39300c4f6c2ade828902e1d6c05"
+      "sha256": "69abdb36fc07f7724710cc516f7599f2bf42f39300c4f6c2ade828902e1d6c05",
+      "phase": "1-8"
     },
     {
       "path": "commands/system_info_output.txt",
       "size_bytes": 928,
-      "sha256": "6d2891070dfc524a08856bab0ea1938950a9daf053bd813a01eaaf66ed93e075"
+      "sha256": "6d2891070dfc524a08856bab0ea1938950a9daf053bd813a01eaaf66ed93e075",
+      "phase": "1-8"
     },
     {
       "path": "findings/CHECKLIST_VERIFIED.md",
-      "size_bytes": 12342,
-      "sha256": "3592adda48e2bb90460d739053d57534d26220f55571b3d6606f820acb820a38"
+      "size_bytes": 19368,
+      "sha256": "2b1cfe36b506a02a5ab762df3ac6d37317133d393908ed04a99f7215f17b29ce",
+      "phase": "1-8+9"
     },
     {
       "path": "findings/CLIENT_ENTITY_FINDINGS.md",
       "size_bytes": 3946,
-      "sha256": "c1a1f98a6ca2374f710a0fac616030de33f648d2ee800bb46ca80fcd7cde9d78"
+      "sha256": "c1a1f98a6ca2374f710a0fac616030de33f648d2ee800bb46ca80fcd7cde9d78",
+      "phase": "1-8"
     },
     {
       "path": "findings/OBSERVABILITY_INVENTORY.md",
       "size_bytes": 6484,
-      "sha256": "bd1be8ff9a7561351c85edb83e6d9e43a78602e863538fec9aed119ac74254ff"
+      "sha256": "bd1be8ff9a7561351c85edb83e6d9e43a78602e863538fec9aed119ac74254ff",
+      "phase": "1-8"
     },
     {
       "path": "perf/N_PLUS_ONE_EVIDENCE.md",
       "size_bytes": 4971,
-      "sha256": "5139d212bc7d7ae9fc9507add2ae5334e46cffdc8a231ef7688b13f4320fc2c4"
+      "sha256": "5139d212bc7d7ae9fc9507add2ae5334e46cffdc8a231ef7688b13f4320fc2c4",
+      "phase": "1-8"
     },
     {
       "path": "perf/PAGE_LOAD_CALL_GRAPH.json",
       "size_bytes": 5311,
-      "sha256": "a9a5a3a2b1a8b82e69a1e1e8bbb27b5acad359e8f6a48fd34c3ee4cfb19a5fb6"
+      "sha256": "a9a5a3a2b1a8b82e69a1e1e8bbb27b5acad359e8f6a48fd34c3ee4cfb19a5fb6",
+      "phase": "1-8"
     },
     {
       "path": "sql/DB_SCHEMA_INVENTORY.json",
       "size_bytes": 14107,
-      "sha256": "46e7a055e744023e4431a89f328d108aff7d646ba28e8b54c6f220b95beb2f2b"
+      "sha256": "46e7a055e744023e4431a89f328d108aff7d646ba28e8b54c6f220b95beb2f2b",
+      "phase": "1-8"
     },
     {
       "path": "sql/DB_SCHEMA_INVENTORY.md",
       "size_bytes": 5069,
-      "sha256": "4a7240c8a2b4c137a9a21ff5677a41642e84969a3943f7122eea0713a72f650e"
+      "sha256": "4a7240c8a2b4c137a9a21ff5677a41642e84969a3943f7122eea0713a72f650e",
+      "phase": "1-8"
     },
     {
       "path": "sql/migrations_list.txt",
       "size_bytes": 3933,
-      "sha256": "07fb9cd000c8f27b86410058980af90f322cb962353c4360843fa2bcf35b0357"
+      "sha256": "07fb9cd000c8f27b86410058980af90f322cb962353c4360843fa2bcf35b0357",
+      "phase": "1-8"
+    },
+    {
+      "path": "db_live/db_audit_v2.js",
+      "size_bytes": 8544,
+      "sha256": "f2d6ca1156817f2ebabb73010eeac3d1689f4eefe86ce0116b3e99ee9d8da10b",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/db_audit.js",
+      "size_bytes": 8233,
+      "sha256": "6ea40039011b4b5903fdf8566f4315f7e2b19a7d116e677d0280005c04686257",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/queries.json",
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/rpc_calculate_overall_health_score.json",
+      "size_bytes": 160,
+      "sha256": "9875b0af6e3a87346794b68c734b9df4ad0b7c531a27346d55cfdd28d4a3f5ab",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/rpc_get_client_dossier_unified.json",
+      "size_bytes": 149,
+      "sha256": "db035c45dec8b0ab4525c12eb1ead97c5d2950b3e31b226a4904a155c3615f6f",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/rpc_get_client_summary.json",
+      "size_bytes": 140,
+      "sha256": "f6d29b960445ec3010035ca227ed5c057217ab9cde3b5a694fbe71cc8074d1d7",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/rpc_resolve_client_id.json",
+      "size_bytes": 140,
+      "sha256": "79b252d9b519c64ca0cc3338f5f9d461d32805f94de3d0b39865e87b7ac28e50",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/rpc_test_calculate_health.json",
+      "size_bytes": 200,
+      "sha256": "6c6da3ee392483e3acebd6c8f675dbda3ee82486db9faf074bfa677b29f9952a",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/rpc_test_get_client_dossier.json",
+      "size_bytes": 225,
+      "sha256": "0274f21d3d26b3504ba177ddd5d6b8874ecf6bd590ad0bc15ac11b42e27b9a8c",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/table_exists_analysis_scores.json",
+      "size_bytes": 57,
+      "sha256": "291f999c32d460819695b0752594fd25c85bef4fb03ae75ebd848f3e5d2c5760",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/table_exists_client_analyses.json",
+      "size_bytes": 58,
+      "sha256": "b3e701e4748ca81a654a1e1af6d4d64c33590f4070e9ea8b6d91cdb8b98e6a92",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/table_exists_client_events.json",
+      "size_bytes": 59,
+      "sha256": "e02bfb0c9e806f64f1945fd42a59192cd8894359bf17ca30075b9326ee842844",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/table_exists_client_external_ids.json",
+      "size_bytes": 59,
+      "sha256": "e02bfb0c9e806f64f1945fd42a59192cd8894359bf17ca30075b9326ee842844",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/table_exists_clients.json",
+      "size_bytes": 58,
+      "sha256": "071a23c47b0c0a08ead75ee403812e960819449e2fa524b4c0e94b6b63876ae1",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/table_exists_loan_applications.json",
+      "size_bytes": 57,
+      "sha256": "21097d5d7d2108c09c4d03fdbd30c1a82aab0415ce6599de6c2d031000344d2a",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/table_exists_webhook_logs.json",
+      "size_bytes": 58,
+      "sha256": "74255acea57743c8617410f0dca007015bbd304335bc43537770bbf5780be4e1",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/results/table_verification.json",
+      "size_bytes": 7716,
+      "sha256": "569b4ceaedfd7536331f58ff838fd568ed2ae2998f6ac941d91c03f7fe78f07f",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/summary.json",
+      "size_bytes": 2805,
+      "sha256": "cd5a844f03ccd8eebdcb4e2c0b563244647b60a17c5805074e2230d1e00b27ee",
+      "phase": "9"
+    },
+    {
+      "path": "db_live/SUMMARY.md",
+      "size_bytes": 10016,
+      "sha256": "837674bbb03acc018760901e4c4e7259d56100af9bee66b48be8e29c95c02320",
+      "phase": "9"
+    },
+    {
+      "path": "VALIDATION_N1_RESULTS.md",
+      "size_bytes": 5759,
+      "sha256": "0309c017f6ea7ab6c5a4cc3594223ca6a550e82ad16fd523991366332e85a523",
+      "phase": "validation"
     }
   ]
 }
