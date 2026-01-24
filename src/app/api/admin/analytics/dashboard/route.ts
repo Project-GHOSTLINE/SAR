@@ -9,7 +9,8 @@ export const dynamic = 'force-dynamic'
 // Vérifier l'authentification admin
 function isAuthenticated(request: NextRequest): boolean {
   const token = request.cookies.get('admin-session')?.value
-  return !!token
+  const apiKey = request.headers.get('x-api-key')
+  return !!token || apiKey === process.env.ADMIN_PASSWORD
 }
 
 /**

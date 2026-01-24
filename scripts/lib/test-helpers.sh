@@ -19,6 +19,7 @@ export NC='\033[0m' # No Color
 
 export TOTAL_PASSED=0
 export TOTAL_FAILED=0
+export LAST_RESPONSE=""
 
 # ════════════════════════════════════════════════════════
 # AUTHENTICATION
@@ -35,7 +36,8 @@ authenticate() {
     exit 1
   fi
 
-  echo "-H \"x-api-key: $password\""
+  # Return just the password, curl -H will be added by caller
+  echo "$password"
 }
 
 # ════════════════════════════════════════════════════════
@@ -53,14 +55,14 @@ test_endpoint() {
 
   echo -n "Testing $name... "
 
-  local auth_header
-  auth_header=$(authenticate)
+  local password
+  password=$(authenticate)
 
   local response
   if [ "$method" = "GET" ]; then
-    response=$(curl -s -w "\n%{http_code}" $auth_header "$BASE_URL$endpoint" 2>&1)
+    response=$(curl -s -w "\n%{http_code}" -H "x-api-key: $password" "$BASE_URL$endpoint" 2>&1)
   else
-    response=$(curl -s -w "\n%{http_code}" -X "$method" $auth_header \
+    response=$(curl -s -w "\n%{http_code}" -X "$method" -H "x-api-key: $password" \
       -H "Content-Type: application/json" \
       -d "$data" "$BASE_URL$endpoint" 2>&1)
   fi
@@ -68,7 +70,7 @@ test_endpoint() {
   local status
   status=$(echo "$response" | tail -n1)
   local body
-  body=$(echo "$response" | head -n-1)
+  body=$(echo "$response" | sed '$d')
 
   if [ "$status" = "$expected_status" ]; then
     echo -e "${GREEN}✅ PASS${NC} (HTTP $status)"
@@ -78,7 +80,8 @@ test_endpoint() {
       echo "   Response: $(echo "$body" | head -c 150)"
     fi
     ((TOTAL_PASSED++))
-    echo "$body"  # Return body for further validation
+    # Export body to global variable for validation
+    LAST_RESPONSE="$body"
     return 0
   else
     echo -e "${RED}❌ FAIL${NC} (Expected $expected_status, got $status)"
@@ -88,9 +91,9 @@ test_endpoint() {
       echo "   Response: $(echo "$body" | head -c 150)"
     fi
     ((TOTAL_FAILED++))
+    LAST_RESPONSE=""
     return 1
   fi
-  echo ""
 }
 
 # ════════════════════════════════════════════════════════
