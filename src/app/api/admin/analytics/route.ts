@@ -14,7 +14,7 @@ function isAuthenticated(request: NextRequest): boolean {
 
 // Initialize Analytics Data Client
 function getAnalyticsClient() {
-  const propertyId = process.env.GA_PROPERTY_ID
+  const propertyId = process.env.GA_PROPERTY_ID?.trim()
 
   if (!propertyId) {
     throw new Error('GA_PROPERTY_ID non configuré dans .env.local')
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(getNoDataResponse(startDate, endDate))
     }
 
-    const propertyId = process.env.GA_PROPERTY_ID!
+    const propertyId = process.env.GA_PROPERTY_ID?.trim()!
 
     // Appeler l'API Google Analytics
     const [response] = await analyticsClient.runReport({
