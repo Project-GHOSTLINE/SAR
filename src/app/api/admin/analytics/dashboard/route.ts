@@ -52,13 +52,18 @@ async function handleGET(request: NextRequest) {
       async () => {
         // Récupérer les données brutes via l'API principale
         const baseUrl = new URL(request.url).origin
+        const headers: HeadersInit = {}
+
+        // Forward authentication (cookie OR x-api-key)
+        const cookie = request.headers.get('cookie')
+        const apiKey = request.headers.get('x-api-key')
+
+        if (cookie) headers['Cookie'] = cookie
+        if (apiKey) headers['x-api-key'] = apiKey
+
         const analyticsResponse = await fetch(
           `${baseUrl}/api/admin/analytics?startDate=${startDate}&endDate=today`,
-          {
-            headers: {
-              Cookie: request.headers.get('cookie') || ''
-            }
-          }
+          { headers }
         )
 
         if (!analyticsResponse.ok) {
