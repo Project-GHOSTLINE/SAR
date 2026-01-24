@@ -347,6 +347,16 @@ ALTER TABLE telemetry_spans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE telemetry_security ENABLE ROW LEVEL SECURITY;
 ALTER TABLE telemetry_alerts ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Service role full access" ON telemetry_requests;
+DROP POLICY IF EXISTS "Service role full access" ON telemetry_spans;
+DROP POLICY IF EXISTS "Service role full access" ON telemetry_security;
+DROP POLICY IF EXISTS "Service role full access" ON telemetry_alerts;
+DROP POLICY IF EXISTS "Authenticated read access" ON telemetry_requests;
+DROP POLICY IF EXISTS "Authenticated read access" ON telemetry_spans;
+DROP POLICY IF EXISTS "Authenticated read access" ON telemetry_security;
+DROP POLICY IF EXISTS "Authenticated read access" ON telemetry_alerts;
+
 -- Policy: Service role has full access (for API writes)
 CREATE POLICY "Service role full access" ON telemetry_requests
   FOR ALL USING (auth.role() = 'service_role');
