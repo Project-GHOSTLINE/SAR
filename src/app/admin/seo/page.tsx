@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
-import { BarChart3, TrendingUp, Users, MousePointer, Search, Link2, RefreshCw, X, MapPin, Smartphone, Globe } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { BarChart3, TrendingUp, Users, MousePointer, Search, Link2, RefreshCw, X, MapPin, Smartphone, Globe, Activity } from 'lucide-react'
 import AdminNav from '@/components/admin/AdminNav'
 
 // Import dynamique pour éviter les erreurs SSR avec Leaflet
@@ -55,6 +56,7 @@ interface SemrushData {
 type DetailView = 'users' | 'devices' | 'geography' | 'traffic' | null
 
 export default function SEOPage() {
+  const router = useRouter()
   const [ga4Data, setGA4Data] = useState<GA4Data | null>(null)
   const [semrushData, setSemrushData] = useState<SemrushData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -121,14 +123,23 @@ export default function SEOPage() {
               Tableau de bord complet des performances SEO de Solution Argent Rapide
             </p>
           </div>
-          <button
-            onClick={fetchData}
-            disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
-            <RefreshCw className={loading ? 'animate-spin' : ''} size={16} />
-            Actualiser
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push('/admin/seo/analytics')}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            >
+              <Activity size={16} />
+              Analyse Avancée
+            </button>
+            <button
+              onClick={fetchData}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            >
+              <RefreshCw className={loading ? 'animate-spin' : ''} size={16} />
+              Actualiser
+            </button>
+          </div>
         </div>
 
         {/* Google Analytics 4 Section */}
