@@ -1,7 +1,7 @@
 # RPC IMPACT PROOF — N+1 Reduction
 **Date:** 2026-01-24 23:45 EST
 **RPC:** `get_client_dossier_unified(client_id uuid)`
-**Status:** 🟨 **READY FOR DEPLOYMENT**
+**Status:** ⚠️ **NOT DEPLOYED - NO RUNTIME PROOF**
 
 ---
 
@@ -51,13 +51,15 @@ const { data: events } = await supabase
 
 ### Network Cost (BEFORE)
 
+⚠️ **ESTIMATED (not measured)**
+
 | Query | Table | Latency (est.) | Rows (avg) |
 |-------|-------|----------------|------------|
-| 1 | clients | ~50ms | 1 |
-| 2 | loan_applications | ~50ms | 0.03 (13/383) |
-| 3 | client_analyses | ~50ms | 1.2 (458/383) |
-| 4 | client_events | ~50ms | unknown (RLS) |
-| **TOTAL** | | **~200ms** | **variable** |
+| 1 | clients | ~50ms (EST) | 1 |
+| 2 | loan_applications | ~50ms (EST) | 0.03 (13/383) |
+| 3 | client_analyses | ~50ms (EST) | 1.2 (458/383) |
+| 4 | client_events | ~50ms (EST) | unknown (RLS) |
+| **TOTAL** | | **~200ms (EST)** | **variable** |
 
 **Issues:**
 - 4 sequential API calls (if in client component)
@@ -91,10 +93,12 @@ const { data } = await supabase.rpc('get_client_dossier_unified', {
 
 ### Network Cost (AFTER)
 
+⚠️ **ESTIMATED (not measured - RPC not deployed)**
+
 | Query | Tables | Latency (est.) | Rows (avg) |
 |-------|--------|----------------|------------|
-| 1 | 4 tables (joined) | ~80ms | variable |
-| **TOTAL** | | **~80ms** | **variable** |
+| 1 | 4 tables (joined) | ~80ms (EST) | variable |
+| **TOTAL** | | **~80ms (EST)** | **variable** |
 
 **Improvements:**
 - ✅ 1 API call (vs 4)
@@ -148,14 +152,31 @@ const { data } = await supabase.rpc('get_client_dossier_unified', {
 4. Measure execution time
 5. Save results to `audit_artifacts/db_live/results/`
 
-**Status:** 🟨 **READY** (awaiting RPC deployment)
+**Status:** ❌ **NOT EXECUTED** (RPC not deployed, cannot run test)
+
+---
+
+## ⚠️ NO MEASURED RESULTS (RPC NOT DEPLOYED)
+
+**Verification performed:** 2026-01-25 00:00 EST
+**Command executed:** `node scripts/test_rpc_exists.js`
+**Result:** ❌ RPC does NOT exist
+
+**Impact:**
+- ❌ Cannot run runtime test
+- ❌ Cannot measure actual latency
+- ❌ Cannot verify JSON output
+- ❌ Cannot prove N+1 elimination
+- ❌ All metrics above are ESTIMATES ONLY
+
+**File missing:** `audit_artifacts/db_live/results/rpc_get_client_dossier_unified_RUNTIME.json`
 
 ---
 
 ## DEPLOYMENT STATUS
 
 ### RPC Function
-**Status:** 🟨 **NOT YET DEPLOYED** (manual step required)
+**Status:** ❌ **NOT DEPLOYED** (manual step required)
 
 **Deployment Steps:**
 1. Open Supabase Dashboard SQL Editor
@@ -170,15 +191,22 @@ const { data } = await supabase.rpc('get_client_dossier_unified', {
 
 ## EXPECTED RESULTS (Post-Deployment)
 
-### Metrics to Verify
+⚠️ **THESE ARE ESTIMATES - NOT MEASURED**
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
+### Metrics to Verify (ONCE DEPLOYED)
+
+| Metric | Before (EST) | After (EST) | Expected Improvement |
+|--------|--------------|-------------|----------------------|
 | **DB Calls** | 4 | 1 | -75% |
 | **API Calls** | 4 | 1 | -75% |
 | **Latency** | ~200ms | ~80ms | -60% |
 | **Waterfall** | Yes (sequential) | No (parallel JOINs) | Eliminated |
 | **Code Complexity** | 4 queries | 1 RPC call | Simplified |
+
+**To get MEASURED results:**
+1. Deploy RPC via Supabase Dashboard
+2. Run: `node scripts/test_rpc_runtime.js`
+3. Check: `audit_artifacts/db_live/results/rpc_get_client_dossier_unified_RUNTIME.json`
 
 ### Test Command
 ```bash
@@ -321,8 +349,9 @@ curl http://localhost:3000/api/admin/client/{uuid}/dossier
 - ❌ **BEFORE:** 4 DB calls, ~200ms, N+1 pattern
 - ✅ **AFTER:** 1 DB call, ~80ms, no N+1
 
-**Confidence:** 100% that implementation will work (code reviewed, patterns verified)
-**Blocker:** Manual deployment required (auto-deploy failed due to auth)
+**Confidence:** 0% MEASURED (no runtime data)
+**Code Quality:** 100% (reviewed, patterns verified)
+**Blocker:** RPC not deployed - cannot execute tests - ZERO runtime proof
 
 ---
 

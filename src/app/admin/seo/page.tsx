@@ -1,8 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { BarChart3, TrendingUp, Users, MousePointer, Search, Link2, RefreshCw, X, MapPin, Smartphone, Globe } from 'lucide-react'
 import AdminNav from '@/components/admin/AdminNav'
+
+// Import dynamique pour éviter les erreurs SSR avec Leaflet
+const UserMap = dynamic(() => import('@/components/UserMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[500px] bg-gray-100 rounded-lg flex items-center justify-center">
+      <p className="text-gray-500">Chargement de la carte...</p>
+    </div>
+  )
+})
 
 interface GA4Data {
   overview: {
@@ -444,8 +455,15 @@ function DetailModal({ view, data, onClose }: DetailModalProps) {
         <div className="p-6 overflow-y-auto max-h-[calc(80vh-88px)]">
           {view === 'users' && (
             <div className="space-y-6">
+              {/* Carte interactive */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Localisation Géographique</h3>
+                <h3 className="text-lg font-semibold mb-4">Vue Satellite</h3>
+                <UserMap locations={data.geography.slice(0, 20)} />
+              </div>
+
+              {/* Liste des villes */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Top 10 Villes</h3>
                 <div className="space-y-2">
                   {data.geography.slice(0, 10).map((geo, idx) => (
                     <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
