@@ -22,6 +22,7 @@ interface GA4Data {
 
 interface SemrushData {
   domain: string
+  date: string
   organic_keywords: number
   organic_traffic: number
   authority_score: number
