@@ -1,17 +1,86 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { BarChart3, TrendingUp, Users, MousePointer, Search, Link2, RefreshCw } from 'lucide-react'
 import AdminNav from '@/components/admin/AdminNav'
 
+interface GA4Data {
+  overview: {
+    totalUsers: number
+    totalSessions: number
+    totalPageViews: number
+    totalConversions: number
+    bounceRate: number
+    engagementRate?: number
+  }
+  devices: Array<{
+    category: string
+    users: number
+    sessions: number
+  }>
+}
+
+interface SemrushData {
+  domain: string
+  organic_keywords: number
+  organic_traffic: number
+  authority_score: number
+  total_backlinks: number
+}
+
 export default function SEOPage() {
-  const router = useRouter()
-  const [mounted, setMounted] = useState(false)
+  const [ga4Data, setGA4Data] = useState<GA4Data | null>(null)
+  const [semrushData, setSemrushData] = useState<SemrushData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [period, setPeriod] = useState('30d')
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    fetchData()
+  }, [period])
+
+  async function fetchData() {
+    setLoading(true)
+    setError(null)
+
+    try {
+      // Fetch Google Analytics 4 data
+      const ga4Response = await fetch(`/api/admin/analytics/dashboard?period=${period}`)
+      if (ga4Response.ok) {
+        const ga4Json = await ga4Response.json()
+        if (ga4Json.success) {
+          setGA4Data(ga4Json.data)
+        }
+      }
+
+      // Fetch Semrush data (dernière collecte)
+      const endDate = new Date().toISOString().split('T')[0]
+      const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+
+      const semrushResponse = await fetch(`/api/seo/collect/semrush?startDate=${startDate}&endDate=${endDate}`)
+      if (semrushResponse.ok) {
+        const semrushJson = await semrushResponse.json()
+        if (semrushJson.success && semrushJson.data.length > 0) {
+          // Prendre la donnée la plus récente
+          setSemrushData(semrushJson.data[0])
+        }
+      }
+    } catch (err) {
+      setError('Erreur lors du chargement des données')
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const mobilePercentage = ga4Data?.devices
+    ? Math.round((ga4Data.devices.find(d => d.category === 'mobile')?.users || 0) /
+      ga4Data.overview.totalUsers * 100)
+    : null
+
+  const organicTraffic = ga4Data?.overview.totalSessions
+    ? Math.round(ga4Data.overview.totalSessions * 0.4) // Estimation
+    : null
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -19,11 +88,21 @@ export default function SEOPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Métriques SEO</h1>
-          <p className="mt-2 text-gray-600">
-            Tableau de bord complet des performances SEO de Solution Argent Rapide
-          </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Métriques SEO</h1>
+            <p className="mt-2 text-gray-600">
+              Tableau de bord complet des performances SEO de Solution Argent Rapide
+            </p>
+          </div>
+          <button
+            onClick={fetchData}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            <RefreshCw className={loading ? 'animate-spin' : ''} size={16} />
+            Actualiser
+          </button>
         </div>
 
         {/* Google Analytics 4 Section */}
@@ -35,67 +114,92 @@ export default function SEOPage() {
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">Google Analytics 4</h2>
-                <p className="text-sm text-gray-500">Données agrégées des 30 derniers jours</p>
+                <p className="text-sm text-gray-500">
+                  Données des {period === '7d' ? '7' : period === '30d' ? '30' : '90'} derniers jours
+                </p>
               </div>
             </div>
-            <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm">
-              <option>30 derniers jours</option>
+            <select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="7d">7 derniers jours</option>
+              <option value="30d">30 derniers jours</option>
+              <option value="90d">90 derniers jours</option>
             </select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <MetricCard
-              icon={<Users size={20} />}
-              label="Utilisateurs"
-              value="N/A"
-              trend={null}
-              color="blue"
-            />
-            <MetricCard
-              icon={<MousePointer size={20} />}
-              label="Sessions"
-              value="N/A"
-              trend={null}
-              color="green"
-            />
-            <MetricCard
-              icon={<TrendingUp size={20} />}
-              label="Taux d'engagement"
-              value="N/A"
-              trend={null}
-              color="purple"
-            />
-          </div>
+          {loading ? (
+            <div className="py-12 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-500">Chargement...</p>
+            </div>
+          ) : ga4Data ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <MetricCard
+                  icon={<Users size={20} />}
+                  label="Utilisateurs"
+                  value={ga4Data.overview.totalUsers.toLocaleString()}
+                  trend={null}
+                  color="blue"
+                />
+                <MetricCard
+                  icon={<MousePointer size={20} />}
+                  label="Sessions"
+                  value={ga4Data.overview.totalSessions.toLocaleString()}
+                  trend={null}
+                  color="green"
+                />
+                <MetricCard
+                  icon={<TrendingUp size={20} />}
+                  label="Taux d'engagement"
+                  value={`${Math.round((ga4Data.overview.engagementRate || 0) * 100)}%`}
+                  trend={null}
+                  color="purple"
+                />
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <MetricCard
-              icon={<TrendingUp size={20} />}
-              label="Conversions"
-              value="N/A"
-              trend={null}
-              color="orange"
-            />
-            <MetricCard
-              icon={<Search size={20} />}
-              label="Trafic organique"
-              value="N/A"
-              trend={null}
-              color="indigo"
-            />
-            <MetricCard
-              icon={<MousePointer size={20} />}
-              label="Mobile"
-              value="N/A"
-              trend={null}
-              color="green"
-            />
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <MetricCard
+                  icon={<TrendingUp size={20} />}
+                  label="Conversions"
+                  value={ga4Data.overview.totalConversions.toLocaleString()}
+                  trend={null}
+                  color="orange"
+                />
+                <MetricCard
+                  icon={<Search size={20} />}
+                  label="Trafic organique (est.)"
+                  value={organicTraffic?.toLocaleString() || 'N/A'}
+                  trend={null}
+                  color="indigo"
+                />
+                <MetricCard
+                  icon={<MousePointer size={20} />}
+                  label="Mobile"
+                  value={mobilePercentage ? `${mobilePercentage}%` : 'N/A'}
+                  trend={null}
+                  color="green"
+                />
+              </div>
 
-          <div className="mt-6 pt-6 border-t border-gray-100">
-            <p className="text-xs text-gray-500">
-              ⚠️ Données non disponibles - Credentials Google Analytics non configurés
-            </p>
-          </div>
+              <div className="mt-6 pt-6 border-t border-gray-100">
+                <p className="text-xs text-gray-500">
+                  ✅ Données en temps réel via Google Analytics 4 API
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="py-12 text-center">
+              <BarChart3 className="mx-auto text-gray-300 mb-4" size={48} />
+              <p className="text-gray-600 font-medium">Aucune donnée disponible</p>
+              <p className="text-sm text-gray-500 mt-2">
+                ⚠️ Credentials Google Analytics non configurés
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Google Search Console Section */}
@@ -110,9 +214,6 @@ export default function SEOPage() {
                 <p className="text-sm text-gray-500">Données agrégées des 30 derniers jours</p>
               </div>
             </div>
-            <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm">
-              <option>30 derniers jours</option>
-            </select>
           </div>
 
           <div className="py-12 text-center">
@@ -133,73 +234,73 @@ export default function SEOPage() {
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">Semrush</h2>
-                <p className="text-sm text-gray-500">Données agrégées des 30 derniers jours</p>
-              </div>
-            </div>
-            <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm">
-              <option>30 derniers jours</option>
-            </select>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <MetricCard
-              icon={<Search size={20} />}
-              label="Mots-clés organiques"
-              value="N/A"
-              trend={null}
-              color="blue"
-            />
-            <MetricCard
-              icon={<TrendingUp size={20} />}
-              label="Authority Score"
-              value="N/A"
-              trend={null}
-              color="purple"
-            />
-            <MetricCard
-              icon={<BarChart3 size={20} />}
-              label="Trafic organique"
-              value="N/A"
-              trend={null}
-              color="green"
-            />
-            <MetricCard
-              icon={<Link2 size={20} />}
-              label="Backlinks"
-              value="N/A"
-              trend={null}
-              color="orange"
-            />
-          </div>
-
-          <div className="mt-6 pt-6 border-t border-gray-100">
-            <p className="text-xs text-gray-500">
-              ⚠️ Données non disponibles - API Semrush non configurée
-            </p>
-          </div>
-        </div>
-
-        {/* Configuration Notice */}
-        <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex gap-3">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-yellow-800">Configuration requise</h3>
-              <div className="mt-2 text-sm text-yellow-700">
-                <p>Pour afficher les vraies données SEO, veuillez configurer:</p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Google Analytics 4: <code className="bg-yellow-100 px-1 rounded">GA_SERVICE_ACCOUNT_JSON</code> dans .env.local</li>
-                  <li>Google Search Console: Service Account avec accès Search Console</li>
-                  <li>Semrush: <code className="bg-yellow-100 px-1 rounded">SEMRUSH_API_KEY</code> dans .env.local</li>
-                </ul>
+                <p className="text-sm text-gray-500">
+                  Données du {semrushData?.date || '...'}
+                </p>
               </div>
             </div>
           </div>
+
+          {loading ? (
+            <div className="py-12 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto"></div>
+              <p className="mt-4 text-gray-500">Chargement...</p>
+            </div>
+          ) : semrushData ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <MetricCard
+                  icon={<Search size={20} />}
+                  label="Mots-clés organiques"
+                  value={semrushData.organic_keywords.toLocaleString()}
+                  trend={null}
+                  color="blue"
+                />
+                <MetricCard
+                  icon={<TrendingUp size={20} />}
+                  label="Authority Score"
+                  value={semrushData.authority_score.toString()}
+                  trend={null}
+                  color="purple"
+                />
+                <MetricCard
+                  icon={<BarChart3 size={20} />}
+                  label="Trafic organique"
+                  value={semrushData.organic_traffic.toLocaleString()}
+                  trend={null}
+                  color="green"
+                />
+                <MetricCard
+                  icon={<Link2 size={20} />}
+                  label="Backlinks"
+                  value={semrushData.total_backlinks.toLocaleString()}
+                  trend={null}
+                  color="orange"
+                />
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-gray-100">
+                <p className="text-xs text-gray-500">
+                  ✅ Données en temps réel via Semrush API
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="py-12 text-center">
+              <Link2 className="mx-auto text-gray-300 mb-4" size={48} />
+              <p className="text-gray-600 font-medium">Aucune donnée disponible</p>
+              <p className="text-sm text-gray-500 mt-2">
+                ⚠️ API Semrush non configurée
+              </p>
+            </div>
+          )}
         </div>
+
+        {error && (
+          <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
       </main>
     </div>
   )
@@ -231,7 +332,7 @@ function MetricCard({ icon, label, value, trend, color }: MetricCardProps) {
         <span className="text-sm text-gray-600">{label}</span>
       </div>
       <div className="flex items-baseline justify-between">
-        <span className="text-2xl font-bold text-gray-400">{value}</span>
+        <span className="text-2xl font-bold text-gray-900">{value}</span>
         {trend !== null && (
           <span className={`text-xs flex items-center gap-1 ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             <TrendingUp size={12} className={trend < 0 ? 'rotate-180' : ''} />
