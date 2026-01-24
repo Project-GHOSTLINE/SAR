@@ -124,7 +124,7 @@ async function checkDatabase(): Promise<{
 
     // Test de connexion: simple query
     const { error: connectionError } = await supabase
-      .from('seo_ga4_daily')
+      .from('seo_ga4_metrics_daily')
       .select('id')
       .limit(1)
 
@@ -135,7 +135,7 @@ async function checkDatabase(): Promise<{
         tables_exist: [],
         last_collection_ga4: null,
         last_collection_semrush: null,
-        error: 'Table seo_ga4_daily n\'existe pas - exécutez la migration'
+        error: 'Table seo_ga4_metrics_daily n\'existe pas - exécutez la migration'
       }
     }
 
@@ -146,12 +146,12 @@ async function checkDatabase(): Promise<{
     // Vérifier les tables existantes
     const tables: string[] = []
 
-    // Test seo_ga4_daily
+    // Test seo_ga4_metrics_daily
     const { error: ga4Error } = await supabase
-      .from('seo_ga4_daily')
+      .from('seo_ga4_metrics_daily')
       .select('id')
       .limit(1)
-    if (!ga4Error) tables.push('seo_ga4_daily')
+    if (!ga4Error) tables.push('seo_ga4_metrics_daily')
 
     // Test seo_semrush_domain_daily
     const { error: semrushError } = await supabase
@@ -164,9 +164,9 @@ async function checkDatabase(): Promise<{
     let lastGA4 = null
     let lastSemrush = null
 
-    if (tables.includes('seo_ga4_daily')) {
+    if (tables.includes('seo_ga4_metrics_daily')) {
       const { data: ga4Data } = await supabase
-        .from('seo_ga4_daily')
+        .from('seo_ga4_metrics_daily')
         .select('date')
         .order('date', { ascending: false })
         .limit(1)
