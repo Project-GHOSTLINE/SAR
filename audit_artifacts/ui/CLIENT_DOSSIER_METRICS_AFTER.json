@@ -1,0 +1,31 @@
+{
+  "timestamp": "TO_BE_MEASURED",
+  "test_margill_id": "MC9004",
+  "client_name": "Jean Dupont (test)",
+  "measurement_method": "Chrome DevTools Network tab",
+  "network_requests_count": 1,
+  "requests_breakdown": {
+    "unified_dossier": {
+      "url": "/api/admin/client/MC9004/dossier",
+      "method": "GET",
+      "estimated_latency_ms": "UNKNOWN - not measured yet",
+      "estimated_size_bytes": "UNKNOWN - not measured yet",
+      "includes": [
+        "client data (from RPC)",
+        "applications",
+        "analyses",
+        "events",
+        "concordances",
+        "autres_contrats"
+      ]
+    }
+  },
+  "page_load_ms": "UNKNOWN - not measured yet",
+  "total_download_kb": "UNKNOWN - not measured yet",
+  "improvement_vs_before": {
+    "network_requests": "2 → 1 (50% reduction)",
+    "expected_latency_improvement": "Should be faster due to single request",
+    "expected_size_improvement": "May be larger (all data in one response) but fewer overhead bytes"
+  },
+  "notes": "TO MEASURE: Start dev server, open /admin/clients-sar, click on a client with margill_id MC9004, measure in DevTools"
+}

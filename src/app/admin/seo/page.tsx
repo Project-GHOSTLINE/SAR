@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { BarChart3, TrendingUp, Users, MousePointer, Search, Link2, RefreshCw, X, MapPin, Smartphone, Globe, Activity } from 'lucide-react'
+import { BarChart3, TrendingUp, Users, MousePointer, Search, Link2, RefreshCw, X, MapPin, Smartphone, Globe, Activity, Shield } from 'lucide-react'
 import AdminNav from '@/components/admin/AdminNav'
 
 // Import dynamique pour éviter les erreurs SSR avec Leaflet
@@ -124,6 +124,13 @@ export default function SEOPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push('/admin/seo/command-center')}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-black border border-gray-700"
+            >
+              <Shield size={16} />
+              Command Center
+            </button>
             <button
               onClick={() => router.push('/admin/seo/analytics')}
               className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"

@@ -1,0 +1,24 @@
+{
+  "timestamp": "TO_BE_MEASURED",
+  "test_margill_id": "MC9004",
+  "client_name": "Jean Dupont (test)",
+  "measurement_method": "Chrome DevTools Network tab",
+  "network_requests_count": 2,
+  "requests_breakdown": {
+    "concordances": {
+      "url": "/api/admin/clients-sar/concordances?margill_id=MC9004",
+      "method": "GET",
+      "estimated_latency_ms": "UNKNOWN - not measured yet",
+      "estimated_size_bytes": "UNKNOWN - not measured yet"
+    },
+    "autres_contrats": {
+      "url": "/api/admin/clients-sar/autres-contrats?margill_id=MC9004",
+      "method": "GET",
+      "estimated_latency_ms": "UNKNOWN - not measured yet",
+      "estimated_size_bytes": "UNKNOWN - not measured yet"
+    }
+  },
+  "page_load_ms": "UNKNOWN - not measured yet",
+  "total_download_kb": "UNKNOWN - not measured yet",
+  "notes": "TO MEASURE: Start dev server, open /admin/clients-sar, click on a client with margill_id MC9004, measure in DevTools"
+}

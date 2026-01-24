@@ -183,36 +183,31 @@ export default function ClientsSARView() {
     }
   }
 
-  const loadConcordances = async (margillId: string) => {
+  // UNIFIED DOSSIER ENDPOINT - Replaces N+1 calls
+  const loadClientDossier = async (margillId: string) => {
     try {
       setConcordancesLoading(true)
-      const response = await fetch(`/api/admin/clients-sar/concordances?margill_id=${margillId}`)
+      setAutresContratsLoading(true)
+
+      // SINGLE CALL - Replaces 2 separate calls
+      const response = await fetch(`/api/admin/client/${margillId}/dossier`)
       const data = await response.json()
 
-      if (data.success) {
+      if (response.ok) {
+        // Extract data from unified response
         setConcordances(data.concordances || [])
+        setAutresContrats(data.autres_contrats || [])
+      } else {
+        console.error('Erreur chargement dossier:', data.error)
+        setConcordances([])
+        setAutresContrats([])
       }
     } catch (error) {
-      console.error('Erreur chargement concordances:', error)
+      console.error('Erreur chargement dossier:', error)
       setConcordances([])
-    } finally {
-      setConcordancesLoading(false)
-    }
-  }
-
-  const loadAutresContrats = async (margillId: string) => {
-    setAutresContratsLoading(true)
-    try {
-      const res = await fetch(`/api/admin/clients-sar/autres-contrats?margill_id=${margillId}`)
-      const data = await res.json()
-
-      if (data.success) {
-        setAutresContrats(data.contrats || [])
-      }
-    } catch (error) {
-      console.error('Erreur chargement autres contrats:', error)
       setAutresContrats([])
     } finally {
+      setConcordancesLoading(false)
       setAutresContratsLoading(false)
     }
   }
@@ -221,8 +216,7 @@ export default function ClientsSARView() {
     setSelectedClient(client)
     setConcordances([])
     setAutresContrats([])
-    loadConcordances(client.margill_id)
-    loadAutresContrats(client.margill_id)
+    loadClientDossier(client.margill_id) // SINGLE CALL - was 2 calls before
   }
 
   const applyStatFilter = (filterType: 'all' | 'sans-ibv' | 'concordances' | 'critique' | 'eleve' | 'mauvaises-creances') => {

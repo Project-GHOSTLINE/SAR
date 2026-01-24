@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-01-24T23:34:46.222Z",
+  "test_margill_id": "MC9004",
+  "test_client_id": "c53ace24-3ceb-4e37-a041-209b7cb2c932",
+  "steps": [
+    {
+      "step": "insert_mapping",
+      "success": true,
+      "created": true,
+      "client_id": "c53ace24-3ceb-4e37-a041-209b7cb2c932"
+    },
+    {
+      "step": "resolve_mapping",
+      "success": true,
+      "resolved_client_id": "c53ace24-3ceb-4e37-a041-209b7cb2c932",
+      "matches_expected": true
+    },
+    {
+      "step": "api_call_ready",
+      "success": true,
+      "note": "Route modification pending",
+      "expected_endpoint": "/api/admin/client/MC9004/dossier",
+      "will_resolve_to": "c53ace24-3ceb-4e37-a041-209b7cb2c932"
+    },
+    {
+      "step": "table_structure",
+      "success": true,
+      "columns": [
+        "id",
+        "client_id",
+        "provider",
+        "external_id",
+        "metadata",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  ],
+  "success": true,
+  "summary": {
+    "mapping_exists": true,
+    "margill_id": "MC9004",
+    "client_id": "c53ace24-3ceb-4e37-a041-209b7cb2c932",
+    "ready_for_ui_integration": true
+  }
+}
