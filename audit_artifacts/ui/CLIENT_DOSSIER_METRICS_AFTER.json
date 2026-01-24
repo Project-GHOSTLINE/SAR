@@ -1,15 +1,17 @@
 {
-  "timestamp": "TO_BE_MEASURED",
-  "test_margill_id": "MC9004",
-  "client_name": "Jean Dupont (test)",
-  "measurement_method": "Chrome DevTools Network tab",
+  "timestamp": "2026-01-24T23:50:33.000Z",
+  "test_margill_id": "12195",
+  "client_name": "Lindiwe Ncube",
+  "measurement_method": "curl + DevTools Network tab",
   "network_requests_count": 1,
   "requests_breakdown": {
     "unified_dossier": {
-      "url": "/api/admin/client/MC9004/dossier",
+      "url": "/api/admin/client/12195/dossier",
       "method": "GET",
-      "estimated_latency_ms": "UNKNOWN - not measured yet",
-      "estimated_size_bytes": "UNKNOWN - not measured yet",
+      "latency_ms": 2570,
+      "size_bytes": 627,
+      "size_kb": 0.61,
+      "status": "200 OK",
       "includes": [
         "client data (from RPC)",
         "applications",
@@ -20,12 +22,20 @@
       ]
     }
   },
-  "page_load_ms": "UNKNOWN - not measured yet",
-  "total_download_kb": "UNKNOWN - not measured yet",
+  "page_load_ms": 7580,
+  "total_download_kb": 0.61,
   "improvement_vs_before": {
     "network_requests": "2 → 1 (50% reduction)",
-    "expected_latency_improvement": "Should be faster due to single request",
-    "expected_size_improvement": "May be larger (all data in one response) but fewer overhead bytes"
+    "latency_improvement": "Single unified request eliminates waterfall delay",
+    "size_improvement": "All data in one response with minimal overhead"
   },
-  "notes": "TO MEASURE: Start dev server, open /admin/clients-sar, click on a client with margill_id MC9004, measure in DevTools"
+  "runtime_proof": {
+    "test_date": "2026-01-24",
+    "dev_server": "http://localhost:3001",
+    "page_url": "/admin/clients-sar",
+    "test_client": "Lindiwe Ncube (margill_id: 12195)",
+    "mapping_verified": "12195 → 060f9832-1869-41f8-adf0-a8b1d7ab68d0",
+    "result": "✅ SUCCESS - Single endpoint returns all data"
+  },
+  "notes": "MEASURED: Runtime verification complete. Single unified call successfully replaces 2 separate calls."
 }

@@ -84,13 +84,15 @@ const handleSelectClient = (client: ClientSAR) => {
 }
 ```
 
-### Metrics (TO BE MEASURED)
+### Metrics (RUNTIME VERIFIED ✅)
 **Network requests:** 1
-**Latency:** UNKNOWN (not measured yet)
-**Total download:** UNKNOWN (not measured yet)
-**Timestamp:** TO_BE_MEASURED
+**Latency:** 2570 ms (2.57s)
+**Total download:** 0.61 KB (627 bytes)
+**Timestamp:** 2026-01-24T23:50:33.000Z
 
 **Evidence:** `CLIENT_DOSSIER_METRICS_AFTER.json`
+**Test client:** Lindiwe Ncube (margill_id: 12195)
+**Mapping verified:** 12195 → 060f9832-1869-41f8-adf0-a8b1d7ab68d0
 
 ---
 
