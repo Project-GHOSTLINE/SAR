@@ -236,7 +236,7 @@ CREATE TABLE IF NOT EXISTS public.client_telemetry_events (
     REFERENCES public.telemetry_requests(trace_id) ON DELETE SET NULL,
 
   CONSTRAINT chk_event_type CHECK (
-    event_type IN ('page_view', 'form_start', 'form_step', 'form_abandon', 'button_click', 'form_submit')
+    event_type IN ('page_view', 'form_start', 'form_step', 'form_abandon', 'form_interaction', 'button_click', 'form_submit')
   )
 );
 

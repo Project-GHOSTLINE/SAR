@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createHash } from 'crypto'
 import { rateLimitFormSubmission } from '@/lib/utils/rate-limiter'
+import { parseUserAgent, stripQueryParams as stripQueryParamsUtil } from '@/lib/utils/ua-parser'
+import { getIPGeoData, getMockGeoData } from '@/lib/utils/ip-geolocation'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,10 +11,30 @@ const supabase = createClient(
 )
 
 /**
+ * Hash value with salt for anonymization (Node.js crypto)
+ * SECURITY: TELEMETRY_HASH_SALT must be set (no fallback)
+ */
+function hashWithSalt(value: string): string | null {
+  const salt = process.env.TELEMETRY_HASH_SALT
+
+  if (!salt) {
+    console.error('[SECURITY] TELEMETRY_HASH_SALT not set - skipping hash')
+    return null
+  }
+
+  return createHash('sha256')
+    .update(value + salt)
+    .digest('hex')
+    .substring(0, 16) // 16 chars = 64 bits entropy
+}
+
+/**
  * POST /api/telemetry/track-event
  *
  * Client-side event tracking (page views, form interactions, button clicks)
  * Linked to session_id (pseudonymous) until client linkage
+ *
+ * PHASE 2: Captures referrer + UTM + device + geo data on FIRST event
  *
  * Payload MUST be sanitized (whitelist keys only)
  * SECURITY: Rate limited per IP (20 events/minute)
@@ -44,6 +67,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 2. Parse request body (before session check, need UTM params)
+    const body = await request.json()
+    const {
+      event_type,
+      event_name,
+      page_url,
+      referrer_url,
+      duration_ms,
+      payload,
+      // NEW: UTM params from client
+      utm_source,
+      utm_medium,
+      utm_campaign,
+    } = body
+
     // 1.5. Ensure session exists in DB (create if first event)
     const { data: existingSession } = await supabase
       .from('client_sessions')
@@ -52,35 +90,127 @@ export async function POST(request: NextRequest) {
       .maybeSingle()
 
     if (!existingSession) {
-      // Create anonymous session (client_id = NULL)
+      // ========================================================================
+      // FIRST EVENT: Capture EVERYTHING (referrer, UTM, device, geo)
+      // ========================================================================
+      console.log('[TrackEvent] First event for session:', sessionId.substring(0, 16) + '...')
+
+      // Extract server-side data
+      const userAgent = request.headers.get('user-agent') || 'unknown'
+      const referrer = request.headers.get('referer') || referrer_url || null
+
+      // Parse device metadata (server-side)
+      const parsedUA = parseUserAgent(userAgent)
+
+      // Hash IP/UA with salt
+      const ipHash = clientIP && clientIP !== 'unknown' ? hashWithSalt(clientIP) : null
+      const uaHash = userAgent && userAgent !== 'unknown' ? hashWithSalt(userAgent) : null
+
+      // Geolocation (ASN, Country, IP prefix)
+      const geoData = process.env.NODE_ENV === 'development'
+        ? getMockGeoData(clientIP)
+        : await getIPGeoData(clientIP)
+
+      console.log('[TrackEvent] Captured data:', {
+        referrer: referrer ? stripQueryParamsUtil(referrer) : null,
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        device: parsedUA.device_type,
+        browser: parsedUA.browser,
+        os: parsedUA.os,
+        asn: geoData.asn,
+        country: geoData.country_code,
+        is_vpn: geoData.is_vpn,
+      })
+
+      // Create anonymous session with FULL metadata
       await supabase
         .from('client_sessions')
         .insert({
           session_id: sessionId,
-          client_id: null,
+          client_id: null, // Anonymous until voluntary linkage
           last_activity_at: new Date().toISOString(),
-          expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+          expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+          // Attribution data (captured ONCE at first event)
+          first_referrer: referrer ? stripQueryParamsUtil(referrer) : null,
+          first_utm_source: utm_source || null,
+          first_utm_medium: utm_medium || null,
+          first_utm_campaign: utm_campaign || null,
+          // Device metadata (server-parsed)
+          device_type: parsedUA.device_type,
+          browser: parsedUA.browser,
+          os: parsedUA.os,
+          // Security hashes
+          ip_hash: ipHash,
+          ua_hash: uaHash,
+          // Geolocation (Phase 2)
+          asn: geoData.asn,
+          country_code: geoData.country_code,
+          ip_prefix: geoData.ip_prefix,
         })
         .select()
         .single()
+
+      // SECURITY EVENTS: Detect VPN/Proxy on first visit
+      if (geoData.is_vpn || geoData.is_proxy) {
+        console.warn('[Security] VPN/Proxy detected on first visit:', {
+          session: sessionId.substring(0, 16) + '...',
+          asn: geoData.asn,
+          is_vpn: geoData.is_vpn,
+          is_proxy: geoData.is_proxy,
+        })
+
+        await supabase
+          .from('security_events')
+          .insert({
+            session_id: sessionId,
+            event_type: 'vpn_detected',
+            ip_hash: ipHash,
+            ip_prefix: geoData.ip_prefix,
+            ua_hash: uaHash,
+            asn: geoData.asn,
+            country_code: geoData.country_code,
+            meta: {
+              is_vpn: geoData.is_vpn,
+              is_proxy: geoData.is_proxy,
+              is_hosting: geoData.is_hosting,
+              detected_at: 'first_visit',
+            },
+          })
+      }
+
+      // SECURITY EVENTS: Detect hosting provider (bot indicator)
+      if (geoData.is_hosting) {
+        console.warn('[Security] Hosting provider detected on first visit:', {
+          session: sessionId.substring(0, 16) + '...',
+          asn: geoData.asn,
+        })
+
+        await supabase
+          .from('security_events')
+          .insert({
+            session_id: sessionId,
+            event_type: 'bot_detected',
+            ip_hash: ipHash,
+            ip_prefix: geoData.ip_prefix,
+            ua_hash: uaHash,
+            asn: geoData.asn,
+            country_code: geoData.country_code,
+            meta: {
+              reason: 'hosting_provider_asn',
+              asn: geoData.asn,
+              detected_at: 'first_visit',
+            },
+          })
+      }
     } else {
-      // Update last_activity_at
+      // Update last_activity_at (session already exists)
       await supabase
         .from('client_sessions')
         .update({ last_activity_at: new Date().toISOString() })
         .eq('session_id', sessionId)
     }
-
-    // 2. Parse request body
-    const body = await request.json()
-    const {
-      event_type,
-      event_name,
-      page_url,
-      referrer_url,
-      duration_ms,
-      payload
-    } = body
 
     // 3. Validate required fields
     if (!event_type || !event_name) {
@@ -97,8 +227,8 @@ export async function POST(request: NextRequest) {
     const sanitizedPayload = sanitizePayload(payload)
 
     // 6. Strip query params from URLs (privacy)
-    const cleanPageUrl = stripQueryParams(page_url)
-    const cleanReferrerUrl = stripQueryParams(referrer_url)
+    const cleanPageUrl = stripQueryParamsUtil(page_url)
+    const cleanReferrerUrl = stripQueryParamsUtil(referrer_url)
 
     // 7. Insert event into database
     const { data, error } = await supabase
@@ -192,17 +322,4 @@ function containsPII(str: string): boolean {
   return piiPatterns.some(pattern => pattern.test(str))
 }
 
-/**
- * Strip query params from URL (keep only origin + pathname)
- */
-function stripQueryParams(url?: string): string | undefined {
-  if (!url) return undefined
-
-  try {
-    const parsed = new URL(url)
-    return parsed.origin + parsed.pathname
-  } catch {
-    // If not a full URL, return as-is (might be just a pathname)
-    return url.split('?')[0]
-  }
-}
+// stripQueryParams is now imported from @/lib/utils/ua-parser
