@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { BetaAnalyticsDataClient } from '@google-analytics/data'
 import type { AnalyticsResponse, AnalyticsRow } from '@/types/analytics'
+import { telemetry } from '@/lib/telemetry'
 
 // Force dynamic rendering (uses cookies for auth)
 export const dynamic = 'force-dynamic'
@@ -53,9 +54,34 @@ function getAnalyticsClient() {
  * - dimensions: Dimensions à grouper (comma-separated)
  */
 export async function GET(request: NextRequest) {
+  // Extract trace_id from middleware
+  const telemetryHeader = request.headers.get('x-telemetry-context')
+  let traceId = telemetry.generateTraceId()
+
+  if (telemetryHeader) {
+    try {
+      const context = JSON.parse(Buffer.from(telemetryHeader, 'base64').toString())
+      traceId = context.traceId
+      telemetry.setTraceId(traceId)
+    } catch {
+      // Ignore invalid header
+    }
+  }
+
   try {
     // Vérifier authentification
     if (!isAuthenticated(request)) {
+      // Log security check failure
+      await telemetry.logSecurityCheck({
+        check_name: 'authentication',
+        result: 'fail',
+        severity: 'medium',
+        source: 'api',
+        provider: 'internal',
+        action_taken: 'blocked',
+        blocked_reason: 'No valid session or API key'
+      })
+
       return NextResponse.json(
         { success: false, error: 'Non autorisé' },
         { status: 401 }
@@ -114,18 +140,30 @@ export async function GET(request: NextRequest) {
 
     const propertyId = process.env.GA_PROPERTY_ID?.trim()!
 
-    // Appeler l'API Google Analytics
-    const [response] = await analyticsClient.runReport({
-      property: `properties/${propertyId}`,
-      dateRanges: [{ startDate, endDate }],
-      dimensions,
-      metrics,
-      limit: 1000 // Max 1000 rows
-    })
+    // Appeler l'API Google Analytics avec telemetry
+    const response = await telemetry.measureExternalAPI(
+      'Google Analytics',
+      'runReport',
+      async () => {
+        const [result] = await analyticsClient.runReport({
+          property: `properties/${propertyId}`,
+          dateRanges: [{ startDate, endDate }],
+          dimensions,
+          metrics,
+          limit: 1000 // Max 1000 rows
+        })
+        return result
+      }
+    )
 
-    // Transformer les données
-    // Mapping matches defaultDimensions (9) and defaultMetrics (10)
-    const data: AnalyticsRow[] = response.rows?.map(row => {
+    // Transformer les données avec telemetry
+    const data: AnalyticsRow[] = await telemetry.measureSpan(
+      'transform_ga4_data',
+      'internal',
+      'data-transformer',
+      'map_rows',
+      async () => {
+        return response.rows?.map(row => {
       const dimensionValues = row.dimensionValues || []
       const metricValues = row.metricValues || []
 
@@ -167,7 +205,9 @@ export async function GET(request: NextRequest) {
         },
         timestamp: new Date().toISOString()
       }
-    }) || []
+        }) || []
+      }
+    )
 
     // Calculer le summary
     const summary = {
@@ -196,6 +236,23 @@ export async function GET(request: NextRequest) {
 
   } catch (error: any) {
     console.error('❌ Erreur Analytics API:', error)
+
+    // Log error span
+    await telemetry.logSpan({
+      span_name: 'analytics_error',
+      span_type: 'internal',
+      target: 'error-handler',
+      operation: 'catch',
+      start_time: new Date().toISOString(),
+      duration_ms: 0,
+      status: 'error',
+      error_type: error instanceof Error ? error.constructor.name : 'UnknownError',
+      error_message_redacted: error instanceof Error
+        ? telemetry.redactErrorMessage(error.message)
+        : 'Unknown error',
+      error_stack_trace: error instanceof Error ? error.stack : undefined
+    })
+
     return NextResponse.json(
       {
         success: false,
@@ -204,6 +261,9 @@ export async function GET(request: NextRequest) {
       },
       { status: 500 }
     )
+  } finally {
+    // Clear trace context
+    telemetry.clearTraceId()
   }
 }
 

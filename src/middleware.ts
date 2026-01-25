@@ -128,26 +128,29 @@ export async function middleware(request: NextRequest) {
   fetch(`${baseUrl}/api/telemetry/write`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'x-telemetry-key': process.env.TELEMETRY_WRITE_KEY || 'dev-key'
     },
     body: JSON.stringify({
-      trace_id: traceId,
-      method: request.method,
-      path: pathname,
-      status: 200, // Default, actual status unknown at middleware level
-      duration_ms: Date.now() - startTime,
-      source: pathname.startsWith('/api/webhooks') ? 'webhook' :
-              pathname.startsWith('/api/cron') ? 'cron' :
-              pathname.startsWith('/api/') ? 'internal' : 'web',
-      env: process.env.NODE_ENV === 'production' ? 'production' : 'development',
-      ip_hash: ipHash,
-      ua_hash: uaHash,
-      region: vercelRegion,
-      user_id: userId,
-      role: userRole,
-      vercel_id: vercelId,
-      vercel_region: vercelRegion,
-      created_at: new Date().toISOString()
+      type: 'request',
+      data: {
+        trace_id: traceId,
+        method: request.method,
+        path: pathname,
+        status: 200, // Default, actual status unknown at middleware level
+        duration_ms: Date.now() - startTime,
+        source: pathname.startsWith('/api/webhooks') ? 'webhook' :
+                pathname.startsWith('/api/cron') ? 'cron' :
+                pathname.startsWith('/api/') ? 'internal' : 'web',
+        env: process.env.VERCEL_ENV || (process.env.NODE_ENV === 'production' ? 'production' : 'development'),
+        ip_hash: ipHash,
+        ua_hash: uaHash,
+        region: vercelRegion,
+        user_id: userId,
+        role: userRole,
+        vercel_id: vercelId,
+        vercel_region: vercelRegion,
+      }
     })
   }).catch(() => {
     // Silently fail - don't break request
