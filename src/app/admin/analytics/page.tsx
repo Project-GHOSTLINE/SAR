@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import AdminNav from '@/components/admin/AdminNav'
 import {
   BarChart,
   Bar,
@@ -92,26 +93,31 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Analytics Dashboard</h1>
-          <div className="flex items-center justify-center h-64">
-            <div className="text-gray-500">Chargement des données...</div>
+      <>
+        <AdminNav currentPage="/admin/analytics" />
+        <div className="min-h-screen bg-gray-50 p-8">
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-3xl font-bold mb-8">Analytics Dashboard</h1>
+            <div className="flex items-center justify-center h-64">
+              <div className="text-gray-500">Chargement des données...</div>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     )
   }
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
-          <p className="text-gray-600 mt-2">Vue d'ensemble des sessions et conversions</p>
-        </div>
+    <>
+      <AdminNav currentPage="/admin/analytics" />
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+            <p className="text-gray-600 mt-2">Vue d'ensemble des sessions et conversions</p>
+          </div>
 
         {/* KPIs Row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -338,5 +344,6 @@ export default function AnalyticsPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }
