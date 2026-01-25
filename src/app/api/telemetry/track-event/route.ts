@@ -4,6 +4,11 @@ import { createHash } from 'crypto'
 import { rateLimitFormSubmission } from '@/lib/utils/rate-limiter'
 import { parseUserAgent, stripQueryParams as stripQueryParamsUtil } from '@/lib/utils/ua-parser'
 import { getIPGeoData, getMockGeoData } from '@/lib/utils/ip-geolocation'
+import {
+  trackTelemetryPerformance,
+  trackSessionCreated,
+  trackSecurityEvent,
+} from '@/lib/utils/vercel-observability'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -40,6 +45,8 @@ function hashWithSalt(value: string): string | null {
  * SECURITY: Rate limited per IP (20 events/minute)
  */
 export async function POST(request: NextRequest) {
+  const startTime = Date.now() // Vercel Observability: Track performance
+
   try {
     // 0. RATE LIMITING: Prevent abuse (20 events per minute per IP)
     const clientIP =
@@ -152,6 +159,13 @@ export async function POST(request: NextRequest) {
         .select()
         .single()
 
+      // Vercel Observability: Track session creation
+      trackSessionCreated(
+        parsedUA.device_type || 'unknown',
+        !!(utm_source || utm_medium || utm_campaign),
+        geoData.country_code || 'unknown'
+      )
+
       // SECURITY EVENTS: Detect VPN/Proxy on first visit
       if (geoData.is_vpn || geoData.is_proxy) {
         console.warn('[Security] VPN/Proxy detected on first visit:', {
@@ -178,6 +192,9 @@ export async function POST(request: NextRequest) {
               detected_at: 'first_visit',
             },
           })
+
+        // Vercel Observability: Track VPN/Proxy detection
+        trackSecurityEvent('vpn_detected', geoData.asn || 0)
       }
 
       // SECURITY EVENTS: Detect hosting provider (bot indicator)
@@ -203,6 +220,9 @@ export async function POST(request: NextRequest) {
               detected_at: 'first_visit',
             },
           })
+
+        // Vercel Observability: Track bot detection
+        trackSecurityEvent('bot_detected', geoData.asn || 0)
       }
     } else {
       // Update last_activity_at (session already exists)
@@ -254,6 +274,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Vercel Observability: Track successful request
+    const duration = Date.now() - startTime
+    trackTelemetryPerformance('/api/telemetry/track-event', duration, true)
+
     return NextResponse.json({
       success: true,
       event_id: data.id
@@ -261,6 +285,11 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('[TrackEvent] Error:', error)
+
+    // Vercel Observability: Track failed request
+    const duration = Date.now() - startTime
+    trackTelemetryPerformance('/api/telemetry/track-event', duration, false)
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

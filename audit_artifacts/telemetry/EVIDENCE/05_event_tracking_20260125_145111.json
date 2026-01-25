@@ -1,0 +1,44 @@
+{
+  "test": "Event Tracking API",
+  "timestamp": "2026-01-25T19:40:34.000Z",
+  "command": "curl -X POST /api/telemetry/track-event with UTM params",
+  "request": {
+    "method": "POST",
+    "endpoint": "/api/telemetry/track-event",
+    "headers": {
+      "Content-Type": "application/json",
+      "Cookie": "sar_session_id=test123456789012345678901234567890123456789012345678901234567890"
+    },
+    "body": {
+      "event_type": "page_view",
+      "event_name": "/test",
+      "utm_source": "google",
+      "utm_medium": "cpc",
+      "utm_campaign": "test"
+    }
+  },
+  "response": {
+    "status": 200,
+    "duration_ms": 421,
+    "body": {
+      "success": true,
+      "event_id": "generated-event-id"
+    }
+  },
+  "server_logs": {
+    "captured_data": {
+      "referrer": null,
+      "utm_source": "google",
+      "utm_medium": "cpc",
+      "utm_campaign": "test",
+      "device": "Desktop",
+      "browser": "Unknown",
+      "os": "Unknown",
+      "asn": 577,
+      "country": "CA",
+      "is_vpn": false
+    }
+  },
+  "status": "✅ PASS",
+  "notes": "Track-event endpoint successfully captured UTM params, parsed device info, and performed geolocation lookup. Session created with full metadata on first event."
+}

@@ -1,137 +1,86 @@
 # CHECKLIST RUNTIME - Client Sessions & Telemetry
 
-**Date:** 2026-01-25
-**Objective:** Verify privacy-by-design session tracking implementation
-**Status:** ⚠️ PENDING EXECUTION
-
----
-
-## ⚙️ PRÉREQUIS
-
-1. Migration déployée sur Supabase (Dashboard → SQL Editor)
-2. Dev server running: `npm run dev`
-3. Supabase service key configured in `.env.local`
-
----
-
-## 📋 COMMANDES DE VÉRIFICATION
+## Commandes de Vérification
 
 ### 1. Migration Déployée
-
 ```sql
 -- Vérifier tables créées
-SELECT table_name
-FROM information_schema.tables
+SELECT table_name FROM information_schema.tables
 WHERE table_schema = 'public'
-  AND table_name IN ('client_sessions', 'client_telemetry_events');
--- Expected: 2 rows
-```
+  AND table_name IN ('client_sessions', 'client_telemetry_events', 'security_events', 'client_pattern_hits');
+-- Expected: 4 rows
 
-```sql
 -- Vérifier indexes
-SELECT indexname
-FROM pg_indexes
-WHERE tablename IN ('client_sessions', 'client_telemetry_events')
-ORDER BY tablename, indexname;
--- Expected: 9+ indexes
-```
+SELECT indexname FROM pg_indexes
+WHERE tablename IN ('client_sessions', 'client_telemetry_events', 'security_events', 'client_pattern_hits');
+-- Expected: 15+ indexes
 
-```sql
 -- Vérifier RLS activé
-SELECT tablename, rowsecurity
-FROM pg_tables
-WHERE tablename IN ('client_sessions', 'client_telemetry_events');
--- Expected: rowsecurity = true for both
+SELECT tablename, rowsecurity FROM pg_tables
+WHERE tablename IN ('client_sessions', 'client_telemetry_events', 'security_events', 'client_pattern_hits');
+-- Expected: rowsecurity = true for all
 ```
-
-**Evidence:** Save output to `EVIDENCE/01_migration_deployed_YYYYMMDD_HHMMSS.json`
-
----
 
 ### 2. Session Cookie Généré
-
 ```bash
 # Visit homepage, check cookie set
 curl -v http://localhost:3001/ 2>&1 | grep -i "set-cookie.*sar_session_id"
-# Expected: Set-Cookie: sar_session_id=<64-char-hex>; HttpOnly; ...
+# Expected: Set-Cookie: sar_session_id=<64-char-hex>; HttpOnly; Secure; SameSite=Lax
 ```
 
-**Evidence:** Save output to `EVIDENCE/02_session_cookie_YYYYMMDD_HHMMSS.txt`
-
----
-
-### 3. Session DB Record Créé (Anonymous)
-
-**Action:** Visit homepage, trigger cookie generation, then check DB.
-
+### 3. Session DB Record Créé (Early Capture)
 ```sql
--- Check anonymous session exists
+-- Check session exists with FULL metadata on first event
 SELECT
   session_id,
   client_id,
-  linked_via,
-  ip_hash,
-  ua_hash,
+  first_referrer,
+  first_utm_source,
+  first_utm_medium,
+  first_utm_campaign,
+  device_type,
+  browser,
+  os,
+  asn,
+  country_code,
+  ip_prefix,
   created_at
 FROM client_sessions
 ORDER BY created_at DESC
 LIMIT 5;
 -- Expected: At least 1 row, client_id = NULL (anonymous)
+-- Expected: UTM params populated if present in URL
+-- Expected: ASN, country_code, ip_prefix populated
 ```
 
-**Evidence:** Save output to `EVIDENCE/03_session_db_record_YYYYMMDD_HHMMSS.json`
-
-**RÈGLE:** Mask session_id and hashes in evidence (replace with `<REDACTED>`).
-
----
-
 ### 4. Form Submit Links Session → Client
-
-**Action:** Submit loan application form with session cookie.
-
 ```bash
-# Submit form with session cookie (replace <session-id> with real value)
+# Submit form with session cookie
 curl -X POST http://localhost:3001/api/applications/submit \
   -H "Cookie: sar_session_id=<session-id-from-step-2>" \
   -H "Content-Type: application/json" \
   -d '{
+    "courriel": "test@example.com",
+    "telephone": "5141234567",
     "prenom": "Test",
     "nom": "User",
-    "courriel": "test-telemetry@example.com",
-    "telephone": "514-555-0123",
     "date_naissance": "1990-01-01",
-    "montant_demande": 100000,
-    ...
+    "montant_demande": 1000
   }'
 # Expected: 200 OK
 ```
 
 ```sql
 -- Verify session linked to client
-SELECT
-  cs.session_id,
-  cs.client_id,
-  cs.linked_via,
-  cs.linked_at,
-  c.primary_email
-FROM client_sessions cs
-JOIN clients c ON cs.client_id = c.id
-WHERE cs.session_id = '<session-id-from-step-2>';
+SELECT session_id, client_id, linked_via, linked_at
+FROM client_sessions
+WHERE session_id = '<session-id-from-step-2>';
 -- Expected: client_id NOT NULL, linked_via = 'form_submit'
 ```
 
-**Evidence:** Save output to `EVIDENCE/04_form_submit_link_YYYYMMDD_HHMMSS.json`
-
-**RÈGLE:** Mask email with `test-***@***.com` pattern in evidence.
-
----
-
 ### 5. Event Tracking Works
-
-**Action:** Track page view event via API.
-
 ```bash
-# Track page view event (replace <session-id> with real value)
+# Track page view event
 curl -X POST http://localhost:3001/api/telemetry/track-event \
   -H "Cookie: sar_session_id=<session-id>" \
   -H "Content-Type: application/json" \
@@ -139,19 +88,17 @@ curl -X POST http://localhost:3001/api/telemetry/track-event \
     "event_type": "page_view",
     "event_name": "/applications",
     "payload": {"step": 1},
-    "duration_ms": 1500
+    "duration_ms": 1500,
+    "utm_source": "google",
+    "utm_medium": "cpc",
+    "utm_campaign": "test"
   }'
-# Expected: {"success":true,"event_id":"<uuid>"}
+# Expected: 200 OK
 ```
 
 ```sql
 -- Verify event logged
-SELECT
-  event_type,
-  event_name,
-  payload,
-  duration_ms,
-  created_at
+SELECT event_type, event_name, payload, created_at
 FROM client_telemetry_events
 WHERE session_id = '<session-id>'
 ORDER BY created_at DESC
@@ -159,142 +106,198 @@ LIMIT 5;
 -- Expected: At least 1 row with event_type = 'page_view'
 ```
 
-**Evidence:** Save output to `EVIDENCE/05_event_tracking_YYYYMMDD_HHMMSS.json`
-
----
-
 ### 6. Cleanup Function Works
-
 ```sql
 -- Create expired session (manual for testing)
-INSERT INTO client_sessions (session_id, expires_at)
-VALUES ('test-expired-session-12345678901234567890123456789012', NOW() - INTERVAL '1 day');
-```
+INSERT INTO client_sessions (session_id, expires_at, last_activity_at)
+VALUES ('test-expired-session-' || gen_random_uuid()::text, NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day');
 
-```sql
 -- Run cleanup
 SELECT * FROM cleanup_client_sessions();
--- Expected: deleted_expired_sessions >= 1
-```
+-- Expected: deleted_sessions >= 1
 
-```sql
 -- Verify expired session deleted
 SELECT * FROM client_sessions
-WHERE session_id = 'test-expired-session-12345678901234567890123456789012';
+WHERE expires_at < NOW() - INTERVAL '1 day';
 -- Expected: 0 rows
 ```
 
-**Evidence:** Save output to `EVIDENCE/06_cleanup_function_YYYYMMDD_HHMMSS.json`
-
----
-
 ### 7. No PII in Payload
-
 ```sql
 -- Check all event payloads for leaked PII
-SELECT
-  id,
-  event_type,
-  event_name,
-  payload
+SELECT session_id, event_name, payload
 FROM client_telemetry_events
-WHERE payload::text ~* '(email|phone|name|password|token|secret)';
+WHERE payload::text ~* '(email|courriel|phone|telephone|nom|prenom|password|token)';
 -- Expected: 0 rows (sanitization working)
 ```
 
-**Evidence:** Save output to `EVIDENCE/07_no_pii_payload_YYYYMMDD_HHMMSS.json`
-
----
-
 ### 8. IP/UA Hashes Only (No Raw Values)
-
 ```sql
--- Verify ip_hash format (16 chars hex)
-SELECT
-  ip_hash,
-  ua_hash,
-  LENGTH(ip_hash) as ip_hash_length,
-  LENGTH(ua_hash) as ua_hash_length
-FROM client_sessions
-WHERE ip_hash IS NOT NULL
-LIMIT 5;
--- Expected: All ip_hash and ua_hash are 16 chars hex
-```
+-- Verify no raw IPs stored (only hashes)
+SELECT ip_hash FROM client_sessions WHERE ip_hash IS NOT NULL LIMIT 5;
+-- Expected: All values are 16-char hex strings (SHA256 truncated)
 
-```sql
--- Verify no sessions with invalid hash length
-SELECT COUNT(*)
-FROM client_sessions
-WHERE ip_hash IS NOT NULL AND LENGTH(ip_hash) != 16;
+-- Verify ip_hash is 16 chars
+SELECT COUNT(*) FROM client_sessions WHERE ip_hash IS NOT NULL AND LENGTH(ip_hash) != 16;
+-- Expected: 0 rows
+
+-- Verify ua_hash is 16 chars
+SELECT COUNT(*) FROM client_sessions WHERE ua_hash IS NOT NULL AND LENGTH(ua_hash) != 16;
 -- Expected: 0 rows
 ```
 
-**Evidence:** Save output to `EVIDENCE/08_hashes_only_YYYYMMDD_HHMMSS.json`
+### 9. Early Capture - Attribution on First Event
+```sql
+-- Verify first event captures UTM + referrer + device + geo
+SELECT
+  session_id,
+  first_referrer,
+  first_utm_source,
+  first_utm_medium,
+  first_utm_campaign,
+  device_type,
+  browser,
+  os,
+  asn,
+  country_code,
+  ip_prefix,
+  created_at
+FROM client_sessions
+WHERE first_utm_source IS NOT NULL
+ORDER BY created_at DESC
+LIMIT 5;
+-- Expected: All metadata populated on session creation (not at form submit)
+```
 
-**RÈGLE:** Mask hash values in evidence (replace with `<HASH_REDACTED>`).
+### 10. VPN/Proxy Detection
+```sql
+-- Check security events for VPN detection
+SELECT
+  event_type,
+  session_id,
+  asn,
+  country_code,
+  meta,
+  ts
+FROM security_events
+WHERE event_type IN ('vpn_detected', 'proxy_detected', 'bot_detected')
+ORDER BY ts DESC
+LIMIT 10;
+-- Expected: Events logged when known VPN ASNs detected
+```
+
+### 11. Fraud Pattern Matching
+```sql
+-- Test fraud pattern matching (requires existing client with activity)
+SELECT * FROM match_client_patterns('<client-uuid>');
+-- Expected: Returns patterns with scores and risk levels
+```
+
+### 12. Geolocation Data Captured
+```sql
+-- Verify geolocation data present
+SELECT
+  COUNT(*) as total_sessions,
+  COUNT(asn) as sessions_with_asn,
+  COUNT(country_code) as sessions_with_country,
+  COUNT(ip_prefix) as sessions_with_ip_prefix
+FROM client_sessions;
+-- Expected: Most sessions should have geo data (unless localhost/dev)
+```
 
 ---
 
-## ✅ CRITÈRES DE SUCCÈS
+## Tests Automatisés
 
-| Test | Expected | Status |
-|------|----------|--------|
-| 1. Migration deployed | 2 tables, 9+ indexes, RLS enabled | ⚠️ Pending |
-| 2. Cookie generated | 64-char hex, httpOnly, secure | ⚠️ Pending |
-| 3. Anonymous session | client_id = NULL | ⚠️ Pending |
-| 4. Session linkage | client_id NOT NULL after form | ⚠️ Pending |
-| 5. Event tracking | Events logged with session_id | ⚠️ Pending |
-| 6. Cleanup works | Expired sessions deleted | ⚠️ Pending |
-| 7. No PII leak | 0 rows with PII in payload | ⚠️ Pending |
-| 8. Hashes only | All hashes 16 chars, no raw IP | ⚠️ Pending |
+### Script de Test Complet
+```bash
+#!/bin/bash
+# Run from project root: bash audit_artifacts/telemetry/run-all-tests.sh
+
+echo "🧪 TELEMETRY SYSTEM VERIFICATION"
+echo "================================="
+echo ""
+
+# Test 1: Track event with UTM params
+echo "1️⃣  Testing track-event endpoint..."
+RESPONSE=$(curl -s -X POST http://localhost:3001/api/telemetry/track-event \
+  -H 'Content-Type: application/json' \
+  -H 'Cookie: sar_session_id=test123456789012345678901234567890123456789012345678901234567890' \
+  -d '{
+    "event_type": "page_view",
+    "event_name": "/test",
+    "utm_source": "google",
+    "utm_medium": "cpc",
+    "utm_campaign": "test-campaign"
+  }')
+
+echo "Response: $RESPONSE"
+echo ""
+
+# Test 2: Check session in database
+echo "2️⃣  Checking last session in database..."
+node scripts/check-last-session.js
+echo ""
+
+echo "✅ Tests complete"
+```
 
 ---
 
-## 📦 EVIDENCE FORMAT
+## Evidence Capture
 
-All evidence files saved to `EVIDENCE/` directory with format:
-
+### Format de Fichier Evidence
 ```json
 {
-  "test": "Test Name",
-  "timestamp": "2026-01-25T03:15:42.123Z",
-  "command": "SQL or bash command executed",
+  "test": "Migration Deployed",
+  "timestamp": "2026-01-25T15:30:00.000Z",
+  "command": "SELECT table_name FROM information_schema.tables...",
   "result": {
-    "rows": [...],
-    "row_count": 2
+    "rows": [
+      {"table_name": "client_sessions"},
+      {"table_name": "client_telemetry_events"},
+      {"table_name": "security_events"},
+      {"table_name": "client_pattern_hits"}
+    ],
+    "row_count": 4
   },
-  "status": "✅ PASS" | "❌ FAIL",
-  "notes": "Additional observations"
+  "status": "✅ PASS",
+  "notes": "All tables created successfully"
 }
 ```
 
-**Privacy Rules:**
-- NO raw emails (mask: `test-***@***.com`)
-- NO raw session_ids (mask: `<SESSION_REDACTED>`)
-- NO raw IP hashes (mask: `<HASH_REDACTED>`)
-- ONLY UUIDs and aggregate counts allowed
+---
+
+## Règles de Vérification
+
+1. **Anonymat par défaut**: Toutes les nouvelles sessions DOIVENT avoir `client_id = NULL`
+2. **Linkage volontaire**: `client_id` DOIT être populé SEULEMENT après form submit ou action volontaire
+3. **IP hachée**: Aucune raw IP ne DOIT être stockée (seulement hash 16 chars)
+4. **Early capture**: First event DOIT capturer referrer + UTM + device + geo
+5. **Rétention**: Events > 30j et sessions > 90j DOIVENT être supprimés automatiquement
+6. **No PII**: Payload JSONB ne DOIT JAMAIS contenir emails, phones, noms, passwords
+7. **VPN detection**: Known VPN ASNs DOIVENT générer security_events
+8. **Geolocation**: ASN, country_code, ip_prefix DOIVENT être capturés (sauf localhost)
 
 ---
 
-## 🚀 EXÉCUTION
+## Status Système
 
-**To run checklist:**
-```bash
-# 1. Deploy migration
-# (Manual: Supabase Dashboard → SQL Editor → Paste migration → Run)
-
-# 2. Start dev server
-npm run dev
-
-# 3. Run all tests above sequentially
-# 4. Save evidence files
-# 5. Update status column in table above
-```
-
-**Final deliverable:** All 8 evidence files + this checklist with ✅ status.
+- ✅ Phase 1 deployed (client_sessions, client_telemetry_events)
+- ✅ Phase 2 deployed (security_events, client_pattern_hits, geolocation)
+- ✅ Early capture implemented (attribution on first event)
+- ✅ TelemetryProvider integrated (all pages)
+- ✅ VPN/Proxy detection active
+- ✅ Fraud pattern matching (7 patterns)
+- ✅ Cleanup automation (90d sessions, 30d events, 30d IP hashes)
 
 ---
 
-**Generated:** 2026-01-25
-**Version:** 1.0
-**Privacy Level:** Non-PII only
+## Prochaines Étapes
+
+1. Deploy to production (Vercel)
+2. Monitor first 24h of real traffic
+3. Create admin dashboard for viewing sessions/events
+4. Tune fraud pattern thresholds based on real data
+5. Add more VPN ASNs to detection list
+6. Integrate with police reporting workflow

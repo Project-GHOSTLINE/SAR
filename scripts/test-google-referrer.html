@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Google Referrer Simulation</title>
+  <style>
+    body {
+      font-family: system-ui;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 15px 30px;
+      background: #4285f4;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 10px;
+      font-size: 18px;
+    }
+    .btn:hover {
+      background: #357ae8;
+    }
+    .info {
+      background: #f0f0f0;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Test: Simuler une visite depuis Google</h1>
+
+  <div class="info">
+    <strong>Objectif:</strong> Tester que la télémétrie capture correctement:
+    <ul>
+      <li>Referrer: <code>https://www.google.com/</code></li>
+      <li>UTM Source: <code>google</code></li>
+      <li>UTM Medium: <code>cpc</code></li>
+      <li>UTM Campaign: <code>pret-rapide-mtl</code></li>
+      <li>Device/Browser/OS (server-parsed)</li>
+      <li>ASN/Country (géolocalisation)</li>
+    </ul>
+  </div>
+
+  <h2>📋 Instructions:</h2>
+
+  <ol>
+    <li>Clique sur le bouton ci-dessous pour simuler une visite Google Ads</li>
+    <li>Tu seras redirigé vers <code>localhost:3001</code> avec UTM params</li>
+    <li>Regarde les logs du serveur Next.js dans le terminal</li>
+    <li>Vérifie la base de données Supabase</li>
+  </ol>
+
+  <h2>🚀 Simuler une visite:</h2>
+
+  <a href="http://localhost:3001/?utm_source=google&utm_medium=cpc&utm_campaign=pret-rapide-mtl&utm_term=pret+rapide+montreal&utm_content=annonce1" class="btn">
+    📍 Homepage (avec UTM Google Ads)
+  </a>
+
+  <a href="http://localhost:3001/aidesecurite?utm_source=google&utm_medium=cpc&utm_campaign=test-fraud&utm_term=pret+facile" class="btn">
+    📝 Formulaire de test (avec UTM)
+  </a>
+
+  <h2>📊 Ce qui sera capturé:</h2>
+
+  <pre>
+client_sessions {
+  session_id: "abc123..." (64 chars)
+
+  // ATTRIBUTION (Google Ads)
+  first_referrer: "https://www.google.com/" (ce fichier HTML)
+  first_utm_source: "google"
+  first_utm_medium: "cpc"
+  first_utm_campaign: "pret-rapide-mtl"
+
+  // DEVICE (server-parsed)
+  device_type: "Desktop"  (ton navigateur)
+  browser: "Chrome"
+  os: "macOS"
+
+  // SECURITY (Phase 2)
+  ip_hash: "7f3a2b..." (SHA256, localhost = mock data)
+  ua_hash: "9e4c1a..."
+  asn: 577 (Bell Canada - mock data en dev)
+  country_code: "CA"
+  ip_prefix: "127.0.0.0/8"
+
+  // TIMING
+  created_at: "2026-01-25 XX:XX:XX"
+  expires_at: "2026-04-25 XX:XX:XX" (90j)
+}</pre>
+
+  <h2>🔍 Vérifier dans la DB:</h2>
+
+  <pre>
+-- Query Supabase:
+SELECT
+  session_id,
+  first_referrer,
+  first_utm_source,
+  first_utm_medium,
+  first_utm_campaign,
+  device_type,
+  browser,
+  os,
+  asn,
+  country_code,
+  created_at
+FROM client_sessions
+ORDER BY created_at DESC
+LIMIT 1;</pre>
+
+  <h2>📝 Logs serveur attendus:</h2>
+
+  <pre>
+[TrackEvent] First event for session: abc123...
+[TrackEvent] Captured data: {
+  referrer: 'file:///.../test-google-referrer.html',
+  utm_source: 'google',
+  utm_medium: 'cpc',
+  utm_campaign: 'pret-rapide-mtl',
+  device: 'Desktop',
+  browser: 'Chrome',
+  os: 'macOS',
+  asn: 577,
+  country: 'CA',
+  is_vpn: false
+}
+POST /api/telemetry/track-event 200 in XXms</pre>
+
+  <p><small>📌 <strong>Note:</strong> En dev, l'ASN/Country utilisent des mock data (Bell Canada, CA). En production, ipapi.co sera appelé pour données réelles.</small></p>
+
+</body>
+</html>

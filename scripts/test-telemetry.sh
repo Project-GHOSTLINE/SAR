@@ -178,7 +178,7 @@ PII_RESPONSE=$(curl -s -X POST http://localhost:3001/api/telemetry/track-event \
   -H "Cookie: sar_session_id=$SESSION_ID" \
   -H "Content-Type: application/json" \
   -d '{
-    "event_type": "form_interaction",
+    "event_type": "button_click",
     "event_name": "/test-pii",
     "payload": {
       "step": 1,

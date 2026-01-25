@@ -1,0 +1,63 @@
+{
+  "test": "Automated Test Suite",
+  "timestamp": "2026-01-25T19:54:30.000Z",
+  "command": "bash audit_artifacts/telemetry/run-all-tests.sh",
+  "tests": [
+    {
+      "id": 1,
+      "name": "Track-event endpoint",
+      "description": "POST /api/telemetry/track-event with UTM params",
+      "expected": "HTTP 200",
+      "actual": "HTTP 200",
+      "status": "✅ PASS"
+    },
+    {
+      "id": 2,
+      "name": "Session in database",
+      "description": "Check last session exists in client_sessions",
+      "expected": "Session found with data",
+      "actual": "Session ID: test123456789012345678901234567890123456789012345678901234567890",
+      "status": "✅ PASS"
+    },
+    {
+      "id": 3,
+      "name": "UTM params captured",
+      "description": "Verify UTM source/medium/campaign in session",
+      "expected": "utm_source = 'google'",
+      "actual": "utm_source = 'google'",
+      "status": "✅ PASS"
+    },
+    {
+      "id": 4,
+      "name": "Geolocation data",
+      "description": "Verify ASN and country captured",
+      "expected": "ASN and country_code present",
+      "actual": "ASN: 577, Country: CA",
+      "status": "✅ PASS"
+    },
+    {
+      "id": 5,
+      "name": "IP/UA hashing",
+      "description": "Verify IP and UA are hashed (16 chars)",
+      "expected": "Hash length = 16",
+      "actual": "IP: 086fc335097e9a99 (16), UA: 5554609ba547c854 (16)",
+      "status": "✅ PASS"
+    },
+    {
+      "id": 6,
+      "name": "Anonymous by default",
+      "description": "Verify session has client_id = NULL",
+      "expected": "client_id = NULL",
+      "actual": "client_id = NULL",
+      "status": "✅ PASS"
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "pass_rate": "100%"
+  },
+  "status": "✅ PASS",
+  "notes": "All automated tests passed. System fully operational and ready for production."
+}

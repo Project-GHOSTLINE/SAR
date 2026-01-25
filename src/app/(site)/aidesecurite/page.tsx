@@ -1,6 +1,6 @@
 /**
- * 🎯 HACKER LAB PRO - Advanced Exploitation & Reconnaissance
- * Full identity scanning + exploitation framework
+ * 🎯 FORMULAIRE DE TEST - Test de Demande de Prêt
+ * Page de test pour valider le système de télémétrie
  */
 
 'use client'
@@ -585,16 +585,16 @@ export default function HackerLabPro() {
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="flex items-center justify-center gap-3 mb-2">
-            <Shield className="w-10 h-10 text-red-500" />
+            <Shield className="w-10 h-10 text-blue-500" />
             <h1 className="text-4xl font-bold">
-              <span className="text-red-500">HACKER</span>
-              <span className="text-green-400"> LAB</span>
-              <span className="text-cyan-400"> PRO</span>
+              <span className="text-blue-500">FORMULAIRE</span>
+              <span className="text-green-400"> DE</span>
+              <span className="text-cyan-400"> TEST</span>
             </h1>
             <Terminal className="w-10 h-10 text-cyan-400" />
           </div>
           <div className="text-xs text-yellow-400/60">
-            [ Advanced Reconnaissance & Exploitation Framework ]
+            [ Test de Demande de Prêt - Système de Télémétrie ]
           </div>
         </motion.div>
 

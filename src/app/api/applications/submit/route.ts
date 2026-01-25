@@ -31,6 +31,7 @@ import {
 } from '@/lib/utils/metrics-logger'
 import { margillClient } from '@/lib/margill-client'
 import { parseUserAgent, stripQueryParams } from '@/lib/utils/ua-parser'
+import { getIPGeoData, getMockGeoData } from '@/lib/utils/ip-geolocation'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -284,6 +285,106 @@ export async function POST(request: NextRequest) {
           return
         }
 
+        // PHASE 2: Geolocation (ASN, Country, IP prefix)
+        const geoData = process.env.NODE_ENV === 'development'
+          ? getMockGeoData(clientIP)
+          : await getIPGeoData(clientIP)
+
+        console.log('[Telemetry] GeoIP data:', {
+          asn: geoData.asn,
+          country: geoData.country_code,
+          is_vpn: geoData.is_vpn,
+          is_hosting: geoData.is_hosting,
+          is_proxy: geoData.is_proxy
+        })
+
+        // Check if session already exists (to detect country changes)
+        const { data: existingSession } = await supabase
+          .from('client_sessions')
+          .select('country_code, asn')
+          .eq('session_id', sessionId)
+          .maybeSingle()
+
+        // Detect country change (fraud indicator)
+        if (existingSession?.country_code && geoData.country_code) {
+          if (existingSession.country_code !== geoData.country_code) {
+            console.warn('[Security] Country change detected:', {
+              session: sessionId,
+              from: existingSession.country_code,
+              to: geoData.country_code
+            })
+
+            // Log security event
+            await supabase
+              .from('security_events')
+              .insert({
+                session_id: sessionId,
+                event_type: 'country_change',
+                ip_hash: ipHash,
+                ip_prefix: geoData.ip_prefix,
+                ua_hash: uaHash,
+                asn: geoData.asn,
+                country_code: geoData.country_code,
+                meta: {
+                  previous_country: existingSession.country_code,
+                  new_country: geoData.country_code,
+                  user_agent: parsedUA.browser,
+                }
+              })
+          }
+        }
+
+        // Detect VPN/Proxy/Hosting (fraud indicators)
+        if (geoData.is_vpn || geoData.is_proxy) {
+          console.warn('[Security] VPN/Proxy detected:', {
+            session: sessionId,
+            asn: geoData.asn,
+            is_vpn: geoData.is_vpn,
+            is_proxy: geoData.is_proxy
+          })
+
+          await supabase
+            .from('security_events')
+            .insert({
+              session_id: sessionId,
+              event_type: 'vpn_detected',
+              ip_hash: ipHash,
+              ip_prefix: geoData.ip_prefix,
+              ua_hash: uaHash,
+              asn: geoData.asn,
+              country_code: geoData.country_code,
+              meta: {
+                is_vpn: geoData.is_vpn,
+                is_proxy: geoData.is_proxy,
+                is_hosting: geoData.is_hosting,
+              }
+            })
+        }
+
+        // Detect hosting provider (suspicious for personal loan)
+        if (geoData.is_hosting) {
+          console.warn('[Security] Hosting provider detected:', {
+            session: sessionId,
+            asn: geoData.asn
+          })
+
+          await supabase
+            .from('security_events')
+            .insert({
+              session_id: sessionId,
+              event_type: 'bot_detected',
+              ip_hash: ipHash,
+              ip_prefix: geoData.ip_prefix,
+              ua_hash: uaHash,
+              asn: geoData.asn,
+              country_code: geoData.country_code,
+              meta: {
+                reason: 'hosting_provider_asn',
+                asn: geoData.asn,
+              }
+            })
+        }
+
         // 3. Create or update session record (upsert pattern)
         await supabase
           .from('client_sessions')
@@ -304,10 +405,39 @@ export async function POST(request: NextRequest) {
             first_utm_source: utmSource,
             first_utm_medium: utmMedium,
             first_utm_campaign: utmCampaign,
+            // PHASE 2: Geolocation data
+            asn: geoData.asn,
+            country_code: geoData.country_code,
+            ip_prefix: geoData.ip_prefix,
           }, {
             onConflict: 'session_id',
             ignoreDuplicates: false
           })
+
+        // PHASE 2: Run fraud pattern matching
+        if (clientId) {
+          console.log('[Fraud] Running pattern matching for client:', clientId)
+
+          const { data: patterns, error: patternError } = await supabase
+            .rpc('match_client_patterns', { p_client_id: clientId })
+
+          if (patternError) {
+            console.error('[Fraud] Pattern matching failed:', patternError)
+          } else if (patterns && patterns.length > 0) {
+            console.warn('[Fraud] PATTERNS DETECTED:', patterns)
+
+            // Calculate total fraud score
+            const totalScore = patterns.reduce((sum: number, p: any) => sum + (p.score || 0), 0)
+            const maxScore = Math.max(...patterns.map((p: any) => p.score || 0))
+
+            console.warn('[Fraud] FRAUD SCORE:', {
+              total: totalScore,
+              max: maxScore,
+              pattern_count: patterns.length,
+              client_id: clientId
+            })
+          }
+        }
       } catch (telemetryError) {
         console.error('[Telemetry] Session linkage error:', telemetryError)
         // Don't fail the whole request

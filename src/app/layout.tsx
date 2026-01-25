@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import { Suspense } from 'react'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { TelemetryProvider } from '@/components/TelemetryProvider'
 import './globals.css'
 
@@ -49,6 +51,8 @@ export default function RootLayout({
             {children}
           </TelemetryProvider>
         </Suspense>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

@@ -38,6 +38,18 @@ export async function checkRateLimit(
   const now = Date.now()
   const cacheKey = `ratelimit:${identifier}`
 
+  // DEVELOPMENT: Skip rate limiting for localhost
+  if (
+    process.env.NODE_ENV === 'development' &&
+    (identifier === 'unknown' || identifier === '127.0.0.1' || identifier.startsWith('::'))
+  ) {
+    return {
+      allowed: true,
+      remaining: maxRequests,
+      resetAt: new Date(now + windowMs)
+    }
+  }
+
   // Vérifier le cache d'abord
   let entry = cache.get(cacheKey)
 
