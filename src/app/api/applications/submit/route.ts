@@ -30,6 +30,7 @@ import {
   logValidationError,
 } from '@/lib/utils/metrics-logger'
 import { margillClient } from '@/lib/margill-client'
+import { parseUserAgent, stripQueryParams } from '@/lib/utils/ua-parser'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,9 +42,16 @@ export const maxDuration = 60 // 60 secondes max
 
 /**
  * Hash value with salt for anonymization (Node.js crypto)
+ * SECURITY: TELEMETRY_HASH_SALT must be set (no fallback)
  */
-function hashWithSalt(value: string): string {
-  const salt = process.env.TELEMETRY_HASH_SALT || 'sar-telemetry-2026'
+function hashWithSalt(value: string): string | null {
+  const salt = process.env.TELEMETRY_HASH_SALT
+
+  if (!salt) {
+    console.error('[SECURITY] TELEMETRY_HASH_SALT not set - skipping hash')
+    return null
+  }
+
   return createHash('sha256')
     .update(value + salt)
     .digest('hex')
@@ -225,7 +233,7 @@ export async function POST(request: NextRequest) {
           .eq('primary_email', body.courriel)
           .maybeSingle()
 
-        let clientId: string
+        let clientId: string | undefined
 
         if (existingClient) {
           // Use existing client_id
@@ -253,32 +261,53 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // 3. Create or update session record (upsert pattern)
-        if (clientId) {
-          await supabase
-            .from('client_sessions')
-            .upsert({
-              session_id: sessionId,
-              client_id: clientId,
-              linked_via: 'form_submit',
-              linked_at: new Date().toISOString(),
-              last_activity_at: new Date().toISOString(),
-              expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-              // Metadata captured at linkage time
-              ip_hash: clientIP && clientIP !== 'unknown' ? await hashWithSalt(clientIP) : null,
-              ua_hash: userAgent && userAgent !== 'unknown' ? await hashWithSalt(userAgent) : null,
-              device_type: body.client_device,
-              browser: body.client_browser,
-              os: body.client_os,
-              first_referrer: body.referrer,
-              first_utm_source: body.utm_source,
-              first_utm_medium: body.utm_medium,
-              first_utm_campaign: body.utm_campaign,
-            }, {
-              onConflict: 'session_id',
-              ignoreDuplicates: false
-            })
+        // SECURITY: Only proceed if clientId is defined
+        if (!clientId) {
+          console.error('[Telemetry] clientId undefined, skipping session linkage')
+          return
         }
+
+        // SECURITY: Parse device metadata server-side (NEVER trust client body)
+        const parsedUA = parseUserAgent(userAgent)
+        const referrer = stripQueryParams(request.headers.get('referer'))
+        const utmSource = request.nextUrl.searchParams.get('utm_source')
+        const utmMedium = request.nextUrl.searchParams.get('utm_medium')
+        const utmCampaign = request.nextUrl.searchParams.get('utm_campaign')
+
+        // SECURITY: Hash IP/UA with mandatory salt
+        const ipHash = clientIP && clientIP !== 'unknown' ? hashWithSalt(clientIP) : null
+        const uaHash = userAgent && userAgent !== 'unknown' ? hashWithSalt(userAgent) : null
+
+        // Skip telemetry if salt is missing (hashWithSalt returns null)
+        if ((clientIP !== 'unknown' && !ipHash) || (userAgent !== 'unknown' && !uaHash)) {
+          console.error('[Telemetry] TELEMETRY_HASH_SALT not set, skipping session linkage')
+          return
+        }
+
+        // 3. Create or update session record (upsert pattern)
+        await supabase
+          .from('client_sessions')
+          .upsert({
+            session_id: sessionId,
+            client_id: clientId,
+            linked_via: 'form_submit',
+            linked_at: new Date().toISOString(),
+            last_activity_at: new Date().toISOString(),
+            expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+            // Metadata captured at linkage time (SERVER-PARSED)
+            ip_hash: ipHash,
+            ua_hash: uaHash,
+            device_type: parsedUA.device_type,
+            browser: parsedUA.browser,
+            os: parsedUA.os,
+            first_referrer: referrer,
+            first_utm_source: utmSource,
+            first_utm_medium: utmMedium,
+            first_utm_campaign: utmCampaign,
+          }, {
+            onConflict: 'session_id',
+            ignoreDuplicates: false
+          })
       } catch (telemetryError) {
         console.error('[Telemetry] Session linkage error:', telemetryError)
         // Don't fail the whole request

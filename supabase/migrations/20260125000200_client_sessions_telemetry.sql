@@ -135,8 +135,7 @@ CREATE INDEX IF NOT EXISTS idx_client_sessions_last_activity
   ON public.client_sessions(last_activity_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_client_sessions_expires
-  ON public.client_sessions(expires_at)
-  WHERE expires_at < now();
+  ON public.client_sessions(expires_at);
 
 CREATE INDEX IF NOT EXISTS idx_client_sessions_ip_hash
   ON public.client_sessions(ip_hash, created_at)
