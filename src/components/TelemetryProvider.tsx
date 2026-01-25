@@ -7,18 +7,35 @@
 
 'use client'
 
-import { useEffect } from 'react'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import { trackPageView } from '@/lib/utils/telemetry-client'
 
 export function TelemetryProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const lastTrackedPath = useRef<string | null>(null)
+  const trackingTimeout = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    // Track page view on mount and route changes
-    trackPageView(pathname)
-  }, [pathname, searchParams])
+    // Debounce tracking to prevent rapid-fire calls during hydration
+    if (trackingTimeout.current) {
+      clearTimeout(trackingTimeout.current)
+    }
+
+    trackingTimeout.current = setTimeout(() => {
+      // Only track if pathname changed (prevents duplicate tracking)
+      if (pathname !== lastTrackedPath.current) {
+        trackPageView(pathname)
+        lastTrackedPath.current = pathname
+      }
+    }, 100) // 100ms debounce
+
+    return () => {
+      if (trackingTimeout.current) {
+        clearTimeout(trackingTimeout.current)
+      }
+    }
+  }, [pathname])
 
   return <>{children}</>
 }
