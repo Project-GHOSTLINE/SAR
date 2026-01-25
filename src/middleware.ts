@@ -43,6 +43,15 @@ export async function middleware(request: NextRequest) {
   const ipHash = ip !== 'unknown' ? await hashWithSalt(ip) : undefined
   const uaHash = ua !== 'unknown' ? await hashWithSalt(ua) : undefined
 
+  // SESSION TRACKING: Generate or retrieve session_id (NO DB write, cookie only)
+  let sessionId = request.cookies.get('sar_session_id')?.value
+  if (!sessionId || sessionId.length !== 64) {
+    // Generate 32-byte random hex (64 chars) using Web Crypto API
+    sessionId = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+  }
+
   // Will be set after auth check
   let userRole: 'admin' | 'user' | 'anonymous' = 'anonymous'
   let userId: string | undefined
@@ -102,12 +111,25 @@ export async function middleware(request: NextRequest) {
   // Create response with telemetry headers
   const response = NextResponse.next()
 
+  // Set session cookie (httpOnly, secure, sameSite=lax)
+  response.cookies.set('sar_session_id', sessionId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 90 * 24 * 60 * 60, // 90 days
+    path: '/'
+  })
+
   // Add trace_id to response headers (for client-side tracking)
   response.headers.set('x-trace-id', traceId)
+
+  // Add session_id to headers for API routes to consume
+  response.headers.set('x-sar-session-id', sessionId)
 
   // Add telemetry context header (for API routes to read)
   const telemetryContext = JSON.stringify({
     traceId,
+    sessionId, // Available for downstream APIs
     method: request.method,
     path: pathname,
     ipHash,

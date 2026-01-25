@@ -8,6 +8,10 @@
     {
       "path": "/api/cron/seo-collect",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-sessions",
+      "schedule": "0 2 * * *"
     }
   ],
   "headers": [

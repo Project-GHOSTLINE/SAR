@@ -17,6 +17,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createHash } from 'crypto'
 import type { LoanApplicationFormData, LoanApplication } from '@/lib/types/titan'
 import { validateLoanApplication } from '@/lib/validators/margill-validation'
 import { rateLimitFormSubmission } from '@/lib/utils/rate-limiter'
@@ -37,6 +38,17 @@ const supabase = createClient(
 
 export const runtime = 'nodejs'
 export const maxDuration = 60 // 60 secondes max
+
+/**
+ * Hash value with salt for anonymization (Node.js crypto)
+ */
+function hashWithSalt(value: string): string {
+  const salt = process.env.TELEMETRY_HASH_SALT || 'sar-telemetry-2026'
+  return createHash('sha256')
+    .update(value + salt)
+    .digest('hex')
+    .substring(0, 16) // 16 chars = 64 bits entropy
+}
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
@@ -197,6 +209,80 @@ export async function POST(request: NextRequest) {
         },
         { status: 500 }
       )
+    }
+
+    // ============================================
+    // 5.5. TELEMETRY: Link session to client (VOLUNTARY EVENT)
+    // ============================================
+
+    const sessionId = request.cookies.get('sar_session_id')?.value
+    if (sessionId && body.courriel) {
+      try {
+        // 1. Find existing client by email
+        const { data: existingClient } = await supabase
+          .from('clients')
+          .select('id')
+          .eq('primary_email', body.courriel)
+          .maybeSingle()
+
+        let clientId: string
+
+        if (existingClient) {
+          // Use existing client_id
+          clientId = existingClient.id
+        } else {
+          // 2. Create NEW client record (NEVER reuse application.id)
+          const { data: newClient, error: clientError } = await supabase
+            .from('clients')
+            .insert({
+              primary_email: body.courriel,
+              primary_phone: body.telephone,
+              first_name: body.prenom,
+              last_name: body.nom,
+              dob: body.date_naissance,
+              status: 'active'
+            })
+            .select('id')
+            .single()
+
+          if (clientError || !newClient) {
+            console.error('[Telemetry] Failed to create client:', clientError)
+            // Don't fail the whole request, just skip telemetry
+          } else {
+            clientId = newClient.id
+          }
+        }
+
+        // 3. Create or update session record (upsert pattern)
+        if (clientId) {
+          await supabase
+            .from('client_sessions')
+            .upsert({
+              session_id: sessionId,
+              client_id: clientId,
+              linked_via: 'form_submit',
+              linked_at: new Date().toISOString(),
+              last_activity_at: new Date().toISOString(),
+              expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+              // Metadata captured at linkage time
+              ip_hash: clientIP && clientIP !== 'unknown' ? await hashWithSalt(clientIP) : null,
+              ua_hash: userAgent && userAgent !== 'unknown' ? await hashWithSalt(userAgent) : null,
+              device_type: body.client_device,
+              browser: body.client_browser,
+              os: body.client_os,
+              first_referrer: body.referrer,
+              first_utm_source: body.utm_source,
+              first_utm_medium: body.utm_medium,
+              first_utm_campaign: body.utm_campaign,
+            }, {
+              onConflict: 'session_id',
+              ignoreDuplicates: false
+            })
+        }
+      } catch (telemetryError) {
+        console.error('[Telemetry] Session linkage error:', telemetryError)
+        // Don't fail the whole request
+      }
     }
 
     // ============================================
