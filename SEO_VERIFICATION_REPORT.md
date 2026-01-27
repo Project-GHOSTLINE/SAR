@@ -14,10 +14,10 @@
 |---------|--------|-----------------|---------------------|
 | **Google Analytics 4** | ✅ OPERATIONAL | ✅ OUI | 2026-01-20 |
 | **Semrush** | ✅ OPERATIONAL | ✅ OUI | 2026-01-22 |
-| **Google Search Console** | ⏳ IN CONFIGURATION | ⏸️ PENDING | N/A |
+| **Google Search Console** | ✅ OPERATIONAL | ✅ OUI | 2026-01-27 |
 | **Supabase Collections** | ✅ OPERATIONAL | ✅ OUI | Active |
 
-**Taux de Réussite**: 66.7% (2/3 services opérationnels, 1/3 en configuration)
+**Taux de Réussite**: 100% (3/3 services opérationnels)
 
 ---
 
@@ -125,7 +125,7 @@
 
 ---
 
-### ⏳ 3. GOOGLE SEARCH CONSOLE (GSC)
+### ✅ 3. GOOGLE SEARCH CONSOLE (GSC)
 
 #### Configuration
 - [x] API implémentée ✅
@@ -136,17 +136,32 @@
   - GET `/api/seo/collect/gsc` - Récupération historique
 - [x] Table Supabase créée (`seo_gsc_metrics_daily`) ✅
 - [x] API Google Search Console activée ✅
-- [ ] Service account ajouté à Search Console ⏳
+- [x] Service account ajouté à Search Console ✅
+- [x] Connexion API testée ✅
 
 #### Status
-**EN CONFIGURATION** - API activée, en attente d'ajout du service account
+**OPÉRATIONNEL** - API fonctionnelle, collection testée
+
+#### Tests Effectués
+```bash
+# Test API temps réel
+curl -H "x-api-key: $ADMIN_PASSWORD" \
+  "https://admin.solutionargentrapide.ca/api/seo/gsc?startDate=2026-01-10&endDate=2026-01-23"
+Response: {"success": true, "data": {...}}
+
+# Test collection
+curl -X POST -H "x-api-key: $ADMIN_PASSWORD" \
+  -d '{"date": "2026-01-20", "force": true}' \
+  "https://admin.solutionargentrapide.ca/api/seo/collect/gsc"
+Response: {"success": true, "message": "Métriques collectées", "data": {...}}
+```
 
 #### Prochaines Étapes
-1. Ajouter service account à Search Console (voir `GSC_SETUP_GUIDE.md`)
-2. Tester les endpoints une fois le service account configuré
-3. Intégrer les métriques au dashboard SEO
+1. Attendre accumulation de données dans GSC (2-3 jours)
+2. Intégrer les métriques au dashboard SEO
+3. Automatiser les collections quotidiennes
 
-**Verdict GSC**: ⏳ **EN COURS DE CONFIGURATION**
+**Verdict GSC**: ✅ **100% OPÉRATIONNEL**
 
 ---
 
