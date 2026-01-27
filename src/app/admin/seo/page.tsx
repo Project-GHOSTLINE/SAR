@@ -69,6 +69,53 @@ interface GSCData {
   }>
 }
 
+interface DeviceIntelligence {
+  trafficShare: {
+    mobile: number
+    desktop: number
+    tablet: number
+  }
+  positionComparison: {
+    mobile: number
+    desktop: number
+    tablet: number
+    mobileDesktopGap: number
+    mobileAdvantage: number
+  }
+  ctrComparison: {
+    mobile: number
+    desktop: number
+    tablet: number
+    mobileDesktopRatio: number
+  }
+  performance: {
+    mobile: number
+    desktop: number
+    gap: number
+    mobileClicksAtRisk: number
+    desktopClicksAtRisk: number
+  }
+  seoConversion: {
+    mobile: number
+    desktop: number
+    tablet: number
+  }
+  mobileFirstScore: number
+  summary: {
+    totalClicks: number
+    totalImpressions: number
+    overallCTR: number
+    dominantDevice: string
+  }
+}
+
+interface DeviceRecommendation {
+  type: 'alert' | 'warning' | 'success' | 'opportunity'
+  category: string
+  message: string
+  impact: 'high' | 'medium' | 'low'
+}
+
 type DetailView = 'users' | 'devices' | 'geography' | 'traffic' | null
 
 export default function SEOPage() {
@@ -76,6 +123,8 @@ export default function SEOPage() {
   const [ga4Data, setGA4Data] = useState<GA4Data | null>(null)
   const [semrushData, setSemrushData] = useState<SemrushData | null>(null)
   const [gscData, setGscData] = useState<GSCData | null>(null)
+  const [deviceData, setDeviceData] = useState<DeviceIntelligence | null>(null)
+  const [deviceRecommendations, setDeviceRecommendations] = useState<DeviceRecommendation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [period, setPeriod] = useState('30d')
@@ -117,6 +166,17 @@ export default function SEOPage() {
         const gscJson = await gscResponse.json()
         if (gscJson.success && gscJson.data.length > 0) {
           setGscData(gscJson.data[0])
+        }
+      }
+
+      // Fetch Device Intelligence
+      const days = period === '7d' ? 7 : period === '30d' ? 30 : 90
+      const deviceResponse = await fetch(`/api/seo/device-intelligence?days=${days}`)
+      if (deviceResponse.ok) {
+        const deviceJson = await deviceResponse.json()
+        if (deviceJson.success) {
+          setDeviceData(deviceJson.metrics)
+          setDeviceRecommendations(deviceJson.recommendations || [])
         }
       }
     } catch (err) {
@@ -366,6 +426,323 @@ export default function SEOPage() {
               <p className="text-gray-600 font-medium">Aucune donnée disponible</p>
               <p className="text-sm text-gray-500 mt-2">
                 Les données Google Search Console seront disponibles après la première collecte
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Device Intelligence Section */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <Smartphone className="text-white" size={24} />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">📱 Device Intelligence</h2>
+                <p className="text-sm text-gray-500">
+                  Analyse croisée Mobile vs Desktop vs Tablet
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="py-12 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+              <p className="mt-4 text-gray-500">Calcul des métriques device...</p>
+            </div>
+          ) : deviceData ? (
+            <>
+              {/* Mobile-First Index Score */}
+              <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">Mobile-First Index Score</h3>
+                    <p className="text-sm text-gray-600">
+                      Score de compatibilité avec l'index mobile-first de Google
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <div className={`text-5xl font-bold ${
+                      deviceData.mobileFirstScore >= 90 ? 'text-green-600' :
+                      deviceData.mobileFirstScore >= 75 ? 'text-blue-600' :
+                      deviceData.mobileFirstScore >= 60 ? 'text-yellow-600' :
+                      'text-red-600'
+                    }`}>
+                      {deviceData.mobileFirstScore}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">/100</div>
+                    <div className={`text-xs font-semibold mt-2 ${
+                      deviceData.mobileFirstScore >= 90 ? 'text-green-600' :
+                      deviceData.mobileFirstScore >= 75 ? 'text-blue-600' :
+                      deviceData.mobileFirstScore >= 60 ? 'text-yellow-600' :
+                      'text-red-600'
+                    }`}>
+                      {deviceData.mobileFirstScore >= 90 ? 'EXCELLENT ✅' :
+                       deviceData.mobileFirstScore >= 75 ? 'BON' :
+                       deviceData.mobileFirstScore >= 60 ? 'MOYEN' :
+                       'CRITIQUE ⚠️'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Positions Comparison */}
+              <div className="mb-6">
+                <h3 className="text-base font-semibold text-gray-900 mb-3">📍 Positions Moyennes Google</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Smartphone size={16} className="text-blue-600" />
+                      <span className="text-sm font-medium text-gray-700">Mobile</span>
+                    </div>
+                    <div className="text-3xl font-bold text-blue-600">
+                      #{deviceData.positionComparison.mobile.toFixed(1)}
+                    </div>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Globe size={16} className="text-gray-600" />
+                      <span className="text-sm font-medium text-gray-700">Desktop</span>
+                    </div>
+                    <div className="text-3xl font-bold text-gray-600">
+                      #{deviceData.positionComparison.desktop.toFixed(1)}
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Activity size={16} className="text-purple-600" />
+                      <span className="text-sm font-medium text-gray-700">Gap M/D</span>
+                    </div>
+                    <div className={`text-3xl font-bold ${
+                      deviceData.positionComparison.mobileAdvantage > 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {deviceData.positionComparison.mobileAdvantage > 0 ? '+' : ''}
+                      {deviceData.positionComparison.mobileAdvantage.toFixed(1)}
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {deviceData.positionComparison.mobileAdvantage > 0 ? '✅ Mobile meilleur' : '⚠️ Desktop meilleur'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Traffic Share */}
+              <div className="mb-6">
+                <h3 className="text-base font-semibold text-gray-900 mb-3">👥 Répartition du Trafic SEO</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-white rounded-lg border-2 border-blue-300">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">📱 Mobile</span>
+                      <span className="text-2xl font-bold text-blue-600">
+                        {deviceData.trafficShare.mobile.toFixed(0)}%
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      {Math.round(deviceData.summary.totalClicks * deviceData.trafficShare.mobile / 100)} clics
+                    </p>
+                  </div>
+                  <div className="p-4 bg-white rounded-lg border border-gray-300">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">💻 Desktop</span>
+                      <span className="text-2xl font-bold text-gray-600">
+                        {deviceData.trafficShare.desktop.toFixed(0)}%
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      {Math.round(deviceData.summary.totalClicks * deviceData.trafficShare.desktop / 100)} clics
+                    </p>
+                  </div>
+                  <div className="p-4 bg-white rounded-lg border border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">📱 Tablet</span>
+                      <span className="text-2xl font-bold text-gray-400">
+                        {deviceData.trafficShare.tablet.toFixed(0)}%
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      {Math.round(deviceData.summary.totalClicks * deviceData.trafficShare.tablet / 100)} clics
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Performance Comparison */}
+              <div className="mb-6">
+                <h3 className="text-base font-semibold text-gray-900 mb-3">⚡ Performance PageSpeed</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-medium text-gray-700">📱 Mobile</span>
+                      <span className={`text-3xl font-bold ${
+                        deviceData.performance.mobile >= 90 ? 'text-green-600' :
+                        deviceData.performance.mobile >= 75 ? 'text-blue-600' :
+                        deviceData.performance.mobile >= 50 ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {deviceData.performance.mobile}
+                      </span>
+                    </div>
+                    {deviceData.performance.mobileClicksAtRisk > 0 && (
+                      <p className="text-xs text-red-600 font-medium">
+                        ⚠️ ~{deviceData.performance.mobileClicksAtRisk} clics à risque
+                      </p>
+                    )}
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-medium text-gray-700">💻 Desktop</span>
+                      <span className={`text-3xl font-bold ${
+                        deviceData.performance.desktop >= 90 ? 'text-green-600' :
+                        deviceData.performance.desktop >= 75 ? 'text-blue-600' :
+                        deviceData.performance.desktop >= 50 ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {deviceData.performance.desktop}
+                      </span>
+                    </div>
+                    {deviceData.performance.desktopClicksAtRisk > 0 && (
+                      <p className="text-xs text-red-600 font-medium">
+                        ⚠️ ~{deviceData.performance.desktopClicksAtRisk} clics à risque
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {deviceData.performance.gap !== 0 && (
+                  <p className="text-sm text-gray-600 mt-2 text-center">
+                    Écart: <strong>{Math.abs(deviceData.performance.gap)}</strong> points
+                    ({deviceData.performance.gap > 0 ? 'Desktop meilleur' : 'Mobile meilleur'})
+                  </p>
+                )}
+              </div>
+
+              {/* CTR Comparison */}
+              <div className="mb-6">
+                <h3 className="text-base font-semibold text-gray-900 mb-3">🎯 CTR Moyen (Google)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <div className="text-sm text-gray-700 mb-1">📱 Mobile</div>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {deviceData.ctrComparison.mobile.toFixed(2)}%
+                    </div>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="text-sm text-gray-700 mb-1">💻 Desktop</div>
+                    <div className="text-2xl font-bold text-gray-600">
+                      {deviceData.ctrComparison.desktop.toFixed(2)}%
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg">
+                    <div className="text-sm text-gray-700 mb-1">📊 Ratio M/D</div>
+                    <div className={`text-2xl font-bold ${
+                      deviceData.ctrComparison.mobileDesktopRatio >= 100 ? 'text-green-600' : 'text-orange-600'
+                    }`}>
+                      {deviceData.ctrComparison.mobileDesktopRatio.toFixed(0)}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SEO Conversion (GSC → GA4) */}
+              <div className="mb-6">
+                <h3 className="text-base font-semibold text-gray-900 mb-3">🔄 Conversion SEO (GSC → GA4)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-white rounded-lg border border-gray-200">
+                    <div className="text-sm text-gray-700 mb-1">📱 Mobile</div>
+                    <div className={`text-2xl font-bold ${
+                      deviceData.seoConversion.mobile >= 90 ? 'text-green-600' :
+                      deviceData.seoConversion.mobile >= 80 ? 'text-blue-600' :
+                      'text-red-600'
+                    }`}>
+                      {deviceData.seoConversion.mobile.toFixed(1)}%
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {deviceData.seoConversion.mobile < 90 &&
+                        `Perte: ${(100 - deviceData.seoConversion.mobile).toFixed(1)}%`}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-white rounded-lg border border-gray-200">
+                    <div className="text-sm text-gray-700 mb-1">💻 Desktop</div>
+                    <div className={`text-2xl font-bold ${
+                      deviceData.seoConversion.desktop >= 90 ? 'text-green-600' :
+                      deviceData.seoConversion.desktop >= 80 ? 'text-blue-600' :
+                      'text-red-600'
+                    }`}>
+                      {deviceData.seoConversion.desktop.toFixed(1)}%
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {deviceData.seoConversion.desktop < 90 &&
+                        `Perte: ${(100 - deviceData.seoConversion.desktop).toFixed(1)}%`}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-white rounded-lg border border-gray-200">
+                    <div className="text-sm text-gray-700 mb-1">📱 Tablet</div>
+                    <div className="text-2xl font-bold text-gray-400">
+                      {deviceData.seoConversion.tablet.toFixed(1)}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recommandations */}
+              {deviceRecommendations.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <h3 className="text-base font-semibold text-gray-900 mb-4">💡 Recommandations Automatiques</h3>
+                  <div className="space-y-3">
+                    {deviceRecommendations.map((rec, idx) => (
+                      <div
+                        key={idx}
+                        className={`p-4 rounded-lg border-l-4 ${
+                          rec.type === 'alert' ? 'bg-red-50 border-red-500' :
+                          rec.type === 'warning' ? 'bg-yellow-50 border-yellow-500' :
+                          rec.type === 'success' ? 'bg-green-50 border-green-500' :
+                          'bg-blue-50 border-blue-500'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="text-xl">
+                            {rec.type === 'alert' ? '⚠️' :
+                             rec.type === 'warning' ? '⚡' :
+                             rec.type === 'success' ? '✅' :
+                             '💡'}
+                          </span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                                {rec.category}
+                              </span>
+                              <span className={`text-xs px-2 py-0.5 rounded ${
+                                rec.impact === 'high' ? 'bg-red-200 text-red-800' :
+                                rec.impact === 'medium' ? 'bg-yellow-200 text-yellow-800' :
+                                'bg-gray-200 text-gray-800'
+                              }`}>
+                                {rec.impact === 'high' ? 'Impact élevé' :
+                                 rec.impact === 'medium' ? 'Impact moyen' :
+                                 'Impact faible'}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-800">{rec.message}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6 pt-6 border-t border-gray-100">
+                <p className="text-xs text-gray-500">
+                  ✅ Métriques calculées en temps réel depuis GSC, GA4 et PageSpeed
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="py-12 text-center">
+              <Smartphone className="mx-auto text-gray-300 mb-4" size={48} />
+              <p className="text-gray-600 font-medium">Aucune donnée device disponible</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Les métriques device seront disponibles après la première collecte
               </p>
             </div>
           )}
