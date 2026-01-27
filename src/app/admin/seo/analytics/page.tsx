@@ -142,7 +142,37 @@ interface TimelineData {
   revenue: number
 }
 
-type TabType = 'overview' | 'ip-analysis' | 'utm-campaigns' | 'events' | 'security'
+interface LinkedClient {
+  id: string
+  session_id: string
+  client_id: string
+  linked_via: string
+  linked_at: string
+  created_at: string
+  device_type: string
+  browser: string
+  os: string
+  first_utm_source: string
+  first_utm_medium: string
+  first_utm_campaign: string
+  client: {
+    id: string
+    first_name: string
+    last_name: string
+    primary_email: string
+    primary_phone: string
+    status: string
+    address_city: string
+    address_province: string
+  }
+  coherence: {
+    score: number
+    flags: string[]
+    status: 'excellent' | 'good' | 'concerning' | 'critical'
+  }
+}
+
+type TabType = 'overview' | 'ip-analysis' | 'utm-campaigns' | 'events' | 'security' | 'clients-linked'
 type SortField = 'pageViews' | 'sessions' | 'duration' | 'anomalyScore' | 'firstSeen'
 type FilterType = 'all' | 'suspicious' | 'bots' | 'humans'
 
@@ -164,6 +194,8 @@ export default function SEOAnalyticsV2Page() {
   const [geoBreakdown, setGeoBreakdown] = useState<GeoBreakdown[]>([])
   const [utmCampaigns, setUtmCampaigns] = useState<UTMCampaign[]>([])
   const [events, setEvents] = useState<EventAnalysis[]>([])
+  const [linkedClients, setLinkedClients] = useState<LinkedClient[]>([])
+  const [linkedClientsStats, setLinkedClientsStats] = useState<any>(null)
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('')
@@ -180,10 +212,11 @@ export default function SEOAnalyticsV2Page() {
     setLoading(true)
     try {
       // Fetch from multiple endpoints in parallel
-      const [gaRes, ipRes, eventsRes] = await Promise.all([
+      const [gaRes, ipRes, eventsRes, linkedRes] = await Promise.all([
         fetch(`/api/admin/analytics?startDate=${getStartDate()}&endDate=today`),
         fetch(`/api/analytics/ip-details`),
-        fetch(`/api/analytics/heatmap`) // Reuse heatmap endpoint for event analysis
+        fetch(`/api/analytics/heatmap`), // Reuse heatmap endpoint for event analysis
+        fetch(`/api/analytics/linked-sessions`)
       ])
 
       // Process GA4 data
@@ -207,6 +240,15 @@ export default function SEOAnalyticsV2Page() {
         const eventData = await eventsRes.json()
         if (eventData.success) {
           processEventData(eventData.data)
+        }
+      }
+
+      // Process linked clients
+      if (linkedRes.ok) {
+        const linkedData = await linkedRes.json()
+        if (linkedData.success) {
+          setLinkedClients(linkedData.data)
+          setLinkedClientsStats(linkedData.stats)
         }
       }
 
@@ -710,6 +752,12 @@ export default function SEOAnalyticsV2Page() {
               icon={<AlertTriangle size={18} />}
               label="Sécurité & Bots"
             />
+            <TabButton
+              active={activeTab === 'clients-linked'}
+              onClick={() => setActiveTab('clients-linked')}
+              icon={<User size={18} />}
+              label="Clients Liés"
+            />
           </div>
 
           {/* Tab Content */}
@@ -751,6 +799,12 @@ export default function SEOAnalyticsV2Page() {
                 )}
                 {activeTab === 'security' && (
                   <SecurityTab traces={traces} stats={stats} />
+                )}
+                {activeTab === 'clients-linked' && (
+                  <LinkedClientsTab
+                    linkedClients={linkedClients}
+                    stats={linkedClientsStats}
+                  />
                 )}
               </>
             )}
@@ -1387,6 +1441,251 @@ function EventsTab({ events }: { events: EventAnalysis[] }) {
           <li>• Les clics sont trackés via le système heatmap</li>
           <li>• Les événements form_start/form_step sont disponibles pour le funnel</li>
         </ul>
+      </div>
+    </div>
+  )
+}
+
+function LinkedClientsTab({ linkedClients, stats }: { linkedClients: LinkedClient[]; stats: any }) {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterCoherence, setFilterCoherence] = useState<'all' | 'excellent' | 'good' | 'concerning' | 'critical'>('all')
+
+  // Apply filters
+  let filteredClients = [...linkedClients]
+
+  if (searchQuery) {
+    filteredClients = filteredClients.filter(c =>
+      c.client?.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.client?.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.client?.primary_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.session_id.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }
+
+  if (filterCoherence !== 'all') {
+    filteredClients = filteredClients.filter(c => c.coherence.status === filterCoherence)
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Stats Cards */}
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <Users className="text-blue-600" size={24} />
+              <span className="text-sm text-blue-900 font-medium">Sessions Liées</span>
+            </div>
+            <p className="text-3xl font-bold text-blue-900">{stats.total_linked_sessions}</p>
+            <p className="text-xs text-blue-700 mt-1">{stats.unique_clients} clients uniques</p>
+          </div>
+
+          <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <Target className="text-green-600" size={24} />
+              <span className="text-sm text-green-900 font-medium">Cohérence Excellente</span>
+            </div>
+            <p className="text-3xl font-bold text-green-900">{stats.coherence_distribution?.excellent || 0}</p>
+            <p className="text-xs text-green-700 mt-1">Score 90-100</p>
+          </div>
+
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <AlertTriangle className="text-orange-600" size={24} />
+              <span className="text-sm text-orange-900 font-medium">À Surveiller</span>
+            </div>
+            <p className="text-3xl font-bold text-orange-900">
+              {(stats.coherence_distribution?.concerning || 0) + (stats.coherence_distribution?.critical || 0)}
+            </p>
+            <p className="text-xs text-orange-700 mt-1">Score &lt; 70</p>
+          </div>
+
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <Activity className="text-purple-600" size={24} />
+              <span className="text-sm text-purple-900 font-medium">Score Moyen</span>
+            </div>
+            <p className="text-3xl font-bold text-purple-900">
+              {Math.round(stats.avg_coherence_score)}/100
+            </p>
+            <p className="text-xs text-purple-700 mt-1">Cohérence globale</p>
+          </div>
+        </div>
+      )}
+
+      {/* Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Rechercher client, email, session..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        <select
+          value={filterCoherence}
+          onChange={(e) => setFilterCoherence(e.target.value as any)}
+          className="px-4 py-2 border border-gray-300 rounded-lg"
+        >
+          <option value="all">Tous les statuts</option>
+          <option value="excellent">Excellent (90-100)</option>
+          <option value="good">Bon (70-89)</option>
+          <option value="concerning">Préoccupant (50-69)</option>
+          <option value="critical">Critique (&lt;50)</option>
+        </select>
+
+        <div className="text-sm text-gray-600 flex items-center">
+          {filteredClients.length} résultat{filteredClients.length > 1 ? 's' : ''}
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse bg-white rounded-lg border border-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Session ID</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lié via</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Lien</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">UTM Source</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cohérence</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {filteredClients.map((client, idx) => (
+              <tr
+                key={idx}
+                className={`hover:bg-gray-50 ${
+                  client.coherence.status === 'critical' ? 'bg-red-50' :
+                  client.coherence.status === 'concerning' ? 'bg-orange-50' :
+                  ''
+                }`}
+              >
+                <td className="px-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {client.client?.first_name} {client.client?.last_name}
+                    </p>
+                    <p className="text-xs text-gray-500">{client.client?.primary_email}</p>
+                    {client.client?.address_city && (
+                      <p className="text-xs text-gray-400">
+                        <MapPin size={10} className="inline mr-1" />
+                        {client.client.address_city}, {client.client.address_province}
+                      </p>
+                    )}
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                    {client.session_id.substring(0, 16)}...
+                  </code>
+                </td>
+                <td className="px-4 py-3">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    client.linked_via === 'form_submit' ? 'bg-blue-100 text-blue-800' :
+                    client.linked_via === 'magic_link' ? 'bg-purple-100 text-purple-800' :
+                    client.linked_via === 'login' ? 'bg-green-100 text-green-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {client.linked_via}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-600">
+                  {new Date(client.linked_at).toLocaleDateString('fr-CA')}
+                  <br />
+                  <span className="text-xs text-gray-400">
+                    {new Date(client.linked_at).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="text-xs space-y-0.5">
+                    <div className="flex items-center gap-1">
+                      <Smartphone size={12} className="text-gray-400" />
+                      <span className="text-gray-600">{client.device_type || 'unknown'}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Monitor size={12} className="text-gray-400" />
+                      <span className="text-gray-600">{client.browser || 'unknown'}</span>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-xs text-gray-600">
+                  {client.first_utm_source || 'direct'}
+                  {client.first_utm_medium && ` / ${client.first_utm_medium}`}
+                </td>
+                <td className="px-4 py-3">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-full bg-gray-200 rounded-full h-2 max-w-[100px]">
+                        <div
+                          className={`h-2 rounded-full ${
+                            client.coherence.status === 'excellent' ? 'bg-green-500' :
+                            client.coherence.status === 'good' ? 'bg-blue-500' :
+                            client.coherence.status === 'concerning' ? 'bg-orange-500' :
+                            'bg-red-600'
+                          }`}
+                          style={{ width: `${client.coherence.score}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-semibold text-gray-700 min-w-[50px]">
+                        {client.coherence.score}
+                      </span>
+                    </div>
+                    {client.coherence.flags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {client.coherence.flags.slice(0, 2).map((flag, i) => (
+                          <span
+                            key={i}
+                            className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded"
+                            title={flag}
+                          >
+                            {flag.substring(0, 20)}{flag.length > 20 ? '...' : ''}
+                          </span>
+                        ))}
+                        {client.coherence.flags.length > 2 && (
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                            +{client.coherence.flags.length - 2}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Info Box */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h3 className="font-semibold text-blue-900 mb-3">💡 À propos de la Cohérence</h3>
+        <div className="space-y-2 text-sm text-blue-700">
+          <p><strong>Score de cohérence (0-100):</strong> Mesure la consistance entre les données de session et le dossier client.</p>
+          <p><strong>Vérifications effectuées:</strong></p>
+          <ul className="list-disc list-inside ml-4 space-y-1">
+            <li>Existence du dossier client</li>
+            <li>Cohérence des informations device</li>
+            <li>Cohérence géographique (session vs adresse client)</li>
+            <li>Validité de la méthode de linkage</li>
+            <li>Cohérence temporelle (date création vs date lien)</li>
+            <li>Cohérence email (métadonnées vs dossier)</li>
+            <li>Présence des données de sécurité (IP hash)</li>
+          </ul>
+          <p className="mt-3"><strong>Actions recommandées:</strong></p>
+          <ul className="list-disc list-inside ml-4 space-y-1">
+            <li><strong>Excellent (90-100):</strong> Aucune action requise</li>
+            <li><strong>Bon (70-89):</strong> Surveiller si récurrent</li>
+            <li><strong>Préoccupant (50-69):</strong> Vérifier manuellement</li>
+            <li><strong>Critique (&lt;50):</strong> Investigation immédiate requise</li>
+          </ul>
+        </div>
       </div>
     </div>
   )
