@@ -270,7 +270,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Extract trace_id from header (optional, for correlation)
-    const traceId = request.headers.get('x-trace-id') || undefined
+    const traceId = request.headers.get('x-trace-id') || null
 
     // 5. Sanitize payload (whitelist keys only, strip PII)
     const sanitizedPayload = sanitizePayload(payload)
@@ -279,19 +279,25 @@ export async function POST(request: NextRequest) {
     const cleanPageUrl = stripQueryParamsUtil(page_url)
     const cleanReferrerUrl = stripQueryParamsUtil(referrer_url)
 
-    // 7. Insert event into database
+    // 7. Insert event into database (only include trace_id if present and valid)
+    const eventData: any = {
+      session_id: sessionId,
+      event_type,
+      event_name,
+      page_url: cleanPageUrl,
+      referrer_url: cleanReferrerUrl,
+      duration_ms: duration_ms ? parseInt(duration_ms) : null,
+      payload: sanitizedPayload
+    }
+
+    // Only include trace_id if it exists (FK constraint requires it to be in telemetry_requests)
+    if (traceId) {
+      eventData.trace_id = traceId
+    }
+
     const { data, error } = await supabase
       .from('client_telemetry_events')
-      .insert({
-        session_id: sessionId,
-        trace_id: traceId,
-        event_type,
-        event_name,
-        page_url: cleanPageUrl,
-        referrer_url: cleanReferrerUrl,
-        duration_ms: duration_ms ? parseInt(duration_ms) : null,
-        payload: sanitizedPayload
-      })
+      .insert(eventData)
       .select('id')
       .single()
 
