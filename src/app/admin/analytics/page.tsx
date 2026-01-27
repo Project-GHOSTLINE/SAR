@@ -100,8 +100,12 @@ interface SessionDetail {
 
 interface HeatmapData {
   day_of_week: number
-  hour: number
+  hour_of_day: number
   event_count: number
+  unique_sessions: number
+  avg_duration_seconds: number | null
+  day_name: string
+  time_period: string
 }
 
 interface IPDetail {
