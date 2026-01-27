@@ -540,7 +540,7 @@ export default function AnalyticsPage() {
                   <div className="text-right pr-2 text-gray-500 font-medium">{day}</div>
                   {Array.from({ length: 24 }, (_, hourIdx) => {
                     const cell = heatmap.find(
-                      h => h.day_of_week === dayIdx && h.hour === hourIdx
+                      h => h.day_of_week === dayIdx && h.hour_of_day === hourIdx
                     )
                     const count = cell?.event_count || 0
                     const maxCount = Math.max(...heatmap.map(h => h.event_count || 0))
