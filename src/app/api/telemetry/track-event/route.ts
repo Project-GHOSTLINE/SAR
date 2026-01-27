@@ -321,11 +321,11 @@ export async function POST(request: NextRequest) {
       sessionId: request.cookies.get('sar_session_id')?.value?.substring(0, 16) + '...',
       timestamp: new Date().toISOString(),
       // Add Supabase error details if available
-      ...(error && typeof error === 'object' && 'code' in error && {
+      ...(error && typeof error === 'object' && 'code' in error ? {
         supabaseCode: (error as any).code,
         supabaseHint: (error as any).hint,
         supabaseDetails: (error as any).details
-      })
+      } : {})
     }
 
     console.error('[TrackEvent] CRITICAL ERROR:', errorDetails)
