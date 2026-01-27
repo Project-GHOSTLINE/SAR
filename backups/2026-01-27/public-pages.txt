@@ -1,0 +1,8 @@
+🌐 Public Pages
+src/app/(site)/page.tsx
+src/app/analyse/page.tsx
+src/app/demo-widgets/page.tsx
+src/app/m/page.tsx
+src/app/metrics-debug/page.tsx
+src/app/metrics/page.tsx
+src/app/test-simple/page.tsx

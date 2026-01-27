@@ -1,0 +1,24 @@
+🔖 Git Information
+4a48b93 feat: Integrate Google Search Console data into SEO dashboard
+29b99ea fix: TypeScript error in SSL route - use object spread instead of mutation
+4b01aae feat: Add Unified Client Metrics with Global Coherence Checks
+5f87346 docs: Add comprehensive SEO integrations report
+dd719a2 feat: Add SSL Labs SSL/TLS monitoring integration
+81c40c1 feat: Add UptimeRobot monitoring integration
+d35933e feat: Add Client Sessions Linkage with Coherence Checks
+8543cd4 feat: Add Cloudflare Analytics integration
+0e3ffa1 feat: Add Google PageSpeed Insights & Core Web Vitals integration
+fc62297 docs: Add Google Search Console success report with real data
+b202ac3 fix: Update GSC to use correct property (without www)
+3f5aa09 docs: Update SEO verification - Google Search Console is now operational
+f9b944c fix: Update GSC to use URL-prefix property instead of domain property
+1a0c018 BREAKING: Replace SEO Analytics V1 with V2 in production
+45795aa feat: SEO Analytics V2 - Complete dashboard with 85% metrics coverage
+335f22e feat: Add Google Search Console (Webmaster Tools) integration
+0909d31 feat: Add comprehensive SEO verification system
+bf6ccb1 feat: Implement click heatmap visualization (Hotjar-style)
+f4664f7 fix: Improve heatmap visibility - make all data cells clearly visible
+5fd54ef fix: Update HeatmapData interface to match API response
+
+Current branch: main
+Last commit: Tue Jan 27 13:19:59 2026 -0500

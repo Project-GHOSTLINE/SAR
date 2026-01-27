@@ -1,0 +1,1066 @@
+📁 Project Structure
+.
+├── ⚠️ REPO-PRINCIPAL.md
+├── ACCES-RAPIDE.md
+├── add-secret.sh
+├── add-shapes-to-board.mjs
+├── add-supabase-key-clean.sh
+├── add-supabase-key-prod.sh
+├── ADMIN-DASHBOARD-IMPLEMENTATION.md
+├── ADMIN-DASHBOARD-IMPROVEMENTS.md
+├── ADMIN-TODO.md
+├── ADMIN-WEBHOOKS-GUIDE.md
+├── ai-generated-7938199_960_720.jpg
+├── ANALYSE-ADMIN-DASHBOARD.md
+├── ANALYTICS_DETAILED_GUIDE.md
+├── ANALYTICS-INTEGRATION-RAPPORT.md
+├── ANALYTICS-SETUP-GUIDE.md
+├── analyze-vopay-metrics.mjs
+├── API_Orchestration_Architecture.zip
+├── ARCHITECTURE_OPTIMIZATION_PLAN.md
+├── ARCHITECTURE-COMPLETE-MASTER-PARTIE-2.md
+├── ARCHITECTURE-COMPLETE-MASTER.md
+├── ARCHITECTURE-COMPLETE.md
+├── audit_artifacts
+│   ├── api
+│   │   ├── API_ROUTE_INVENTORY.json
+│   │   ├── API_ROUTE_INVENTORY.md
+│   │   └── ORCHESTRATION_ENDPOINTS.md
+│   ├── AUDIT_SUMMARY.md
+│   ├── commands
+│   │   ├── analyze_routes.sh
+│   │   ├── find_admin_pages.txt
+│   │   ├── find_api_routes.txt
+│   │   ├── find_sql_migrations.txt
+│   │   ├── grep_client_id_queries.txt
+│   │   ├── grep_clients_table.txt
+│   │   ├── grep_email_joins.txt
+│   │   ├── grep_email_queries.txt
+│   │   ├── grep_observability.txt
+│   │   ├── grep_orchestration_endpoints.txt
+│   │   ├── system_info_output.txt
+│   │   └── system_info.txt
+│   ├── db_live
+│   │   ├── db_audit_v2.js
+│   │   ├── db_audit.js
+│   │   ├── queries.json
+│   │   ├── query_fks.js
+│   │   ├── results
+│   │   ├── summary.json
+│   │   └── SUMMARY.md
+│   ├── diagrams
+│   ├── findings
+│   │   ├── CHECKLIST_VERIFIED.md
+│   │   ├── CHECKLIST_VERIFIED.md.bak
+│   │   ├── CLIENT_ENTITY_FINDINGS.md
+│   │   ├── N2_CLIENTS_TABLE_PROOF.md
+│   │   ├── N2_EMAIL_JOIN_EVIDENCE.md
+│   │   ├── N2_FK_INVENTORY.md
+│   │   ├── N2_ROW_COUNTS.json
+│   │   ├── N2_RPC_RESULTS.md
+│   │   ├── N2_TABLES_DIFF.md
+│   │   ├── N2_VERDICT_SUMMARY.md
+│   │   ├── OBSERVABILITY_INVENTORY.md
+│   │   └── RPC_IMPACT_PROOF.md
+│   ├── inventory
+│   ├── MANIFEST.json
+│   ├── N1_VALIDATION_FINAL.md
+│   ├── perf
+│   │   ├── N_PLUS_ONE_EVIDENCE.md
+│   │   └── PAGE_LOAD_CALL_GRAPH.json
+│   ├── README.md
+│   ├── security
+│   ├── sql
+│   │   ├── DB_SCHEMA_INVENTORY.json
+│   │   ├── DB_SCHEMA_INVENTORY.md
+│   │   └── migrations_list.txt
+│   ├── telemetry
+│   │   ├── ANALYTICS_DASHBOARD.md
+│   │   ├── CHECKLIST_PHASE2.md
+│   │   ├── CHECKLIST_RUNTIME.md
+│   │   ├── DELIVERABLES_COMPLETE.md
+│   │   ├── DEPLOYMENT_SUCCESS.md
+│   │   ├── EVIDENCE
+│   │   ├── FINAL_SUMMARY.md
+│   │   ├── FIX_500_ERROR.md
+│   │   ├── PHASE2_EARLY_CAPTURE.md
+│   │   ├── run-all-tests.sh
+│   │   ├── SECURITY_PASS_SUMMARY.md
+│   │   ├── SECURITY_PASS_VERIFICATION.sh
+│   │   ├── SQL_POLICE_QUERIES.md
+│   │   ├── TEST_RESULTS_PRODUCTION.md
+│   │   ├── URGENT_ACTION_REQUIRED.md
+│   │   ├── VERCEL_DASHBOARD_ACTIVATION.md
+│   │   └── VERCEL_DASHBOARDS_GUIDE.md
+│   ├── ui
+│   │   ├── CLIENT_DOSSIER_CALLS_AFTER.md
+│   │   ├── CLIENT_DOSSIER_CALLS_BEFORE.md
+│   │   ├── CLIENT_DOSSIER_METRICS_AFTER.json
+│   │   ├── CLIENT_DOSSIER_METRICS_BEFORE.json
+│   │   ├── margill_resolution_proof.json
+│   │   └── UI_IMPACT_PROOF.md
+│   └── VALIDATION_N1_RESULTS.md
+├── Audit-2026-01-22
+│   ├── ANALYSE-RESSOURCES-LIMITES.md
+│   ├── ARCHITECTURE-FLOW-OVERVIEW.md
+│   ├── CHECKUP-BRUTAL-RAPPORT-FINAL.md
+│   ├── DATA-FLOW-DIAGRAMS.md
+│   ├── DATABASE-AUDIT-REPORT.md
+│   ├── PIPELINE-DIAGRAMS.md
+│   ├── README.md
+│   ├── REQUEST-FLOW-DIAGRAMS.md
+│   ├── SEQUENCE-DIAGRAMS.md
+│   ├── TEST-LIST-COMPLETE.md
+│   └── TRACING-GUIDE.md
+├── AUDIT-INCOHERENCES.md
+├── AUTOMATIC_DEBUG_RESULTS.md
+├── backups
+│   ├── 2026-01-22
+│   │   ├── admin_sections.json
+│   │   ├── backup-db.js
+│   │   ├── backup-report.json
+│   │   ├── backup.log
+│   │   ├── claude_memory.json
+│   │   ├── client_identity_aliases.json
+│   │   ├── clients.json
+│   │   ├── contact_messages.json
+│   │   ├── DATABASE-CORRECTIONS-REPORT.md
+│   │   ├── emails_envoyes.json
+│   │   ├── fraud_cases.json
+│   │   ├── loan_applications.json
+│   │   ├── loans.json
+│   │   ├── metric_registry.json
+│   │   ├── metric_values.json
+│   │   ├── payment_events.json
+│   │   ├── payment_schedule_versions.json
+│   │   ├── phase1-cleanup-malicious.js
+│   │   ├── phase1.log
+│   │   ├── phase2-create-clients-link-orphans.js
+│   │   ├── phase2.log
+│   │   ├── phase3-add-indexes.js
+│   │   ├── phase3-execute-indexes.js
+│   │   ├── phase3-execute-pg.js
+│   │   ├── phase3-indexes.sql
+│   │   ├── phase3-report.json
+│   │   ├── PHASE3-SUMMARY.md
+│   │   ├── phase3.log
+│   │   ├── quickbooks_customers.json
+│   │   ├── quickbooks_invoices.json
+│   │   ├── quickbooks_payments.json
+│   │   ├── quickbooks_tokens.json
+│   │   ├── support_tickets.json
+│   │   ├── vopay_objects.json
+│   │   └── vopay_webhook_logs.json
+│   ├── 2026-01-23-rpc-migration
+│   │   ├── backup-report.json
+│   │   ├── vopay_objects.json
+│   │   ├── vopay_webhook_logs.json
+│   │   └── webhook_logs.json
+│   └── 2026-01-27
+│       ├── admin-pages.txt
+│       ├── api-endpoints.txt
+│       ├── audit-artifacts.txt
+│       ├── backup-script.sql
+│       ├── components.txt
+│       ├── documentation.txt
+│       ├── inventory.sh
+│       ├── migrations.txt
+│       ├── public-pages.txt
+│       └── structure.txt
+├── BLUEPRINT-RESUME-RAPIDE.md
+├── BUILD_STATUS_RPC.md
+├── BUILD-SUCCESS.md
+├── BYPASS-TECHNIQUES-REAL.md
+├── CHANGEMENTS-NA-2026-01-23.md
+├── check-all-tables.sql
+├── check-heatmap.mjs
+├── check-loans.mjs
+├── check-martin-inverite.js
+├── check-nickolas.js
+├── check-pominville.js
+├── check-qb-status.mjs
+├── check-real-data.mjs
+├── check-supabase-webhooks.mjs
+├── check-telemetry-data.mjs
+├── check-vopay-response.mjs
+├── check-vopay-simple.mjs
+├── CHOIX-FINAL.md
+├── CLAUDE_TOOLS.md
+├── CLAUDE-MEMORY-GUIDE.md
+├── CLAUDE-RULES-SYSTEM.md
+├── clean-test-webhooks.sql
+├── CLICK_HEATMAP_IMPLEMENTATION.md
+├── CLIENT_SESSIONS_LINKAGE_DOC.md
+├── CLIENT_UNIFIED_METRICS_DOC.md
+├── CLIENTS-SAR-FRAUD-DETECTION.md
+├── collect-semrush.mjs
+├── components
+├── configure-vopay-webhook.sh
+├── CONNECTE-QUICKBOOKS-MAINTENANT.md
+├── COORDINATION-SYSTEM-README.md
+├── COPIER-COLLER-DANS-SUPABASE.sql
+├── coverage
+│   ├── clover.xml
+│   ├── coverage-final.json
+│   ├── lcov-report
+│   │   ├── base.css
+│   │   ├── block-navigation.js
+│   │   ├── favicon.png
+│   │   ├── index.html
+│   │   ├── prettify.css
+│   │   ├── prettify.js
+│   │   ├── sort-arrow-sprite.png
+│   │   ├── sorter.js
+│   │   └── src
+│   └── lcov.info
+├── create-client-analyses-optimized.sql
+├── create-client-analyses-table.sql
+├── create-mindmap-board.mjs
+├── create-mindmap-vertical.mjs
+├── create-miro-board-direct.mjs
+├── create-miro-db-structure.mjs
+├── create-support-tables.js
+├── CREATE-TABLE-SIMPLE.sql
+├── create-test-client.mjs
+├── create-webhook-table.mjs
+├── DASHBOARD-REDESIGN-PLAN.md
+├── database
+│   ├── 01_create_indexes.sql
+│   ├── 02_create_materialized_views.sql
+│   ├── 03_create_functions.sql
+│   ├── 04_setup_cron_jobs.sql
+│   ├── 05_test_performance.sql
+│   ├── calculate_global_metrics_CORRECT.sql
+│   ├── calculate_global_metrics_fixed.sql
+│   ├── calculate_global_metrics.sql
+│   ├── check_vopay_status_values.sql
+│   ├── check_vopay_structure.sql
+│   ├── claude-activity-tracking.sql
+│   ├── claude-memory-system.sql
+│   ├── cleanup-all.sql
+│   ├── create_database_explorer_function.sql
+│   ├── create_download_tracking.sql
+│   ├── DATABASE_STRUCTURE.md
+│   ├── EXPORT_ALL_SCHEMA.sql
+│   ├── fix-permissions.sql
+│   ├── functions
+│   │   └── get_client_dossier_unified.sql
+│   ├── GENERATE_FULL_SCHEMA.sql
+│   ├── list-tables.sql
+│   ├── METRIC_ENGINE_INSTALL.md
+│   ├── metric_engine_schema.sql
+│   ├── migrations
+│   │   └── restructure
+│   ├── NEXT_STEPS_PHASE_2.md
+│   ├── README.md
+│   ├── SAFE-enable-rls.sql
+│   ├── sentinel-scoring.sql
+│   ├── SHOW_CRITICAL_TABLES.sql
+│   ├── test-simple.sql
+│   ├── tests
+│   │   └── restructure
+│   ├── titan-advanced-only.sql
+│   ├── titan-fresh-start.sql
+│   ├── titan-simple-no-verify.sql
+│   ├── titan-step1-tables.sql
+│   ├── titan-system.sql
+│   ├── update_all_metric_descriptions.sql
+│   ├── update_vopay_metric_descriptions.sql
+│   ├── URGENT-enable-rls.sql
+│   └── verify-and-expose.sql
+├── DATAFLOW-CLIENTS-SAR.md
+├── DATAFLOW-ET-CHECKLIST.md
+├── DATAFLOW-HEALTH-ARCHITECTURE.md
+├── debug-flinks-data.js
+├── debug-full.sh
+├── debug-phone.mjs
+├── DEEP-SCAN-REPORT.md
+├── DEPLOYMENT-CHECKLIST.md
+├── diagnostic-messages.mjs
+├── DIAGNOSTIC-PLAYWRIGHT.md
+├── DNS-CONFIGURATION.md
+├── docker-compose.yml
+├── docs
+│   ├── API_ROUTE_INVENTORY.md
+│   ├── ARCHITECTURE_AUDIT_SUMMARY.md
+│   ├── Archive.zip
+│   ├── CLIENT_DOSSIER_TARGET_SCHEMA.md
+│   ├── DATAFLOW_CLIENT_DOSSIER.mmd
+│   ├── DATAFLOW_HEALTH_IMPLEMENTATION.md
+│   ├── DATAFLOW_HEALTH_SIGNALS.md
+│   ├── DATAFLOW_METRICS_PIPELINE.mmd
+│   ├── DATAFLOW_OVERVIEW.mmd
+│   ├── DATAFLOW_SEQUENCE_LOGIN.mmd
+│   ├── DB_SCHEMA_INVENTORY.md
+│   ├── DB_VIEWS_AND_FUNCTIONS_PLAN.md
+│   ├── GOOGLE-ANALYTICS-SERVICE-ACCOUNT.md
+│   ├── GOOGLE-SEARCH-CONSOLE-SETUP.md
+│   ├── METRICS_CATALOG.md
+│   ├── ORCHESTRATION_API_SPEC.md
+│   ├── README.md
+│   ├── SEMRUSH-API-SETUP.md
+│   ├── telemetry-data-flow.md
+│   ├── telemetry-request-flow.md
+│   ├── telemetry-sequence-diagram.md
+│   ├── VOPAY_WEBHOOKS.md
+│   ├── WEBHOOK-CURL-TESTS.sh
+│   ├── WEBHOOK-DATA-FLOW.md
+│   ├── WEBHOOK-MIGRATION-SUMMARY.md
+│   ├── WEBHOOK-QUICK-REFERENCE.md
+│   └── WEBHOOK-SYSTEM-STATUS.md
+├── DONNEES-REELLES-SEULEMENT.md
+├── DOWNLOAD-SECTION-UPDATE.md
+├── e2e
+│   ├── fixtures
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── plans
+│   ├── playwright-report
+│   │   └── index.html
+│   ├── playwright.config.ts
+│   ├── quickbooks-reconnect-guide.md
+│   ├── specs
+│   │   ├── admin-quickbooks-analyzer.spec.ts
+│   │   ├── auth.setup.ts
+│   │   ├── check-vopay-tab.spec.ts
+│   │   ├── clients-sar.spec.ts
+│   │   ├── fix-qb-connection.spec.ts
+│   │   ├── ga4-api-validation.spec.ts
+│   │   ├── ga4-real-data-validation.spec.ts
+│   │   ├── ga4-ui-manual-check.spec.ts
+│   │   ├── mobile-site-verification.spec.ts
+│   │   ├── qb-auto-fix-and-sync.spec.ts
+│   │   ├── qb-auto-reconnect.spec.ts
+│   │   ├── qb-diagnostic-noauth.spec.ts
+│   │   ├── qb-force-workflow.spec.ts
+│   │   ├── qb-full-auto.spec.ts
+│   │   ├── qb-real-test.spec.ts
+│   │   ├── qb-verify-bank-accounts.spec.ts
+│   │   ├── quickbooks.spec.ts
+│   │   ├── seo-complete-analysis.spec.ts
+│   │   ├── seo-real-data.spec.ts
+│   │   ├── site-analyzer.spec.ts
+│   │   ├── smoke.spec.ts
+│   │   ├── test-margill-iframe.spec.ts
+│   │   ├── verify-qb-fix-direct.spec.ts
+│   │   └── verify-qb-fix.spec.ts
+│   ├── storage
+│   │   └── state.json
+│   ├── test-artifacts
+│   │   ├── margill-iframe-test.png
+│   │   ├── qb-fix-verification
+│   │   └── seo-analysis
+│   ├── test-results
+│   │   ├── mobile-01-homepage.png
+│   │   ├── mobile-02-form.png
+│   │   ├── mobile-03-faq.png
+│   │   ├── mobile-04-admin-login.png
+│   │   ├── mobile-05-admin-dashboard.png
+│   │   ├── mobile-07-responsive-iPhone-11-Pro-Max.png
+│   │   ├── mobile-07-responsive-iPhone-13-Pro.png
+│   │   └── mobile-07-responsive-iPhone-SE.png
+│   ├── verify-qb-reconnection.sh
+│   └── vopay-page-full.png
+├── e2e-dashboard.html
+├── E2E-IMPLEMENTATION-SUMMARY.md
+├── E2E-TESTING-SETUP.md
+├── ERREUR-DETECTEE.md
+├── ETAT-PROJET-DASHBOARD-ADMIN.md
+├── EXECUTE-NOW.md
+├── execute-sql.mjs
+├── export-analytics-data.mjs
+├── extensions
+│   └── ibv-crawler-v2
+│       ├── background.js
+│       ├── content-script.js
+│       ├── icons
+│       ├── manifest.json
+│       ├── popup.html
+│       ├── popup.js
+│       └── README.md
+├── FEATURE-COMPLETE.md
+├── FEATURE-METRIQUES-CLIENT.md
+├── FICHIERS-CREES.md
+├── FINAL_STATUS_FACTUAL.md
+├── FINAL_STATUS_PROVEN.md
+├── final-check.mjs
+├── FINAL-INSTRUCTIONS.txt
+├── FINAL-PERFORMANCE-REPORT.md
+├── FINAL-SOLUTION-PASSWORD.sh
+├── FIX-DOWNLOAD-COUNTER.md
+├── FIX-MENU-MOBILE-GLASSMORPHISM.md
+├── fix-old-messages.mjs
+├── FIX-SUMMARY.md
+├── FLUX-DONNEES-BANCAIRES-SIMPLE.md
+├── GA4-REAL-DATA-SOLUTION.md
+├── GA4-SUCCESS-SUMMARY.txt
+├── GA4-VALIDATION-REPORT.md
+├── get-client-and-open.mjs
+├── get-client-id.mjs
+├── GSC_SETUP_GUIDE.md
+├── GSC_SUCCESS_REPORT.md
+├── GUIDE-CORRECTION-URGENTE.md
+├── GUIDE-SCOPES-INTUIT.md
+├── GUIDE-SUPABASE-STORAGE-SUPPORT.md
+├── IMPLEMENTATION-COMPLETE.md
+├── import-vopay-transactions.mjs
+├── INSTALLATION-CLIENTS-SAR.md
+├── INSTALLATION-RAPIDE-MEMOIRE.md
+├── INSTRUCTION-SCRIPT.txt
+├── INSTRUCTIONS-SIMPLES.md
+├── INTEGRATION-NEXT-JS.md
+├── INVERITE-API-EXPLICATION.md
+├── INVERITE-DONNEES-DISPONIBLES.md
+├── INVERITE-FLOW-EXACT.md
+├── invoice.pdf
+├── jest.config.js
+├── jest.setup.js
+├── JOURNAL
+│   ├── ANALYSE-COMPLETE-SYSTEME.md
+│   ├── LOGBOOK.md
+│   ├── STATUS-BOARD.md
+│   └── STATUS-PHASE-0.md
+├── JOURNAL-SAR-CORTEX.md
+├── lib
+├── logs
+│   ├── dev-server.log
+│   ├── perf.ndjson
+│   └── README.md
+├── Makefile
+├── MARGILL-IFRAME-IMPLEMENTATION.md
+├── MEMOIRE-AUTOMATIQUE.md
+├── MEMORY-SYSTEM-GUIDE.md
+├── MENU-CONSISTENCY-FIX.md
+├── MESSAGES-DASHBOARD-UX-2026-01-07.md
+├── METRIC-INSPECTOR-GUIDE.md
+├── MIGRATION_ANALYTICS_V1_TO_V2.md
+├── MIGRATION-SQL-A-COPIER.sql
+├── MIGRATION-STATUS.md
+├── MIGRATION-TROUBLESHOOTING.md
+├── migrations
+│   ├── 001_create_clients_fraud_detection.sql
+│   ├── 002_add_missing_columns.sql
+│   └── 002_optimize_search_indexes.sql
+├── MIRO-QUICK-START.md
+├── MISSION_COMPLETE_FILES.md
+├── n8n
+│   ├── README.md
+│   └── workflows
+│       └── run-e2e-on-webhook.json
+├── NEW_INTEGRATIONS_REPORT.md
+├── NEWMAN-INTEGRATION-COMPLETE.md
+├── next-env.d.ts
+├── NEXT-STEPS.md
+├── next.config.js
+├── NOUVELLE-PAGE-ACCUEIL.md
+├── OPTIMISATION-RECHERCHE.md
+├── original-fb3787ed6941f5d50b2bd9a473d2f28a.webp
+├── ORIGINE-DONNEES-BANCAIRES.md
+├── OU-EST-LE-PASSWORD.txt
+├── package-lock.json
+├── package.json
+├── PAGE-AMELIOREE.md
+├── PERF-CODE-EXAMPLES.md
+├── PERFORMANCE_FIXES.md
+├── PERFORMANCE-MONITORING-GUIDE.md
+├── PERFORMANCE-README.md
+├── PHASE-2-COMPLETE.md
+├── PHASE-3-COMPLETE.md
+├── postcss.config.js
+├── postman
+│   ├── collections
+│   │   ├── SAR-API-Tests.postman_collection.json
+│   │   └── VoPay-Webhooks-Complete.postman_collection.json
+│   ├── environments
+│   │   ├── dev.json
+│   │   ├── prod.json
+│   │   └── staging.json
+│   ├── README.md
+│   ├── reports
+│   │   ├── dev_20260121_114230.html
+│   │   ├── dev_20260121_114230.json
+│   │   ├── dev_20260121_115440.html
+│   │   ├── dev_20260121_115440.json
+│   │   ├── latest.html -> dev_20260121_115440.html
+│   │   └── latest.json -> dev_20260121_115440.json
+│   └── run.sh
+├── PROBLEME-DIAGNOSTIC.md
+├── PRODUCTION-QB-ANALYSIS.md
+├── progression
+│   ├── app
+│   │   ├── api
+│   │   ├── debug
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   └── suivi
+│   ├── components
+│   │   ├── ModernProgressBar.tsx
+│   │   └── ProgressBar.tsx
+│   ├── DASHBOARD-DEBUG.md
+│   ├── DEPLOYMENT.md
+│   ├── EMAIL-MARC-MARGILL.md
+│   ├── EMAIL-MARC-TEXTE.txt
+│   ├── google-apps-script-test.js
+│   ├── GUIDE-GOOGLE-SCRIPT.md
+│   ├── INTEGRATION-MARGILL.md
+│   ├── lib
+│   │   ├── auth.ts
+│   │   ├── constants.ts
+│   │   ├── crypto.ts
+│   │   ├── magic-link.ts
+│   │   ├── rate-limit.ts
+│   │   ├── sms.ts
+│   │   └── supabase.ts
+│   ├── MARGILL-QUICKSTART.md
+│   ├── next-env.d.ts
+│   ├── next.config.js
+│   ├── NOUVELLE-CLE-API.md
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── QUICKSTART.md
+│   ├── README.md
+│   ├── SETUP-PRODUCTION.md
+│   ├── STATUS.md
+│   ├── supabase
+│   │   ├── migrations
+│   │   ├── test-application-clean.sql
+│   │   └── test-application.sql
+│   ├── tailwind.config.ts
+│   ├── test-api-navigateur.html
+│   ├── test-magic-link.sh
+│   ├── test-margill-webhook.sh
+│   ├── tsconfig.json
+│   ├── tsconfig.tsbuildinfo
+│   ├── types
+│   │   └── index.ts
+│   └── vercel.json
+├── public
+│   ├── anonymity-check.html
+│   ├── api-map.html
+│   ├── aqueduc-cerveau.html
+│   ├── aqueduc-velocity-dashboard.html
+│   ├── architecture-plan.html
+│   ├── bypass-tester.html
+│   ├── claude-cortex.html
+│   ├── claude-monitor.html
+│   ├── client-journey.html
+│   ├── command-center-ultimate.html
+│   ├── command-center.html
+│   ├── control-panel-complete.html
+│   ├── control-panel.html
+│   ├── cortex-worldmap.html
+│   ├── dashboard-overview.html
+│   ├── data-flow.html
+│   ├── deep-recon-report.json
+│   ├── device-inspector.html
+│   ├── downloads
+│   │   ├── ibv-crawler-v2.15.zip
+│   │   ├── ibv-crawler-v2.16.zip
+│   │   └── README.md
+│   ├── email-preview-equipe.html
+│   ├── email-preview.html
+│   ├── exploit-chains.html
+│   ├── fingerprint-deep.html
+│   ├── hacking-toolkit.html
+│   ├── network-architecture.html
+│   ├── network-graph-interactive.html
+│   ├── network-modern.html
+│   ├── network-recon.html
+│   ├── network-sentinel.html
+│   ├── network-topology.html
+│   ├── osint-advanced.html
+│   ├── osint-real.html
+│   ├── performance-diagnostic.html
+│   ├── plan-aqueduc.html
+│   ├── Releves_Bancaires_2025.html
+│   ├── robots.txt
+│   ├── route-explorer.html
+│   ├── route-metro-map.html
+│   ├── route-test-report.html
+│   ├── sentinel-command.html
+│   ├── sentinel-control.html
+│   ├── sentinel-fleet.html
+│   ├── sentinel-garage.html
+│   ├── sentinel-scoring.html
+│   ├── sentinel-warfare.html
+│   ├── seo-exploit.html
+│   ├── sitemap.xml
+│   ├── skynet-metaverse.html
+│   ├── skynet.html
+│   ├── stress-test-dashboard.html
+│   ├── test-memory.html
+│   ├── test-tools.html
+│   ├── ultimate-view.html
+│   └── vulnerability-scanner.html
+├── QUICK-START-E2E.md
+├── QUICK-START-TEST.md
+├── QUICKBOOKS-ANALYSIS-RESULTS.md
+├── QUICKBOOKS-COMMANDS.sh
+├── QUICKBOOKS-COMPLETE-TEST.js
+├── QUICKBOOKS-CONNECTION-GUIDE.md
+├── QUICKBOOKS-COOKIE-TEST.js
+├── QUICKBOOKS-DEBUG-SCRIPT.js
+├── QUICKBOOKS-DEPLOYMENT-SUCCESS.md
+├── QUICKBOOKS-DEPLOYMENT.md
+├── QUICKBOOKS-FINAL-REPORT.md
+├── QUICKBOOKS-FIX-DEPLOYED.md
+├── QUICKBOOKS-INTEGRATION-COMPLETE.md
+├── QUICKBOOKS-NEXT-STEPS.md
+├── QUICKBOOKS-README.md
+├── QUICKBOOKS-RECONNECTION-SUMMARY.md
+├── QUICKBOOKS-SCOPES-FIX.md
+├── QUICKBOOKS-TEST-CONSOLE.js
+├── QUICKSTART-PERFORMANCE.md
+├── RAPPORT-FINAL-SUCCES.md
+├── RAPPORT-SEO-ANALYSIS.md
+├── RAPPORT-TEST-MOBILE-COMPLET.md
+├── RAPPORT-TESTS-COMPLET.md
+├── RAPPORT-TESTS-PERFORMANCE.md
+├── RAPPORT-TESTS-WEBHOOKS-2026-01-06.md
+├── RAPPORT-VERIFICATION-DATAFLOW.md
+├── README-GA4-SUCCESS.md
+├── README-TEST.md
+├── README-URGENT.txt
+├── REFACTORISATION-ARCHITECTURE-MODULAIRE.md
+├── RELEVES-BANCAIRES-FIX-COMPLETE.md
+├── RELEVES-BANCAIRES-SUPABASE.md
+├── RESUME-FINAL.md
+├── RESUME-SESSION.md
+├── RPC_DEPLOYMENT_GUIDE.md
+├── run-messages-migration.mjs
+├── run-migration.mjs
+├── run-seo-analysis.sh
+├── run-supabase-migration.mjs
+├── run-support-migration.mjs
+├── run-trace-fk-fix.mjs
+├── RUNTIME_VERIFICATION_SUMMARY.md
+├── SAR audit Fred.zip
+├── SAR_AUDIT_ARTIFACTS_FINAL_2026-01-24_1722.zip
+├── SAR_AUDIT_ARTIFACTS_N2_2026-01-24_1745.zip
+├── SAR_Complete_Documentation.zip
+├── SAR-CORTEX-MIRO-INTEGRATION.md
+├── SAR-PERF-AUDIT.md
+├── SAR-README.md
+├── SAR-Restructuration-Dossier-FINAL.zip
+├── SAR-Restructuration-Dossier.zip
+├── SAR-STRUCTURE-COMPLETE.md
+├── SCOPES-CHECK.md
+├── scripts
+│   ├── activate-ga4-api-applescript.sh
+│   ├── activate-ga4-api-with-auth.js
+│   ├── activate-ga4-api.js
+│   ├── advanced-exploit-tests.mjs
+│   ├── apply-analysis-tables.mjs
+│   ├── apply-download-tracking.mjs
+│   ├── apply-migration-now.js
+│   ├── apply-migration.mjs
+│   ├── apply-seo-migration.js
+│   ├── apply-seo-migration.sh
+│   ├── apply-supabase-migration.sh
+│   ├── apply-telemetry-migration.js
+│   ├── auto-execute.sh
+│   ├── auto-load-memory.mjs
+│   ├── auto-migrate.mjs
+│   ├── backup-before-rpc-migration.js
+│   ├── backup-supabase-pre-phase1.mjs
+│   ├── bypass-exploitation-test.mjs
+│   ├── check_client_external_ids.js
+│   ├── check_duplicates.ts
+│   ├── check_ga4_data.ts
+│   ├── check_yesterday_data.ts
+│   ├── check-database.mjs
+│   ├── check-last-events.js
+│   ├── check-last-fraud.sql
+│   ├── check-last-session.js
+│   ├── check-migrations.sh
+│   ├── check-table-columns.mjs
+│   ├── check-webhook-logs.js
+│   ├── clean_duplicates.ts
+│   ├── clean-and-reimport.sh
+│   ├── compare-telemetry-systems.js
+│   ├── configure-vercel-env.sh
+│   ├── configure-vopay-webhooks.ts
+│   ├── create-scoring-table.mjs
+│   ├── create-search-indexes.ts
+│   ├── curl-execute-sql.sh
+│   ├── curl-migration.sh
+│   ├── debug_date_ranges.ts
+│   ├── deep-recon.js
+│   ├── deploy_rpc_pg.js
+│   ├── deploy_rpc.js
+│   ├── deploy-migration.js
+│   ├── deploy-migration.sh
+│   ├── deploy-phase2-migration.ts
+│   ├── diagnostic-complet.mjs
+│   ├── direct-query-test.mjs
+│   ├── exec-migration.js
+│   ├── execute-migration.mjs
+│   ├── execute-phase0-api.mjs
+│   ├── execute-phase0-direct.mjs
+│   ├── execute-phase0-pg.mjs
+│   ├── execute-phase0.mjs
+│   ├── final_verification.ts
+│   ├── find_bad_record.ts
+│   ├── import-clients-sar-xlsx.ts
+│   ├── import-clients-sar-xml.ts
+│   ├── import-clients-sar.ts
+│   ├── init-claude-memory.mjs
+│   ├── inspect-creditsecours-iframe.mjs
+│   ├── install-performance-table.mjs
+│   ├── lib
+│   │   └── test-helpers.sh
+│   ├── load-test-telemetry.js
+│   ├── migrate-old-webhooks.js
+│   ├── monitor-deployment.sh
+│   ├── perf
+│   │   ├── analyze.sh
+│   │   ├── README.md
+│   │   └── smoke.sh
+│   ├── prepare-db-for-import.ts
+│   ├── psql-execute.sh
+│   ├── README.md
+│   ├── restore-backup.js
+│   ├── run-migration.mjs
+│   ├── run-migration.ts
+│   ├── secure-osint-routes.mjs
+│   ├── security-test-suite.mjs
+│   ├── setup-complete.mjs
+│   ├── start-worker.mjs
+│   ├── stress-test-animated.mjs
+│   ├── sync-journal-to-miro.mjs
+│   ├── test_api_with_margill_id.js
+│   ├── test_margill_mapping.js
+│   ├── test_metrics_api_flow.ts
+│   ├── test_production_api.ts
+│   ├── test_rpc_exists.js
+│   ├── test_rpc_runtime.js
+│   ├── test-activity-logging.mjs
+│   ├── test-all-webhooks-architect.ts
+│   ├── test-api-submit.mjs
+│   ├── test-dataflow.ts
+│   ├── test-google-analytics.sh
+│   ├── test-google-referrer.html
+│   ├── test-mobile.sh
+│   ├── test-quickbooks-api.sh
+│   ├── test-quickbooks-webhook.sh
+│   ├── test-semrush-api.sh
+│   ├── test-seo-apis.sh
+│   ├── test-seo-complete.sh
+│   ├── test-telemetry.sh
+│   ├── test-titan-system.mjs
+│   ├── test-track-event.sh
+│   ├── test-vopay-webhooks.ts
+│   ├── update-clients-sar-xlsx.ts
+│   ├── upload-releves-to-supabase.mjs
+│   ├── validate-telemetry.js
+│   ├── verify_data_range.ts
+│   ├── verify-all-routes.js
+│   ├── verify-dashboard-data.js
+│   ├── verify-deployment.sh
+│   ├── verify-phase2.js
+│   ├── verify-setup.js
+│   ├── wait-and-test.mjs
+│   └── watch-telemetry.sh
+├── scriptsql.txt
+├── SECURING-OSINT-ROUTES.md
+├── SECURITY-AUDIT-REPORT.md
+├── security-deep-scan.mjs
+├── SECURITY-FINAL-REPORT.md
+├── SECURITY-FINDINGS-SUMMARY.md
+├── SECURITY-FIX-COMPLETE.md
+├── SECURITY-FIX-COMPLETED.md
+├── SECURITY-FIX-URGENT.md
+├── SECURITY-RECOMMENDATIONS.md
+├── security-retest.mjs
+├── security-stress-test.mjs
+├── SECURITY-TESTING.md
+├── SEMRUSH-ENRICHISSEMENT.md
+├── SEMRUSH-QUICKSTART.md
+├── SENTINEL-COMMANDS.json
+├── SENTINEL-CONTROL-PANEL.md
+├── SENTINEL-INSTRUCTIONS.md
+├── sentinel-live-tracker.html
+├── SENTINEL-MESSAGE-TO-WORKER.md
+├── sentinel-osint-dashboard.html
+├── sentinel-osint-monitor.mjs
+├── SENTINEL-OSINT-REPORT.json
+├── SENTINEL-SYSTEM-LIVE.md
+├── SEO_ANALYTICS_METRICS_CHECKLIST.md
+├── SEO_ANALYTICS_V2_IMPLEMENTATION.md
+├── SEO_VERIFICATION_REPORT.md
+├── SEO-ANALYSIS-GUIDE.md
+├── SEO-METRICS-SETUP.md
+├── SEO-SYSTEM-COMPLETE.md
+├── SESSION-2026-01-14-COMPLETE.md
+├── setup-clients-sar.sh
+├── setup-vopay-webhook-table.mjs
+├── setup-webauthn-tables.mjs
+├── show-volume-today-breakdown.mjs
+├── SIMPLE-CREATE-SUPPORT.sql
+├── SITE-ANALYSIS-RESULTS.md
+├── SITE-ANALYZER-GUIDE.md
+├── SOLUTION-FINALE.txt
+├── solutionargentrapide.ca_issues_20251217.xlsx
+├── src
+│   ├── app
+│   │   ├── (site)
+│   │   ├── admin
+│   │   ├── analyse
+│   │   ├── api
+│   │   ├── clients
+│   │   ├── demo-widgets
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── m
+│   │   ├── metrics
+│   │   ├── metrics-debug
+│   │   └── test-simple
+│   ├── components
+│   │   ├── admin
+│   │   ├── AuditHistory.tsx
+│   │   ├── Axeptio.tsx
+│   │   ├── ClickHeatmapTracker.tsx
+│   │   ├── ClientTimeline.tsx
+│   │   ├── ContactModal.tsx
+│   │   ├── Footer.tsx
+│   │   ├── GoogleAnalytics.tsx
+│   │   ├── Header.tsx
+│   │   ├── margill
+│   │   ├── TelemetryProvider.tsx
+│   │   ├── ui
+│   │   ├── UserMap.tsx
+│   │   ├── VoPayStats.tsx
+│   │   └── widgets
+│   ├── generated
+│   │   └── deep-recon-report.json
+│   ├── hooks
+│   │   └── useVoPayData.ts
+│   ├── lib
+│   │   ├── analysis
+│   │   ├── analytics.ts
+│   │   ├── cache.ts
+│   │   ├── claude-memory-loader.ts
+│   │   ├── margill-client.ts
+│   │   ├── miro-cortex-sync.ts
+│   │   ├── perf.ts
+│   │   ├── quickbooks
+│   │   ├── supabase-memory.ts
+│   │   ├── supabase-server.ts
+│   │   ├── supabase-with-audit.ts
+│   │   ├── supabase.ts
+│   │   ├── support-diagnostics.ts
+│   │   ├── support-utils.ts
+│   │   ├── telemetry
+│   │   ├── telemetry.ts
+│   │   ├── types
+│   │   ├── utils
+│   │   ├── validators
+│   │   ├── validators.ts
+│   │   ├── vopay.ts
+│   │   └── webauthn-store.ts
+│   ├── middleware
+│   │   ├── osint-auth.ts
+│   │   └── performance-logger.ts
+│   ├── middleware.ts
+│   └── types
+│       ├── analysis.ts
+│       ├── analytics.ts
+│       └── inverite.ts
+├── START-HERE.md
+├── START-TEST.sh
+├── STATS-MESSAGES-SIMPLIFIEES-2026-01-07.md
+├── STATUS-FINAL.md
+├── STATUT-ACTUEL.md
+├── supabase
+│   ├── config.toml
+│   └── migrations
+│       ├── 20260113000000_titan_init.sql
+│       ├── 20260114_security_logs.sql
+│       ├── 20260117151900_mailops_001_create_client_events.sql
+│       ├── 20260117151901_mailops_002_create_email_accounts.sql
+│       ├── 20260117151902_mailops_003_create_email_messages.sql
+│       ├── 20260117151903_mailops_004_create_classification_taxonomy.sql
+│       ├── 20260117151904_mailops_005_create_email_classifications.sql
+│       ├── 20260117151905_mailops_006_create_event_actions.sql
+│       ├── 20260117151906_mailops_007_create_email_metrics_daily.sql
+│       ├── 20260117151907_mailops_008_alter_contact_messages.sql.disabled
+│       ├── 20260117151908_mailops_009_alter_emails_envoyes.sql.disabled
+│       ├── 20260117151909_mailops_010_create_rls_policies.sql
+│       ├── 20260118000000_performance_indexes.sql
+│       ├── 20260118000001_rpc_functions.sql
+│       ├── 20260118000002_materialized_views.sql
+│       ├── 20260120000000_quickbooks_integration.sql
+│       ├── 20260120000001_fix_quickbooks_tokens_unique.sql
+│       ├── 20260121000000_seo_metrics_system.sql
+│       ├── 20260122_telemetry_tables.sql
+│       ├── 20260122000000_unified_webhook_logs.sql
+│       ├── 20260122000001_add_analysis_tables.sql
+│       ├── 20260122000002_add_download_tracking.sql
+│       ├── 20260123000000_update_vopay_webhook_rpc.sql
+│       ├── 20260124230000_create_get_client_dossier_unified.sql
+│       ├── 20260125000100_create_client_external_ids.sql
+│       ├── 20260125000200_client_sessions_telemetry.sql
+│       ├── 20260125000300_fraud_detection_phase2.sql
+│       ├── 20260127_cloudflare_analytics_table.sql
+│       ├── 20260127_gsc_metrics_table.sql
+│       ├── 20260127_pagespeed_metrics_table.sql
+│       ├── 20260127_ssl_monitoring_table.sql
+│       ├── 20260127_uptime_monitoring_table.sql
+│       ├── 20260127000100_remove_trace_fk.sql
+│       └── supabase
+├── supabase-add-messages-features.sql
+├── supabase-add-metadata.sql
+├── SUPABASE-FIX.md
+├── SUPABASE-MIGRATION-METADATA.md
+├── supabase-support-system.sql
+├── supabase-vopay-webhooks.sql
+├── supabase-webauthn-setup.sql
+├── tailwind.config.js
+├── TELEMETRY_DEBUG.md
+├── TELEMETRY_EXAMPLE.md
+├── TELEMETRY_FIXES_COMPLETE.md
+├── TELEMETRY_GUIDE.md
+├── TELEMETRY-PHASE1-INSTALL.md
+├── temp
+│   ├── test-file-1768351020864.txt
+│   ├── test-file-1768351071134.txt
+│   └── test-file-1768351321679.txt
+├── test-admin-dashboard.mjs
+├── test-all-statuses.sh
+├── test-all-webhooks.mjs
+├── test-api-stats.mjs
+├── test-artifacts
+│   ├── 01-login-page.png
+│   ├── 02-after-login.png
+│   ├── 03-seo-page.png
+│   ├── COMPLETE-VERIFICATION-20260121-131701.md
+│   ├── junit.xml
+│   ├── logs
+│   │   └── e2e.log
+│   ├── mobile-test
+│   ├── playwright-report
+│   │   ├── data
+│   │   ├── index.html
+│   │   └── trace
+│   ├── qb-auto-fix
+│   │   ├── 01-before-disconnect.png
+│   │   └── 02-after-disconnect.png
+│   ├── qb-auto-reconnect
+│   │   └── 01-before-connect.png
+│   ├── qb-diagnostic
+│   │   ├── diagnostic-report.json
+│   │   ├── qb-page-1769020550606.png
+│   │   ├── qb-page-1769023383618.png
+│   │   ├── qb-page-1769023536647.png
+│   │   ├── qb-page-1769023751424.png
+│   │   └── qb-page-1769023938713.png
+│   ├── qb-fix
+│   │   ├── diagnostic-report.json
+│   │   └── qb-page-current.png
+│   ├── qb-fix-verification
+│   │   ├── admin-quickbooks-page.png
+│   │   ├── verification-report.html
+│   │   └── verification-report.json
+│   ├── qb-force
+│   │   ├── 01-after-disconnect.png
+│   │   └── 02-after-cache-clear.png
+│   ├── qb-full-auto
+│   │   └── 01-before.png
+│   ├── qb-real
+│   │   ├── 01-dashboard.png
+│   │   ├── 02-qb-page-initial.png
+│   │   ├── 03-after-test.png
+│   │   ├── 04-after-refresh.png
+│   │   └── 99-final-state.png
+│   ├── quickbooks-analysis
+│   │   ├── dashboard-qb-widget.png
+│   │   ├── quickbooks-analysis.html
+│   │   ├── quickbooks-analysis.json
+│   │   ├── quickbooks-page-404.png
+│   │   └── quickbooks-page.png
+│   ├── results.json
+│   ├── screenshots
+│   ├── site-analysis
+│   │   ├── http___localhost_4000_.png
+│   │   ├── http___localhost_4000_admin_dashboard.png
+│   │   ├── http___localhost_4000_admin.png
+│   │   ├── http___localhost_4000_api_quickbooks_status.png
+│   │   ├── http___localhost_4000_faq.png
+│   │   ├── http___localhost_4000_mentions_legales.png
+│   │   ├── http___localhost_4000_nous_joindre.png
+│   │   ├── http___localhost_4000_politique_de_confidentialite.png
+│   │   ├── http___localhost_4000_politique_de_cookies.png
+│   │   ├── http___localhost_4000.png
+│   │   ├── report.html
+│   │   └── report.json
+│   └── traces
+├── test-dashboard-hydration.mjs
+├── test-failed-webhook.sh
+├── TEST-GOOGLE-SCRIPT-README.md
+├── test-google-script.js
+├── test-loan-application.json
+├── TEST-LOCALHOST.md
+├── test-miro-sync.mjs
+├── test-payload.json
+├── test-quickbooks-connection.sh
+├── test-results
+├── test-signature.mjs
+├── test-supabase.mjs
+├── test-vopay-api.mjs
+├── test-webhook-local.sh
+├── test-webhook.sh
+├── test-webhooks-method1.mjs
+├── test-webhooks-method2.mjs
+├── test-webhooks-method3.mjs
+├── TESTING-GUIDE.md
+├── TESTS-SEO-APIS-2026-01-23.md
+├── TITAN-SYSTEM-STATUS.md
+├── tools
+│   ├── collect_artifacts.sh
+│   ├── collect-ga4-30days.sh
+│   ├── force-collect-30days.sh
+│   ├── open_all_interfaces.sh
+│   ├── README.md
+│   ├── reset_env.sh
+│   ├── run_e2e.sh
+│   ├── run_smoke.sh
+│   └── verify-ga4-final.sh
+├── tsconfig.json
+├── tsconfig.tsbuildinfo
+├── UPDATE-VERCEL-SECRET.md
+├── UPDATED_FILES_SUMMARY.md
+├── UPTIME_SETUP.md
+├── URGENT-FIX-INTUIT-SETTINGS.md
+├── URLS.md
+├── VALIDATION-TELEPHONE-EMAIL.md
+├── VERCEL_ENV_SETUP.md
+├── VERCEL-CONFIG-GUIDE.md
+├── vercel.json
+├── VERIFICATION_COMPLETE.md
+├── VERIFICATION-DASHBOARD-2026-01-07.md
+├── VERIFICATION-DATAFLOW-REPORT.md
+├── VERIFICATION-FINALE.md
+├── VERIFICATION-MANUELLE.md
+├── VERIFIER-MIGRATION.md
+├── view-semrush-data.mjs
+├── VISUALISATION-PROGRESSION-MIRO.md
+├── VISUALIZATIONS_COMPLETE.md
+├── VOPAY-ENGINEER-MODE-PLAN.md
+├── VOPAY-FIX-2026-01-05.md
+├── VOPAY-INTEGRATION.md
+├── VOPAY-WEBHOOK-FINAL.md
+├── VOPAY-WEBHOOK-SETUP.md
+├── VOPAY-WIDGETS-GUIDE.md
+├── WEBHOOK_MONITORING_README.md
+├── WEBHOOK_MONITORING_SYSTEM.md
+├── WEBHOOK-ARCHITECT-REPORT.json
+├── WEBHOOK-COMPLETION-REPORT.md
+├── WEBHOOK-TESTS.md
+├── WEBHOOK-VOPAY-COMPLETE.md
+├── WIDGETS-SHORTCODES.md
+├── WORKER-CHANGELOG.md
+└── WORKER-STATUS.md
+
+121 directories, 942 files
