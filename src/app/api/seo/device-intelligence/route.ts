@@ -149,13 +149,19 @@ function aggregateGSCByDevice(data: any[]): Record<string, DeviceStats> {
   }
 
   data.forEach(row => {
-    const breakdown = row.device_breakdown || []
-    breakdown.forEach((device: any) => {
-      const type = device.device.toLowerCase()
+    const breakdown = row.device_breakdown || {}
+
+    // Le breakdown est un objet avec clés MOBILE, DESKTOP, TABLET
+    Object.keys(breakdown).forEach(deviceKey => {
+      const device = breakdown[deviceKey]
+      const type = deviceKey.toLowerCase()
+
       if (devices[type]) {
         devices[type].clicks += device.clicks || 0
         devices[type].impressions += device.impressions || 0
-        devices[type].positions.push(device.position || 0)
+        if (device.position) {
+          devices[type].positions.push(device.position)
+        }
       }
     })
   })
@@ -185,16 +191,20 @@ function aggregateGA4ByDevice(data: any[]): Record<string, any> {
   }
 
   data.forEach(row => {
-    const breakdown = row.device_breakdown || []
-    breakdown.forEach((device: any) => {
-      const type = device.device_category?.toLowerCase() || 'unknown'
-      if (devices[type]) {
-        devices[type].sessions += device.sessions || 0
-        devices[type].users += device.active_users || 0
-        // Note: GA4 ne fournit pas avg session duration par device dans ce format
-        // On peut l'ajouter plus tard si disponible
-      }
-    })
+    // GA4 a des colonnes directes pour device users
+    devices.mobile.users += row.mobile_users || 0
+    devices.desktop.users += row.desktop_users || 0
+    devices.tablet.users += row.tablet_users || 0
+
+    // Estimer les sessions proportionnellement aux users
+    const totalUsers = (row.mobile_users || 0) + (row.desktop_users || 0) + (row.tablet_users || 0)
+    const totalSessions = row.sessions || 0
+
+    if (totalUsers > 0) {
+      devices.mobile.sessions += Math.round(totalSessions * (row.mobile_users || 0) / totalUsers)
+      devices.desktop.sessions += Math.round(totalSessions * (row.desktop_users || 0) / totalUsers)
+      devices.tablet.sessions += Math.round(totalSessions * (row.tablet_users || 0) / totalUsers)
+    }
   })
 
   const result: Record<string, any> = {}
