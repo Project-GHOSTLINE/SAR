@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -8,6 +8,12 @@ export default function TestMargillPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
+
+  // File upload state
+  const [permisFile, setPermisFile] = useState<File | null>(null)
+  const [otherFiles, setOtherFiles] = useState<File[]>([])
+  const permisInputRef = useRef<HTMLInputElement>(null)
+  const otherInputRef = useRef<HTMLInputElement>(null)
 
   // Form state
   const [formData, setFormData] = useState({
@@ -57,12 +63,6 @@ export default function TestMargillPage() {
     // Autres
     reason_for_loan: 'Dépenses imprévues',
     how_did_you_hear: 'Recherche Google',
-
-    // Optionnels (absents du formulaire iframe)
-    monthly_income: '',
-    education_level: '',
-    credit_score: '',
-    sin: ''
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -78,14 +78,43 @@ export default function TestMargillPage() {
     setResult(null)
 
     try {
-      const response = await fetch('/api/test-margill/submit', {
+      // 1. Soumettre le formulaire et récupérer le payload
+      const formResponse = await fetch('/api/test-margill/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
 
-      const data = await response.json()
-      setResult(data)
+      const formData_result = await formResponse.json()
+
+      // 2. Si des fichiers sont uploadés, les envoyer vers Vercel Blob
+      let uploadResult = null
+      const allFiles = []
+      if (permisFile) allFiles.push(permisFile)
+      if (otherFiles.length > 0) allFiles.push(...otherFiles)
+
+      if (allFiles.length > 0) {
+        const uploadFormData = new FormData()
+        uploadFormData.append('demande_id', `test-${formData.last_name.toLowerCase()}`)
+        uploadFormData.append('client_name', `${formData.first_name}-${formData.last_name}`)
+
+        allFiles.forEach(file => {
+          uploadFormData.append('file', file)
+        })
+
+        const uploadResponse = await fetch('/api/upload-documents', {
+          method: 'POST',
+          body: uploadFormData
+        })
+
+        uploadResult = await uploadResponse.json()
+      }
+
+      // 3. Combiner les résultats
+      setResult({
+        ...formData_result,
+        upload: uploadResult
+      })
     } catch (error) {
       setResult({
         success: false,
@@ -574,54 +603,107 @@ export default function TestMargillPage() {
             </div>
           </div>
 
-          {/* Champs optionnels (absents du formulaire iframe) */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-2 text-yellow-900">⚠️ Champs Optionnels (Absent de l'iframe)</h2>
-            <p className="text-sm text-yellow-800 mb-4">Ces champs sont dans le document Margill mais absents du formulaire iframe actuel</p>
-            <div className="grid grid-cols-2 gap-4">
+          {/* Upload de Documents */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">📄 Upload de Documents (Étape 2)</h2>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-blue-800 mb-2">
+                <strong>⚠️ Section informative pour Marc:</strong>
+              </p>
+              <p className="text-sm text-blue-700">
+                Après la soumission du formulaire, le client sera redirigé vers une page d'upload pour soumettre ses preuves d'identité.
+              </p>
+            </div>
+
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Revenu mensuel</label>
-                <input
-                  type="text"
-                  name="monthly_income"
-                  value={formData.monthly_income}
-                  onChange={handleChange}
-                  placeholder="(vide)"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  📷 Permis de conduire (Obligatoire)
+                </label>
+                <div
+                  onClick={() => permisInputRef.current?.click()}
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                >
+                  <div className="space-y-2">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <div className="text-sm text-gray-600">
+                      {permisFile ? (
+                        <p className="font-medium text-green-600">✅ {permisFile.name}</p>
+                      ) : (
+                        <>
+                          <p className="font-medium">Cliquer pour uploader ou glisser-déposer</p>
+                          <p className="text-xs mt-1">PNG, JPG, PDF jusqu'à 10MB</p>
+                        </>
+                      )}
+                    </div>
+                    <input
+                      ref={permisInputRef}
+                      type="file"
+                      accept="image/*,.pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) setPermisFile(file)
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Niveau d'éducation</label>
-                <input
-                  type="text"
-                  name="education_level"
-                  value={formData.education_level}
-                  onChange={handleChange}
-                  placeholder="(vide)"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  📄 Autres documents (Optionnel)
+                </label>
+                <div
+                  onClick={() => otherInputRef.current?.click()}
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                >
+                  <div className="space-y-2">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <div className="text-sm text-gray-600">
+                      {otherFiles.length > 0 ? (
+                        <div className="text-left max-w-xs mx-auto">
+                          <p className="font-medium text-green-600 mb-2">✅ {otherFiles.length} fichier(s) sélectionné(s):</p>
+                          {otherFiles.map((file, idx) => (
+                            <p key={idx} className="text-xs text-gray-600">{file.name}</p>
+                          ))}
+                        </div>
+                      ) : (
+                        <>
+                          <p className="font-medium">Preuve de revenu, relevé bancaire, etc.</p>
+                          <p className="text-xs mt-1">PNG, JPG, PDF jusqu'à 10MB</p>
+                        </>
+                      )}
+                    </div>
+                    <input
+                      ref={otherInputRef}
+                      type="file"
+                      accept="image/*,.pdf"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || [])
+                        if (files.length > 0) setOtherFiles(files)
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cote de crédit</label>
-                <input
-                  type="text"
-                  name="credit_score"
-                  value={formData.credit_score}
-                  onChange={handleChange}
-                  placeholder="(vide)"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">NAS (Numéro d'assurance sociale)</label>
-                <input
-                  type="text"
-                  name="sin"
-                  value={formData.sin}
-                  onChange={handleChange}
-                  placeholder="(vide)"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
-                />
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-sm text-yellow-800">
+                  <strong>❓ Questions pour Marc:</strong>
+                </p>
+                <ul className="text-sm text-yellow-700 mt-2 space-y-1 list-disc list-inside">
+                  <li>Doit-on utiliser <code className="bg-yellow-100 px-1 rounded">uploadDocsV2.aspx</code> de Margill?</li>
+                  <li>Peut-on uploader dans Google Drive et envoyer les URLs à Margill?</li>
+                  <li>Quels documents sont obligatoires vs optionnels?</li>
+                  <li>Y a-t-il une limite de taille/nombre de fichiers?</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -677,6 +759,54 @@ export default function TestMargillPage() {
                           {item.message && <p className="text-sm text-gray-600">{item.message}</p>}
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload Results */}
+                {result.upload && (
+                  <div>
+                    <h3 className="font-semibold mb-2">📤 Documents Uploadés:</h3>
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded">
+                      {result.upload.success ? (
+                        <div className="space-y-3">
+                          <p className="text-blue-800 font-semibold">
+                            ✅ {result.upload.files.length} fichier(s) uploadé(s) sur Vercel Blob
+                          </p>
+                          <div className="space-y-2">
+                            {result.upload.files.map((file: any, idx: number) => (
+                              <div key={idx} className="bg-white p-3 rounded border border-blue-200">
+                                <p className="text-sm font-medium text-gray-900">
+                                  📄 {file.pathname.split('/').pop()}
+                                </p>
+                                <p className="text-xs text-gray-600 mt-1">
+                                  Taille: {file.size} bytes
+                                </p>
+                                <a
+                                  href={file.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-blue-600 hover:underline mt-1 block"
+                                >
+                                  🔗 Ouvrir dans un nouvel onglet
+                                </a>
+                              </div>
+                            ))}
+                          </div>
+                          {result.upload.metadata_url && (
+                            <a
+                              href={result.upload.metadata_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-blue-600 hover:underline block mt-2"
+                            >
+                              📋 Voir metadata.json
+                            </a>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-red-800">❌ Erreur upload: {result.upload.error}</p>
+                      )}
                     </div>
                   </div>
                 )}
