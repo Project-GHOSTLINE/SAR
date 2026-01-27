@@ -49,7 +49,7 @@ export async function GET() {
 
       // Count page-to-page transitions
       const flowMap = new Map<string, number>()
-      for (const pages of sessionFlows.values()) {
+      for (const pages of Array.from(sessionFlows.values())) {
         for (let i = 0; i < pages.length - 1; i++) {
           const source = pages[i] || '/'
           const target = pages[i + 1] || '/'
