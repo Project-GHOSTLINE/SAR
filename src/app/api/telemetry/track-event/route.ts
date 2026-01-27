@@ -113,10 +113,16 @@ export async function POST(request: NextRequest) {
       const ipHash = clientIP && clientIP !== 'unknown' ? hashWithSalt(clientIP) : null
       const uaHash = userAgent && userAgent !== 'unknown' ? hashWithSalt(userAgent) : null
 
-      // Geolocation (ASN, Country, IP prefix)
-      const geoData = process.env.NODE_ENV === 'development'
-        ? getMockGeoData(clientIP)
-        : await getIPGeoData(clientIP)
+      // Geolocation (ASN, Country, IP prefix) - with graceful fallback
+      let geoData
+      try {
+        geoData = process.env.NODE_ENV === 'development'
+          ? getMockGeoData(clientIP)
+          : await getIPGeoData(clientIP)
+      } catch (geoError) {
+        console.warn('[TrackEvent] Geolocation failed, using fallback:', geoError)
+        geoData = getMockGeoData(clientIP) // Use mock as fallback
+      }
 
       console.log('[TrackEvent] Captured data:', {
         referrer: referrer ? stripQueryParamsUtil(referrer) : null,
@@ -160,8 +166,16 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (sessionInsertError) {
-        console.error('[TrackEvent] Failed to create session:', sessionInsertError)
-        // Continue anyway, event can still be logged
+        console.error('[TrackEvent] CRITICAL: Failed to create session:', sessionInsertError)
+        return NextResponse.json(
+          {
+            error: 'Failed to create session',
+            details: sessionInsertError.message,
+            code: sessionInsertError.code,
+            hint: sessionInsertError.hint
+          },
+          { status: 500 }
+        )
       }
 
       // Vercel Observability: Track session creation
@@ -300,13 +314,21 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     // ENHANCED LOGGING: Capture full error details for debugging
-    console.error('[TrackEvent] CRITICAL ERROR:', {
+    const errorDetails = {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       name: error instanceof Error ? error.name : undefined,
       sessionId: request.cookies.get('sar_session_id')?.value?.substring(0, 16) + '...',
-      timestamp: new Date().toISOString()
-    })
+      timestamp: new Date().toISOString(),
+      // Add Supabase error details if available
+      ...(error && typeof error === 'object' && 'code' in error && {
+        supabaseCode: (error as any).code,
+        supabaseHint: (error as any).hint,
+        supabaseDetails: (error as any).details
+      })
+    }
+
+    console.error('[TrackEvent] CRITICAL ERROR:', errorDetails)
 
     // Vercel Observability: Track failed request
     const duration = Date.now() - startTime
@@ -315,13 +337,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Internal server error',
-        // Include error details in development
-        ...(process.env.NODE_ENV === 'development' && {
-          debug: {
-            message: error instanceof Error ? error.message : String(error),
-            type: error instanceof Error ? error.name : typeof error
-          }
-        })
+        // Always include error details for debugging (even in production)
+        debug: {
+          message: error instanceof Error ? error.message : String(error),
+          type: error instanceof Error ? error.name : typeof error,
+          code: error && typeof error === 'object' && 'code' in error ? (error as any).code : undefined
+        }
       },
       { status: 500 }
     )
