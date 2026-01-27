@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
       })
 
       // Create anonymous session with FULL metadata
-      await supabase
+      const { error: sessionInsertError } = await supabase
         .from('client_sessions')
         .insert({
           session_id: sessionId,
@@ -159,6 +159,11 @@ export async function POST(request: NextRequest) {
         .select()
         .single()
 
+      if (sessionInsertError) {
+        console.error('[TrackEvent] Failed to create session:', sessionInsertError)
+        // Continue anyway, event can still be logged
+      }
+
       // Vercel Observability: Track session creation
       trackSessionCreated(
         parsedUA.device_type || 'unknown',
@@ -175,26 +180,31 @@ export async function POST(request: NextRequest) {
           is_proxy: geoData.is_proxy,
         })
 
-        await supabase
-          .from('security_events')
-          .insert({
-            session_id: sessionId,
-            event_type: 'vpn_detected',
-            ip_hash: ipHash,
-            ip_prefix: geoData.ip_prefix,
-            ua_hash: uaHash,
-            asn: geoData.asn,
-            country_code: geoData.country_code,
-            meta: {
-              is_vpn: geoData.is_vpn,
-              is_proxy: geoData.is_proxy,
-              is_hosting: geoData.is_hosting,
-              detected_at: 'first_visit',
-            },
-          })
+        try {
+          await supabase
+            .from('security_events')
+            .insert({
+              session_id: sessionId,
+              event_type: 'vpn_detected',
+              ip_hash: ipHash,
+              ip_prefix: geoData.ip_prefix,
+              ua_hash: uaHash,
+              asn: geoData.asn,
+              country_code: geoData.country_code,
+              meta: {
+                is_vpn: geoData.is_vpn,
+                is_proxy: geoData.is_proxy,
+                is_hosting: geoData.is_hosting,
+                detected_at: 'first_visit',
+              },
+            })
 
-        // Vercel Observability: Track VPN/Proxy detection
-        trackSecurityEvent('vpn_detected', geoData.asn || 0)
+          // Vercel Observability: Track VPN/Proxy detection
+          trackSecurityEvent('vpn_detected', geoData.asn || 0)
+        } catch (securityError) {
+          console.warn('[Security] Failed to log VPN event (table may not exist):', securityError)
+          // Non-critical, continue
+        }
       }
 
       // SECURITY EVENTS: Detect hosting provider (bot indicator)
@@ -204,25 +214,30 @@ export async function POST(request: NextRequest) {
           asn: geoData.asn,
         })
 
-        await supabase
-          .from('security_events')
-          .insert({
-            session_id: sessionId,
-            event_type: 'bot_detected',
-            ip_hash: ipHash,
-            ip_prefix: geoData.ip_prefix,
-            ua_hash: uaHash,
-            asn: geoData.asn,
-            country_code: geoData.country_code,
-            meta: {
-              reason: 'hosting_provider_asn',
+        try {
+          await supabase
+            .from('security_events')
+            .insert({
+              session_id: sessionId,
+              event_type: 'bot_detected',
+              ip_hash: ipHash,
+              ip_prefix: geoData.ip_prefix,
+              ua_hash: uaHash,
               asn: geoData.asn,
-              detected_at: 'first_visit',
-            },
-          })
+              country_code: geoData.country_code,
+              meta: {
+                reason: 'hosting_provider_asn',
+                asn: geoData.asn,
+                detected_at: 'first_visit',
+              },
+            })
 
-        // Vercel Observability: Track bot detection
-        trackSecurityEvent('bot_detected', geoData.asn || 0)
+          // Vercel Observability: Track bot detection
+          trackSecurityEvent('bot_detected', geoData.asn || 0)
+        } catch (securityError) {
+          console.warn('[Security] Failed to log bot event (table may not exist):', securityError)
+          // Non-critical, continue
+        }
       }
     } else {
       // Update last_activity_at (session already exists)
@@ -284,14 +299,30 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('[TrackEvent] Error:', error)
+    // ENHANCED LOGGING: Capture full error details for debugging
+    console.error('[TrackEvent] CRITICAL ERROR:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+      sessionId: request.cookies.get('sar_session_id')?.value?.substring(0, 16) + '...',
+      timestamp: new Date().toISOString()
+    })
 
     // Vercel Observability: Track failed request
     const duration = Date.now() - startTime
     trackTelemetryPerformance('/api/telemetry/track-event', duration, false)
 
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        // Include error details in development
+        ...(process.env.NODE_ENV === 'development' && {
+          debug: {
+            message: error instanceof Error ? error.message : String(error),
+            type: error instanceof Error ? error.name : typeof error
+          }
+        })
+      },
       { status: 500 }
     )
   }
