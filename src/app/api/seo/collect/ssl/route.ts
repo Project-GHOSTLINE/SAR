@@ -84,13 +84,16 @@ export async function POST(request: NextRequest) {
     console.log('⏳ Cela peut prendre 60-120 secondes...')
 
     const startTime = Date.now()
-    const sslData: any = await scanSSLLabs(host, force)
+    const sslLabsResult = await scanSSLLabs(host, force)
     const scanDuration = Math.round((Date.now() - startTime) / 1000)
 
-    // Ajouter métadonnées
-    sslData.host = host
-    sslData.date = targetDate
-    sslData.scan_duration_seconds = scanDuration
+    // Créer l'objet complet avec métadonnées
+    const sslData = {
+      ...sslLabsResult,
+      host,
+      date: targetDate,
+      scan_duration_seconds: scanDuration
+    }
 
     const { data, error } = await supabase
       .from('seo_ssl_checks')

@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import {
   ArrowLeft, Search, Filter, AlertTriangle, Bot, User, Clock, Eye, MapPin,
   Smartphone, TrendingUp, Download, DollarSign, Users, Activity, Target,
-  Globe, Monitor, Calendar, BarChart3, PieChart as PieChartIcon
+  Globe, Monitor, Calendar, BarChart3, PieChart as PieChartIcon, Database,
+  Mail, Phone, CheckCircle, XCircle
 } from 'lucide-react'
 import AdminNav from '@/components/admin/AdminNav'
 import {
@@ -179,6 +180,12 @@ interface UnifiedClientMetrics {
     client_email: string
     client_phone: string
     client_status: string
+    client_address: {
+      line1: string
+      city: string
+      province: string
+      postal_code: string
+    }
     total_contact_messages: number
     total_support_tickets: number
     total_email_messages: number
@@ -228,6 +235,9 @@ export default function SEOAnalyticsV2Page() {
   const [events, setEvents] = useState<EventAnalysis[]>([])
   const [linkedClients, setLinkedClients] = useState<LinkedClient[]>([])
   const [linkedClientsStats, setLinkedClientsStats] = useState<any>(null)
+  const [unifiedMetrics, setUnifiedMetrics] = useState<UnifiedClientMetrics | null>(null)
+  const [unifiedLoading, setUnifiedLoading] = useState(false)
+  const [unifiedError, setUnifiedError] = useState<string | null>(null)
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('')
@@ -790,6 +800,12 @@ export default function SEOAnalyticsV2Page() {
               icon={<User size={18} />}
               label="Clients Liés"
             />
+            <TabButton
+              active={activeTab === 'unified-metrics'}
+              onClick={() => setActiveTab('unified-metrics')}
+              icon={<Database size={18} />}
+              label="Vérification Client"
+            />
           </div>
 
           {/* Tab Content */}
@@ -836,6 +852,16 @@ export default function SEOAnalyticsV2Page() {
                   <LinkedClientsTab
                     linkedClients={linkedClients}
                     stats={linkedClientsStats}
+                  />
+                )}
+                {activeTab === 'unified-metrics' && (
+                  <UnifiedMetricsTab
+                    metrics={unifiedMetrics}
+                    loading={unifiedLoading}
+                    error={unifiedError}
+                    setMetrics={setUnifiedMetrics}
+                    setLoading={setUnifiedLoading}
+                    setError={setUnifiedError}
                   />
                 )}
               </>
@@ -2035,6 +2061,244 @@ function DataRow({ label, value, mono }: { label: string; value: string; mono?: 
       <span className={`font-medium text-gray-900 ${mono ? 'font-mono text-xs' : ''}`}>
         {value}
       </span>
+    </div>
+  )
+}
+
+// Unified Metrics Tab
+function UnifiedMetricsTab({
+  metrics,
+  loading,
+  error,
+  setMetrics,
+  setLoading,
+  setError
+}: {
+  metrics: UnifiedClientMetrics | null
+  loading: boolean
+  error: string | null
+  setMetrics: (m: UnifiedClientMetrics | null) => void
+  setLoading: (l: boolean) => void
+  setError: (e: string | null) => void
+}) {
+  const [clientId, setClientId] = useState('')
+
+  async function fetchClientMetrics() {
+    if (!clientId) {
+      setError('Veuillez entrer un ID client')
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    setMetrics(null)
+
+    try {
+      const res = await fetch(`/api/analytics/client-unified-metrics?client_id=${clientId}`)
+      const result = await res.json()
+
+      if (!result.success) {
+        setError(result.error || 'Erreur lors de la récupération des données')
+        return
+      }
+
+      setMetrics(result)
+    } catch (err) {
+      setError('Erreur de connexion au serveur')
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const coherenceColor = metrics?.coherence.status === 'excellent' ? 'green' :
+                          metrics?.coherence.status === 'good' ? 'blue' :
+                          metrics?.coherence.status === 'concerning' ? 'orange' : 'red'
+
+  return (
+    <div className="space-y-6">
+      {/* Search Box */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Database size={20} />
+          Vérification Complète Client
+        </h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Merger TOUTES les données d'un client depuis toutes les sources (messages, applications, transactions, sessions, support, emails) + 11 vérifications de cohérence automatiques
+        </p>
+        <div className="flex gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="Entrez l'ID client (UUID)..."
+              value={clientId}
+              onChange={(e) => setClientId(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && fetchClientMetrics()}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <button
+            onClick={fetchClientMetrics}
+            disabled={loading || !clientId}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Analyse...
+              </>
+            ) : (
+              <>
+                <Database size={20} />
+                Analyser
+              </>
+            )}
+          </button>
+        </div>
+
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-800">
+            <XCircle size={20} />
+            {error}
+          </div>
+        )}
+      </div>
+
+      {/* Results */}
+      {metrics && (
+        <div className="space-y-6">
+          {/* Client Info */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <User size={20} />
+              Profil Client
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-2 text-gray-700">
+                <User size={18} className="text-gray-400" />
+                <span className="font-medium">{metrics.metrics.client_name}</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-700">
+                <Mail size={18} className="text-gray-400" />
+                <span>{metrics.metrics.client_email}</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-700">
+                <Phone size={18} className="text-gray-400" />
+                <span>{metrics.metrics.client_phone || 'N/A'}</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-700">
+                <MapPin size={18} className="text-gray-400" />
+                <span>
+                  {metrics.metrics.client_address.city}, {metrics.metrics.client_address.province}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Coherence Score */}
+          <div className={`bg-${coherenceColor}-50 border border-${coherenceColor}-200 rounded-lg p-8`}>
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Score de Cohérence</h3>
+              <div className="flex items-center justify-center gap-6 mb-4">
+                <div className="text-6xl font-bold" style={{
+                  color: coherenceColor === 'green' ? '#10b981' :
+                         coherenceColor === 'blue' ? '#3b82f6' :
+                         coherenceColor === 'orange' ? '#f59e0b' : '#ef4444'
+                }}>
+                  {metrics.coherence.score}
+                </div>
+                <div className="text-left">
+                  <p className="text-sm text-gray-600">sur 100</p>
+                  <p className={`text-lg font-semibold`} style={{
+                    color: coherenceColor === 'green' ? '#047857' :
+                           coherenceColor === 'blue' ? '#1d4ed8' :
+                           coherenceColor === 'orange' ? '#d97706' : '#dc2626'
+                  }}>
+                    {metrics.coherence.status.toUpperCase()}
+                  </p>
+                  <p className="text-xs text-gray-500">{metrics.coherence.checks_performed} vérifications</p>
+                </div>
+              </div>
+
+              {metrics.coherence.flags.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <p className="font-semibold text-gray-900">⚠️ Anomalies Détectées:</p>
+                  {metrics.coherence.flags.map((flag, i) => (
+                    <div key={i} className="bg-white border border-orange-300 rounded-lg p-3 text-left">
+                      <p className="text-sm text-gray-800">{flag}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {metrics.coherence.flags.length === 0 && (
+                <div className="flex items-center justify-center gap-2 text-green-700">
+                  <CheckCircle size={20} />
+                  <span className="font-medium">Aucune anomalie - Données cohérentes</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Metrics Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-xs text-gray-600 mb-1">Messages Contact</p>
+              <p className="text-2xl font-bold text-blue-600">{metrics.metrics.total_contact_messages}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-xs text-gray-600 mb-1">Applications</p>
+              <p className="text-2xl font-bold text-green-600">{metrics.metrics.total_applications}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-xs text-gray-600 mb-1">Transactions VoPay</p>
+              <p className="text-2xl font-bold text-purple-600">{metrics.metrics.total_vopay_transactions}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-xs text-gray-600 mb-1">Sessions Analytics</p>
+              <p className="text-2xl font-bold text-orange-600">{metrics.metrics.total_sessions}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-xs text-gray-600 mb-1">Tickets Support</p>
+              <p className="text-2xl font-bold text-red-600">{metrics.metrics.total_support_tickets}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-xs text-gray-600 mb-1">Emails</p>
+              <p className="text-2xl font-bold text-blue-600">{metrics.metrics.total_email_messages}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-xs text-gray-600 mb-1">Events Telemetry</p>
+              <p className="text-2xl font-bold text-green-600">{metrics.metrics.total_telemetry_events}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-xs text-gray-600 mb-1">Score Engagement</p>
+              <p className="text-2xl font-bold text-purple-600">{metrics.metrics.engagement_score}/100</p>
+            </div>
+          </div>
+
+          {/* Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h4 className="font-semibold text-gray-900 mb-2">Total Interactions</h4>
+              <p className="text-3xl font-bold text-blue-600">{metrics.summary.total_interactions}</p>
+              <p className="text-xs text-gray-500 mt-1">Messages + Sessions + Apps + Tickets</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h4 className="font-semibold text-gray-900 mb-2">Complétude Données</h4>
+              <p className="text-3xl font-bold text-green-600">{metrics.summary.data_completeness}%</p>
+              <p className="text-xs text-gray-500 mt-1">Champs profile remplis</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h4 className="font-semibold text-gray-900 mb-2">Risque Profil</h4>
+              <p className={`text-3xl font-bold ${metrics.summary.profile_risk === 'high' ? 'text-red-600' : 'text-green-600'}`}>
+                {metrics.summary.profile_risk === 'high' ? 'ÉLEVÉ' : 'FAIBLE'}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">Basé sur cohérence</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
