@@ -1,4 +1,11 @@
+/**
+ * API: POST /api/seo/collect/gsc
+ *
+ * Collecte les métriques Google Search Console et les stocke dans Supabase
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
+import { google } from 'googleapis'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -25,10 +32,10 @@ function getSupabaseClient() {
 /**
  * POST /api/seo/collect/gsc
  *
- * Collecte les métriques Google Search Console et les stocke dans Supabase
+ * Collecte les métriques GSC et les stocke dans Supabase
  *
  * Body:
- * - date: Date à collecter (format: YYYY-MM-DD, défaut: il y a 3 jours - GSC a un délai)
+ * - date: Date à collecter (format: YYYY-MM-DD, défaut: hier)
  * - force: Forcer la recollecte même si existe déjà
  */
 export async function POST(request: NextRequest) {
@@ -42,12 +49,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}))
-    // GSC a un délai de ~3 jours pour les données complètes
-    const targetDate = body.date || get3DaysAgo()
+    const targetDate = body.date || getYesterday()
     const force = body.force || false
 
     const supabase = getSupabaseClient()
-    const siteUrl = process.env.GSC_SITE_URL || 'https://solutionargentrapide.ca'
+    const domain = 'solutionargentrapide.ca'
 
     // Vérifier si déjà collecté
     if (!force) {
@@ -55,7 +61,7 @@ export async function POST(request: NextRequest) {
         .from('seo_gsc_metrics_daily')
         .select('id')
         .eq('date', targetDate)
-        .eq('site_url', siteUrl)
+        .eq('domain', domain)
         .single()
 
       if (existing) {
@@ -68,36 +74,23 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Vérifier si Google Search Console est configuré
-    if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY) {
-      console.warn('⚠️ Google Search Console non configuré - utilisation de données mock')
-
-      const mockData = generateMockGSCData(targetDate, siteUrl)
-
-      const { data, error } = await supabase
-        .from('seo_gsc_metrics_daily')
-        .upsert([mockData], { onConflict: 'date,site_url' })
-        .select()
-        .single()
-
-      if (error) throw error
-
+    // Vérifier si GSC est configuré
+    if (!process.env.GA_SERVICE_ACCOUNT_JSON) {
       return NextResponse.json({
-        success: true,
-        message: 'Métriques GSC collectées (MODE MOCK - Configurez Google Search Console pour vraies données)',
-        date: targetDate,
-        data,
-        mock: true
-      })
+        success: false,
+        error: 'Google Search Console non configuré',
+        message: 'GA_SERVICE_ACCOUNT_JSON requis'
+      }, { status: 503 })
     }
 
-    // TODO: Implémenter la vraie collecte avec Google Search Console API
-    // Pour l'instant, utiliser des données mock
-    const mockData = generateMockGSCData(targetDate, siteUrl)
+    // Collecter les données GSC
+    console.log('🔍 Collecte des métriques Google Search Console depuis l\'API...')
+
+    const gscData = await collectRealGSCData(domain, targetDate)
 
     const { data, error } = await supabase
       .from('seo_gsc_metrics_daily')
-      .upsert([mockData], { onConflict: 'date,site_url' })
+      .upsert([gscData], { onConflict: 'date,domain' })
       .select()
       .single()
 
@@ -105,10 +98,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Métriques GSC collectées (implémentation complète à venir)',
+      message: 'Métriques Google Search Console collectées avec succès',
       date: targetDate,
-      data,
-      note: 'Configurez GOOGLE_SERVICE_ACCOUNT_EMAIL et GOOGLE_PRIVATE_KEY pour activer la collecte réelle'
+      data
     })
 
   } catch (error: any) {
@@ -140,7 +132,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const startDate = searchParams.get('startDate') || get30DaysAgo()
-    const endDate = searchParams.get('endDate') || get3DaysAgo()
+    const endDate = searchParams.get('endDate') || getYesterday()
 
     const supabase = getSupabaseClient()
 
@@ -177,95 +169,148 @@ export async function GET(request: NextRequest) {
 // FONCTIONS UTILITAIRES
 // ============================================
 
-function generateMockGSCData(date: string, siteUrl: string) {
-  return {
-    site_url: siteUrl,
-    date,
-    clicks: Math.floor(Math.random() * 500) + 150,
-    impressions: Math.floor(Math.random() * 15000) + 5000,
-    ctr: Math.random() * 3 + 2,
-    average_position: Math.random() * 15 + 10,
-    top_queries: [
-      {
-        query: 'prêt rapide',
-        clicks: 85,
-        impressions: 2500,
-        ctr: 3.4,
-        position: 5.2
-      },
-      {
-        query: 'prêt argent rapide',
-        clicks: 62,
-        impressions: 1800,
-        ctr: 3.4,
-        position: 6.8
-      },
-      {
-        query: 'prêt personnel rapide',
-        clicks: 41,
-        impressions: 1200,
-        ctr: 3.4,
-        position: 8.3
-      },
-      {
-        query: 'prêt en ligne rapide',
-        clicks: 28,
-        impressions: 950,
-        ctr: 2.9,
-        position: 11.2
-      },
-      {
-        query: 'crédit rapide canada',
-        clicks: 19,
-        impressions: 680,
-        ctr: 2.8,
-        position: 13.5
+/**
+ * Collecte les vraies données depuis l'API Google Search Console
+ */
+async function collectRealGSCData(domain: string, date: string) {
+  const credentials = JSON.parse(process.env.GA_SERVICE_ACCOUNT_JSON!)
+  const auth = new google.auth.GoogleAuth({
+    credentials,
+    scopes: ['https://www.googleapis.com/auth/webmasters.readonly']
+  })
+
+  const searchconsole = google.searchconsole({ version: 'v1', auth })
+  const siteUrl = `sc-domain:${domain}`
+
+  try {
+    // 1. Métriques globales
+    const overviewResponse = await searchconsole.searchanalytics.query({
+      siteUrl,
+      requestBody: {
+        startDate: date,
+        endDate: date,
+        dimensions: [],
+        rowLimit: 1
       }
-    ],
-    top_pages: [
-      {
-        page: 'https://solutionargentrapide.ca/',
-        clicks: 180,
-        impressions: 5500,
-        ctr: 3.3
-      },
-      {
-        page: 'https://solutionargentrapide.ca/demande',
-        clicks: 120,
-        impressions: 3200,
-        ctr: 3.8
-      },
-      {
-        page: 'https://solutionargentrapide.ca/about',
-        clicks: 45,
-        impressions: 1500,
-        ctr: 3.0
+    })
+
+    const overview = overviewResponse.data.rows?.[0] || {
+      clicks: 0,
+      impressions: 0,
+      ctr: 0,
+      position: 0
+    }
+
+    // 2. Top queries
+    const queriesResponse = await searchconsole.searchanalytics.query({
+      siteUrl,
+      requestBody: {
+        startDate: date,
+        endDate: date,
+        dimensions: ['query'],
+        rowLimit: 100
       }
-    ],
-    desktop_clicks: Math.floor(Math.random() * 200) + 80,
-    mobile_clicks: Math.floor(Math.random() * 250) + 120,
-    tablet_clicks: Math.floor(Math.random() * 50) + 20,
-    top_countries: [
-      { country: 'CAN', clicks: 420, impressions: 14000 }
-    ],
-    desktop_impressions: Math.floor(Math.random() * 5000) + 3000,
-    mobile_impressions: Math.floor(Math.random() * 8000) + 5000,
-    rich_results_impressions: Math.floor(Math.random() * 500) + 100,
-    total_indexed_pages: 45,
-    total_submitted_pages: 52,
-    coverage_issues: 3,
-    collected_at: new Date().toISOString()
+    })
+
+    const topQueries = (queriesResponse.data.rows || []).slice(0, 20).map((row: any) => ({
+      query: row.keys?.[0] || '',
+      clicks: row.clicks || 0,
+      impressions: row.impressions || 0,
+      ctr: row.ctr || 0,
+      position: row.position || 0
+    }))
+
+    // 3. Top pages
+    const pagesResponse = await searchconsole.searchanalytics.query({
+      siteUrl,
+      requestBody: {
+        startDate: date,
+        endDate: date,
+        dimensions: ['page'],
+        rowLimit: 100
+      }
+    })
+
+    const topPages = (pagesResponse.data.rows || []).slice(0, 20).map((row: any) => ({
+      page: row.keys?.[0] || '',
+      clicks: row.clicks || 0,
+      impressions: row.impressions || 0,
+      ctr: row.ctr || 0,
+      position: row.position || 0
+    }))
+
+    // 4. Breakdown par device
+    const devicesResponse = await searchconsole.searchanalytics.query({
+      siteUrl,
+      requestBody: {
+        startDate: date,
+        endDate: date,
+        dimensions: ['device'],
+        rowLimit: 10
+      }
+    })
+
+    const deviceBreakdown: any = {}
+    devicesResponse.data.rows?.forEach((row: any) => {
+      const device = row.keys?.[0] || 'unknown'
+      deviceBreakdown[device] = {
+        clicks: row.clicks || 0,
+        impressions: row.impressions || 0,
+        ctr: row.ctr || 0,
+        position: row.position || 0
+      }
+    })
+
+    // 5. Breakdown par country
+    const countriesResponse = await searchconsole.searchanalytics.query({
+      siteUrl,
+      requestBody: {
+        startDate: date,
+        endDate: date,
+        dimensions: ['country'],
+        rowLimit: 10
+      }
+    })
+
+    const countryBreakdown: any = {}
+    countriesResponse.data.rows?.forEach((row: any) => {
+      const country = row.keys?.[0] || 'unknown'
+      countryBreakdown[country] = {
+        clicks: row.clicks || 0,
+        impressions: row.impressions || 0,
+        ctr: row.ctr || 0,
+        position: row.position || 0
+      }
+    })
+
+    return {
+      domain,
+      date,
+      total_clicks: overview.clicks || 0,
+      total_impressions: overview.impressions || 0,
+      avg_ctr: overview.ctr || 0,
+      avg_position: overview.position || 0,
+      top_queries: topQueries,
+      top_pages: topPages,
+      device_breakdown: deviceBreakdown,
+      country_breakdown: countryBreakdown,
+      collected_at: new Date().toISOString()
+    }
+
+  } catch (error: any) {
+    console.error('❌ Erreur lors de l\'appel API Google Search Console:', error)
+    throw error
   }
 }
 
-function get3DaysAgo(): string {
-  const date = new Date()
-  date.setDate(date.getDate() - 3)
-  return date.toISOString().split('T')[0]
+function getYesterday(): string {
+  const yesterday = new Date()
+  yesterday.setDate(yesterday.getDate() - 4) // GSC a un délai de ~3 jours
+  return yesterday.toISOString().split('T')[0]
 }
 
 function get30DaysAgo(): string {
   const date = new Date()
-  date.setDate(date.getDate() - 30)
+  date.setDate(date.getDate() - 34) // 30 jours + 4 jours de délai
   return date.toISOString().split('T')[0]
 }
