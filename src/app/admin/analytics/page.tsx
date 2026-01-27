@@ -549,16 +549,20 @@ export default function AnalyticsPage() {
                     const count = cell?.event_count || 0
                     const maxCount = Math.max(...heatmap.map(h => h.event_count || 0))
                     const intensity = maxCount > 0 ? count / maxCount : 0
+
+                    // Palette plus visible: même les petites valeurs sont colorées
                     const bgColor =
-                      intensity > 0.7
+                      count === 0
+                        ? 'bg-gray-100'
+                        : intensity > 0.6
                         ? 'bg-green-600'
-                        : intensity > 0.4
+                        : intensity > 0.3
+                        ? 'bg-green-500'
+                        : intensity > 0.15
                         ? 'bg-green-400'
-                        : intensity > 0.2
-                        ? 'bg-green-200'
-                        : intensity > 0
-                        ? 'bg-green-100'
-                        : 'bg-gray-100'
+                        : intensity > 0.05
+                        ? 'bg-green-300'
+                        : 'bg-green-200'
 
                     return (
                       <div
