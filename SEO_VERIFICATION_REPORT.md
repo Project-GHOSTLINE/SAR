@@ -14,10 +14,10 @@
 |---------|--------|-----------------|---------------------|
 | **Google Analytics 4** | ✅ OPERATIONAL | ✅ OUI | 2026-01-20 |
 | **Semrush** | ✅ OPERATIONAL | ✅ OUI | 2026-01-22 |
-| **Google Search Console** | ⚠️ NOT CONFIGURED | ❌ NON | N/A |
+| **Google Search Console** | ⏳ IN CONFIGURATION | ⏸️ PENDING | N/A |
 | **Supabase Collections** | ✅ OPERATIONAL | ✅ OUI | Active |
 
-**Taux de Réussite**: 66.7% (2/3 services opérationnels)
+**Taux de Réussite**: 66.7% (2/3 services opérationnels, 1/3 en configuration)
 
 ---
 
@@ -125,25 +125,28 @@
 
 ---
 
-### ⚠️ 3. GOOGLE SEARCH CONSOLE (GSC)
+### ⏳ 3. GOOGLE SEARCH CONSOLE (GSC)
 
 #### Configuration
-- [ ] API non implémentée
-- [ ] Credentials disponibles (utilise GA_SERVICE_ACCOUNT_JSON)
-- [ ] Endpoint à créer: `/api/seo/gsc`
+- [x] API implémentée ✅
+- [x] Credentials disponibles (utilise GA_SERVICE_ACCOUNT_JSON) ✅
+- [x] Endpoints créés ✅
+  - GET `/api/seo/gsc` - Données en temps réel
+  - POST `/api/seo/collect/gsc` - Collection quotidienne
+  - GET `/api/seo/collect/gsc` - Récupération historique
+- [x] Table Supabase créée (`seo_gsc_metrics_daily`) ✅
+- [x] API Google Search Console activée ✅
+- [ ] Service account ajouté à Search Console ⏳
 
 #### Status
-**NON CONFIGURÉ** - API Search Console pas encore intégrée
+**EN CONFIGURATION** - API activée, en attente d'ajout du service account
 
-#### Recommandation
-```bash
-# TODO: Implémenter Google Search Console API
-# URL: https://developers.google.com/webmaster-tools/v1
-# Credentials: Utiliser GA_SERVICE_ACCOUNT_JSON
-# Endpoint: POST /api/seo/gsc
-```
+#### Prochaines Étapes
+1. Ajouter service account à Search Console (voir `GSC_SETUP_GUIDE.md`)
+2. Tester les endpoints une fois le service account configuré
+3. Intégrer les métriques au dashboard SEO
 
-**Verdict GSC**: ⚠️ **À IMPLÉMENTER**
+**Verdict GSC**: ⏳ **EN COURS DE CONFIGURATION**
 
 ---
 
