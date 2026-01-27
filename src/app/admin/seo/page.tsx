@@ -53,12 +53,29 @@ interface SemrushData {
   total_backlinks: number
 }
 
+interface GSCData {
+  domain: string
+  date: string
+  total_clicks: number
+  total_impressions: number
+  avg_ctr: number
+  avg_position: number
+  top_queries?: Array<{
+    query: string
+    clicks: number
+    impressions: number
+    ctr: number
+    position: number
+  }>
+}
+
 type DetailView = 'users' | 'devices' | 'geography' | 'traffic' | null
 
 export default function SEOPage() {
   const router = useRouter()
   const [ga4Data, setGA4Data] = useState<GA4Data | null>(null)
   const [semrushData, setSemrushData] = useState<SemrushData | null>(null)
+  const [gscData, setGscData] = useState<GSCData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [period, setPeriod] = useState('30d')
@@ -91,6 +108,15 @@ export default function SEOPage() {
         const semrushJson = await semrushResponse.json()
         if (semrushJson.success && semrushJson.data.length > 0) {
           setSemrushData(semrushJson.data[0])
+        }
+      }
+
+      // Fetch Google Search Console data
+      const gscResponse = await fetch(`/api/seo/collect/gsc?startDate=${startDate}&endDate=${endDate}`)
+      if (gscResponse.ok) {
+        const gscJson = await gscResponse.json()
+        if (gscJson.success && gscJson.data.length > 0) {
+          setGscData(gscJson.data[0])
         }
       }
     } catch (err) {
@@ -261,18 +287,88 @@ export default function SEOPage() {
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">Google Search Console</h2>
-                <p className="text-sm text-gray-500">Données agrégées des 30 derniers jours</p>
+                <p className="text-sm text-gray-500">
+                  Données du {gscData?.date || '...'}
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="py-12 text-center">
-            <Search className="mx-auto text-gray-300 mb-4" size={48} />
-            <p className="text-gray-600 font-medium">Aucune donnée disponible pour cette période</p>
-            <p className="text-sm text-gray-500 mt-2">
-              API Google Search Console non configurée
-            </p>
-          </div>
+          {loading ? (
+            <div className="py-12 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+              <p className="mt-4 text-gray-500">Chargement...</p>
+            </div>
+          ) : gscData ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <MetricCard
+                  icon={<MousePointer size={20} />}
+                  label="Clics totaux"
+                  value={gscData.total_clicks.toLocaleString()}
+                  trend={null}
+                  color="blue"
+                />
+                <MetricCard
+                  icon={<BarChart3 size={20} />}
+                  label="Impressions"
+                  value={gscData.total_impressions.toLocaleString()}
+                  trend={null}
+                  color="green"
+                />
+                <MetricCard
+                  icon={<TrendingUp size={20} />}
+                  label="CTR Moyen"
+                  value={`${(gscData.avg_ctr * 100).toFixed(2)}%`}
+                  trend={null}
+                  color="purple"
+                />
+                <MetricCard
+                  icon={<Search size={20} />}
+                  label="Position moyenne"
+                  value={gscData.avg_position.toFixed(1)}
+                  trend={null}
+                  color="orange"
+                />
+              </div>
+
+              {gscData.top_queries && gscData.top_queries.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-gray-100">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-4">Top 5 Requêtes</h3>
+                  <div className="space-y-2">
+                    {gscData.top_queries.slice(0, 5).map((query, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">{query.query}</p>
+                          <p className="text-xs text-gray-500">
+                            Position #{query.position.toFixed(1)} • CTR {(query.ctr * 100).toFixed(1)}%
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-semibold text-gray-900">{query.clicks} clics</p>
+                          <p className="text-xs text-gray-500">{query.impressions.toLocaleString()} impressions</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6 pt-6 border-t border-gray-100">
+                <p className="text-xs text-gray-500">
+                  ✅ Données en temps réel via Google Search Console API
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="py-12 text-center">
+              <Search className="mx-auto text-gray-300 mb-4" size={48} />
+              <p className="text-gray-600 font-medium">Aucune donnée disponible</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Les données Google Search Console seront disponibles après la première collecte
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Semrush Section */}
