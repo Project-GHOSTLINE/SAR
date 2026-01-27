@@ -172,7 +172,39 @@ interface LinkedClient {
   }
 }
 
-type TabType = 'overview' | 'ip-analysis' | 'utm-campaigns' | 'events' | 'security' | 'clients-linked'
+interface UnifiedClientMetrics {
+  client_id: string
+  metrics: {
+    client_name: string
+    client_email: string
+    client_phone: string
+    client_status: string
+    total_contact_messages: number
+    total_support_tickets: number
+    total_email_messages: number
+    total_applications: number
+    total_vopay_transactions: number
+    total_sessions: number
+    total_telemetry_events: number
+    first_contact_date: string
+    last_activity_date: string
+    engagement_score: number
+  }
+  coherence: {
+    score: number
+    status: 'excellent' | 'good' | 'concerning' | 'critical'
+    flags: string[]
+    checks_performed: number
+  }
+  summary: {
+    total_interactions: number
+    total_transactions: number
+    data_completeness: number
+    profile_risk: 'high' | 'low'
+  }
+}
+
+type TabType = 'overview' | 'ip-analysis' | 'utm-campaigns' | 'events' | 'security' | 'clients-linked' | 'unified-metrics'
 type SortField = 'pageViews' | 'sessions' | 'duration' | 'anomalyScore' | 'firstSeen'
 type FilterType = 'all' | 'suspicious' | 'bots' | 'humans'
 

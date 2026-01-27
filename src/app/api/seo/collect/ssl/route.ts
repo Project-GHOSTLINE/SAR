@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     console.log('⏳ Cela peut prendre 60-120 secondes...')
 
     const startTime = Date.now()
-    const sslData = await scanSSLLabs(host, force)
+    const sslData: any = await scanSSLLabs(host, force)
     const scanDuration = Math.round((Date.now() - startTime) / 1000)
 
     // Ajouter métadonnées
