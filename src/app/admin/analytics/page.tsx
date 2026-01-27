@@ -104,6 +104,39 @@ interface HeatmapData {
   event_count: number
 }
 
+interface IPDetail {
+  ip_hash: string
+  session_count: number
+  linked_sessions: number
+  anonymous_sessions: number
+  conversion_rate: string
+  devices: string[]
+  countries: string[]
+  sources: string[]
+  first_seen: string
+  last_seen: string
+  total_duration_seconds: number
+  avg_duration_seconds: number
+  total_events: number
+  total_page_views: number
+  avg_events_per_session: string
+}
+
+interface PageFlow {
+  source: string
+  target: string
+  flow_count: number
+  flow_label: string
+}
+
+interface ReferrerData {
+  domain: string
+  sessions: number
+  conversions: number
+  conversion_rate: string
+  sample_urls: string[]
+}
+
 export default function AnalyticsPage() {
   const [funnel, setFunnel] = useState<FunnelStage[]>([])
   const [timeline, setTimeline] = useState<TimelineData[]>([])
@@ -113,6 +146,9 @@ export default function AnalyticsPage() {
   const [pages, setPages] = useState<PageMetric[]>([])
   const [sessions, setSessions] = useState<SessionDetail[]>([])
   const [heatmap, setHeatmap] = useState<HeatmapData[]>([])
+  const [ipDetails, setIpDetails] = useState<IPDetail[]>([])
+  const [pageFlow, setPageFlow] = useState<PageFlow[]>([])
+  const [referrers, setReferrers] = useState<ReferrerData[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -126,7 +162,10 @@ export default function AnalyticsPage() {
           sourcesRes,
           pagesRes,
           sessionsRes,
-          heatmapRes
+          heatmapRes,
+          ipDetailsRes,
+          pageFlowRes,
+          referrersRes
         ] = await Promise.all([
           fetch('/api/analytics/funnel'),
           fetch('/api/analytics/timeline'),
@@ -135,7 +174,10 @@ export default function AnalyticsPage() {
           fetch('/api/analytics/sources'),
           fetch('/api/analytics/pages'),
           fetch('/api/analytics/sessions?limit=20'),
-          fetch('/api/analytics/heatmap')
+          fetch('/api/analytics/heatmap'),
+          fetch('/api/analytics/ip-details'),
+          fetch('/api/analytics/page-flow'),
+          fetch('/api/analytics/referrers')
         ])
 
         const [
@@ -146,7 +188,10 @@ export default function AnalyticsPage() {
           sourcesData,
           pagesData,
           sessionsData,
-          heatmapData
+          heatmapData,
+          ipDetailsData,
+          pageFlowData,
+          referrersData
         ] = await Promise.all([
           funnelRes.json(),
           timelineRes.json(),
@@ -155,7 +200,10 @@ export default function AnalyticsPage() {
           sourcesRes.json(),
           pagesRes.json(),
           sessionsRes.json(),
-          heatmapRes.json()
+          heatmapRes.json(),
+          ipDetailsRes.json(),
+          pageFlowRes.json(),
+          referrersRes.json()
         ])
 
         setFunnel(funnelData.data || [])
@@ -166,6 +214,9 @@ export default function AnalyticsPage() {
         setPages(pagesData.data || [])
         setSessions(sessionsData.data || [])
         setHeatmap(heatmapData.data || [])
+        setIpDetails(ipDetailsData.data || [])
+        setPageFlow(pageFlowData.data || [])
+        setReferrers(referrersData.data || [])
       } catch (error) {
         console.error('Failed to fetch analytics:', error)
       } finally {
@@ -643,6 +694,163 @@ export default function AnalyticsPage() {
                         hour: '2-digit',
                         minute: '2-digit'
                       })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* IP Details - Aggregated by IP Hash */}
+        <div className="bg-white rounded-lg shadow p-6 mt-8">
+          <h2 className="text-xl font-semibold mb-4">📍 Analyse par IP (Top 50 Visiteurs)</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 text-xs">
+              <thead>
+                <tr>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">IP Hash</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Sessions</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Conversions</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Taux Conv.</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Devices</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Pays</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Sources</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Events Tot.</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Durée Moy.</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Première Visite</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {ipDetails.map((ip, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-3 py-2 text-xs font-mono text-gray-900">{ip.ip_hash}</td>
+                    <td className="px-3 py-2 text-xs text-blue-600 font-bold">{ip.session_count}</td>
+                    <td className="px-3 py-2 text-xs text-green-600 font-bold">{ip.linked_sessions}</td>
+                    <td className="px-3 py-2 text-xs">
+                      <span className={`px-2 py-1 rounded-full ${
+                        parseFloat(ip.conversion_rate) > 5 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {ip.conversion_rate}%
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-xs text-gray-700">
+                      {ip.devices.slice(0, 2).join(', ')}
+                      {ip.devices.length > 2 && ` +${ip.devices.length - 2}`}
+                    </td>
+                    <td className="px-3 py-2 text-xs font-medium text-blue-600">
+                      {ip.countries.join(', ')}
+                    </td>
+                    <td className="px-3 py-2 text-xs text-gray-600">
+                      {ip.sources.slice(0, 2).join(', ')}
+                      {ip.sources.length > 2 && ` +${ip.sources.length - 2}`}
+                    </td>
+                    <td className="px-3 py-2 text-xs text-purple-600">{ip.total_events}</td>
+                    <td className="px-3 py-2 text-xs text-green-600">{ip.avg_duration_seconds}s</td>
+                    <td className="px-3 py-2 text-xs text-gray-500">
+                      {new Date(ip.first_seen).toLocaleDateString('fr-CA', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Time per Page Bar Chart */}
+        <div className="bg-white rounded-lg shadow p-6 mt-8">
+          <h2 className="text-xl font-semibold mb-4">⏱️ Temps Passé par Page (Durée Moyenne)</h2>
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={pages} layout="horizontal">
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" label={{ value: 'Durée (secondes)', position: 'insideBottom', offset: -5 }} />
+              <YAxis dataKey="page_url" type="category" width={180} />
+              <Tooltip />
+              <Bar dataKey="avg_duration_seconds" fill="#10b981" name="Durée Moyenne (s)" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Page Flow Sankey */}
+        <div className="bg-white rounded-lg shadow p-6 mt-8">
+          <h2 className="text-xl font-semibold mb-4">🔀 Flux de Navigation (Parcours Pages)</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Page Origine</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">→</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Page Destination</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Flux (Nb Visiteurs)</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visualisation</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {pageFlow.map((flow, idx) => {
+                  const maxFlow = Math.max(...pageFlow.map(f => f.flow_count))
+                  const widthPercent = (flow.flow_count / maxFlow) * 100
+                  return (
+                    <tr key={idx} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-sm text-gray-900 font-medium">{flow.source || '/'}</td>
+                      <td className="px-6 py-4 text-sm text-center text-gray-400">→</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 font-medium">{flow.target || '/'}</td>
+                      <td className="px-6 py-4 text-sm font-bold text-blue-600">{flow.flow_count}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <div className="w-full bg-gray-200 rounded-full h-4">
+                          <div
+                            className="bg-blue-500 h-4 rounded-full flex items-center justify-center text-xs text-white"
+                            style={{ width: `${widthPercent}%` }}
+                          >
+                            {widthPercent > 20 ? flow.flow_count : ''}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Referrer Domains */}
+        <div className="bg-white rounded-lg shadow p-6 mt-8">
+          <h2 className="text-xl font-semibold mb-4">🌐 Sites Referrers (D'où viennent les visiteurs)</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Domaine Referrer</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sessions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Conversions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Taux Conv.</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Exemples URLs</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {referrers.map((ref, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm font-medium text-blue-600">{ref.domain}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{ref.sessions}</td>
+                    <td className="px-6 py-4 text-sm text-green-600">{ref.conversions}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`px-2 py-1 rounded-full ${
+                        parseFloat(ref.conversion_rate) > 3 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {ref.conversion_rate}%
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-gray-500 max-w-xs truncate">
+                      {ref.sample_urls.slice(0, 1).map(url => (
+                        <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                          {url}
+                        </a>
+                      ))}
                     </td>
                   </tr>
                 ))}
