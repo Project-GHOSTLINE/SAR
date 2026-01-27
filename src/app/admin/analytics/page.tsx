@@ -53,34 +53,119 @@ interface JourneyData {
   count: number
 }
 
+interface SourceData {
+  utm_source: string | null
+  utm_medium: string | null
+  sessions: number
+  conversions: number
+  conversion_rate: number
+}
+
+interface PageMetric {
+  page_url: string
+  views: number
+  unique_sessions: number
+  avg_duration_seconds: number
+  views_per_session: string
+}
+
+interface SessionDetail {
+  session_id: string
+  client_id: string
+  created_at: string
+  last_activity_at: string
+  duration_seconds: number
+  device: {
+    type: string
+    browser: string
+    os: string
+  }
+  source: {
+    referrer: string | null
+    utm_source: string | null
+    utm_medium: string | null
+    utm_campaign: string | null
+  }
+  location: {
+    country_code: string | null
+    asn: number | null
+  }
+  events: {
+    total: number
+    page_views: number
+    form_interactions: number
+  }
+  ip_hash: string | null
+}
+
+interface HeatmapData {
+  day_of_week: number
+  hour: number
+  event_count: number
+}
+
 export default function AnalyticsPage() {
   const [funnel, setFunnel] = useState<FunnelStage[]>([])
   const [timeline, setTimeline] = useState<TimelineData[]>([])
   const [abandons, setAbandons] = useState<AbandonData[]>([])
   const [journeys, setJourneys] = useState<JourneyData[]>([])
+  const [sources, setSources] = useState<SourceData[]>([])
+  const [pages, setPages] = useState<PageMetric[]>([])
+  const [sessions, setSessions] = useState<SessionDetail[]>([])
+  const [heatmap, setHeatmap] = useState<HeatmapData[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchAnalytics() {
       try {
-        const [funnelRes, timelineRes, abandonsRes, journeysRes] = await Promise.all([
+        const [
+          funnelRes,
+          timelineRes,
+          abandonsRes,
+          journeysRes,
+          sourcesRes,
+          pagesRes,
+          sessionsRes,
+          heatmapRes
+        ] = await Promise.all([
           fetch('/api/analytics/funnel'),
           fetch('/api/analytics/timeline'),
           fetch('/api/analytics/abandons'),
-          fetch('/api/analytics/journeys')
+          fetch('/api/analytics/journeys'),
+          fetch('/api/analytics/sources'),
+          fetch('/api/analytics/pages'),
+          fetch('/api/analytics/sessions?limit=20'),
+          fetch('/api/analytics/heatmap')
         ])
 
-        const [funnelData, timelineData, abandonsData, journeysData] = await Promise.all([
+        const [
+          funnelData,
+          timelineData,
+          abandonsData,
+          journeysData,
+          sourcesData,
+          pagesData,
+          sessionsData,
+          heatmapData
+        ] = await Promise.all([
           funnelRes.json(),
           timelineRes.json(),
           abandonsRes.json(),
-          journeysRes.json()
+          journeysRes.json(),
+          sourcesRes.json(),
+          pagesRes.json(),
+          sessionsRes.json(),
+          heatmapRes.json()
         ])
 
         setFunnel(funnelData.data || [])
         setTimeline(timelineData.data || [])
         setAbandons(abandonsData.data || [])
         setJourneys(journeysData.data || [])
+        setSources(sourcesData.data || [])
+        setPages(pagesData.data || [])
+        setSessions(sessionsData.data || [])
+        setHeatmap(heatmapData.data || [])
       } catch (error) {
         console.error('Failed to fetch analytics:', error)
       } finally {
@@ -335,6 +420,229 @@ export default function AnalyticsPage() {
                     <td className="px-6 py-4 text-sm text-gray-500">{stage.avg_events}</td>
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {Math.round(stage.avg_seconds)}s
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Traffic Sources Table */}
+        <div className="bg-white rounded-lg shadow p-6 mt-8">
+          <h2 className="text-xl font-semibold mb-4">Sources de Trafic (UTM + Referrer)</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Source
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Medium
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Sessions
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Conversions
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Taux Conv.
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {sources.map((source, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                      {source.utm_source || 'Direct'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {source.utm_medium || '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-blue-600">{source.sessions}</td>
+                    <td className="px-6 py-4 text-sm text-green-600">{source.conversions}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-purple-600">
+                      {source.conversion_rate}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Activity Heatmap */}
+        <div className="bg-white rounded-lg shadow p-6 mt-8">
+          <h2 className="text-xl font-semibold mb-4">Heatmap d'Activité (7j x 24h)</h2>
+          <div className="overflow-x-auto">
+            <div className="grid grid-cols-25 gap-1 text-xs">
+              <div className="col-span-1"></div>
+              {Array.from({ length: 24 }, (_, i) => (
+                <div key={i} className="text-center text-gray-500 font-medium">
+                  {i}h
+                </div>
+              ))}
+              {['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'].map((day, dayIdx) => (
+                <div key={dayIdx} className="contents">
+                  <div className="text-right pr-2 text-gray-500 font-medium">{day}</div>
+                  {Array.from({ length: 24 }, (_, hourIdx) => {
+                    const cell = heatmap.find(
+                      h => h.day_of_week === dayIdx && h.hour === hourIdx
+                    )
+                    const count = cell?.event_count || 0
+                    const maxCount = Math.max(...heatmap.map(h => h.event_count || 0))
+                    const intensity = maxCount > 0 ? count / maxCount : 0
+                    const bgColor =
+                      intensity > 0.7
+                        ? 'bg-green-600'
+                        : intensity > 0.4
+                        ? 'bg-green-400'
+                        : intensity > 0.2
+                        ? 'bg-green-200'
+                        : intensity > 0
+                        ? 'bg-green-100'
+                        : 'bg-gray-100'
+
+                    return (
+                      <div
+                        key={hourIdx}
+                        className={`h-8 ${bgColor} rounded flex items-center justify-center text-xs text-gray-700`}
+                        title={`${day} ${hourIdx}h: ${count} events`}
+                      >
+                        {count > 0 ? count : ''}
+                      </div>
+                    )
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Page Metrics Table */}
+        <div className="bg-white rounded-lg shadow p-6 mt-8">
+          <h2 className="text-xl font-semibold mb-4">Métriques par Page (7 derniers jours)</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Page URL
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Vues
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Sessions Uniques
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Durée Moy.
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Vues/Session
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {pages.map((page, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                      {page.page_url || '/'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-blue-600">{page.views}</td>
+                    <td className="px-6 py-4 text-sm text-purple-600">{page.unique_sessions}</td>
+                    <td className="px-6 py-4 text-sm text-green-600">
+                      {page.avg_duration_seconds}s
+                    </td>
+                    <td className="px-6 py-4 text-sm text-orange-600">{page.views_per_session}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Recent Sessions Detail Table */}
+        <div className="bg-white rounded-lg shadow p-6 mt-8">
+          <h2 className="text-xl font-semibold mb-4">Sessions Récentes (Détails par IP)</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 text-xs">
+              <thead>
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Session ID
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    IP Hash
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Statut
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Device
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Pays
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Source
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Events
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Durée
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Créé
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {sessions.map((session, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-xs font-mono text-gray-900">
+                      {session.session_id}
+                    </td>
+                    <td className="px-4 py-3 text-xs font-mono text-gray-500">
+                      {session.ip_hash || 'N/A'}
+                    </td>
+                    <td className="px-4 py-3 text-xs">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          session.client_id === 'linked'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {session.client_id === 'linked' ? 'Lié' : 'Anonyme'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-700">
+                      {session.device.type} - {session.device.browser}
+                    </td>
+                    <td className="px-4 py-3 text-xs font-medium text-blue-600">
+                      {session.location.country_code || 'Unknown'}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-600">
+                      {session.source.utm_source ||
+                       (session.source.referrer ? 'Referrer' : 'Direct')}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-purple-600">
+                      {session.events.total} ({session.events.page_views}pg)
+                    </td>
+                    <td className="px-4 py-3 text-xs text-green-600">
+                      {session.duration_seconds}s
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-500">
+                      {new Date(session.created_at).toLocaleString('fr-CA', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
                     </td>
                   </tr>
                 ))}
