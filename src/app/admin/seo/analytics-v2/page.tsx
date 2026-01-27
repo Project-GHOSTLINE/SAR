@@ -927,7 +927,7 @@ function OverviewTab({ timeline, deviceBreakdown, geoBreakdown, metrics }: Overv
   )
 }
 
-// IP Analysis Tab - Will add next
+// IP Analysis Tab
 interface IPAnalysisTabProps {
   traces: IPTrace[]
   searchQuery: string
@@ -943,10 +943,243 @@ interface IPAnalysisTabProps {
 }
 
 function IPAnalysisTab(props: IPAnalysisTabProps) {
-  // Implementation similar to current page but enhanced
+  const {
+    traces,
+    searchQuery,
+    setSearchQuery,
+    filterType,
+    setFilterType,
+    sortField,
+    setSortField,
+    sortDesc,
+    setSortDesc,
+    setSelectedIP
+  } = props
+
+  // Apply filters and sort
+  let filteredTraces = [...traces]
+
+  // Search filter
+  if (searchQuery) {
+    filteredTraces = filteredTraces.filter(t =>
+      t.ip.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.location.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.location.country.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }
+
+  // Type filter
+  switch (filterType) {
+    case 'suspicious':
+      filteredTraces = filteredTraces.filter(t => t.anomalyScore >= 30 && !t.isBot)
+      break
+    case 'bots':
+      filteredTraces = filteredTraces.filter(t => t.isBot)
+      break
+    case 'humans':
+      filteredTraces = filteredTraces.filter(t => t.anomalyScore < 30)
+      break
+  }
+
+  // Sort
+  filteredTraces.sort((a, b) => {
+    let aVal: number, bVal: number
+
+    switch (sortField) {
+      case 'pageViews':
+        aVal = a.totalPageViews
+        bVal = b.totalPageViews
+        break
+      case 'sessions':
+        aVal = a.totalSessions
+        bVal = b.totalSessions
+        break
+      case 'duration':
+        aVal = a.avgSessionDuration
+        bVal = b.avgSessionDuration
+        break
+      case 'anomalyScore':
+        aVal = a.anomalyScore
+        bVal = b.anomalyScore
+        break
+      case 'firstSeen':
+        aVal = new Date(a.firstSeen).getTime()
+        bVal = new Date(b.firstSeen).getTime()
+        break
+      default:
+        aVal = 0
+        bVal = 0
+    }
+
+    return sortDesc ? bVal - aVal : aVal - bVal
+  })
+
   return (
-    <div>
-      <p className="text-gray-600">Table IP analysis - à implémenter</p>
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Rechercher IP, ville, pays..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        <select
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value as FilterType)}
+          className="px-4 py-2 border border-gray-300 rounded-lg"
+        >
+          <option value="all">Toutes les IP</option>
+          <option value="humans">Humains uniquement</option>
+          <option value="suspicious">Suspectes</option>
+          <option value="bots">Bots</option>
+        </select>
+
+        <div className="text-sm text-gray-600 flex items-center">
+          {filteredTraces.length} résultat{filteredTraces.length > 1 ? 's' : ''}
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse bg-white rounded-lg border border-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                IP / Localisation
+              </th>
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                onClick={() => {
+                  setSortField('sessions')
+                  setSortDesc(!sortDesc)
+                }}
+              >
+                Sessions {sortField === 'sessions' && (sortDesc ? '↓' : '↑')}
+              </th>
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                onClick={() => {
+                  setSortField('pageViews')
+                  setSortDesc(!sortDesc)
+                }}
+              >
+                Pages {sortField === 'pageViews' && (sortDesc ? '↓' : '↑')}
+              </th>
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                onClick={() => {
+                  setSortField('duration')
+                  setSortDesc(!sortDesc)
+                }}
+              >
+                Durée {sortField === 'duration' && (sortDesc ? '↓' : '↑')}
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Device/Traffic
+              </th>
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                onClick={() => {
+                  setSortField('anomalyScore')
+                  setSortDesc(!sortDesc)
+                }}
+              >
+                Anomalie {sortField === 'anomalyScore' && (sortDesc ? '↓' : '↑')}
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {filteredTraces.map((trace, idx) => (
+              <tr
+                key={idx}
+                className={`hover:bg-gray-50 ${
+                  trace.isBot ? 'bg-red-50' : trace.anomalyScore >= 30 ? 'bg-orange-50' : ''
+                }`}
+              >
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    {trace.isBot ? (
+                      <Bot className="text-red-600" size={20} />
+                    ) : trace.anomalyScore >= 30 ? (
+                      <AlertTriangle className="text-orange-600" size={20} />
+                    ) : (
+                      <User className="text-green-600" size={20} />
+                    )}
+                    <div>
+                      <p className="font-mono text-sm font-semibold text-gray-900">{trace.ip}</p>
+                      <p className="text-xs text-gray-500">
+                        <MapPin size={12} className="inline mr-1" />
+                        {trace.location.city}, {trace.location.country}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900">{trace.totalSessions}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">{trace.totalPageViews}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">
+                  <Clock size={14} className="inline mr-1 text-gray-400" />
+                  {Math.round(trace.avgSessionDuration)}s
+                </td>
+                <td className="px-6 py-4">
+                  <div className="text-xs space-y-1">
+                    <div className="flex items-center gap-1">
+                      <Smartphone size={12} className="text-gray-400" />
+                      <span className="text-gray-600">{trace.device.category}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Globe size={12} className="text-gray-400" />
+                      <span className="text-gray-600">{trace.traffic.source}/{trace.traffic.medium}</span>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-full bg-gray-200 rounded-full h-2 max-w-[100px]">
+                      <div
+                        className={`h-2 rounded-full ${
+                          trace.anomalyScore >= 50 ? 'bg-red-600' :
+                          trace.anomalyScore >= 30 ? 'bg-orange-500' :
+                          'bg-green-500'
+                        }`}
+                        style={{ width: `${Math.min(100, trace.anomalyScore)}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-semibold text-gray-700 min-w-[40px]">
+                      {trace.anomalyScore}
+                    </span>
+                  </div>
+                  {trace.flags.length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {trace.flags.slice(0, 2).map((flag, i) => (
+                        <span key={i} className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded">
+                          {flag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </td>
+                <td className="px-6 py-4">
+                  <button
+                    onClick={() => setSelectedIP(trace)}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    Détails →
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
@@ -1002,9 +1235,159 @@ function UTMCampaignsTab({ campaigns }: { campaigns: UTMCampaign[] }) {
 }
 
 function EventsTab({ events }: { events: EventAnalysis[] }) {
+  // Fetch events from telemetry if not loaded
+  const [eventData, setEventData] = useState<EventAnalysis[]>(events)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (events.length === 0) {
+      fetchEvents()
+    }
+  }, [])
+
+  async function fetchEvents() {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/analytics/heatmap')
+      if (res.ok) {
+        const data = await res.json()
+        // Process heatmap data into event analysis
+        if (data.success && data.data) {
+          // Group by day/hour to create event analysis
+          const eventMap = new Map<string, EventAnalysis>()
+
+          data.data.forEach((item: any) => {
+            const key = `page_view_${item.day_name}`
+            const existing = eventMap.get(key) || {
+              event_type: 'page_view',
+              event_name: item.day_name,
+              count: 0,
+              unique_sessions: 0,
+              avg_duration_ms: 0,
+              pages: []
+            }
+
+            existing.count += item.event_count
+            existing.unique_sessions += item.unique_sessions
+            existing.avg_duration_ms += item.avg_duration_seconds * 1000
+
+            eventMap.set(key, existing)
+          })
+
+          setEventData(Array.from(eventMap.values()))
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  if (eventData.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <Activity size={48} className="mx-auto text-gray-300 mb-4" />
+        <p className="text-gray-600">Aucun événement enregistré pour cette période</p>
+        <p className="text-sm text-gray-500 mt-2">Les événements client-side (clics, page views) apparaîtront ici</p>
+      </div>
+    )
+  }
+
   return (
-    <div>
-      <p className="text-gray-600">Event analysis - à implémenter</p>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-2">
+            <Activity className="text-blue-600" size={24} />
+            <span className="text-sm text-blue-900 font-medium">Total Événements</span>
+          </div>
+          <p className="text-3xl font-bold text-blue-900">
+            {eventData.reduce((sum, e) => sum + e.count, 0).toLocaleString()}
+          </p>
+        </div>
+        <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-2">
+            <Users className="text-green-600" size={24} />
+            <span className="text-sm text-green-900 font-medium">Sessions Uniques</span>
+          </div>
+          <p className="text-3xl font-bold text-green-900">
+            {eventData.reduce((sum, e) => sum + e.unique_sessions, 0).toLocaleString()}
+          </p>
+        </div>
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-2">
+            <Clock className="text-purple-600" size={24} />
+            <span className="text-sm text-purple-900 font-medium">Durée Moy.</span>
+          </div>
+          <p className="text-3xl font-bold text-purple-900">
+            {Math.round(
+              eventData.reduce((sum, e) => sum + e.avg_duration_ms, 0) / eventData.length / 1000
+            )}s
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-semibold mb-4">📊 Événements par Type</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse bg-white rounded-lg border border-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Occurrences</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Sessions</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Durée Moy.</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pages</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {eventData
+                .sort((a, b) => b.count - a.count)
+                .map((event, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-medium">
+                        {event.event_type}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{event.event_name}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900 text-right font-semibold">
+                      {event.count.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                      {event.unique_sessions.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                      {Math.round(event.avg_duration_ms / 1000)}s
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-600">
+                      {event.pages.length > 0 ? event.pages.join(', ') : 'Toutes'}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h3 className="font-semibold text-blue-900 mb-2">💡 Insights</h3>
+        <ul className="space-y-2 text-sm text-blue-700">
+          <li>• Les événements page_view représentent la majorité du trafic</li>
+          <li>• Les clics sont trackés via le système heatmap</li>
+          <li>• Les événements form_start/form_step sont disponibles pour le funnel</li>
+        </ul>
+      </div>
     </div>
   )
 }
@@ -1079,26 +1462,248 @@ function SecurityTab({ traces, stats }: { traces: IPTrace[]; stats: any }) {
 function IPDetailModalV2({ trace, onClose }: { trace: IPTrace; onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">{trace.ip}</h2>
+            <h2 className="text-xl font-semibold text-gray-900 font-mono">{trace.ip}</h2>
             <p className="text-sm text-gray-500">
+              <MapPin size={14} className="inline mr-1" />
               {trace.location.city}, {trace.location.region}, {trace.location.country}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 hover:text-gray-900"
           >
             ✕
           </button>
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-88px)]">
-          <p className="text-gray-600">Enhanced IP details - à implémenter</p>
+          {/* Anomaly Flags */}
+          {trace.flags.length > 0 && (
+            <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              <h3 className="font-semibold text-orange-900 mb-2 flex items-center gap-2">
+                <AlertTriangle size={20} />
+                Anomalies Détectées
+              </h3>
+              <div className="space-y-1">
+                {trace.flags.map((flag, i) => (
+                  <p key={i} className="text-sm text-orange-700">{flag}</p>
+                ))}
+              </div>
+              <p className="mt-2 text-sm font-semibold text-orange-900">
+                Score d'anomalie: {trace.anomalyScore}/100
+              </p>
+            </div>
+          )}
+
+          {/* Core Metrics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <MetricBox label="Sessions" value={trace.totalSessions.toString()} />
+            <MetricBox label="Pages Vues" value={trace.totalPageViews.toString()} />
+            <MetricBox label="Durée Moy." value={`${Math.round(trace.avgSessionDuration)}s`} />
+            <MetricBox label="Taux Rebond" value={`${Math.round(trace.bounceRate * 100)}%`} />
+          </div>
+
+          {/* Device & Browser Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <Smartphone size={18} />
+                Appareil
+              </h3>
+              <div className="space-y-2 text-sm">
+                <DataRow label="Catégorie" value={trace.device.category} />
+                <DataRow label="OS" value={trace.device.os} />
+                {trace.device.osVersion !== 'unknown' && (
+                  <DataRow label="Version OS" value={trace.device.osVersion} />
+                )}
+                <DataRow label="Navigateur" value={trace.device.browser} />
+                {trace.device.browserVersion !== 'unknown' && (
+                  <DataRow label="Version Nav." value={trace.device.browserVersion} />
+                )}
+                {trace.device.screenResolution !== 'unknown' && (
+                  <DataRow label="Résolution" value={trace.device.screenResolution} />
+                )}
+                {trace.device.brand && (
+                  <DataRow label="Marque" value={trace.device.brand} />
+                )}
+                {trace.device.model && (
+                  <DataRow label="Modèle" value={trace.device.model} />
+                )}
+              </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <Clock size={18} />
+                Chronologie
+              </h3>
+              <div className="space-y-2 text-sm">
+                <DataRow label="Première visite" value={new Date(trace.firstSeen).toLocaleString('fr-CA')} />
+                <DataRow label="Dernière visite" value={new Date(trace.lastSeen).toLocaleString('fr-CA')} />
+                <DataRow
+                  label="Durée totale"
+                  value={`${Math.round(trace.totalDuration / 60)}m ${trace.totalDuration % 60}s`}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Traffic Source */}
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <Globe size={18} />
+              Source de Trafic
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+              <DataRow label="Source" value={trace.traffic.source} />
+              <DataRow label="Medium" value={trace.traffic.medium} />
+              {trace.traffic.campaign && (
+                <DataRow label="Campagne" value={trace.traffic.campaign} />
+              )}
+              {trace.traffic.term && (
+                <DataRow label="Terme" value={trace.traffic.term} />
+              )}
+              {trace.traffic.content && (
+                <DataRow label="Contenu" value={trace.traffic.content} />
+              )}
+              {trace.traffic.referrer && (
+                <DataRow label="Referrer" value={trace.traffic.referrer} />
+              )}
+            </div>
+          </div>
+
+          {/* Telemetry Data */}
+          {(trace.telemetry.ga4_session_id || trace.telemetry.asn || trace.telemetry.timezone) && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                <Activity size={18} />
+                Données Telemetry
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                {trace.telemetry.ga4_session_id && (
+                  <DataRow label="GA4 Session ID" value={trace.telemetry.ga4_session_id} mono />
+                )}
+                {trace.telemetry.ga4_client_id && (
+                  <DataRow label="GA4 Client ID" value={trace.telemetry.ga4_client_id} mono />
+                )}
+                {trace.telemetry.asn && (
+                  <DataRow label="ASN" value={`AS${trace.telemetry.asn}`} />
+                )}
+                {trace.telemetry.asn_org && (
+                  <DataRow label="Provider" value={trace.telemetry.asn_org} />
+                )}
+                {trace.telemetry.timezone && (
+                  <DataRow label="Timezone" value={trace.telemetry.timezone} />
+                )}
+                {trace.telemetry.language && (
+                  <DataRow label="Langue" value={trace.telemetry.language} />
+                )}
+                {trace.telemetry.linked_via && (
+                  <DataRow label="Lié via" value={trace.telemetry.linked_via} />
+                )}
+                {trace.telemetry.linked_at && (
+                  <DataRow
+                    label="Lié le"
+                    value={new Date(trace.telemetry.linked_at).toLocaleString('fr-CA')}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Pages Visited */}
+          {trace.pages.length > 0 && (
+            <div className="mb-6">
+              <h3 className="font-semibold text-gray-900 mb-3">📄 Pages Visitées</h3>
+              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Page</th>
+                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Vues</th>
+                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Temps Moy.</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {trace.pages.map((page, i) => (
+                      <tr key={i} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 text-sm text-gray-900">{page.path}</td>
+                        <td className="px-4 py-2 text-sm text-gray-900 text-right">{page.views}</td>
+                        <td className="px-4 py-2 text-sm text-gray-900 text-right">
+                          {Math.round(page.avgTime)}s
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Events */}
+          {trace.events.length > 0 && (
+            <div className="mb-6">
+              <h3 className="font-semibold text-gray-900 mb-3">⚡ Événements</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {trace.events.map((event, i) => (
+                  <div key={i} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <p className="text-xs text-gray-600 mb-1">{event.type}</p>
+                    <p className="text-lg font-bold text-gray-900">{event.count}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Recommendation */}
+          <div className={`p-4 rounded-lg border ${
+            trace.isBot
+              ? 'bg-red-50 border-red-200'
+              : trace.anomalyScore >= 30
+              ? 'bg-orange-50 border-orange-200'
+              : 'bg-green-50 border-green-200'
+          }`}>
+            <h3 className={`font-semibold mb-2 flex items-center gap-2 ${
+              trace.isBot ? 'text-red-900' : trace.anomalyScore >= 30 ? 'text-orange-900' : 'text-green-900'
+            }`}>
+              💡 Recommandation
+            </h3>
+            <p className={`text-sm ${
+              trace.isBot ? 'text-red-700' : trace.anomalyScore >= 30 ? 'text-orange-700' : 'text-green-700'
+            }`}>
+              {trace.isBot
+                ? "Bot détecté. Considérer le blocage via robots.txt, firewall ou rate limiting."
+                : trace.anomalyScore >= 30
+                ? "Comportement suspect. Surveiller de près et vérifier les logs serveur. Possible scraper ou automatisation."
+                : "Comportement normal. Utilisateur légitime avec patterns d'interaction humains."}
+            </p>
+          </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+// Helper components for modal
+function MetricBox({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="p-4 bg-gray-50 rounded-lg">
+      <p className="text-xs text-gray-600 mb-1">{label}</p>
+      <p className="text-2xl font-bold text-gray-900">{value}</p>
+    </div>
+  )
+}
+
+function DataRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div>
+      <span className="text-gray-600">{label}:</span>{' '}
+      <span className={`font-medium text-gray-900 ${mono ? 'font-mono text-xs' : ''}`}>
+        {value}
+      </span>
     </div>
   )
 }
