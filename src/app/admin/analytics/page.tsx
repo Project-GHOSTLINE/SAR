@@ -141,6 +141,31 @@ interface ReferrerData {
   sample_urls: string[]
 }
 
+interface ClickHeatmapData {
+  page_url: string
+  total_clicks: number
+  viewport_stats: {
+    width: number
+    height: number
+  } | null
+  grid_size: number
+  density_grid: Array<{
+    grid_x: number
+    grid_y: number
+    x_percent_start: number
+    y_percent_start: number
+    x_percent_end: number
+    y_percent_end: number
+    click_count: number
+  }>
+  raw_clicks: Array<{
+    x_percent: number
+    y_percent: number
+    element_selector: string
+    element_text: string
+  }>
+}
+
 export default function AnalyticsPage() {
   const [funnel, setFunnel] = useState<FunnelStage[]>([])
   const [timeline, setTimeline] = useState<TimelineData[]>([])
@@ -153,6 +178,8 @@ export default function AnalyticsPage() {
   const [ipDetails, setIpDetails] = useState<IPDetail[]>([])
   const [pageFlow, setPageFlow] = useState<PageFlow[]>([])
   const [referrers, setReferrers] = useState<ReferrerData[]>([])
+  const [clickHeatmap, setClickHeatmap] = useState<ClickHeatmapData | null>(null)
+  const [selectedPage, setSelectedPage] = useState<string>('/')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -230,6 +257,23 @@ export default function AnalyticsPage() {
 
     fetchAnalytics()
   }, [])
+
+  // Fetch click heatmap for selected page
+  useEffect(() => {
+    async function fetchClickHeatmap() {
+      try {
+        const res = await fetch(`/api/analytics/click-heatmap?page=${encodeURIComponent(selectedPage)}`)
+        const data = await res.json()
+        if (data.success) {
+          setClickHeatmap(data.data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch click heatmap:', error)
+      }
+    }
+
+    fetchClickHeatmap()
+  }, [selectedPage])
 
   if (loading) {
     return (
@@ -865,6 +909,116 @@ export default function AnalyticsPage() {
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Click Heatmap Visualization */}
+        <div className="bg-white rounded-lg shadow p-6 mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">🖱️ Heatmap de Clics (Où les utilisateurs cliquent)</h2>
+            <select
+              value={selectedPage}
+              onChange={(e) => setSelectedPage(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="/">Page d'accueil (/)</option>
+              <option value="/demande-de-pret-en-ligne-formulaire">Formulaire de demande</option>
+              <option value="/nous-joindre">Nous joindre</option>
+              <option value="/a-propos">À propos</option>
+              {pages.map(page => (
+                <option key={page.page_url} value={page.page_url}>
+                  {page.page_url}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {clickHeatmap && clickHeatmap.total_clicks > 0 ? (
+            <div>
+              <div className="mb-4 text-sm text-gray-600">
+                <div className="flex gap-6 mb-2">
+                  <div><strong>Total clics:</strong> {clickHeatmap.total_clicks}</div>
+                  {clickHeatmap.viewport_stats && (
+                    <div><strong>Viewport moyen:</strong> {clickHeatmap.viewport_stats.width}x{clickHeatmap.viewport_stats.height}px</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Heatmap Grid Visualization */}
+              <div className="relative bg-gray-100 rounded-lg overflow-hidden" style={{ paddingBottom: '150%' }}>
+                {clickHeatmap.density_grid.map((cell, idx) => {
+                  const maxClicks = Math.max(...clickHeatmap.density_grid.map(c => c.click_count))
+                  const intensity = cell.click_count / maxClicks
+
+                  // Color gradient: blue (cold) → green → yellow → red (hot)
+                  const bgColor =
+                    intensity > 0.8 ? 'rgba(220, 38, 38, 0.7)' :  // red-600
+                    intensity > 0.6 ? 'rgba(234, 88, 12, 0.6)' :  // orange-600
+                    intensity > 0.4 ? 'rgba(251, 191, 36, 0.5)' : // amber-400
+                    intensity > 0.2 ? 'rgba(74, 222, 128, 0.4)' : // green-400
+                    intensity > 0.1 ? 'rgba(96, 165, 250, 0.3)' : // blue-400
+                    'rgba(147, 197, 253, 0.2)'                     // blue-300
+
+                  return (
+                    <div
+                      key={idx}
+                      className="absolute border border-white/20 flex items-center justify-center text-xs font-semibold text-white hover:ring-2 hover:ring-blue-500 transition-all cursor-pointer"
+                      style={{
+                        left: `${cell.x_percent_start}%`,
+                        top: `${cell.y_percent_start}%`,
+                        width: `${cell.x_percent_end - cell.x_percent_start}%`,
+                        height: `${cell.y_percent_end - cell.y_percent_start}%`,
+                        backgroundColor: bgColor,
+                        textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                      }}
+                      title={`${cell.click_count} clics (${(intensity * 100).toFixed(1)}%)`}
+                    >
+                      {cell.click_count > 2 && cell.click_count}
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Legend */}
+              <div className="mt-4 flex items-center gap-4 text-sm">
+                <span className="font-medium">Légende:</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded" style={{ backgroundColor: 'rgba(147, 197, 253, 0.2)' }}></div>
+                  <span>Froid (peu de clics)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded" style={{ backgroundColor: 'rgba(251, 191, 36, 0.5)' }}></div>
+                  <span>Moyen</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded" style={{ backgroundColor: 'rgba(220, 38, 38, 0.7)' }}></div>
+                  <span>Chaud (beaucoup de clics)</span>
+                </div>
+              </div>
+
+              {/* Top Clicked Elements */}
+              <div className="mt-6">
+                <h3 className="text-md font-semibold mb-3">Top Éléments Cliqués</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {clickHeatmap.raw_clicks.slice(0, 10).map((click, idx) => (
+                    <div key={idx} className="border border-gray-200 rounded p-3">
+                      <div className="text-sm font-mono text-gray-700">{click.element_selector}</div>
+                      {click.element_text && (
+                        <div className="text-xs text-gray-500 mt-1 truncate">"{click.element_text}"</div>
+                      )}
+                      <div className="text-xs text-gray-400 mt-1">
+                        Position: ({click.x_percent.toFixed(1)}%, {click.y_percent.toFixed(1)}%)
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              <div className="text-lg mb-2">Aucun clic enregistré pour cette page</div>
+              <div className="text-sm">Les clics seront capturés automatiquement lors des visites.</div>
+            </div>
+          )}
         </div>
       </div>
     </div>

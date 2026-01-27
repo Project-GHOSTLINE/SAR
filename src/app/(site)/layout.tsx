@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import ClickHeatmapTracker from '@/components/ClickHeatmapTracker'
 
 export default function SiteLayout({
   children,
@@ -20,6 +21,7 @@ export default function SiteLayout({
 
   return (
     <>
+      <ClickHeatmapTracker />
       {mounted && <Header />}
       <main className={isFormPage ? '' : 'pt-[72px]'}>{children}</main>
       {mounted && !isFormPage && <Footer />}
