@@ -20,11 +20,13 @@ export default function ClientPortal() {
     nom?: string
     email?: string
     telephone?: string
+    message?: string
   }>({})
   const [touched, setTouched] = useState<{
     nom?: boolean
     email?: boolean
     telephone?: boolean
+    message?: boolean
   }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -75,7 +77,7 @@ export default function ClientPortal() {
   ]
 
   // Validation temps réel
-  const validateField = (field: 'nom' | 'email' | 'telephone') => {
+  const validateField = (field: 'nom' | 'email' | 'telephone' | 'message') => {
     const newErrors = { ...errors }
 
     if (field === 'nom') {
@@ -104,18 +106,26 @@ export default function ClientPortal() {
       }
     }
 
+    if (field === 'message') {
+      if (!formData.message || formData.message.trim().length < 10) {
+        newErrors.message = 'Le message doit contenir au moins 10 caractères'
+      } else {
+        delete newErrors.message
+      }
+    }
+
     setErrors(newErrors)
   }
 
-  const handleBlur = (field: 'nom' | 'email' | 'telephone') => {
+  const handleBlur = (field: 'nom' | 'email' | 'telephone' | 'message') => {
     setTouched({ ...touched, [field]: true })
     validateField(field)
   }
 
   const handleChange = (field: 'nom' | 'email' | 'telephone' | 'message', value: string) => {
     setFormData({ ...formData, [field]: value })
-    if (field !== 'message' && touched[field as 'nom' | 'email' | 'telephone']) {
-      setTimeout(() => validateField(field as 'nom' | 'email' | 'telephone'), 0)
+    if (touched[field as 'nom' | 'email' | 'telephone' | 'message']) {
+      setTimeout(() => validateField(field as 'nom' | 'email' | 'telephone' | 'message'), 0)
     }
   }
 
@@ -123,12 +133,13 @@ export default function ClientPortal() {
     e.preventDefault()
 
     // Marquer tous les champs comme touchés
-    setTouched({ nom: true, email: true, telephone: true })
+    setTouched({ nom: true, email: true, telephone: true, message: true })
 
     // Valider tous les champs
     validateField('nom')
     validateField('email')
     validateField('telephone')
+    validateField('message')
 
     // Vérifier s'il y a des erreurs
     const tempErrors: typeof errors = {}
@@ -145,6 +156,10 @@ export default function ClientPortal() {
     const phoneValidation = validateCanadianPhone(formData.telephone)
     if (!phoneValidation.valid) {
       tempErrors.telephone = phoneValidation.error
+    }
+
+    if (!formData.message || formData.message.trim().length < 10) {
+      tempErrors.message = 'Le message doit contenir au moins 10 caractères'
     }
 
     if (Object.keys(tempErrors).length > 0 || !selectedAction) {
@@ -192,7 +207,7 @@ export default function ClientPortal() {
     setSelectedAction(null)
     setFormData({ nom: '', email: '', telephone: '', message: '' })
     setErrors({})
-    setTouched({})
+    setTouched({ nom: false, email: false, telephone: false, message: false })
     setIsSuccess(false)
   }
 
@@ -388,20 +403,32 @@ export default function ClientPortal() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Message ou details (optionnel)
+                    Message ou details *
                   </label>
                   <textarea
                     rows={4}
-                    placeholder="Decrivez votre situation ou ajoutez des details..."
+                    required
+                    placeholder="Decrivez votre situation ou ajoutez des details... (minimum 10 caractères)"
                     value={formData.message}
                     onChange={(e) => handleChange('message', e.target.value)}
-                    className="w-full px-5 py-4 bg-white/80 border-2 border-gray-100 rounded-xl text-gray-800 placeholder-gray-400 focus:border-sar-green focus:ring-4 focus:ring-sar-green/10 outline-none transition-all resize-none"
+                    onBlur={() => handleBlur('message')}
+                    className={`w-full px-5 py-4 bg-white/80 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:border-sar-green focus:ring-4 focus:ring-sar-green/10 outline-none transition-all resize-none ${
+                      touched.message && errors.message
+                        ? 'border-red-500 bg-red-50'
+                        : 'border-gray-100'
+                    }`}
                   />
+                  {touched.message && errors.message && (
+                    <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
+                      <AlertCircle size={14} />
+                      <span>{errors.message}</span>
+                    </div>
+                  )}
                 </div>
 
                 <button
                   type="submit"
-                  disabled={isSubmitting || !formData.nom || !formData.email || !formData.telephone}
+                  disabled={isSubmitting || !formData.nom || !formData.email || !formData.telephone || !formData.message}
                   className="w-full py-5 rounded-xl font-bold text-lg bg-gradient-to-r from-sar-green to-sar-green-dark text-white shadow-xl hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
