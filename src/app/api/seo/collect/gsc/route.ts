@@ -180,7 +180,7 @@ async function collectRealGSCData(domain: string, date: string) {
   })
 
   const searchconsole = google.searchconsole({ version: 'v1', auth })
-  const siteUrl = `https://www.${domain}/`
+  const siteUrl = `https://${domain}/`
 
   try {
     // 1. Métriques globales

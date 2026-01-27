@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     })
 
     const searchconsole = google.searchconsole({ version: 'v1', auth })
-    const siteUrl = 'https://www.solutionargentrapide.ca/'
+    const siteUrl = 'https://solutionargentrapide.ca/'
 
     // Requête principale
     const response = await searchconsole.searchanalytics.query({
