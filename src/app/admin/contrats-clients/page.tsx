@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import AdminNav from '@/components/admin/AdminNav'
+import CreateContractModal from '@/components/admin/CreateContractModal'
 import {
   FileText, Clock, CheckCircle, XCircle, Eye, Download,
   Send, Search, Filter, Calendar, User, Mail, ExternalLink,
-  AlertCircle, TrendingUp, RefreshCw
+  AlertCircle, TrendingUp, RefreshCw, Plus
 } from 'lucide-react'
 
 interface Contract {
@@ -47,6 +48,7 @@ export default function ContratsClientsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [refreshing, setRefreshing] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   useEffect(() => {
     loadContracts()
@@ -164,14 +166,23 @@ export default function ContratsClientsPage() {
                 Gestion et suivi des contrats de signature électronique
               </p>
             </div>
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-              Actualiser
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-semibold shadow-lg"
+              >
+                <Plus className="w-5 h-5" />
+                Créer un contrat
+              </button>
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                Actualiser
+              </button>
+            </div>
           </div>
 
           {/* Stats Cards */}
@@ -385,6 +396,16 @@ export default function ContratsClientsPage() {
           </div>
         )}
       </div>
+
+      {/* Modal de création */}
+      <CreateContractModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={() => {
+          loadContracts()
+          setShowCreateModal(false)
+        }}
+      />
     </div>
   )
 }
