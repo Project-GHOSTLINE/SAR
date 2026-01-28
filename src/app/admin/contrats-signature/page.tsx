@@ -82,14 +82,8 @@ export default function ContratsSignaturePage() {
   }
 
   const handleOpenOutilCoordonnees = () => {
-    // En localhost: ouvre le fichier local
-    // En production: ouvre la version hébergée
-    if (window.location.hostname === 'localhost') {
-      const outilPath = '/Users/xunit/Desktop/Margiil Files/outil-coordonnees-pdf.html'
-      window.open(`file://${outilPath}`, '_blank')
-    } else {
-      window.open('/outil-coordonnees-pdf.html', '_blank')
-    }
+    // Ouvrir la page protégée de création de template
+    router.push('/admin/template-creator')
   }
 
   const getCategoryColor = (category: string) => {
