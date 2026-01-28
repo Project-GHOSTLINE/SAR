@@ -28,6 +28,8 @@ export default function TemplateCreatorPage() {
   const [fieldWidth, setFieldWidth] = useState(80)
   const [fieldHeight, setFieldHeight] = useState(25)
   const [saving, setSaving] = useState(false)
+  const [pdfJsLoaded, setPdfJsLoaded] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const pageWrapperRef = useRef<HTMLDivElement>(null)
@@ -35,32 +37,76 @@ export default function TemplateCreatorPage() {
 
   // Charger PDF.js
   useEffect(() => {
+    console.log('🔄 Chargement de PDF.js...')
     const script = document.createElement('script')
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'
     script.onload = () => {
       if ((window as any).pdfjsLib) {
         (window as any).pdfjsLib.GlobalWorkerOptions.workerSrc =
           'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+        console.log('✅ PDF.js chargé avec succès')
+        setPdfJsLoaded(true)
+      } else {
+        console.error('❌ PDF.js n\'a pas été chargé correctement')
       }
+    }
+    script.onerror = () => {
+      console.error('❌ Erreur lors du chargement de PDF.js')
+      alert('Erreur lors du chargement de PDF.js. Vérifie ta connexion internet.')
     }
     document.body.appendChild(script)
 
     return () => {
-      document.body.removeChild(script)
+      if (document.body.contains(script)) {
+        document.body.removeChild(script)
+      }
     }
   }, [])
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file) {
+      console.log('❌ Aucun fichier sélectionné')
+      return
+    }
 
-    const arrayBuffer = await file.arrayBuffer()
-    if ((window as any).pdfjsLib) {
+    console.log('📄 Fichier sélectionné:', file.name, file.type, file.size, 'bytes')
+
+    if (!pdfJsLoaded) {
+      alert('⏳ PDF.js est en cours de chargement. Attends quelques secondes et réessaye.')
+      console.error('❌ PDF.js pas encore chargé')
+      return
+    }
+
+    if (!(window as any).pdfjsLib) {
+      alert('❌ Erreur: PDF.js n\'est pas disponible. Recharge la page.')
+      console.error('❌ pdfjsLib n\'existe pas sur window')
+      return
+    }
+
+    setLoading(true)
+    console.log('🔄 Lecture du PDF...')
+
+    try {
+      const arrayBuffer = await file.arrayBuffer()
+      console.log('✅ Fichier lu, taille:', arrayBuffer.byteLength, 'bytes')
+
+      console.log('🔄 Chargement du document PDF...')
       const pdf = await (window as any).pdfjsLib.getDocument({ data: arrayBuffer }).promise
+      console.log('✅ PDF chargé:', pdf.numPages, 'pages')
+
       setPdfDoc(pdf)
       setTotalPages(pdf.numPages)
       setCurrentPage(1)
-      renderPage(pdf, 1)
+
+      console.log('🔄 Rendu de la page 1...')
+      await renderPage(pdf, 1)
+      console.log('✅ Page rendue avec succès')
+    } catch (error) {
+      console.error('❌ Erreur lors du chargement du PDF:', error)
+      alert('❌ Erreur lors du chargement du PDF. Vérifie que c\'est un PDF valide.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -274,13 +320,34 @@ export default function TemplateCreatorPage() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   📄 Charger un PDF
                 </label>
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer hover:border-blue-500 transition bg-slate-900">
-                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-400">Cliquez pour charger</span>
+                {!pdfJsLoaded && (
+                  <div className="mb-2 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded text-xs text-yellow-400">
+                    ⏳ Chargement de PDF.js en cours...
+                  </div>
+                )}
+                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition bg-slate-900 ${
+                  loading ? 'border-blue-500 cursor-wait' :
+                  pdfJsLoaded ? 'border-slate-600 cursor-pointer hover:border-blue-500' :
+                  'border-slate-700 cursor-not-allowed opacity-50'
+                }`}>
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-400 border-t-blue-500 mb-2"></div>
+                      <span className="text-sm text-gray-400">Chargement du PDF...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                      <span className="text-sm text-gray-400">
+                        {pdfJsLoaded ? 'Cliquez pour charger' : 'Attends le chargement de PDF.js...'}
+                      </span>
+                    </>
+                  )}
                   <input
                     type="file"
                     accept=".pdf"
                     onChange={handleFileUpload}
+                    disabled={!pdfJsLoaded || loading}
                     className="hidden"
                   />
                 </label>
