@@ -145,7 +145,10 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
   const drawFieldsOnCanvas = (ctx: CanvasRenderingContext2D, pageNum: number, scale: number) => {
     const pageFields = signatureFields.filter(f => f.page === pageNum)
 
+    console.log(`🎨 Dessin de ${pageFields.length} champ(s) sur page ${pageNum} (scale: ${scale})`)
+
     pageFields.forEach(field => {
+      console.log(`   - ${field.type} à (${field.x}, ${field.y}) → canvas (${field.x * scale}, ${field.y * scale})`)
       // Couleur selon le type et la sélection
       if (selectedField === field.id) {
         ctx.strokeStyle = '#3B82F6' // Bleu si sélectionné
@@ -671,8 +674,8 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
 
                   <div
                     ref={containerRef}
-                    className="overflow-auto bg-white rounded-lg p-4 flex justify-center"
-                    style={{ maxHeight: '550px' }}
+                    className="overflow-auto bg-white rounded-lg p-4 flex justify-center items-start"
+                    style={{ maxHeight: '650px', minHeight: '400px' }}
                   >
                     {pdfDoc ? (
                       <canvas

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Canvas Coordinates</title>
+  <style>
+    body { margin: 20px; font-family: Arial; }
+    canvas { border: 2px solid #000; display: block; margin: 20px 0; }
+    .info { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>Test des coordonnées Canvas vs PDF</h1>
+
+  <div class="info">
+    <h3>Coordonnées du template "Contrat SAR Standard":</h3>
+    <ul>
+      <li><strong>Signature:</strong> x=100, y=650, width=180, height=40</li>
+      <li><strong>Initiales:</strong> x=400, y=650, width=80, height=25</li>
+    </ul>
+  </div>
+
+  <h3>Canvas simulé (taille PDF Letter: 612x792)</h3>
+  <canvas id="testCanvas" width="612" height="792"></canvas>
+
+  <div class="info">
+    <strong>Verdict:</strong> <span id="verdict"></span>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('testCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Remplir le fond en blanc
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 612, 792);
+
+    // Dessiner une grille pour référence
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < 612; x += 50) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, 792);
+      ctx.stroke();
+    }
+    for (let y = 0; y < 792; y += 50) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(612, y);
+      ctx.stroke();
+    }
+
+    // Marquer les axes
+    ctx.fillStyle = '#000';
+    ctx.font = '12px Arial';
+    ctx.fillText('Y=0 (TOP)', 10, 20);
+    ctx.fillText('Y=792 (BOTTOM)', 10, 780);
+    ctx.fillText('X=0 (LEFT)', 10, 400);
+    ctx.fillText('X=612 (RIGHT)', 520, 400);
+
+    // Dessiner les rectangles du template
+    // Rectangle 1: Signature (vert)
+    ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
+    ctx.strokeStyle = '#10B981';
+    ctx.lineWidth = 3;
+    ctx.fillRect(100, 650, 180, 40);
+    ctx.strokeRect(100, 650, 180, 40);
+    ctx.fillStyle = '#000';
+    ctx.fillText('SIGNATURE (100, 650)', 105, 670);
+
+    // Rectangle 2: Initiales (orange)
+    ctx.fillStyle = 'rgba(245, 158, 11, 0.3)';
+    ctx.strokeStyle = '#F59E0B';
+    ctx.lineWidth = 3;
+    ctx.fillRect(400, 650, 80, 25);
+    ctx.strokeRect(400, 650, 80, 25);
+    ctx.fillStyle = '#000';
+    ctx.fillText('INIT (400, 650)', 405, 665);
+
+    // Verdict
+    const verdictEl = document.getElementById('verdict');
+    if (650 + 40 <= 792) {
+      verdictEl.textContent = '✅ Les rectangles DEVRAIENT être visibles en bas du canvas!';
+      verdictEl.style.color = 'green';
+    } else {
+      verdictEl.textContent = '❌ Les rectangles sont EN DEHORS du canvas!';
+      verdictEl.style.color = 'red';
+    }
+
+    console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+    console.log('Signature ends at Y:', 650 + 40, '(should be <= 792)');
+    console.log('Initiales ends at Y:', 650 + 25, '(should be <= 792)');
+  </script>
+</body>
+</html>
