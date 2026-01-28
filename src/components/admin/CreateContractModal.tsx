@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { X, Upload, Plus, Trash2, Move, Loader2, Check, FileText, Sparkles } from 'lucide-react'
+import * as pdfjsLib from 'pdfjs-dist'
 
 interface SignatureField {
   id: string
@@ -54,7 +55,20 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
   const [selectedField, setSelectedField] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
 
+  // PDF rendering avec Canvas
+  const [pdfDoc, setPdfDoc] = useState<any>(null)
+  const [currentPdfPage, setCurrentPdfPage] = useState(1)
+  const [totalPdfPages, setTotalPdfPages] = useState(1)
+  const [pdfScale, setPdfScale] = useState(1.5)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Configurer PDF.js
+  useEffect(() => {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.js/pdf.worker.min.js'
+  }, [])
 
   // Charger les templates au montage
   useEffect(() => {
@@ -62,6 +76,112 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
       loadTemplates()
     }
   }, [isOpen])
+
+  // Charger le PDF sur canvas quand on arrive à l'étape 3
+  useEffect(() => {
+    if (step === 3 && pdfFile && !pdfDoc) {
+      loadPdfForCanvas()
+    }
+  }, [step, pdfFile])
+
+  // Re-render le canvas quand les champs changent
+  useEffect(() => {
+    if (pdfDoc && step === 3) {
+      renderPdfPage(pdfDoc, currentPdfPage)
+    }
+  }, [signatureFields, selectedField])
+
+  const loadPdfForCanvas = async () => {
+    if (!pdfFile) return
+
+    try {
+      const arrayBuffer = await pdfFile.arrayBuffer()
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer })
+      const pdf = await loadingTask.promise
+
+      setPdfDoc(pdf)
+      setTotalPdfPages(pdf.numPages)
+      setCurrentPdfPage(1)
+
+      // Rendre la première page
+      await renderPdfPage(pdf, 1)
+    } catch (error) {
+      console.error('Erreur chargement PDF:', error)
+    }
+  }
+
+  const renderPdfPage = async (pdf: any, pageNum: number) => {
+    const page = await pdf.getPage(pageNum)
+
+    // Calculer le scale optimal
+    const container = containerRef.current
+    let calculatedScale = pdfScale
+
+    if (container) {
+      const containerWidth = container.clientWidth - 64
+      const baseViewport = page.getViewport({ scale: 1 })
+      const optimalScale = containerWidth / baseViewport.width
+      calculatedScale = Math.min(Math.max(optimalScale, 0.5), 2)
+      setPdfScale(calculatedScale)
+    }
+
+    const viewport = page.getViewport({ scale: calculatedScale })
+
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    canvas.width = viewport.width
+    canvas.height = viewport.height
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    await page.render({ canvasContext: ctx, viewport }).promise
+
+    // Dessiner les champs existants
+    drawFieldsOnCanvas(ctx, pageNum, calculatedScale)
+  }
+
+  const drawFieldsOnCanvas = (ctx: CanvasRenderingContext2D, pageNum: number, scale: number) => {
+    const pageFields = signatureFields.filter(f => f.page === pageNum)
+
+    pageFields.forEach(field => {
+      // Couleur selon le type et la sélection
+      if (selectedField === field.id) {
+        ctx.strokeStyle = '#3B82F6' // Bleu si sélectionné
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.3)'
+      } else if (field.type === 'signature') {
+        ctx.strokeStyle = '#10B981' // Vert pour signature
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.2)'
+      } else {
+        ctx.strokeStyle = '#F59E0B' // Orange pour initiales
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.2)'
+      }
+
+      ctx.lineWidth = 3
+      ctx.setLineDash([])
+
+      // Rectangle
+      const x = field.x * scale
+      const y = field.y * scale
+      const width = field.width * scale
+      const height = field.height * scale
+
+      ctx.fillRect(x, y, width, height)
+      ctx.strokeRect(x, y, width, height)
+
+      // Label
+      ctx.fillStyle = '#000000'
+      ctx.font = `${12 * scale}px Arial`
+      ctx.fillText(field.type === 'signature' ? 'SIGNATURE' : 'INIT', x + 5, y + 15 * scale)
+    })
+  }
+
+  const changePdfPage = async (newPage: number) => {
+    if (!pdfDoc || newPage < 1 || newPage > totalPdfPages) return
+    setCurrentPdfPage(newPage)
+    await renderPdfPage(pdfDoc, newPage)
+  }
 
   const loadTemplates = async () => {
     try {
@@ -523,46 +643,94 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
                 )}
               </div>
 
-              {/* Panneau de droite: Prévisualisation PDF */}
+              {/* Panneau de droite: Prévisualisation PDF avec Canvas */}
               <div className="col-span-9">
-                <div className="bg-gray-100 rounded-xl p-4 relative" style={{ height: '600px' }}>
-                  {pdfUrl ? (
-                    <div className="relative w-full h-full">
-                      <iframe
-                        src={`${pdfUrl}#toolbar=0&navpanes=0`}
-                        className="w-full h-full rounded-lg"
-                        title="Aperçu PDF"
-                      />
-                      {/* Overlay pour les champs de signature */}
-                      <div className="absolute inset-0 pointer-events-none">
-                        {signatureFields.map((field) => (
-                          <div
-                            key={field.id}
-                            className={`absolute border-2 ${
-                              selectedField === field.id
-                                ? 'border-blue-500 bg-blue-500/20'
-                                : field.type === 'signature'
-                                ? 'border-blue-400 bg-blue-400/10'
-                                : 'border-purple-400 bg-purple-400/10'
-                            } pointer-events-auto cursor-move rounded`}
-                            style={{
-                              left: `${field.x}px`,
-                              top: `${field.y}px`,
-                              width: `${field.width}px`,
-                              height: `${field.height}px`
-                            }}
-                            onClick={() => setSelectedField(field.id)}
-                          >
-                            <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-700 bg-white/70 rounded">
-                              {field.label}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                <div className="bg-gray-100 rounded-xl p-4" style={{ minHeight: '600px' }}>
+                  {/* Contrôles de page */}
+                  {pdfDoc && totalPdfPages > 1 && (
+                    <div className="flex items-center justify-between mb-4">
+                      <button
+                        onClick={() => changePdfPage(currentPdfPage - 1)}
+                        disabled={currentPdfPage === 1}
+                        className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-200 disabled:opacity-50 text-sm"
+                      >
+                        ← Préc.
+                      </button>
+                      <span className="text-sm text-gray-600">
+                        Page {currentPdfPage} / {totalPdfPages}
+                      </span>
+                      <button
+                        onClick={() => changePdfPage(currentPdfPage + 1)}
+                        disabled={currentPdfPage === totalPdfPages}
+                        className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-200 disabled:opacity-50 text-sm"
+                      >
+                        Suiv. →
+                      </button>
                     </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500">
-                      Pas de PDF chargé
+                  )}
+
+                  <div
+                    ref={containerRef}
+                    className="overflow-auto bg-white rounded-lg p-4 flex justify-center"
+                    style={{ maxHeight: '550px' }}
+                  >
+                    {pdfDoc ? (
+                      <canvas
+                        ref={canvasRef}
+                        className="shadow-lg"
+                        onClick={(e) => {
+                          const canvas = canvasRef.current
+                          if (!canvas) return
+
+                          const rect = canvas.getBoundingClientRect()
+                          const clickX = e.clientX - rect.left
+                          const clickY = e.clientY - rect.top
+
+                          // Convertir en coordonnées PDF (sans scale)
+                          const pdfX = Math.round(clickX / pdfScale)
+                          const pdfY = Math.round(clickY / pdfScale)
+
+                          // Vérifier si on a cliqué sur un champ existant
+                          const clickedField = signatureFields.find(f => {
+                            const fx = f.x * pdfScale
+                            const fy = f.y * pdfScale
+                            const fw = f.width * pdfScale
+                            const fh = f.height * pdfScale
+
+                            return clickX >= fx && clickX <= fx + fw &&
+                                   clickY >= fy && clickY <= fy + fh &&
+                                   f.page === currentPdfPage
+                          })
+
+                          if (clickedField) {
+                            setSelectedField(clickedField.id)
+                          } else {
+                            setSelectedField(null)
+                          }
+
+                          // Re-render pour montrer la sélection
+                          if (pdfDoc) {
+                            renderPdfPage(pdfDoc, currentPdfPage)
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-64 text-gray-500">
+                        <Loader2 className="w-8 h-8 animate-spin" />
+                        <span className="ml-2">Chargement du PDF...</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {signatureFields.length > 0 && (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-800">
+                        ✅ <strong>{signatureFields.length}</strong> champ{signatureFields.length > 1 ? 's' : ''} placé{signatureFields.length > 1 ? 's' : ''}
+                        {selectedTemplateId && ' (depuis template)'}
+                      </p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        Clique sur un rectangle pour le sélectionner et modifier ses propriétés
+                      </p>
                     </div>
                   )}
                 </div>
