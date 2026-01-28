@@ -124,6 +124,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       badge: null
     },
     {
+      name: 'Templates',
+      href: '/admin/contrats-signature',
+      icon: FileText,
+      badge: null
+    },
+    {
       name: 'Support',
       href: '/admin/dashboard?tab=support',
       icon: Wrench,

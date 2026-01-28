@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { X, Upload, Plus, Trash2, Move, Loader2, Check, FileText } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { X, Upload, Plus, Trash2, Move, Loader2, Check, FileText, Sparkles } from 'lucide-react'
 
 interface SignatureField {
   id: string
@@ -14,6 +14,16 @@ interface SignatureField {
   height: number
 }
 
+interface Template {
+  id: string
+  name: string
+  description: string | null
+  category: string
+  signature_fields: SignatureField[]
+  is_active: boolean
+  usage_count: number
+}
+
 interface CreateContractModalProps {
   isOpen: boolean
   onClose: () => void
@@ -23,6 +33,11 @@ interface CreateContractModalProps {
 export default function CreateContractModal({ isOpen, onClose, onSuccess }: CreateContractModalProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [loading, setLoading] = useState(false)
+
+  // Templates
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
+  const [loadingTemplates, setLoadingTemplates] = useState(false)
 
   // Étape 1: Infos client
   const [clientName, setClientName] = useState('')
@@ -40,6 +55,41 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
   const [isDragging, setIsDragging] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Charger les templates au montage
+  useEffect(() => {
+    if (isOpen) {
+      loadTemplates()
+    }
+  }, [isOpen])
+
+  const loadTemplates = async () => {
+    try {
+      setLoadingTemplates(true)
+      const response = await fetch('/api/admin/signature-templates?active=true')
+      const data = await response.json()
+
+      if (data.success) {
+        setTemplates(data.templates || [])
+      }
+    } catch (error) {
+      console.error('Erreur chargement templates:', error)
+    } finally {
+      setLoadingTemplates(false)
+    }
+  }
+
+  const loadTemplateFields = (templateId: string) => {
+    const template = templates.find(t => t.id === templateId)
+    if (template) {
+      // Charger les champs du template
+      setSignatureFields(template.signature_fields.map(f => ({
+        ...f,
+        id: `field_${Date.now()}_${Math.random()}` // Nouveau ID unique
+      })))
+      setSelectedTemplateId(templateId)
+    }
+  }
 
   if (!isOpen) return null
 
@@ -116,6 +166,22 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
         throw new Error(data.error || 'Erreur lors de la création')
       }
 
+      // Incrémenter le compteur d'utilisation du template si un template a été utilisé
+      if (selectedTemplateId) {
+        try {
+          await fetch(`/api/admin/signature-templates/${selectedTemplateId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              usage_count: (templates.find(t => t.id === selectedTemplateId)?.usage_count || 0) + 1
+            })
+          })
+        } catch (err) {
+          console.error('Erreur incrémentation usage_count:', err)
+          // Ne pas bloquer si ça échoue
+        }
+      }
+
       alert('✅ Contrat créé et envoyé avec succès!')
       onSuccess()
       handleClose()
@@ -131,6 +197,7 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
     setClientName('')
     setClientEmail('')
     setTitle('')
+    setSelectedTemplateId('')
     setPdfFile(null)
     setPdfBase64('')
     setPdfUrl('')
@@ -214,6 +281,54 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
                   placeholder="Ex: Contrat de prêt 5000$"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
+              </div>
+
+              {/* Sélecteur de template */}
+              <div className="pt-4 border-t border-gray-200">
+                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-purple-500" />
+                  Utiliser un template (optionnel)
+                </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Sélectionnez un template pour pré-remplir automatiquement les positions des champs de signature
+                </p>
+                {loadingTemplates ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                  </div>
+                ) : (
+                  <select
+                    value={selectedTemplateId}
+                    onChange={(e) => {
+                      const templateId = e.target.value
+                      if (templateId) {
+                        loadTemplateFields(templateId)
+                      } else {
+                        setSelectedTemplateId('')
+                        setSignatureFields([])
+                      }
+                    }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white"
+                  >
+                    <option value="">-- Placement manuel des champs --</option>
+                    {templates.map(template => (
+                      <option key={template.id} value={template.id}>
+                        {template.name} ({template.signature_fields.length} champ{template.signature_fields.length > 1 ? 's' : ''})
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {selectedTemplateId && (
+                  <div className="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                    <p className="text-sm text-purple-800 flex items-center gap-2">
+                      <Check className="w-4 h-4" />
+                      Template sélectionné: {templates.find(t => t.id === selectedTemplateId)?.name}
+                    </p>
+                    <p className="text-xs text-purple-600 mt-1">
+                      Les champs seront automatiquement placés à l'étape 3
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}
