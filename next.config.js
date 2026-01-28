@@ -43,7 +43,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.axept.io https://client.axept.io https://www.googletagmanager.com https://widget.freshworks.com https://vercel.live https://*.vercel.live; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.resend.com https://static.axept.io https://client.axept.io https://api.axept.io https://www.google-analytics.com https://widget.freshworks.com https://vercel.live https://*.vercel.live; frame-src 'self' https://static.axept.io https://argentrapide.margill.com https://vercel.live https://*.vercel.live;"
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.axept.io https://client.axept.io https://www.googletagmanager.com https://widget.freshworks.com https://vercel.live https://*.vercel.live; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.resend.com https://static.axept.io https://client.axept.io https://api.axept.io https://www.google-analytics.com https://widget.freshworks.com https://vercel.live https://*.vercel.live; frame-src 'self' https://static.axept.io https://argentrapide.margill.com https://dllyzfuqjzuhvshrlmuq.supabase.co https://vercel.live https://*.vercel.live; object-src 'self' https://dllyzfuqjzuhvshrlmuq.supabase.co blob:;"
           }
         ]
       }
