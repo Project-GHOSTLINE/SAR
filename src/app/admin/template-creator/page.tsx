@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import AdminNav from '@/components/admin/AdminNav'
 import { ArrowLeft, Upload, Plus, Save, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import * as pdfjsLib from 'pdfjs-dist'
 
 interface SignatureField {
   id: string
@@ -35,32 +36,15 @@ export default function TemplateCreatorPage() {
   const pageWrapperRef = useRef<HTMLDivElement>(null)
   const scale = 1.5
 
-  // Charger PDF.js
+  // Configurer PDF.js
   useEffect(() => {
-    console.log('🔄 Chargement de PDF.js...')
-    const script = document.createElement('script')
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'
-    script.onload = () => {
-      if ((window as any).pdfjsLib) {
-        (window as any).pdfjsLib.GlobalWorkerOptions.workerSrc =
-          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
-        console.log('✅ PDF.js chargé avec succès')
-        setPdfJsLoaded(true)
-      } else {
-        console.error('❌ PDF.js n\'a pas été chargé correctement')
-      }
-    }
-    script.onerror = () => {
-      console.error('❌ Erreur lors du chargement de PDF.js')
-      alert('Erreur lors du chargement de PDF.js. Vérifie ta connexion internet.')
-    }
-    document.body.appendChild(script)
+    console.log('🔄 Configuration de PDF.js...')
 
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script)
-      }
-    }
+    // Configurer le worker (fichier local)
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.js/pdf.worker.min.js'
+
+    console.log('✅ PDF.js configuré avec succès')
+    setPdfJsLoaded(true)
   }, [])
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,12 +62,6 @@ export default function TemplateCreatorPage() {
       return
     }
 
-    if (!(window as any).pdfjsLib) {
-      alert('❌ Erreur: PDF.js n\'est pas disponible. Recharge la page.')
-      console.error('❌ pdfjsLib n\'existe pas sur window')
-      return
-    }
-
     setLoading(true)
     console.log('🔄 Lecture du PDF...')
 
@@ -92,7 +70,8 @@ export default function TemplateCreatorPage() {
       console.log('✅ Fichier lu, taille:', arrayBuffer.byteLength, 'bytes')
 
       console.log('🔄 Chargement du document PDF...')
-      const pdf = await (window as any).pdfjsLib.getDocument({ data: arrayBuffer }).promise
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer })
+      const pdf = await loadingTask.promise
       console.log('✅ PDF chargé:', pdf.numPages, 'pages')
 
       setPdfDoc(pdf)
