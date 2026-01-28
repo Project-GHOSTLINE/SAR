@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { FileText, Plus, Trash2, Eye, CheckCircle, Clock, Users } from 'lucide-react'
 import AdminNav from '@/components/admin/AdminNav'
 
@@ -28,6 +29,7 @@ interface Template {
 }
 
 export default function ContratsSignaturePage() {
+  const router = useRouter()
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
@@ -80,9 +82,8 @@ export default function ContratsSignaturePage() {
   }
 
   const handleOpenOutilCoordonnees = () => {
-    // Ouvrir l'outil dans un nouvel onglet
-    window.open('/Users/xunit/Desktop/Margiil Files/outil-coordonnees-pdf.html', '_blank')
-    alert('📌 Ouvre le fichier outil-coordonnees-pdf.html depuis:\n/Users/xunit/Desktop/Margiil Files/\n\nUtilise cet outil pour créer des nouveaux templates en cliquant sur un PDF.')
+    // Rediriger vers la page intégrée de création de template
+    router.push('/admin/template-creator')
   }
 
   const getCategoryColor = (category: string) => {
