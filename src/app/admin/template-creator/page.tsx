@@ -34,7 +34,8 @@ export default function TemplateCreatorPage() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const pageWrapperRef = useRef<HTMLDivElement>(null)
-  const scale = 1.5
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1.5)
 
   // Configurer PDF.js
   useEffect(() => {
@@ -93,7 +94,22 @@ export default function TemplateCreatorPage() {
     setCurrentPage(pageNum)
 
     const page = await pdf.getPage(pageNum)
-    const viewport = page.getViewport({ scale })
+
+    // Calculer le scale optimal pour que le PDF rentre dans le conteneur
+    const container = containerRef.current
+    let calculatedScale = scale
+
+    if (container) {
+      const containerWidth = container.clientWidth - 64 // padding
+      const baseViewport = page.getViewport({ scale: 1 })
+      const optimalScale = containerWidth / baseViewport.width
+      // Limiter entre 0.5 et 2
+      calculatedScale = Math.min(Math.max(optimalScale, 0.5), 2)
+      setScale(calculatedScale)
+      console.log('📐 Scale calculé:', calculatedScale)
+    }
+
+    const viewport = page.getViewport({ scale: calculatedScale })
 
     const canvas = canvasRef.current
     if (!canvas) return
@@ -480,11 +496,20 @@ export default function TemplateCreatorPage() {
                 </div>
               </div>
             ) : (
-              <div className="border border-slate-600 rounded-lg overflow-auto max-h-[600px] bg-slate-900 p-4">
+              <div
+                ref={containerRef}
+                className="border border-slate-600 rounded-lg overflow-auto bg-slate-900 p-8"
+                style={{
+                  maxHeight: 'calc(100vh - 250px)',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'flex-start'
+                }}
+              >
                 <canvas
                   ref={canvasRef}
                   onClick={handleCanvasClick}
-                  className="cursor-crosshair mx-auto"
+                  className="cursor-crosshair shadow-2xl"
                 />
               </div>
             )}
