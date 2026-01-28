@@ -118,6 +118,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       badge: null
     },
     {
+      name: 'Contrats Clients',
+      href: '/admin/contrats-clients',
+      icon: FileText,
+      badge: null
+    },
+    {
       name: 'Support',
       href: '/admin/dashboard?tab=support',
       icon: Wrench,
