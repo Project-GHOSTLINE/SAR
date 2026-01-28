@@ -2,19 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-const resend = new Resend(process.env.RESEND_API_KEY!)
-
 /**
  * GET /api/admin/contrats-clients
  * Liste tous les contrats de signature avec statistiques
  */
 export async function GET(req: NextRequest) {
   try {
+    // Créer le client Supabase au runtime
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
     // Récupérer tous les contrats
     const { data: contracts, error } = await supabase
       .from('signature_documents')
@@ -65,6 +64,13 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
+    // Créer les clients au runtime
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    const resend = new Resend(process.env.RESEND_API_KEY!)
+
     const body = await req.json()
     const {
       clientName,

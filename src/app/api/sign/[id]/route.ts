@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 /**
  * GET /api/sign/[id]
  * Récupérer un document pour signature avec validation du token
@@ -15,6 +10,12 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Créer le client Supabase au runtime
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
     const { id } = params
     const token = req.nextUrl.searchParams.get('token')
 

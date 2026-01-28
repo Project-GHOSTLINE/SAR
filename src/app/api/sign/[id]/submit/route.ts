@@ -3,13 +3,6 @@ import { createClient } from '@supabase/supabase-js'
 import { PDFDocument } from 'pdf-lib'
 import { Resend } from 'resend'
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-const resend = new Resend(process.env.RESEND_API_KEY!)
-
 /**
  * POST /api/sign/[id]/submit
  * Soumettre les signatures et finaliser le document
@@ -19,6 +12,13 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Créer les clients au runtime
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    const resend = new Resend(process.env.RESEND_API_KEY!)
+
     const { id } = params
     const body = await req.json()
     const { token, signatures } = body
