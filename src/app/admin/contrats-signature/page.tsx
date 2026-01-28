@@ -82,8 +82,8 @@ export default function ContratsSignaturePage() {
   }
 
   const handleOpenOutilCoordonnees = () => {
-    // Rediriger vers la page intégrée de création de template
-    router.push('/admin/template-creator')
+    // Ouvrir l'outil de coordonnées PDF
+    window.open('/outil-coordonnees-pdf.html', '_blank')
   }
 
   const getCategoryColor = (category: string) => {
