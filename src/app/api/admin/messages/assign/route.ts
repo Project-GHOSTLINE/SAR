@@ -138,11 +138,16 @@ export async function GET(request: NextRequest) {
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const firstDayISO = firstDayOfMonth.toISOString()
 
+    // Calculer le début de la journée à 00:01
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 1, 0)
+    const startOfTodayISO = startOfToday.toISOString()
+
     // Récupérer tous les messages DU MOIS EN COURS avec leurs infos
     const { data: messages, error } = await supabase
       .from('contact_messages')
       .select('id, assigned_to, system_responded, lu, created_at')
       .gte('created_at', firstDayISO)
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -175,6 +180,17 @@ export async function GET(request: NextRequest) {
     const lastMichel = messages?.filter(m => m.assigned_to === 'Michel')[0]?.created_at || null
     const lastNone = messages?.filter(m => !m.assigned_to)[0]?.created_at || null
 
+    // Compter les messages supprimés aujourd'hui (depuis 00:01)
+    const { count: deletedToday, error: deletedError } = await supabase
+      .from('contact_messages')
+      .select('*', { count: 'exact', head: true })
+      .gte('deleted_at', startOfTodayISO)
+      .not('deleted_at', 'is', null)
+
+    if (deletedError) {
+      console.error('Error counting deleted messages:', deletedError)
+    }
+
     // Stats détaillées par collègue (pour la carte d'assignations)
     const byColleague: Record<string, number> = {
       Sandra: acheminesSandra,
@@ -195,6 +211,9 @@ export async function GET(request: NextRequest) {
         acheminesSandra,
         acheminesMichel,
         nonAchemines,
+
+        // Messages supprimés aujourd'hui
+        deletedToday: deletedToday || 0,
 
         // Dates des derniers messages
         lastAll,

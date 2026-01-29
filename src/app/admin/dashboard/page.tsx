@@ -269,6 +269,7 @@ function AdminDashboardContent() {
     acheminesSandra: 0,
     acheminesMichel: 0,
     nonAchemines: 0,
+    deletedToday: 0,
     lastAll: null as string | null,
     lastReponse: null as string | null,
     lastSandra: null as string | null,
@@ -714,7 +715,7 @@ function AdminDashboardContent() {
                 <span className="text-sm text-gray-500 font-medium">Vue d'ensemble du support client</span>
               </div>
 
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-7 gap-4">
                 {/* Total Messages */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-300 group">
                   <div className="flex items-center justify-between mb-2">
@@ -812,6 +813,20 @@ function AdminDashboardContent() {
                     ) : (
                       <span className="text-gray-500">Aucun en attente</span>
                     )}
+                  </span>
+                </div>
+
+                {/* Supprimés Aujourd'hui */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-600">Supprimés Aujourd'hui</span>
+                    <div className="w-8 h-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <X size={16} className="text-gray-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900 mb-1">{messageStats.deletedToday}</p>
+                  <span className="text-xs text-gray-500">
+                    Depuis 00:01
                   </span>
                 </div>
               </div>
