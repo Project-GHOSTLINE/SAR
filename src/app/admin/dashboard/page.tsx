@@ -332,6 +332,17 @@ function AdminDashboardContent() {
     setSelectedMessage(null)
   }, [selectedView])
 
+  // Auto-ouvrir un message depuis l'URL (?open=messageId)
+  useEffect(() => {
+    const openParam = searchParams.get('open')
+    if (openParam && selectedView === 'messages' && messages.length > 0 && !selectedMessage) {
+      const messageToOpen = messages.find(m => m.id === openParam)
+      if (messageToOpen) {
+        fetchMessageDetails(messageToOpen)
+      }
+    }
+  }, [messages, searchParams, selectedView])
+
   const fetchMessages = async () => {
     try {
       const res = await fetch('/api/admin/messages', { credentials: 'include' })

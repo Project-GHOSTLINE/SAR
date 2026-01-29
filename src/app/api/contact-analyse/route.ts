@@ -178,7 +178,7 @@ QUESTION: ${question}
 ${questionAutre ? `\nDETAILS:\n${questionAutre}` : ''}
 
 ---
-Voir le message dans l'admin: https://admin.solutionargentrapide.ca/admin/messages?open=${messageId}`,
+Voir le message dans l'admin: https://admin.solutionargentrapide.ca/admin/dashboard?tab=messages&open=${messageId}`,
           envoye_par: 'system'
         })
 
@@ -301,13 +301,13 @@ L'equipe Solution Argent Rapide`,
         <h3>⚡ Reponses rapides</h3>
         <a href="tel:${telephone.replace(/\D/g, '')}" class="response-btn">📞 Appeler le client</a>
         <a href="mailto:${email}?subject=Re: Votre demande ${reference ? '#' + reference : ''} - Solution Argent Rapide&body=Bonjour ${nom.split(' ')[0]},%0D%0A%0D%0AMerci de nous avoir contacte.%0D%0A%0D%0A" class="response-btn secondary">✉️ Repondre par courriel</a>
-        <a href="https://admin.solutionargentrapide.ca/admin/messages?open=${messageId}" class="response-btn" style="background: linear-gradient(135deg, #00874e 0%, #006341 100%); color: white;">👁️ Voir dans l'admin</a>
+        <a href="https://admin.solutionargentrapide.ca/admin/dashboard?tab=messages&open=${messageId}" class="response-btn" style="background: linear-gradient(135deg, #00874e 0%, #006341 100%); color: white;">👁️ Voir dans l'admin</a>
       </div>
     </div>
 
     <div class="footer">
       <p>Ce message a ete envoye automatiquement<br>
-      <a href="https://admin.solutionargentrapide.ca/admin/messages?open=${messageId}" style="color: #00874e; font-weight: 600; text-decoration: none;">👁️ Ouvrir ce message dans l'admin →</a></p>
+      <a href="https://admin.solutionargentrapide.ca/admin/dashboard?tab=messages&open=${messageId}" style="color: #00874e; font-weight: 600; text-decoration: none;">👁️ Ouvrir ce message dans l'admin →</a></p>
     </div>
   </div>
 </body>
