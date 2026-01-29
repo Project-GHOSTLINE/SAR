@@ -298,10 +298,10 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
     .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-    .header { background: linear-gradient(135deg, #00874e 0%, #005a34 100%); color: white; padding: 30px; text-align: center; }
+    .header { background-color: #00874e; background: linear-gradient(135deg, #00874e 0%, #005a34 100%); color: white; padding: 30px; text-align: center; }
     .header h1 { margin: 0; font-size: 24px; }
     .content { padding: 30px; }
-    .source-banner { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; }
+    .source-banner { background-color: #3b82f6; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; }
     .source-banner h2 { margin: 0; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
     .source-banner p { margin: 8px 0 0; opacity: 0.9; font-size: 14px; }
     .reference { background: #00874e; color: white; display: inline-block; padding: 8px 16px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; }
@@ -418,7 +418,7 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
             <td align="center" style="padding-bottom: 30px;">
               <table role="presentation" style="border-collapse: collapse;">
                 <tr>
-                  <td style="background: linear-gradient(135deg, #00874e 0%, #005a34 100%); padding: 20px 40px; border-radius: 12px;">
+                  <td style="background-color: #00874e; background: linear-gradient(135deg, #00874e 0%, #005a34 100%); padding: 20px 40px; border-radius: 12px;">
                     <span style="font-size: 24px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">Solution</span>
                     <span style="font-size: 24px; font-weight: 700; color: #c9a227; letter-spacing: -0.5px; margin-left: 8px;">Argent Rapide</span>
                   </td>
@@ -434,12 +434,12 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
               <!-- Success Banner -->
               <table role="presentation" style="width: 100%; border-collapse: collapse;">
                 <tr>
-                  <td style="background: linear-gradient(135deg, #00874e 0%, #005a34 100%); padding: 35px 40px; border-radius: 16px 16px 0 0; text-align: center;">
-                    <div style="width: 70px; height: 70px; background: rgba(255,255,255,0.2); border-radius: 50%; margin: 0 auto 15px; line-height: 70px;">
-                      <span style="font-size: 36px; color: white;">✓</span>
+                  <td style="background-color: #00874e; background: linear-gradient(135deg, #00874e 0%, #005a34 100%); padding: 35px 40px; border-radius: 16px 16px 0 0; text-align: center;">
+                    <div style="width: 70px; height: 70px; background-color: rgba(255,255,255,0.2); border-radius: 50%; margin: 0 auto 15px; line-height: 70px;">
+                      <span style="font-size: 36px; color: #ffffff;">✓</span>
                     </div>
                     <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 700;">Demande bien recue!</h1>
-                    <p style="margin: 10px 0 0; color: rgba(255,255,255,0.9); font-size: 15px;">Nous traitons votre demande avec attention</p>
+                    <p style="margin: 10px 0 0; color: #ffffff; font-size: 15px; opacity: 0.9;">Nous traitons votre demande avec attention</p>
                   </td>
                 </tr>
               </table>
