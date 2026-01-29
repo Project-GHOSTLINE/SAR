@@ -416,35 +416,6 @@ L'equipe Solution Argent Rapide`,
                       </tr>
                     </table>
 
-                    <!-- What happens next -->
-                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0; background: #fafafa; border-radius: 12px;">
-                      <tr>
-                        <td style="padding: 25px;">
-                          <p style="margin: 0 0 15px; color: #111827; font-size: 15px; font-weight: 700;">📋 Prochaines etapes:</p>
-                          <table role="presentation" style="width: 100%; border-collapse: collapse;">
-                            <tr>
-                              <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
-                                <span style="color: #00874e; font-weight: 700; margin-right: 10px;">1.</span>
-                                Notre equipe analyse votre demande
-                              </td>
-                            </tr>
-                            <tr>
-                              <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
-                                <span style="color: #00874e; font-weight: 700; margin-right: 10px;">2.</span>
-                                ${destinataireNom} vous contacte sous 24h
-                              </td>
-                            </tr>
-                            <tr>
-                              <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
-                                <span style="color: #00874e; font-weight: 700; margin-right: 10px;">3.</span>
-                                Nous repondons a votre question
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                    </table>
-
                     <!-- Hours Box -->
                     <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 25px 0;">
                       <tr>
