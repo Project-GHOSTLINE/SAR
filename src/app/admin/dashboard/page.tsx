@@ -1477,8 +1477,17 @@ function AdminDashboardContent() {
 
                 if (uniqueOptions.length === 0) return null
 
+                // Compter les messages par option
+                const optionCounts: Record<string, number> = {}
+                uniqueOptions.forEach(option => {
+                  optionCounts[option as string] = messages.filter(msg => extractOptionFromMessage(msg.question).option === option).length
+                })
+
                 // Compter les messages "Autres demandes" (ceux sans option)
                 const autresCount = messages.filter(msg => !extractOptionFromMessage(msg.question).option).length
+
+                // Total de tous les messages
+                const totalCount = messages.length
 
                 return (
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
@@ -1492,7 +1501,7 @@ function AdminDashboardContent() {
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
-                        Tous les types
+                        Tous les types ({totalCount})
                       </button>
                       {uniqueOptions.map((option) => (
                         <button
@@ -1500,7 +1509,7 @@ function AdminDashboardContent() {
                           onClick={() => setMessageSubFilter(option)}
                           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${getOptionButtonColor(option, messageSubFilter === option)}`}
                         >
-                          {option}
+                          {option} ({optionCounts[option as string] || 0})
                         </button>
                       ))}
                       {autresCount > 0 && (
