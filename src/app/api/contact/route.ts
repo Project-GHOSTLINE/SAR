@@ -282,7 +282,7 @@ MESSAGE:
 ${message}
 
 ---
-Connectez-vous a l'admin pour repondre: /admin/dashboard`,
+Voir le message dans l'admin: https://admin.solutionargentrapide.ca/admin/messages?open=${messageId}`,
           envoye_par: 'system'
         })
       }
@@ -368,13 +368,14 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
         ${contactMethod === 'phone'
           ? `<a href="tel:${contact.replace(/\D/g, '')}" class="action-btn">📞 Appeler le client</a>`
           : `<a href="mailto:${contact}?subject=Re: Votre message ${reference ? '%23' + reference : ''} - Solution Argent Rapide" class="action-btn">✉️ Repondre par courriel</a>`}
-        <a href="https://solutionargentrapide.ca/admin/dashboard" class="action-btn secondary">🔗 Voir dans l'admin</a>
+        <a href="https://admin.solutionargentrapide.ca/admin/messages?open=${messageId}" class="action-btn" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">👁️ Ouvrir le message dans l'admin</a>
       </div>
     </div>
 
     <div class="footer">
       <p>Ce message a ete envoye automatiquement depuis ${sourceLabel}<br>
-      <a href="https://solutionargentrapide.ca">solutionargentrapide.ca</a></p>
+      <a href="https://solutionargentrapide.ca">solutionargentrapide.ca</a> |
+      <a href="https://admin.solutionargentrapide.ca/admin/messages?open=${messageId}" style="color: #00874e; font-weight: 600;">👁️ Ouvrir dans l'admin</a></p>
     </div>
   </div>
 </body>
