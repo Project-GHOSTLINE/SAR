@@ -59,8 +59,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const questionComplete = question === "Autre question"
-      ? questionAutre
+    const questionComplete = questionAutre
+      ? `${question}\n\n${questionAutre}`
       : question
 
     // Determiner le tag source et le destinataire
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     const isEspaceClient = source === 'espace-client'
     const questionWithTag = isEspaceClient
       ? `[${sourceLabel}] [${question}] ${questionAutre || ''}`
-      : `[${sourceLabel}] [${question}] ${question === "Autre question" ? questionAutre : ''}`
+      : `[${sourceLabel}] [${question}] ${questionAutre || ''}`
 
     // Destinataire selon le type de question et source
     const isAutreQuestion = question === "Autre question" || question.includes("Autre question")
@@ -175,7 +175,7 @@ Email: ${email}
 Telephone: ${telephone}
 
 QUESTION: ${question}
-${question === "Autre question" ? `\nDETAILS:\n${questionAutre}` : ''}
+${questionAutre ? `\nDETAILS:\n${questionAutre}` : ''}
 
 ---
 Connectez-vous a l'admin pour repondre: /admin/dashboard`,
@@ -290,7 +290,7 @@ L'equipe Solution Argent Rapide`,
         </div>
       </div>
 
-      ${question === "Autre question" && questionAutre ? `
+      ${questionAutre ? `
       <div class="message-box">
         <h3>💬 Details de la question</h3>
         <p style="white-space: pre-wrap;">${questionAutre}</p>
