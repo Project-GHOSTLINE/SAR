@@ -421,6 +421,36 @@ function AdminDashboardContent() {
     }
   }
 
+  const resendNotification = async (messageId: string, assignedTo?: string) => {
+    const recipient = assignedTo || await new Promise<string>((resolve) => {
+      const choice = confirm('Envoyer à Sandra? (OK = Sandra, Annuler = Michel)')
+      resolve(choice ? 'Sandra' : 'Michel')
+    })
+
+    if (!confirm(`Renvoyer la notification à ${recipient}?`)) {
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/admin/messages/resend`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ messageId, recipient })
+      })
+
+      if (res.ok) {
+        alert(`✅ Notification renvoyée à ${recipient}!`)
+      } else {
+        const data = await res.json()
+        alert(`❌ Erreur: ${data.error || 'Impossible de renvoyer'}`)
+      }
+    } catch (error) {
+      console.error('Error resending notification:', error)
+      alert('❌ Erreur lors de l\'envoi')
+    }
+  }
+
   const fetchMessageStats = async () => {
     try {
       const res = await fetch('/api/admin/messages/assign', { credentials: 'include' })
@@ -1785,6 +1815,16 @@ function AdminDashboardContent() {
                     Details du message
                   </h2>
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        resendNotification(selectedMessage.id, selectedMessage.assigned_to)
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-all hover:scale-105 border border-blue-200 hover:border-blue-300"
+                    >
+                      <Send size={18} />
+                      <span className="text-sm font-medium">Renvoyer</span>
+                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
