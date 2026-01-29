@@ -1307,7 +1307,7 @@ function AdminDashboardContent() {
         {selectedView === 'messages' && (
           <div className="flex gap-6">
             {/* Liste des messages */}
-            <div className={`${selectedMessage ? 'w-1/2' : 'w-full'} transition-all duration-300`}>
+            <div className="w-full transition-all duration-300">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h1 className="text-3xl font-bold text-[#003d2c] flex items-center gap-3">
@@ -1772,8 +1772,12 @@ function AdminDashboardContent() {
             {selectedMessage && (
               <div
                 onClick={closeDetail}
-                className="w-1/2 bg-white rounded-xl shadow-lg border border-gray-100 sticky top-24 h-fit max-h-[calc(100vh-120px)] overflow-auto cursor-pointer"
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
               >
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl my-8 max-h-[90vh] overflow-y-auto"
+                >
                 {/* Header */}
                 <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex items-center justify-between sticky top-0 z-10 rounded-t-xl">
                   <h2 className="font-bold text-gray-900 flex items-center gap-2">
@@ -2379,6 +2383,7 @@ function AdminDashboardContent() {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
             )}
           </div>
