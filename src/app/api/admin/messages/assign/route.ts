@@ -147,7 +147,6 @@ export async function GET(request: NextRequest) {
       .from('contact_messages')
       .select('id, assigned_to, system_responded, lu, created_at')
       .gte('created_at', firstDayISO)
-      .is('deleted_at', null)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -181,15 +180,8 @@ export async function GET(request: NextRequest) {
     const lastNone = messages?.filter(m => !m.assigned_to)[0]?.created_at || null
 
     // Compter les messages supprimés aujourd'hui (depuis 00:01)
-    const { count: deletedToday, error: deletedError } = await supabase
-      .from('contact_messages')
-      .select('*', { count: 'exact', head: true })
-      .gte('deleted_at', startOfTodayISO)
-      .not('deleted_at', 'is', null)
-
-    if (deletedError) {
-      console.error('Error counting deleted messages:', deletedError)
-    }
+    // NOTE: Temporairement désactivé jusqu'à ce que la migration soit exécutée
+    const deletedToday = 0
 
     // Stats détaillées par collègue (pour la carte d'assignations)
     const byColleague: Record<string, number> = {
