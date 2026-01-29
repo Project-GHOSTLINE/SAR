@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     const questionComplete = questionAutre
-      ? `${question}\n\n${questionAutre}`
+      ? questionAutre
       : question
 
     // Determiner le tag source et le destinataire
