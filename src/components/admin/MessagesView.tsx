@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import {
   RefreshCw, Mail, Phone, ChevronRight, Loader2,
   Clock, CheckCircle, X, User, Send, MessageSquare, Tag, ExternalLink,
@@ -210,6 +211,7 @@ function getOptionButtonColor(option: string, isSelected: boolean): string {
 }
 
 export default function MessagesView() {
+  const searchParams = useSearchParams()
   const [messages, setMessages] = useState<Message[]>([])
   const [stats, setStats] = useState({ total: 0, nonLus: 0 })
   const [messageStats, setMessageStats] = useState({
@@ -351,6 +353,17 @@ export default function MessagesView() {
     }, 30000)
     return () => clearInterval(interval)
   }, [])
+
+  // Auto-open message from URL parameter ?open=messageId
+  useEffect(() => {
+    const openParam = searchParams.get('open')
+    if (openParam && messages.length > 0 && !selectedMessage) {
+      const messageToOpen = messages.find(m => m.id === openParam)
+      if (messageToOpen) {
+        fetchMessageDetails(messageToOpen)
+      }
+    }
+  }, [messages, searchParams])
 
   return (
     <div className="flex gap-4">
