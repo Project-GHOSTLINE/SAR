@@ -11,7 +11,7 @@ import {
   DollarSign, Calendar, Clock, CheckCircle, XCircle,
   X, User, Send, MessageSquare, Tag, ExternalLink,
   Monitor, Smartphone, Globe, Chrome, MapPin, Languages,
-  Maximize2, Link2, TrendingUp as Campaign, Target, Download
+  Maximize2, Link2, TrendingUp as Campaign, Target, Download, Trash2
 } from 'lucide-react'
 import AdminNav from '@/components/admin/AdminNav'
 import SupportView from '@/components/admin/SupportView'
@@ -394,6 +394,31 @@ function AdminDashboardContent() {
     setMessageEmails([])
     setMessageNotes([])
     router.push('/admin/dashboard?tab=messages')
+  }
+
+  const deleteMessage = async (messageId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce message? Cette action est irréversible.')) {
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/admin/messages?id=${messageId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      })
+
+      if (res.ok) {
+        // Fermer le panneau de détails
+        closeDetail()
+        // Rafraîchir les données
+        await Promise.all([fetchMessages(), fetchMessageStats()])
+      } else {
+        alert('Erreur lors de la suppression du message')
+      }
+    } catch (error) {
+      console.error('Error deleting message:', error)
+      alert('Erreur lors de la suppression du message')
+    }
   }
 
   const fetchMessageStats = async () => {
@@ -1755,16 +1780,28 @@ function AdminDashboardContent() {
                     <MessageSquare size={18} className="text-[#00874e]" />
                     Details du message
                   </h2>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      closeDetail()
-                    }}
-                    className="flex items-center gap-2 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-all hover:scale-105 border border-red-200 hover:border-red-300"
-                  >
-                    <X size={20} />
-                    <span className="text-sm font-medium">Fermer</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        deleteMessage(selectedMessage.id)
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-all hover:scale-105 border border-red-200 hover:border-red-300"
+                    >
+                      <Trash2 size={18} />
+                      <span className="text-sm font-medium">Supprimer</span>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        closeDetail()
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg transition-all hover:scale-105 border border-gray-200 hover:border-gray-300"
+                    >
+                      <X size={20} />
+                      <span className="text-sm font-medium">Fermer</span>
+                    </button>
+                  </div>
                 </div>
 
                 {detailLoading ? (

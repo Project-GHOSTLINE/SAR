@@ -316,3 +316,41 @@ async function handlePATCH(request: NextRequest) {
 }
 
 export const PATCH = withPerf('admin/messages', handlePATCH)
+
+// DELETE - Supprimer un message (soft delete)
+async function handleDELETE(request: NextRequest) {
+  const isAuth = await verifyAuth()
+
+  if (!isAuth) {
+    return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+  }
+
+  try {
+    const { searchParams } = new URL(request.url)
+    const messageId = searchParams.get('id')
+
+    if (!messageId) {
+      return NextResponse.json({ error: 'ID manquant' }, { status: 400 })
+    }
+
+    const supabase = getSupabaseServer()
+
+    // Soft delete: mettre deleted_at à NOW()
+    const { error } = await supabase
+      .from('contact_messages')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', parseInt(messageId))
+
+    if (error) {
+      console.error('Supabase delete error:', error)
+      throw error
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error deleting message:', error)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  }
+}
+
+export const DELETE = withPerf('admin/messages', handleDELETE)
