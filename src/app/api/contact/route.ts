@@ -237,12 +237,13 @@ export async function POST(request: NextRequest) {
         messageId = data.id
         reference = generateReference(data.id)
 
-        // NOTE: Les emails HTML seront enregistres APRES leur creation ci-dessous
+        // NOTE: Les emails HTML seront enregistres dans la BD apres leur creation ci-dessous
       }
     }
 
-    // Creer les templates HTML AVANT de les enregistrer dans la BD
-    const emailHtml = messageId ? `
+    // Envoyer emails via Resend
+    if (process.env.RESEND_API_KEY) {
+      const emailHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -332,10 +333,22 @@ export async function POST(request: NextRequest) {
   </div>
 </body>
 </html>
-      `.trim() : ''
+      `.trim()
 
-    // Email de confirmation au client
-    const clientConfirmationHtml = (messageId && clientEmail) ? `
+      // Enregistrer l'email HTML dans la BD
+      if (supabase && messageId) {
+        await supabase.from('emails_envoyes').insert({
+          message_id: messageId,
+          type: 'system',
+          destinataire: departementEmail,
+          sujet: `📬 [${sourceLabel.toUpperCase()}] ${reference ? '#' + reference : ''} - Nouveau message`,
+          contenu: emailHtml,
+          envoye_par: 'system'
+        })
+      }
+
+      // Envoyer au departement responsable uniquement
+      await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
@@ -547,55 +560,20 @@ export async function POST(request: NextRequest) {
   </table>
 </body>
 </html>
-        `.trim() : ''
+        `.trim()
 
-    // Enregistrer les emails HTML dans la BD maintenant qu'on a messageId et les templates
-    if (supabase && messageId) {
-      // Enregistrer l'email HTML envoye au departement responsable
-      if (emailHtml) {
-        await supabase.from('emails_envoyes').insert({
-          message_id: messageId,
-          type: 'system',
-          destinataire: departementEmail,
-          sujet: `📬 [${sourceLabel.toUpperCase()}] ${reference ? '#' + reference : ''} - Nouveau message`,
-          contenu: emailHtml,
-          envoye_par: 'system'
-        })
-      }
+        // Enregistrer l'email HTML de confirmation dans la BD
+        if (supabase && messageId) {
+          await supabase.from('emails_envoyes').insert({
+            message_id: messageId,
+            type: 'system',
+            destinataire: clientEmail,
+            sujet: `✅ Demande recue #${reference} - Solution Argent Rapide`,
+            contenu: clientConfirmationHtml,
+            envoye_par: 'system'
+          })
+        }
 
-      // Enregistrer l'email HTML de confirmation au client
-      if (clientConfirmationHtml) {
-        await supabase.from('emails_envoyes').insert({
-          message_id: messageId,
-          type: 'system',
-          destinataire: clientEmail,
-          sujet: `✅ Demande recue #${reference} - Solution Argent Rapide`,
-          contenu: clientConfirmationHtml,
-          envoye_par: 'system'
-        })
-      }
-    }
-
-    // Envoyer emails via Resend
-    if (process.env.RESEND_API_KEY && emailHtml) {
-      // Envoyer au departement responsable
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          from: 'SAR Contact <noreply@solutionargentrapide.ca>',
-          to: departementEmail,
-          reply_to: contactMethod === 'email' ? contact : undefined,
-          subject: `📬 [${sourceLabel.toUpperCase()}] ${reference ? '#' + reference : ''} - Nouveau message`,
-          html: emailHtml
-        })
-      })
-
-      // Envoyer confirmation au client si email fourni
-      if (clientConfirmationHtml) {
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
