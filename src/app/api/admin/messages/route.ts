@@ -44,6 +44,8 @@ async function handleGET(request: NextRequest) {
 
     // Si on demande un message specifique avec ses emails/notes
     if (messageId) {
+      console.log(`[Messages API] Fetching details for message ID: ${messageId}`)
+
       // Fetch emails for this message
       const { data: emails, error: emailsError } = await supabase
         .from('emails_envoyes')
@@ -52,8 +54,11 @@ async function handleGET(request: NextRequest) {
         .order('created_at', { ascending: false })
 
       if (emailsError) {
-        console.error('Emails error:', emailsError)
-        throw emailsError
+        console.error('[Messages API] Emails error:', emailsError)
+        return NextResponse.json({
+          error: 'Erreur lors de la récupération des emails',
+          details: emailsError.message
+        }, { status: 500 })
       }
 
       // Fetch notes for this message
@@ -64,8 +69,11 @@ async function handleGET(request: NextRequest) {
         .order('created_at', { ascending: false })
 
       if (notesError) {
-        console.error('Notes error:', notesError)
-        throw notesError
+        console.error('[Messages API] Notes error:', notesError)
+        return NextResponse.json({
+          error: 'Erreur lors de la récupération des notes',
+          details: notesError.message
+        }, { status: 500 })
       }
 
       // Format response
@@ -173,8 +181,13 @@ async function handleGET(request: NextRequest) {
       nonLus: unreadCount || 0
     })
   } catch (error) {
-    console.error('Error fetching messages:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    console.error('[Messages API] Error fetching messages:', error)
+    console.error('[Messages API] Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    return NextResponse.json({
+      error: 'Erreur serveur',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      details: process.env.NODE_ENV === 'development' ? error : undefined
+    }, { status: 500 })
   }
 }
 
