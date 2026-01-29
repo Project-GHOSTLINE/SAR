@@ -360,7 +360,7 @@ Connectez-vous a l'admin pour repondre: /admin/dashboard`,
 
       <div class="message-box">
         <h3>💬 Message du client</h3>
-        <p>${message}</p>
+        <p style="white-space: pre-wrap;">${message}</p>
       </div>
 
       <div class="quick-actions">

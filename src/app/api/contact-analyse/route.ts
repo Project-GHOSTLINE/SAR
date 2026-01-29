@@ -293,7 +293,7 @@ L'equipe Solution Argent Rapide`,
       ${question === "Autre question" && questionAutre ? `
       <div class="message-box">
         <h3>💬 Details de la question</h3>
-        <p>${questionAutre}</p>
+        <p style="white-space: pre-wrap;">${questionAutre}</p>
       </div>
       ` : ''}
 

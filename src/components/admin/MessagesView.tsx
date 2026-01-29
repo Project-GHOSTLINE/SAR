@@ -1407,6 +1407,102 @@ export default function MessagesView() {
           )}
         </div>
       )}
+
+      {/* Modal Preview Email */}
+      {previewEmail && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setPreviewEmail(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="px-6 py-4 bg-gradient-to-r from-[#10B981] to-emerald-600 text-white flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold">Aperçu de l'email</h2>
+                <p className="text-sm text-emerald-100 mt-1">
+                  Envoyé à {previewEmail.to} • {new Date(previewEmail.date).toLocaleString('fr-CA')}
+                </p>
+              </div>
+              <button
+                onClick={() => setPreviewEmail(null)}
+                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Email Details */}
+            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Type</p>
+                  <p className="text-base font-semibold text-gray-900">
+                    {previewEmail.type === 'system' ? '🤖 Automatique' : '✍️ Manuel'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Envoyé par</p>
+                  <p className="text-base font-semibold text-gray-900">{previewEmail.sentBy}</p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-sm text-gray-500 font-medium">Objet</p>
+                <p className="text-lg font-bold text-gray-900 mt-1">{previewEmail.subject}</p>
+              </div>
+            </div>
+
+            {/* Email Content */}
+            <div className="flex-1 overflow-auto p-6">
+              <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 p-6">
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <MessageSquare size={16} />
+                  Contenu de l'email
+                </h3>
+                {/* Afficher le HTML si présent, sinon le texte brut */}
+                {previewEmail.content.includes('<html>') || previewEmail.content.includes('<!DOCTYPE') ? (
+                  <div className="bg-white rounded-lg border border-gray-300 overflow-hidden">
+                    <iframe
+                      srcDoc={previewEmail.content}
+                      className="w-full min-h-[500px] border-0"
+                      title="Email Preview"
+                      sandbox="allow-same-origin"
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-lg border border-gray-300 p-6">
+                    <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700 leading-relaxed">
+                      {previewEmail.content}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+              <button
+                onClick={() => {
+                  // Copier le contenu dans le presse-papiers
+                  navigator.clipboard.writeText(previewEmail.content)
+                  alert('Contenu copié dans le presse-papiers !')
+                }}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-medium transition-colors flex items-center gap-2"
+              >
+                📋 Copier le contenu
+              </button>
+              <button
+                onClick={() => setPreviewEmail(null)}
+                className="px-6 py-2 bg-[#10B981] hover:bg-[#059669] text-white rounded-xl font-semibold transition-colors"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

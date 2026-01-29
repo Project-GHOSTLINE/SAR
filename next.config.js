@@ -3,6 +3,12 @@ const nextConfig = {
   images: {
     domains: ['solutionargentrapide.ca'],
   },
+  webpack: (config, { isServer }) => {
+    // Ignorer le module 'canvas' pour PDF.js
+    config.resolve.alias.canvas = false
+    config.resolve.alias.encoding = false
+    return config
+  },
   async headers() {
     return [
       {
