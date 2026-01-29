@@ -237,60 +237,12 @@ export async function POST(request: NextRequest) {
         messageId = data.id
         reference = generateReference(data.id)
 
-        // Creer les enregistrements d'emails dans emails_envoyes
-
-        // 1. Email de confirmation au client (si email fourni)
-        if (clientEmail) {
-          await supabase.from('emails_envoyes').insert({
-            message_id: messageId,
-            type: 'system',
-            destinataire: clientEmail,
-            sujet: `Confirmation de votre demande #${reference}`,
-            contenu: `Bonjour,
-
-Nous avons bien recu votre message.
-
-Votre numero de reference: #${reference}
-
-Notre equipe vous contactera dans les 24-48h ouvrables.
-
-Cordialement,
-L'equipe Solution Argent Rapide`,
-            envoye_par: 'system'
-          })
-        }
-
-        // 2. Notification au responsable du departement
-        await supabase.from('emails_envoyes').insert({
-          message_id: messageId,
-          type: 'system',
-          destinataire: departementEmail,
-          sujet: `[${sourceLabel.toUpperCase()}] #${reference} - Nouveau message`,
-          contenu: `Bonjour ${responsable},
-
-NOUVELLE DEMANDE - ${sourceLabel}
-=====================================
-
-Reference: #${reference}
-Date: ${new Date().toLocaleString('fr-CA')}
-Source: ${sourceLabel}
-
-CONTACT CLIENT:
-${contactLabel}: ${contact}
-
-MESSAGE:
-${message}
-
----
-Voir le message dans l'admin: https://admin.solutionargentrapide.ca/admin/dashboard?tab=messages&open=${messageId}`,
-          envoye_par: 'system'
-        })
+        // NOTE: Les emails HTML seront enregistres APRES leur creation ci-dessous
       }
     }
 
-    // Envoyer emails via Resend
-    if (process.env.RESEND_API_KEY) {
-      const emailHtml = `
+    // Creer les templates HTML AVANT de les enregistrer dans la BD
+    const emailHtml = messageId ? `
 <!DOCTYPE html>
 <html>
 <head>
@@ -380,10 +332,10 @@ Voir le message dans l'admin: https://admin.solutionargentrapide.ca/admin/dashbo
   </div>
 </body>
 </html>
-      `.trim()
+      `.trim() : ''
 
-      // Envoyer au departement responsable uniquement
-      await fetch('https://api.resend.com/emails', {
+    // Email de confirmation au client
+    const clientConfirmationHtml = (messageId && clientEmail) ? `
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
@@ -595,8 +547,55 @@ Voir le message dans l'admin: https://admin.solutionargentrapide.ca/admin/dashbo
   </table>
 </body>
 </html>
-        `.trim()
+        `.trim() : ''
 
+    // Enregistrer les emails HTML dans la BD maintenant qu'on a messageId et les templates
+    if (supabase && messageId) {
+      // Enregistrer l'email HTML envoye au departement responsable
+      if (emailHtml) {
+        await supabase.from('emails_envoyes').insert({
+          message_id: messageId,
+          type: 'system',
+          destinataire: departementEmail,
+          sujet: `📬 [${sourceLabel.toUpperCase()}] ${reference ? '#' + reference : ''} - Nouveau message`,
+          contenu: emailHtml,
+          envoye_par: 'system'
+        })
+      }
+
+      // Enregistrer l'email HTML de confirmation au client
+      if (clientConfirmationHtml) {
+        await supabase.from('emails_envoyes').insert({
+          message_id: messageId,
+          type: 'system',
+          destinataire: clientEmail,
+          sujet: `✅ Demande recue #${reference} - Solution Argent Rapide`,
+          contenu: clientConfirmationHtml,
+          envoye_par: 'system'
+        })
+      }
+    }
+
+    // Envoyer emails via Resend
+    if (process.env.RESEND_API_KEY && emailHtml) {
+      // Envoyer au departement responsable
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: 'SAR Contact <noreply@solutionargentrapide.ca>',
+          to: departementEmail,
+          reply_to: contactMethod === 'email' ? contact : undefined,
+          subject: `📬 [${sourceLabel.toUpperCase()}] ${reference ? '#' + reference : ''} - Nouveau message`,
+          html: emailHtml
+        })
+      })
+
+      // Envoyer confirmation au client si email fourni
+      if (clientConfirmationHtml) {
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {

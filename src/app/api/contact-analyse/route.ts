@@ -158,60 +158,11 @@ export async function POST(request: NextRequest) {
         messageId = data.id
         reference = generateReference(data.id)
 
-        // Enregistrer l'email envoye a l'equipe
-        await supabase.from('emails_envoyes').insert({
-          message_id: messageId,
-          type: 'system',
-          destinataire: destinataire,
-          sujet: `[NOUVELLE DEMANDE] ${nom} - #${reference}`,
-          contenu: `Nouvelle demande depuis ${sourceLabel}
-
-Reference: #${reference}
-Date: ${new Date().toLocaleString('fr-CA')}
-
-CLIENT:
-Nom: ${nom}
-Email: ${email}
-Telephone: ${telephone}
-
-QUESTION: ${question}
-${questionAutre ? `\nDETAILS:\n${questionAutre}` : ''}
-
----
-Voir le message dans l'admin: https://admin.solutionargentrapide.ca/admin/dashboard?tab=messages&open=${messageId}`,
-          envoye_par: 'system'
-        })
-
-        // Enregistrer l'email de confirmation au client
-        if (email) {
-          await supabase.from('emails_envoyes').insert({
-            message_id: messageId,
-            type: 'system',
-            destinataire: email,
-            sujet: `Confirmation de votre demande #${reference}`,
-            contenu: `Bonjour ${nom.split(' ')[0]},
-
-Nous avons bien recu votre demande.
-
-Votre numero de reference: #${reference}
-Question: ${questionComplete}
-
-Notre equipe vous contactera dans les 24-48h ouvrables.
-
-Heures d'ouverture:
-Lundi au vendredi: 8h00 a 16h00
-
-Contact: 514-589-1946 (Analyse et suivi) ou 450-999-1107 (Administration)
-
-Cordialement,
-L'equipe Solution Argent Rapide`,
-            envoye_par: 'system'
-          })
-        }
+        // NOTE: Les emails HTML seront enregistres APRES leur creation ci-dessous
       }
     }
 
-    // Email HTML template pour l'equipe
+    // Email HTML template pour l'equipe (CREE AVANT L'ENREGISTREMENT)
     const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -521,6 +472,31 @@ L'equipe Solution Argent Rapide`,
 </body>
 </html>
     `.trim()
+
+    // Enregistrer les emails HTML dans la BD maintenant qu'on a messageId et les templates
+    if (supabase && messageId) {
+      // Enregistrer l'email HTML envoye a l'equipe
+      await supabase.from('emails_envoyes').insert({
+        message_id: messageId,
+        type: 'system',
+        destinataire: destinataire,
+        sujet: `💬 ${question} - ${nom} ${reference ? '#' + reference : ''}`,
+        contenu: emailHtml,
+        envoye_par: 'system'
+      })
+
+      // Enregistrer l'email HTML de confirmation au client
+      if (email) {
+        await supabase.from('emails_envoyes').insert({
+          message_id: messageId,
+          type: 'system',
+          destinataire: email,
+          sujet: `✅ Demande recue ${reference ? '#' + reference : ''} - Solution Argent Rapide`,
+          contenu: clientConfirmationHtml,
+          envoye_par: 'system'
+        })
+      }
+    }
 
     // Envoyer emails via Resend si configure
     if (process.env.RESEND_API_KEY) {
