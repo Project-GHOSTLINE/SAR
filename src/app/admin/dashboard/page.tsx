@@ -392,6 +392,7 @@ function AdminDashboardContent() {
     setSelectedMessage(null)
     setMessageEmails([])
     setMessageNotes([])
+    router.push('/admin/dashboard?tab=messages')
   }
 
   const fetchMessageStats = async () => {
@@ -1565,6 +1566,7 @@ function AdminDashboardContent() {
                             closeDetail()
                           } else {
                             fetchMessageDetails(msg)
+                            router.push(`/admin/dashboard?tab=messages&open=${msg.id}`)
                           }
                         }}
                         className={`px-6 py-5 hover:bg-gradient-to-r ${filterColors.hover} hover:to-transparent transition-all cursor-pointer group ${!msg.lu ? 'bg-gradient-to-r from-blue-50/30 to-transparent' : ''} ${selectedMessage?.id === msg.id ? `ring-2 ${filterColors.selected} ring-inset` : ''}`}
