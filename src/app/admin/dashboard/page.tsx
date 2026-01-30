@@ -101,6 +101,29 @@ interface RecentTransaction {
   environment: string
 }
 
+// Formatter le nom: Prénom NOM (premier mot normal, reste en majuscules)
+function formatClientName(fullName: string): string {
+  if (!fullName || fullName.trim() === '') return fullName
+
+  // Split sur espaces multiples et filtrer les vides
+  const parts = fullName.trim().split(/\s+/).filter(p => p.length > 0)
+
+  if (parts.length === 0) return fullName
+
+  // Si un seul mot, le capitaliser normalement
+  if (parts.length === 1) {
+    return parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase()
+  }
+
+  // Premier mot = Prénom (capitalize normalement)
+  const firstName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase()
+
+  // Reste = Nom de famille (tout en majuscules)
+  const lastName = parts.slice(1).join(' ').toUpperCase()
+
+  return `${firstName} ${lastName}`
+}
+
 // Extraire l'option selectionnee et la source du message
 function extractOptionFromMessage(question: string): { source: string | null; option: string | null; message: string } {
   // Format: [Source] [Option] Message
@@ -140,6 +163,25 @@ function extractOptionFromMessage(question: string): { source: string | null; op
     cleanMessage = question.replace(/\[Formulaire Contact\]\s*/g, '').trim()
   }
 
+  // Detecter Page Nous Joindre
+  if (!source && question.includes('[Page Nous Joindre]')) {
+    source = 'Page Nous Joindre'
+    cleanMessage = question.replace(/\[Page Nous Joindre\]\s*/g, '').trim()
+
+    // Extraire l'option si présente (entre crochets)
+    const optionMatch = cleanMessage.match(/\[([^\]]+)\]/)
+    if (optionMatch) {
+      option = optionMatch[1]
+      cleanMessage = cleanMessage.replace(/\[[^\]]+\]\s*/g, '').trim()
+    }
+  }
+
+  // Nettoyer les infos de contact redondantes du message
+  cleanMessage = cleanMessage
+    .replace(/^Téléphone:\s*\d+\s*/i, '')
+    .replace(/^Email:\s*[\w.-]+@[\w.-]+\.\w+\s*/i, '')
+    .trim()
+
   return {
     source,
     option,
@@ -154,7 +196,8 @@ function getSourceColor(source: string | null): string {
     'Espace Client': 'bg-purple-100 text-purple-700',
     'Analyse Demande': 'bg-blue-100 text-blue-700',
     'Formulaire Accueil': 'bg-indigo-100 text-indigo-700',
-    'Formulaire Contact': 'bg-cyan-100 text-cyan-700'
+    'Formulaire Contact': 'bg-cyan-100 text-cyan-700',
+    'Page Nous Joindre': 'bg-emerald-100 text-emerald-700'
   }
   return colors[source] || 'bg-gray-100 text-gray-600'
 }
@@ -1866,7 +1909,7 @@ function AdminDashboardContent() {
                             {selectedMessage.nom.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
                           <div>
-                            <p className="font-bold text-gray-900 text-lg">{selectedMessage.nom}</p>
+                            <p className="font-bold text-gray-900 text-lg">{formatClientName(selectedMessage.nom)}</p>
                             <p className="text-sm text-gray-500 font-mono">#{selectedMessage.reference}</p>
                           </div>
                         </div>
@@ -2012,32 +2055,66 @@ function AdminDashboardContent() {
                       </div>
                     </div>
 
-                    {/* Option Selectionnee */}
+                    {/* Message du Client - Format Professionnel */}
                     {(() => {
-                      const { option } = extractOptionFromMessage(selectedMessage.question)
-                      return option ? (
-                        <div className="bg-gray-50 rounded-xl p-5">
-                          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <Tag size={14} />
-                            Option Selectionnee
-                          </h3>
-                          <span className={`inline-block text-sm px-4 py-2 rounded-full font-semibold ${getOptionColor(option)}`}>
-                            {option}
-                          </span>
-                        </div>
-                      ) : null
-                    })()}
+                      const { source, option, message } = extractOptionFromMessage(selectedMessage.question)
 
-                    {/* Message */}
-                    <div className="bg-gray-50 rounded-xl p-5">
-                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <MessageSquare size={14} />
-                        Message du Client
-                      </h3>
-                      <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
-                        {extractOptionFromMessage(selectedMessage.question).message}
-                      </p>
-                    </div>
+                      return (
+                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
+                          <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <MessageSquare size={16} className="text-[#00874e]" />
+                            Message du Client
+                          </h3>
+
+                          {/* Métadonnées */}
+                          <div className="space-y-3 mb-5">
+                            {/* Source */}
+                            {source && (
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs text-gray-600 font-semibold">Source:</span>
+                                <span className={`text-xs px-3 py-1.5 rounded-full font-semibold ${getSourceColor(source)}`}>
+                                  {source}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Contact */}
+                            <div className="flex items-center gap-3 flex-wrap text-sm">
+                              {selectedMessage.telephone && (
+                                <div className="flex items-center gap-1.5">
+                                  <Phone size={14} className="text-gray-500" />
+                                  <span className="text-gray-700 font-medium">{selectedMessage.telephone}</span>
+                                </div>
+                              )}
+                              {selectedMessage.email && (
+                                <div className="flex items-center gap-1.5">
+                                  <Mail size={14} className="text-gray-500" />
+                                  <span className="text-gray-700 font-medium">{selectedMessage.email}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Type de demande */}
+                            {option && (
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs text-gray-600 font-semibold">Sujet:</span>
+                                <span className={`text-xs px-3 py-1.5 rounded-full font-semibold ${getOptionColor(option)}`}>
+                                  {option}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Contenu du message */}
+                          <div className="bg-white rounded-lg p-4 border-l-4 border-[#00874e] shadow-sm">
+                            <p className="text-xs uppercase tracking-wide text-gray-500 font-bold mb-2">Contenu</p>
+                            <p className="text-gray-800 whitespace-pre-wrap leading-relaxed text-sm">
+                              {message}
+                            </p>
+                          </div>
+                        </div>
+                      )
+                    })()}
 
                     {/* Métriques Techniques & Analytiques - Version Enrichie */}
                     {(selectedMessage.client_ip || selectedMessage.client_device) && (
