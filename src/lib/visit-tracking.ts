@@ -2,8 +2,9 @@
  * Visit Tracking - Identity Graph
  *
  * Generates and persists visit_id (UUIDv4) in cookie for 30 days.
+ * Also manages visitor_id for cross-session tracking.
  * This enables linking:
- *   IP → visit_id → session_id → user_id → client_id
+ *   IP → visitor_id → visit_id → session_id → user_id → client_id
  *
  * Usage:
  *   import { getOrCreateVisitId, getVisitHeaders } from '@/lib/visit-tracking'
@@ -14,6 +15,8 @@
  *   // In API calls
  *   fetch('/api/...', { headers: getVisitHeaders() })
  */
+
+import { getOrCreateVisitorId, getCookie as getVisitorCookie } from '@/lib/tracking-session';
 
 const VISIT_ID_COOKIE = 'sar_visit_id';
 const VISIT_ID_EXPIRY_DAYS = 30;
@@ -83,11 +86,18 @@ export function getVisitId(): string | null {
 
 /**
  * Get headers to include in API calls
- * Returns object with x-sar-visit-id (and x-sar-session-id if available)
+ * Returns object with x-sar-visitor-id, x-sar-visit-id (and x-sar-session-id if available)
  */
 export function getVisitHeaders(): Record<string, string> {
   const headers: Record<string, string> = {};
 
+  // Add visitor_id (first-party persistent tracking)
+  const visitorId = getVisitorCookie('sar_visitor_id');
+  if (visitorId) {
+    headers['x-sar-visitor-id'] = visitorId;
+  }
+
+  // Add visit_id (30-day session)
   const visitId = getVisitId();
   if (visitId) {
     headers['x-sar-visit-id'] = visitId;
@@ -111,13 +121,17 @@ export function initVisitTracking() {
     return;
   }
 
-  // Create visit_id if it doesn't exist
-  getOrCreateVisitId();
+  // Create visitor_id if it doesn't exist (persistent across sessions)
+  const visitorId = getOrCreateVisitorId();
+
+  // Create visit_id if it doesn't exist (30-day session)
+  const visitId = getOrCreateVisitId();
 
   // Log for debugging (remove in production)
   if (process.env.NODE_ENV === 'development') {
     console.log('[Visit Tracking] Initialized:', {
-      visit_id: getVisitId(),
+      visitor_id: visitorId,
+      visit_id: visitId,
     });
   }
 }
