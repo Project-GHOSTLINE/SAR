@@ -114,6 +114,11 @@ export async function middleware(request: NextRequest) {
   const visitId = request.headers.get('x-sar-visit-id') || undefined
   const clientSessionId = request.headers.get('x-sar-session-id') || undefined
 
+  // VISITOR ID: Read from cookie or header (first-party tracking)
+  const visitorId = request.cookies.get('sar_visitor_id')?.value ||
+                    request.headers.get('x-sar-visitor-id') ||
+                    undefined
+
   // SESSION TRACKING: Generate or retrieve session_id (NO DB write, cookie only)
   let sessionId = request.cookies.get('sar_session_id')?.value
   if (!sessionId || sessionId.length !== 64) {
@@ -249,6 +254,7 @@ export async function middleware(request: NextRequest) {
         vercel_region: vercelRegion,
         visit_id: visitId, // From client header
         session_id: clientSessionId, // From client header (optional)
+        visitor_id: visitorId, // From cookie or header (first-party tracking)
         meta_redacted: deviceInfo, // Device/Browser/OS info from User-Agent
       }
     })

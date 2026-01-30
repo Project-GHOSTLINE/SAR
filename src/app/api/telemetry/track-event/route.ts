@@ -22,7 +22,7 @@ const supabase = createClient(
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, x-sar-visit-id, x-sar-session-id',
+  'Access-Control-Allow-Headers': 'Content-Type, x-sar-visit-id, x-sar-session-id, x-sar-visitor-id',
 };
 
 // Handle CORS preflight
@@ -34,13 +34,15 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Extract visit_id from header (set by client)
+    // Extract identity headers (set by client)
     const visitId = request.headers.get('x-sar-visit-id');
     const sessionId = request.headers.get('x-sar-session-id');
+    const visitorId = request.headers.get('x-sar-visitor-id');
 
     console.log('[telemetry] Received event:', {
       visitId,
       sessionId,
+      visitorId,
       event_name: body.event_name,
       page_path: body.page_path,
     });
@@ -77,6 +79,7 @@ export async function POST(request: NextRequest) {
     const eventPayload = {
       visit_id: visitId,
       session_id: sessionId || null,
+      visitor_id: visitorId || null,
       event_name,
       page_path: page_path || null,
       referrer: referrer || null,
