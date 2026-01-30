@@ -1,7 +1,11 @@
 -- Migration: Add Device Profiles to Fraud Detection
 -- Enrichit les vues avec device/browser/OS info pour profiling complet
 
--- 1. Update network_correlation with device info
+-- 1. Drop existing views (required to change column structure)
+DROP VIEW IF EXISTS fraud_detection_live CASCADE;
+DROP VIEW IF EXISTS network_correlation CASCADE;
+
+-- 2. Recreate network_correlation with device info
 CREATE OR REPLACE VIEW network_correlation AS
 SELECT
   -- Identité
@@ -68,7 +72,33 @@ WHERE tr.env = 'production'
   AND tr.visit_id IS NOT NULL
 GROUP BY tr.ip, tr.visit_id, tr.session_id, tr.user_id, tr.client_id;
 
--- 2. Create device_profiles view (One row per unique device)
+-- 3. Recreate fraud_detection_live
+CREATE OR REPLACE VIEW fraud_detection_live AS
+SELECT
+  nc.*,
+  CASE
+    WHEN nc.total_events = 0 AND nc.total_requests > 5 THEN 90
+    WHEN nc.requests_per_minute > 30 THEN 80
+    WHEN nc.correlation_score < 30 AND nc.total_requests > 10 THEN 70
+    WHEN nc.form_starts > 0 AND nc.form_submits = 0 AND nc.session_duration_seconds > 60 THEN 60
+    WHEN nc.server_errors + nc.client_errors > 10 THEN 50
+    ELSE 10
+  END as fraud_score,
+  nc.total_events = 0 AND nc.total_requests > 5 as is_likely_bot,
+  nc.requests_per_minute > 30 as is_velocity_abuse,
+  nc.correlation_score < 30 as is_low_correlation,
+  nc.server_errors > 5 as has_many_errors,
+  CASE
+    WHEN nc.total_events = 0 AND nc.total_requests > 5 THEN 'BOT'
+    WHEN nc.requests_per_minute > 30 THEN 'SCRAPER'
+    WHEN nc.correlation_score < 30 THEN 'SUSPICIOUS'
+    WHEN nc.form_submits > 0 THEN 'CONVERTER'
+    WHEN nc.page_views > 3 THEN 'ENGAGED'
+    ELSE 'VISITOR'
+  END as classification
+FROM network_correlation nc;
+
+-- 4. Create device_profiles view (One row per unique device)
 CREATE OR REPLACE VIEW device_profiles AS
 SELECT
   visit_id,
@@ -135,7 +165,7 @@ SELECT
 
 FROM fraud_detection_live;
 
--- 3. Create visit_timeline view (Full browsing history per visit)
+-- 5. Create visit_timeline view (Full browsing history per visit)
 CREATE OR REPLACE VIEW visit_timeline AS
 SELECT
   tr.visit_id,
@@ -190,7 +220,7 @@ WHERE te.visit_id IS NOT NULL
 
 ORDER BY visit_id, timestamp ASC;
 
--- 4. Create client_device_history view (All devices used by a client)
+-- 6. Create client_device_history view (All devices used by a client)
 CREATE OR REPLACE VIEW client_device_history AS
 SELECT
   c.id as client_id,

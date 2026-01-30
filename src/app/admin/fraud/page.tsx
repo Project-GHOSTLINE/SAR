@@ -294,7 +294,11 @@ export default function FraudDetectionPage() {
                       {det.ip}
                     </a>
                   </td>
-                  <td className="p-2 font-mono text-xs">{det.visit_id?.slice(0, 8)}...</td>
+                  <td className="p-2 font-mono text-xs">
+                    <a href={`/admin/fraud/device/${det.visit_id}`} className="text-blue-600 hover:underline">
+                      {det.visit_id?.slice(0, 8)}...
+                    </a>
+                  </td>
                   <td className="p-2">
                     {det.device_label || det.device_type ? (
                       <div className="text-xs">
