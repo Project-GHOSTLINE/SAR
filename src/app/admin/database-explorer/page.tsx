@@ -146,13 +146,40 @@ export default function DatabaseExplorerPage() {
                 Exploration complète de toutes les tables et données
               </p>
             </div>
-            <button
-              onClick={fetchData}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Rafraîchir
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  if (expandedTables.size === filteredTables.length && filteredTables.length > 0) {
+                    // Collapse all
+                    setExpandedTables(new Set())
+                  } else {
+                    // Expand all filtered tables
+                    setExpandedTables(new Set(filteredTables.map(t => t.table_name)))
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={filteredTables.length === 0}
+              >
+                {expandedTables.size === filteredTables.length && filteredTables.length > 0 ? (
+                  <>
+                    <ChevronRight className="w-4 h-4" />
+                    Fermer Tout
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-4 h-4" />
+                    Ouvrir Tout
+                  </>
+                )}
+              </button>
+              <button
+                onClick={fetchData}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Rafraîchir
+              </button>
+            </div>
           </div>
 
           {/* Stats globales */}

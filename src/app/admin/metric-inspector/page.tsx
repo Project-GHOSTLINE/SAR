@@ -200,13 +200,39 @@ export default function MetricInspectorPage() {
               <h1 className="text-3xl font-bold text-gray-900">Metric Engine Inspector</h1>
               <p className="text-gray-600 mt-1">Visualisation complète de l'architecture modulaire</p>
             </div>
-            <button
-              onClick={fetchInspectionData}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Rafraîchir
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  if (expandedSections.size === data.sections.length) {
+                    // Collapse all
+                    setExpandedSections(new Set())
+                  } else {
+                    // Expand all
+                    setExpandedSections(new Set(data.sections.map(s => s.section_key)))
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                {expandedSections.size === data.sections.length ? (
+                  <>
+                    <ChevronRight className="w-4 h-4" />
+                    Fermer Tout
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-4 h-4" />
+                    Ouvrir Tout
+                  </>
+                )}
+              </button>
+              <button
+                onClick={fetchInspectionData}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Rafraîchir
+              </button>
+            </div>
           </div>
 
           {/* Stats globales */}
