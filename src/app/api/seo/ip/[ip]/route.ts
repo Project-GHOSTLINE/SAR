@@ -35,7 +35,7 @@ export async function GET(
     const { data: timelineRaw } = await supabase
       .from("telemetry_requests")
       .select("created_at, method, path, status, duration_ms")
-      .eq("ip_hash", ip)
+      .eq("ip", ip)
       .eq("env", "production")
       .gte("created_at", startDate.toISOString())
       .order("created_at", { ascending: false })
@@ -55,7 +55,7 @@ export async function GET(
     const { data: topPaths } = await supabase
       .from("telemetry_requests")
       .select("path")
-      .eq("ip_hash", ip)
+      .eq("ip", ip)
       .eq("env", "production")
       .gte("created_at", startDate.toISOString());
 
@@ -90,29 +90,14 @@ export async function GET(
     const totalRequests = ipIntel.total_requests || 1;
     const successRate = Math.round((successCount / totalRequests) * 100);
 
-    // Find clear IP from ip_hash (since URL uses ip_hash)
-    // Query telemetry_requests to get the clear IP for this ip_hash
-    const { data: ipMapping } = await supabase
-      .from("telemetry_requests")
-      .select("ip")
-      .eq("ip_hash", ip)
-      .not("ip", "is", null)
-      .limit(1)
-      .single();
-
-    const clearIp = ipMapping?.ip;
-
-    // Fetch visits from visit_dossier view (using clear IP if available)
-    const { data: visits } = clearIp
-      ? await supabase
-          .from("visit_dossier")
-          .select("*")
-          .eq("ip", clearIp)
-          .gte("first_seen", startDate.toISOString())
-          .order("first_seen", { ascending: false })
-          .limit(10)
-          .then((res) => res)
-      : { data: null };
+    // Fetch visits from visit_dossier view (using clear IP from URL)
+    const { data: visits } = await supabase
+      .from("visit_dossier")
+      .select("*")
+      .eq("ip", ip)
+      .gte("first_seen", startDate.toISOString())
+      .order("first_seen", { ascending: false })
+      .limit(10);
 
     // Enrich visits with events data (only if we have clear IP and visits)
     const enrichedVisits = visits

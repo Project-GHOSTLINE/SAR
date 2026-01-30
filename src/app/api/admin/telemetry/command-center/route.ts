@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 /**
  * API: GET /api/admin/telemetry/command-center
  *

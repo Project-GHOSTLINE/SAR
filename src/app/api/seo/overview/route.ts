@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // GET /api/seo/overview?range=30d&device=all&page=all
 // Source: seo_unified_daily_plus view
 // Retourne: KPIs consolidés + série temporelle + top pages

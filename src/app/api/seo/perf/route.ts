@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // GET /api/seo/perf?range=30d&path=/&device=all
 // Source: vercel_speed_insights_daily
 // Retourne: Speed Insights détaillé par page/device
