@@ -139,22 +139,42 @@ export interface DailyActivity {
 
 export interface RequestTimeline {
   timestamp: string;
+  created_at: string;
+  method: string;
   path: string;
   duration_ms: number;
   status: number;
   region: string | null;
 }
 
+export interface IpAlert {
+  level: "CRIT" | "WARN" | "OK";
+  title: string;
+  description: string;
+  action?: string;
+  metric: string;
+  value?: string | number;
+}
+
+export interface SlowEndpoint {
+  path: string;
+  avg_duration: number;
+  count: number;
+}
+
 export interface IpData {
+  ip: string;
   intelligence: IpIntelligence;
+  score: number;
+  alerts: IpAlert[];
   stats: IpStats;
   topPaths: PathCount[];
-  dailyActivity: DailyActivity[];
+  slowestEndpoints: SlowEndpoint[];
   timeline: RequestTimeline[];
   meta: {
     range: string;
     days: number;
-    timeline_size: number;
+    dataPoints: number;
   };
 }
 

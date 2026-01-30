@@ -1,6 +1,5 @@
 // GET /api/seo/ip/[ip]?range=30d
-// Source: ip_to_seo_segment view + telemetry_requests
-// Retourne: IP Intelligence + Timeline des requêtes
+// Retourne le dossier complet d'une IP
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
@@ -15,139 +14,157 @@ export async function GET(
   { params }: { params: { ip: string } }
 ) {
   try {
-    const ipHash = params.ip;
+    const ip = params.ip;
     const { searchParams } = new URL(req.url);
     const range = searchParams.get("range") || "30d";
 
-    // Calculer la date de début
-    const daysMap: Record<string, number> = {
-      "7d": 7,
-      "30d": 30,
-      "90d": 90,
-    };
+    const daysMap: Record<string, number> = { "7d": 7, "30d": 30, "90d": 90 };
     const days = daysMap[range] || 30;
-    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
+    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-    // 1️⃣ Intelligence IP (depuis view ip_to_seo_segment)
-    const { data: intelligence, error: intError } = await supabase
+    const { data: ipIntel, error: intelError } = await supabase
       .from("ip_to_seo_segment")
       .select("*")
-      .eq("ip", ipHash)
+      .eq("ip", ip)
       .single();
 
-    if (intError && intError.code !== "PGRST116") {
-      throw intError;
+    if (intelError || !ipIntel) {
+      return NextResponse.json({ error: "IP not found" }, { status: 404 });
     }
 
-    if (!intelligence) {
-      return NextResponse.json(
-        { error: "IP not found", ip: ipHash },
-        { status: 404 }
-      );
-    }
-
-    // 2️⃣ Timeline des requêtes (depuis telemetry_requests)
-    const { data: timeline, error: timelineError } = await supabase
+    const { data: timelineRaw } = await supabase
       .from("telemetry_requests")
-      .select("created_at, path, duration_ms, status, vercel_region, meta_redacted")
-      .eq("ip_hash", ipHash)
+      .select("created_at, method, path, status, duration_ms")
+      .eq("ip_hash", ip)
       .eq("env", "production")
-      .gte("created_at", startDate)
+      .gte("created_at", startDate.toISOString())
       .order("created_at", { ascending: false })
-      .limit(200);
+      .limit(100);
 
-    if (timelineError) throw timelineError;
+    // Map timeline to include all fields for both preview and full dossier
+    const timeline = timelineRaw?.map((r) => ({
+      timestamp: r.created_at, // For ExplorerIpPanel
+      created_at: r.created_at, // For IP Dossier page
+      method: r.method,
+      path: r.path,
+      status: r.status,
+      duration_ms: r.duration_ms || 0,
+      region: null, // Not tracked yet
+    })) || [];
 
-    // 3️⃣ Agréger stats additionnelles
-    const stats = {
-      total_requests: timeline?.length || 0,
-      unique_paths: new Set(timeline?.map((r) => r.path)).size,
-      avg_duration: timeline?.length
-        ? Math.round(
-            timeline.reduce((sum, r) => sum + (r.duration_ms || 0), 0) /
-              timeline.length
-          )
-        : 0,
-      success_rate: timeline?.length
-        ? Math.round(
-            (timeline.filter((r) => r.status >= 200 && r.status < 300).length /
-              timeline.length) *
-              100
-          )
-        : 0,
-      regions: Array.from(new Set(timeline?.map((r) => r.vercel_region).filter(Boolean))),
-    };
+    const { data: topPaths } = await supabase
+      .from("telemetry_requests")
+      .select("path")
+      .eq("ip_hash", ip)
+      .eq("env", "production")
+      .gte("created_at", startDate.toISOString());
 
-    // 4️⃣ Distribution par path
     const pathCounts: Record<string, number> = {};
-    timeline?.forEach((r) => {
-      if (r.path) {
-        pathCounts[r.path] = (pathCounts[r.path] || 0) + 1;
-      }
-    });
-
-    const topPaths = Object.entries(pathCounts)
+    topPaths?.forEach((r) => { pathCounts[r.path] = (pathCounts[r.path] || 0) + 1; });
+    const topPathsList = Object.entries(pathCounts)
       .map(([path, count]) => ({ path, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
-    // 5️⃣ Distribution par jour
-    const dailyCounts: Record<string, number> = {};
-    timeline?.forEach((r) => {
-      const date = r.created_at.split("T")[0];
-      dailyCounts[date] = (dailyCounts[date] || 0) + 1;
+    const pathDurations: Record<string, { sum: number; count: number }> = {};
+    timelineRaw?.forEach((r) => {
+      if (!pathDurations[r.path]) pathDurations[r.path] = { sum: 0, count: 0 };
+      pathDurations[r.path].sum += r.duration_ms || 0;
+      pathDurations[r.path].count += 1;
     });
 
-    const dailyActivity = Object.entries(dailyCounts)
-      .map(([date, count]) => ({ date, count }))
-      .sort((a, b) => a.date.localeCompare(b.date));
+    const slowestEndpoints = Object.entries(pathDurations)
+      .map(([path, stats]) => ({
+        path,
+        avg_duration: Math.round(stats.sum / stats.count),
+        count: stats.count,
+      }))
+      .sort((a, b) => b.avg_duration - a.avg_duration)
+      .slice(0, 10);
+
+    const score = calculateIpScore(ipIntel);
+    const alerts = generateAlerts(ipIntel);
+
+    // Calculate stats for preview
+    const successCount = ipIntel.success_count || 0;
+    const totalRequests = ipIntel.total_requests || 1;
+    const successRate = Math.round((successCount / totalRequests) * 100);
 
     return NextResponse.json({
+      ip: ipIntel.ip,
       intelligence: {
-        ip: intelligence.ip,
-        first_seen: intelligence.first_seen,
-        last_seen: intelligence.last_seen,
-        landing_page: intelligence.landing_page,
-        most_visited_page: intelligence.most_visited_page,
-        total_requests: intelligence.total_requests,
-        active_days: intelligence.active_days,
-        unique_pages: intelligence.unique_pages,
-        avg_duration_ms: intelligence.avg_duration_ms,
-        p50_duration_ms: intelligence.p50_duration_ms,
-        p95_duration_ms: intelligence.p95_duration_ms,
-        device: intelligence.device,
-        utm_source: intelligence.utm_source,
-        utm_medium: intelligence.utm_medium,
-        utm_campaign: intelligence.utm_campaign,
-        vercel_region: intelligence.vercel_region,
-        success_count: intelligence.success_count,
-        client_error_count: intelligence.client_error_count,
-        server_error_count: intelligence.server_error_count,
+        first_seen: ipIntel.first_seen,
+        last_seen: ipIntel.last_seen,
+        total_requests: ipIntel.total_requests,
+        active_days: ipIntel.active_days,
+        unique_pages: ipIntel.unique_pages,
+        landing_page: ipIntel.landing_page,
+        most_visited_page: ipIntel.most_visited_page,
+        device: ipIntel.device || "Unknown",
+        utm_source: ipIntel.utm_source || "Unknown",
+        utm_medium: ipIntel.utm_medium || "Unknown",
+        utm_campaign: ipIntel.utm_campaign || "Unknown",
+        avg_duration_ms: ipIntel.avg_duration_ms,
+        p50_duration_ms: ipIntel.p50_duration_ms,
+        p95_duration_ms: ipIntel.p95_duration_ms,
+        success_count: ipIntel.success_count,
+        client_error_count: ipIntel.client_error_count,
+        server_error_count: ipIntel.server_error_count,
       },
-      stats,
-      topPaths,
-      dailyActivity,
-      timeline: timeline?.slice(0, 50).map((r) => ({
-        timestamp: r.created_at,
-        path: r.path,
-        duration_ms: r.duration_ms,
-        status: r.status,
-        region: r.vercel_region,
-      })),
-      meta: {
-        range,
-        days,
-        timeline_size: timeline?.length || 0,
+      score,
+      alerts,
+      stats: {
+        total_requests: totalRequests,
+        unique_paths: ipIntel.unique_pages || 0,
+        avg_duration: ipIntel.avg_duration_ms || 0,
+        success_rate: successRate,
+        regions: [], // Not tracking regions yet
       },
+      timeline: timeline || [],
+      topPaths: topPathsList,
+      slowestEndpoints,
+      meta: { range, days, dataPoints: timeline?.length || 0 },
     });
-
   } catch (err: any) {
-    console.error("SEO IP Error:", err.message);
-    return NextResponse.json(
-      { error: "Internal error", details: err.message },
-      { status: 500 }
-    );
+    console.error("IP Dossier Error:", err.message);
+    return NextResponse.json({ error: "Internal error", details: err.message }, { status: 500 });
   }
+}
+
+function calculateIpScore(ipData: any): number {
+  let score = 0;
+  if (ipData.unique_pages >= 3) score += 10;
+  if (ipData.total_requests >= 20) score += 10;
+  if (ipData.active_days >= 2) score += 10;
+  if (ipData.landing_page?.includes("/demande") || ipData.landing_page?.includes("/faq")) score += 10;
+  if (ipData.p95_duration_ms < 800) score += 20;
+  if (ipData.server_error_count === 0) score += 10;
+  if (ipData.client_error_count <= 2) score += 10;
+  if (ipData.utm_source === "google" && ipData.utm_medium === "organic") score += 10;
+  const targetPages = ["/demande", "/faq", "/ibv", "/marge-credit"];
+  if (targetPages.some((page) => ipData.landing_page?.includes(page))) score += 10;
+  return Math.min(score, 100);
+}
+
+function generateAlerts(ipData: any) {
+  const alerts: any[] = [];
+  if (ipData.server_error_count >= 1 && ipData.landing_page?.includes("/demande")) {
+    alerts.push({ level: "CRIT", title: "Erreurs 5xx sur page conversion", description: `${ipData.server_error_count} erreur(s) serveur`, action: "Vérifier logs backend", metric: "5xx", value: ipData.server_error_count });
+  }
+  if (ipData.p95_duration_ms >= 2000) {
+    alerts.push({ level: "CRIT", title: "Backend très lent", description: `p95 à ${ipData.p95_duration_ms}ms`, action: "Profiler endpoints", metric: "p95", value: `${ipData.p95_duration_ms}ms` });
+  }
+  if (ipData.client_error_count >= 5) {
+    alerts.push({ level: "WARN", title: "Nombreuses erreurs 4xx", description: `${ipData.client_error_count} erreur(s) client`, action: "Vérifier liens cassés", metric: "4xx", value: ipData.client_error_count });
+  }
+  if (ipData.p95_duration_ms >= 800 && ipData.p95_duration_ms < 2000) {
+    alerts.push({ level: "WARN", title: "Latence élevée", description: `p95 à ${ipData.p95_duration_ms}ms`, action: "Optimiser DB", metric: "p95", value: `${ipData.p95_duration_ms}ms` });
+  }
+  if (ipData.unique_pages === 1 && ipData.total_requests >= 10) {
+    alerts.push({ level: "WARN", title: "Boucle détectée", description: `${ipData.total_requests} requêtes sur 1 page`, action: "Possible bot", metric: "Loop", value: `${ipData.total_requests}x` });
+  }
+  if (ipData.server_error_count === 0 && ipData.p95_duration_ms < 800 && ipData.unique_pages >= 3) {
+    alerts.push({ level: "OK", title: "Expérience fluide", description: "Aucune erreur, latence faible", metric: "UX" });
+  }
+  return alerts.sort((a, b) => { const order: Record<string, number> = { CRIT: 0, WARN: 1, OK: 2 }; return order[a.level] - order[b.level]; });
 }

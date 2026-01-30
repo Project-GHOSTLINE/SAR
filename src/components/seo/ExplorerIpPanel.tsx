@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
+import { MagnifyingGlassIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { IpData } from "./types";
 
 interface ExplorerIpPanelProps {
@@ -9,6 +10,7 @@ interface ExplorerIpPanelProps {
 }
 
 export default function ExplorerIpPanel({ onSearch }: ExplorerIpPanelProps) {
+  const router = useRouter();
   const [ipInput, setIpInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<IpData | null>(null);
@@ -79,6 +81,27 @@ export default function ExplorerIpPanel({ onSearch }: ExplorerIpPanelProps) {
       {/* Results */}
       {data && (
         <div className="space-y-6">
+          {/* Action Banner */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-1">
+                  Aperçu rapide de l'IP
+                </h3>
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  Voir le dossier complet avec score, alertes, timeline et plus
+                </p>
+              </div>
+              <button
+                onClick={() => router.push(`/admin/seo/ip/${ipInput.trim()}`)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+              >
+                Voir Dossier Complet
+                <ArrowRightIcon className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
           {/* Intelligence */}
           <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
