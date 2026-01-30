@@ -90,6 +90,66 @@ export async function GET(
     const totalRequests = ipIntel.total_requests || 1;
     const successRate = Math.round((successCount / totalRequests) * 100);
 
+    // Fetch visits from visit_dossier view
+    const { data: visits } = await supabase
+      .from("visit_dossier")
+      .select("*")
+      .eq("ip", ip)
+      .gte("first_seen", startDate.toISOString())
+      .order("first_seen", { ascending: false })
+      .limit(10);
+
+    // Enrich visits with events data
+    const enrichedVisits = await Promise.all(
+      (visits || []).map(async (visit) => {
+        // Get events for this visit
+        const { data: events } = await supabase
+          .from("telemetry_events")
+          .select("event_name, page_path, utm, referrer, created_at")
+          .eq("visit_id", visit.visit_id)
+          .order("created_at", { ascending: true })
+          .limit(50);
+
+        // Parse UTM from first event
+        const firstEvent = events?.[0];
+        const utm = firstEvent?.utm || null;
+        const referrer = firstEvent?.referrer || null;
+
+        // Count key events
+        const eventCounts = events?.reduce(
+          (acc, e) => {
+            acc.total++;
+            if (e.event_name === "page_view") acc.page_views++;
+            if (e.event_name === "form_start") acc.form_starts++;
+            if (e.event_name === "form_submit") acc.form_submits++;
+            return acc;
+          },
+          { total: 0, page_views: 0, form_starts: 0, form_submits: 0 }
+        ) || { total: 0, page_views: 0, form_starts: 0, form_submits: 0 };
+
+        return {
+          visit_id: visit.visit_id,
+          first_seen: visit.first_seen,
+          last_seen: visit.last_seen,
+          landing_page: visit.landing_page,
+          utm,
+          referrer,
+          total_requests: visit.total_requests,
+          unique_pages: visit.unique_pages,
+          events: eventCounts,
+          perf: {
+            avg_duration_ms: visit.avg_duration_ms,
+            p95_duration_ms: visit.p95_duration_ms,
+          },
+          links: {
+            session_id: visit.session_id,
+            user_id: visit.user_id,
+            client_id: visit.client_id,
+          },
+        };
+      })
+    );
+
     return NextResponse.json({
       ip: ipIntel.ip,
       intelligence: {
@@ -123,7 +183,13 @@ export async function GET(
       timeline: timeline || [],
       topPaths: topPathsList,
       slowestEndpoints,
-      meta: { range, days, dataPoints: timeline?.length || 0 },
+      visits: enrichedVisits,
+      meta: {
+        range,
+        days,
+        dataPoints: timeline?.length || 0,
+        distinct_visits: enrichedVisits.length,
+      },
     });
   } catch (err: any) {
     console.error("IP Dossier Error:", err.message);

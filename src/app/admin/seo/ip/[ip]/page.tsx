@@ -56,10 +56,36 @@ interface IpDossierData {
     avg_duration: number;
     count: number;
   }>;
+  visits: Array<{
+    visit_id: string;
+    first_seen: string;
+    last_seen: string;
+    landing_page: string;
+    utm: any;
+    referrer: string | null;
+    total_requests: number;
+    unique_pages: number;
+    events: {
+      total: number;
+      page_views: number;
+      form_starts: number;
+      form_submits: number;
+    };
+    perf: {
+      avg_duration_ms: number;
+      p95_duration_ms: number;
+    };
+    links: {
+      session_id: string | null;
+      user_id: string | null;
+      client_id: string | null;
+    };
+  }>;
   meta: {
     range: string;
     days: number;
     dataPoints: number;
+    distinct_visits: number;
   };
 }
 
@@ -281,6 +307,113 @@ export default function IpDossierPage() {
                       </div>
                     )}
                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Visits */}
+        {data.visits && data.visits.length > 0 && (
+          <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Visites ({data.visits.length})
+            </h3>
+            <div className="space-y-4">
+              {data.visits.map((visit) => (
+                <div
+                  key={visit.visit_id}
+                  className="border border-gray-200 dark:border-zinc-800 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
+                          {visit.visit_id.substring(0, 8)}
+                        </span>
+                        {visit.links.client_id && (
+                          <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                            Client lié
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {new Date(visit.first_seen).toLocaleString("fr-FR", {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}{" "}
+                        →{" "}
+                        {new Date(visit.last_seen).toLocaleString("fr-FR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {visit.total_requests} req • {visit.unique_pages} pages
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                    <div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        Landing
+                      </div>
+                      <div className="text-sm font-mono text-gray-900 dark:text-white truncate">
+                        {visit.landing_page}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        Source
+                      </div>
+                      <div className="text-sm text-gray-900 dark:text-white">
+                        {visit.utm?.source || visit.referrer || "Direct"}
+                        {visit.utm?.medium && ` / ${visit.utm.medium}`}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
+                    <span>
+                      {visit.events.page_views} vues
+                    </span>
+                    {visit.events.form_starts > 0 && (
+                      <span>{visit.events.form_starts} formulaires démarrés</span>
+                    )}
+                    {visit.events.form_submits > 0 && (
+                      <span className="text-green-600 dark:text-green-400 font-medium">
+                        ✓ {visit.events.form_submits} soumis
+                      </span>
+                    )}
+                    <span>
+                      p95: {visit.perf.p95_duration_ms}ms
+                    </span>
+                  </div>
+
+                  {(visit.links.session_id || visit.links.user_id || visit.links.client_id) && (
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-zinc-800 flex items-center gap-3 text-xs">
+                      {visit.links.session_id && (
+                        <span className="text-gray-500 dark:text-gray-400">
+                          Session: {visit.links.session_id.substring(0, 8)}
+                        </span>
+                      )}
+                      {visit.links.user_id && (
+                        <span className="text-gray-500 dark:text-gray-400">
+                          User: {visit.links.user_id.substring(0, 8)}
+                        </span>
+                      )}
+                      {visit.links.client_id && (
+                        <span className="text-blue-600 dark:text-blue-400 font-medium">
+                          Client: {visit.links.client_id}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
