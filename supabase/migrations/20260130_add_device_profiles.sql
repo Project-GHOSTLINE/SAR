@@ -220,5 +220,71 @@ WHERE te.visit_id IS NOT NULL
 
 ORDER BY visit_id, timestamp ASC;
 
+-- 6. Recreate ip_risk_profile (was dropped by CASCADE)
+CREATE OR REPLACE VIEW ip_risk_profile AS
+SELECT
+  ip,
+  COUNT(DISTINCT visit_id) as total_visits,
+  AVG(fraud_score)::int as avg_fraud_score,
+  MAX(fraud_score) as max_fraud_score,
+  COUNT(*) FILTER (WHERE is_likely_bot) as bot_visits,
+  COUNT(*) FILTER (WHERE is_velocity_abuse) as velocity_abuse_visits,
+  COUNT(*) FILTER (WHERE classification = 'BOT') as bot_count,
+  COUNT(*) FILTER (WHERE classification = 'SCRAPER') as scraper_count,
+  COUNT(*) FILTER (WHERE classification = 'SUSPICIOUS') as suspicious_count,
+  COUNT(*) FILTER (WHERE classification = 'CONVERTER') as converter_count,
+  MIN(first_seen) as first_seen,
+  MAX(last_seen) as last_seen,
+  CASE
+    WHEN AVG(fraud_score) > 70 THEN 'CRITICAL'
+    WHEN AVG(fraud_score) > 50 THEN 'HIGH'
+    WHEN AVG(fraud_score) > 30 THEN 'MEDIUM'
+    ELSE 'LOW'
+  END as risk_level
+FROM fraud_detection_live
+GROUP BY ip;
+
+-- 7. Recreate suspicious_patterns (was dropped by CASCADE)
+CREATE OR REPLACE VIEW suspicious_patterns AS
+SELECT
+  'No Events Generated' as pattern,
+  COUNT(*) as occurrences,
+  ARRAY(SELECT DISTINCT ip FROM fraud_detection_live WHERE is_likely_bot LIMIT 10) as sample_ips
+FROM fraud_detection_live
+WHERE is_likely_bot
+HAVING COUNT(*) > 0
+
+UNION ALL
+
+SELECT
+  'Velocity Abuse' as pattern,
+  COUNT(*) as occurrences,
+  ARRAY(SELECT DISTINCT ip FROM fraud_detection_live WHERE is_velocity_abuse LIMIT 10) as sample_ips
+FROM fraud_detection_live
+WHERE is_velocity_abuse
+HAVING COUNT(*) > 0
+
+UNION ALL
+
+SELECT
+  'Low Correlation' as pattern,
+  COUNT(*) as occurrences,
+  ARRAY(SELECT DISTINCT ip FROM fraud_detection_live WHERE is_low_correlation LIMIT 10) as sample_ips
+FROM fraud_detection_live
+WHERE is_low_correlation
+HAVING COUNT(*) > 0
+
+UNION ALL
+
+SELECT
+  'Multiple Errors' as pattern,
+  COUNT(*) as occurrences,
+  ARRAY(SELECT DISTINCT ip FROM fraud_detection_live WHERE has_many_errors LIMIT 10) as sample_ips
+FROM fraud_detection_live
+WHERE has_many_errors
+HAVING COUNT(*) > 0;
+
 COMMENT ON VIEW device_profiles IS 'Profil complet par device: iPhone, MacBook, etc. avec specs complètes';
 COMMENT ON VIEW visit_timeline IS 'Historique chronologique complet par visite (requests + events mélangés)';
+COMMENT ON VIEW ip_risk_profile IS 'Profil de risque agrégé par IP';
+COMMENT ON VIEW suspicious_patterns IS 'Patterns suspects détectés (bots, scrapers, velocity abuse)';
