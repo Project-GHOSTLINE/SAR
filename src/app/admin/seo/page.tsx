@@ -5,6 +5,9 @@ import { Tab } from "@headlessui/react";
 import AdminNav from "@/components/admin/AdminNav";
 import SeoTopBar from "@/components/seo/SeoTopBar";
 import KpiGrid from "@/components/seo/KpiGrid";
+import TimelineChart from "@/components/seo/TimelineChart";
+import GscDetails from "@/components/seo/GscDetails";
+import RecommendationsPanel from "@/components/seo/RecommendationsPanel";
 import ExplorerIpPanel from "@/components/seo/ExplorerIpPanel";
 import {
   SeoOverview,
@@ -104,19 +107,22 @@ export default function SeoPage() {
                   {/* KPI Grid */}
                   <KpiGrid kpis={overview?.kpis || null} loading={loading} />
 
-                  {/* Timeline Chart Placeholder */}
+                  {/* Recommendations Panel */}
+                  {overview && overview.kpis && (
+                    <RecommendationsPanel kpis={overview.kpis} />
+                  )}
+
+                  {/* Timeline Chart */}
                   {overview && overview.timeline.length > 0 && (
-                    <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        Timeline (30 jours)
-                      </h3>
-                      <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-zinc-700 rounded">
-                        <p>
-                          Graphique timeline:{" "}
-                          {overview.timeline.length} points de données
-                        </p>
-                      </div>
-                    </div>
+                    <TimelineChart data={overview.timeline} />
+                  )}
+
+                  {/* GSC Details (Top Queries & Top Pages) */}
+                  {overview && (overview.gscQueries || overview.gscPages) && (
+                    <GscDetails
+                      topQueries={overview.gscQueries || []}
+                      topPages={overview.gscPages || []}
+                    />
                   )}
 
                   {/* Top Pages */}

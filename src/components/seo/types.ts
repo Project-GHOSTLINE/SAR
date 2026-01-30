@@ -58,16 +58,37 @@ export interface TimelinePoint {
   perf_status: "GOOD" | "WARN" | "CRIT" | null;
 }
 
+// Alias for compatibility
+export type TimelineDataPoint = TimelinePoint;
+
 export interface TopPage {
   path: string;
   views?: number;
   count?: number;
 }
 
+export interface GscQuery {
+  query: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+}
+
+export interface GscPage {
+  page: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+}
+
 export interface SeoOverview {
   kpis: SeoKpis;
   timeline: TimelinePoint[];
   topPages: TopPage[];
+  gscQueries?: GscQuery[];
+  gscPages?: GscPage[];
   meta: {
     range: string;
     days: number;

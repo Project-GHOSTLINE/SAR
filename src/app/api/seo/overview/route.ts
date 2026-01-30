@@ -118,7 +118,33 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // 4️⃣ Série temporelle (inverser pour avoir chronologique)
+    // 4️⃣ GSC Top Queries & Pages (depuis gsc_top_queries et gsc_top_pages JSONB)
+    let gscQueries: any[] = [];
+    let gscPages: any[] = [];
+
+    if (latestGsc.gsc_top_queries) {
+      try {
+        const queries = typeof latestGsc.gsc_top_queries === "string"
+          ? JSON.parse(latestGsc.gsc_top_queries)
+          : latestGsc.gsc_top_queries;
+        gscQueries = Array.isArray(queries) ? queries.slice(0, 20) : [];
+      } catch (e) {
+        console.error("Failed to parse gsc_top_queries:", e);
+      }
+    }
+
+    if (latestGsc.gsc_top_pages) {
+      try {
+        const pages = typeof latestGsc.gsc_top_pages === "string"
+          ? JSON.parse(latestGsc.gsc_top_pages)
+          : latestGsc.gsc_top_pages;
+        gscPages = Array.isArray(pages) ? pages.slice(0, 20) : [];
+      } catch (e) {
+        console.error("Failed to parse gsc_top_pages:", e);
+      }
+    }
+
+    // 5️⃣ Série temporelle (inverser pour avoir chronologique)
     const timelineSeries = timeline.reverse().map((d) => ({
       date: d.date,
       ga4_users: d.ga4_users || 0,
@@ -135,6 +161,8 @@ export async function GET(req: NextRequest) {
       kpis,
       timeline: timelineSeries,
       topPages,
+      gscQueries,
+      gscPages,
       meta: {
         range,
         days,
