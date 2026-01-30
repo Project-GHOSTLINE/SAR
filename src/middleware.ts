@@ -23,6 +23,73 @@ async function hashWithSalt(value: string): Promise<string> {
   return hashHex.substring(0, 16) // 16 chars = 64 bits entropy
 }
 
+/**
+ * Parse User-Agent to extract device/browser/OS info
+ */
+function parseUserAgent(ua: string) {
+  if (!ua || ua === 'unknown') {
+    return {
+      device: 'unknown',
+      browser: 'unknown',
+      browser_version: 'unknown',
+      os: 'unknown',
+      os_version: 'unknown',
+      user_agent: ua
+    }
+  }
+
+  // Device type
+  const isMobile = /Mobile|Android|iPhone|iPad|iPod/i.test(ua)
+  const isTablet = /iPad|Android(?!.*Mobile)/i.test(ua)
+  const device = isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop'
+
+  // Browser detection
+  let browser = 'unknown'
+  let browser_version = 'unknown'
+  if (ua.includes('Chrome') && !ua.includes('Edg')) {
+    browser = 'Chrome'
+    const match = ua.match(/Chrome\/(\d+)/)
+    if (match) browser_version = match[1]
+  } else if (ua.includes('Safari') && !ua.includes('Chrome')) {
+    browser = 'Safari'
+    const match = ua.match(/Version\/(\d+)/)
+    if (match) browser_version = match[1]
+  } else if (ua.includes('Firefox')) {
+    browser = 'Firefox'
+    const match = ua.match(/Firefox\/(\d+)/)
+    if (match) browser_version = match[1]
+  } else if (ua.includes('Edg')) {
+    browser = 'Edge'
+    const match = ua.match(/Edg\/(\d+)/)
+    if (match) browser_version = match[1]
+  }
+
+  // OS detection
+  let os = 'unknown'
+  let os_version = 'unknown'
+  if (ua.includes('Windows NT')) {
+    os = 'Windows'
+    const match = ua.match(/Windows NT (\d+\.\d+)/)
+    if (match) os_version = match[1]
+  } else if (ua.includes('Mac OS X')) {
+    os = 'macOS'
+    const match = ua.match(/Mac OS X (\d+[._]\d+)/)
+    if (match) os_version = match[1].replace('_', '.')
+  } else if (ua.includes('iPhone') || ua.includes('iPad')) {
+    os = 'iOS'
+    const match = ua.match(/OS (\d+[._]\d+)/)
+    if (match) os_version = match[1].replace('_', '.')
+  } else if (ua.includes('Android')) {
+    os = 'Android'
+    const match = ua.match(/Android (\d+(\.\d+)?)/)
+    if (match) os_version = match[1]
+  } else if (ua.includes('Linux')) {
+    os = 'Linux'
+  }
+
+  return { device, browser, browser_version, os, os_version, user_agent: ua }
+}
+
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || ''
   const { pathname } = request.nextUrl
@@ -150,6 +217,9 @@ export async function middleware(request: NextRequest) {
   const startTime = Date.now()
   const baseUrl = request.nextUrl.origin
 
+  // Parse User-Agent for device/browser/OS detection
+  const deviceInfo = parseUserAgent(ua)
+
   // Fire-and-forget: call internal API, don't await
   fetch(`${baseUrl}/api/telemetry/write`, {
     method: 'POST',
@@ -179,6 +249,7 @@ export async function middleware(request: NextRequest) {
         vercel_region: vercelRegion,
         visit_id: visitId, // From client header
         session_id: clientSessionId, // From client header (optional)
+        meta_redacted: deviceInfo, // Device/Browser/OS info from User-Agent
       }
     })
   }).catch(() => {
