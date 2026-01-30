@@ -16,9 +16,9 @@ export async function GET(req: NextRequest) {
     const minScore = parseInt(searchParams.get("min_score") || "50");
     const classification = searchParams.get("classification"); // BOT, SCRAPER, SUSPICIOUS, etc.
 
-    // Fetch live fraud detections
+    // Fetch device profiles (includes device info)
     let query = supabase
-      .from("fraud_detection_live")
+      .from("device_profiles")
       .select("*")
       .gte("fraud_score", minScore)
       .order("fraud_score", { ascending: false })

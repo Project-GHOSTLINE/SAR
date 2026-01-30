@@ -18,6 +18,8 @@ type FraudStats = {
 type FraudDetection = {
   ip: string;
   visit_id: string;
+  client_id?: string;
+  user_id?: string;
   total_requests: number;
   total_events: number;
   correlation_score: number;
@@ -29,6 +31,18 @@ type FraudDetection = {
   requests_per_minute: number;
   first_seen: string;
   last_seen: string;
+  // Device info
+  device_label?: string;
+  browser_label?: string;
+  device_type?: string;
+  browser?: string;
+  browser_version?: string;
+  os?: string;
+  os_version?: string;
+  viewport_width?: string;
+  viewport_height?: string;
+  screen_width?: string;
+  screen_height?: string;
 };
 
 type IpRisk = {
@@ -262,6 +276,7 @@ export default function FraudDetectionPage() {
               <tr className="border-b">
                 <th className="text-left p-2">IP</th>
                 <th className="text-left p-2">Visit ID</th>
+                <th className="text-left p-2">Device</th>
                 <th className="text-left p-2">Classification</th>
                 <th className="text-right p-2">Score Fraude</th>
                 <th className="text-right p-2">Correlation</th>
@@ -280,6 +295,23 @@ export default function FraudDetectionPage() {
                     </a>
                   </td>
                   <td className="p-2 font-mono text-xs">{det.visit_id?.slice(0, 8)}...</td>
+                  <td className="p-2">
+                    {det.device_label || det.device_type ? (
+                      <div className="text-xs">
+                        <div className="font-semibold text-gray-900">
+                          {det.device_label || det.device_type || 'Unknown Device'}
+                        </div>
+                        {det.browser_label && (
+                          <div className="text-gray-600">{det.browser_label}</div>
+                        )}
+                        {det.viewport_width && det.viewport_height && (
+                          <div className="text-gray-500">{det.viewport_width}×{det.viewport_height}</div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-xs">No device info</span>
+                    )}
+                  </td>
                   <td className="p-2">
                     <span
                       className={`px-2 py-1 rounded text-xs font-bold ${
