@@ -115,9 +115,9 @@ export async function GET(
       : { data: null };
 
     // Enrich visits with events data (only if we have clear IP and visits)
-    const enrichedVisits = visits?.data
+    const enrichedVisits = visits
       ? await Promise.all(
-          visits.data.map(async (visit) => {
+          visits.map(async (visit) => {
         // Get events for this visit
         const { data: events } = await supabase
           .from("telemetry_events")
