@@ -90,18 +90,34 @@ export async function GET(
     const totalRequests = ipIntel.total_requests || 1;
     const successRate = Math.round((successCount / totalRequests) * 100);
 
-    // Fetch visits from visit_dossier view
-    const { data: visits } = await supabase
-      .from("visit_dossier")
-      .select("*")
-      .eq("ip", ip)
-      .gte("first_seen", startDate.toISOString())
-      .order("first_seen", { ascending: false })
-      .limit(10);
+    // Find clear IP from ip_hash (since URL uses ip_hash)
+    // Query telemetry_requests to get the clear IP for this ip_hash
+    const { data: ipMapping } = await supabase
+      .from("telemetry_requests")
+      .select("ip")
+      .eq("ip_hash", ip)
+      .not("ip", "is", null)
+      .limit(1)
+      .single();
 
-    // Enrich visits with events data
-    const enrichedVisits = await Promise.all(
-      (visits || []).map(async (visit) => {
+    const clearIp = ipMapping?.ip;
+
+    // Fetch visits from visit_dossier view (using clear IP if available)
+    const { data: visits } = clearIp
+      ? await supabase
+          .from("visit_dossier")
+          .select("*")
+          .eq("ip", clearIp)
+          .gte("first_seen", startDate.toISOString())
+          .order("first_seen", { ascending: false })
+          .limit(10)
+          .then((res) => res)
+      : { data: null };
+
+    // Enrich visits with events data (only if we have clear IP and visits)
+    const enrichedVisits = visits?.data
+      ? await Promise.all(
+          visits.data.map(async (visit) => {
         // Get events for this visit
         const { data: events } = await supabase
           .from("telemetry_events")
@@ -147,8 +163,9 @@ export async function GET(
             client_id: visit.client_id,
           },
         };
-      })
-    );
+          })
+        )
+      : [];
 
     return NextResponse.json({
       ip: ipIntel.ip,
