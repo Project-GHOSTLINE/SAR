@@ -9,6 +9,10 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Mark as dynamic route (not static)
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -22,7 +26,15 @@ export async function POST(request: NextRequest) {
     const visitId = request.headers.get('x-sar-visit-id');
     const sessionId = request.headers.get('x-sar-session-id');
 
+    console.log('[telemetry] Received event:', {
+      visitId,
+      sessionId,
+      event_name: body.event_name,
+      page_path: body.page_path,
+    });
+
     if (!visitId) {
+      console.error('[telemetry] Missing visit_id header');
       return NextResponse.json(
         { error: 'Missing visit_id' },
         { status: 400 }
@@ -37,46 +49,54 @@ export async function POST(request: NextRequest) {
       utm,
       device,
       timestamp,
+      properties,
       ...extra
     } = body;
 
     if (!event_name) {
+      console.error('[telemetry] Missing event_name in body');
       return NextResponse.json(
         { error: 'Missing event_name' },
         { status: 400 }
       );
     }
 
+    // Prepare insert payload
+    const eventPayload = {
+      visit_id: visitId,
+      session_id: sessionId || null,
+      event_name,
+      page_path: page_path || null,
+      referrer: referrer || null,
+      utm: utm || null,
+      device: device || null,
+      properties: properties || (Object.keys(extra).length > 0 ? extra : null),
+      created_at: timestamp || new Date().toISOString(),
+    };
+
+    console.log('[telemetry] Inserting event:', eventPayload);
+
     // Insert event
     const { data, error } = await supabase
       .from('telemetry_events')
-      .insert({
-        visit_id: visitId,
-        session_id: sessionId || null,
-        event_name,
-        page_path: page_path || null,
-        referrer: referrer || null,
-        utm: utm || null,
-        device: device || null,
-        properties: Object.keys(extra).length > 0 ? extra : null,
-        created_at: timestamp || new Date().toISOString(),
-      })
+      .insert(eventPayload)
       .select('id')
       .single();
 
     if (error) {
-      console.error('[telemetry] Event write error:', error);
+      console.error('[telemetry] Supabase insert error:', error);
       return NextResponse.json(
-        { error: 'Failed to track event', details: error.message },
+        { error: 'Failed to track event', details: error.message, code: error.code },
         { status: 500 }
       );
     }
 
+    console.log('[telemetry] Event tracked successfully:', data.id);
     return NextResponse.json({ success: true, id: data.id });
   } catch (error: any) {
     console.error('[telemetry] Unexpected error:', error);
     return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
+      { error: 'Internal server error', details: error.message, stack: error.stack },
       { status: 500 }
     );
   }

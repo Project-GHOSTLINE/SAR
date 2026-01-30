@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Track Event</title>
+</head>
+<body>
+  <h1>Test Telemetry Event Tracking</h1>
+  <button id="test-btn">Send Test Event</button>
+  <pre id="result"></pre>
+
+  <script>
+    const visitId = crypto.randomUUID();
+
+    document.getElementById('test-btn').addEventListener('click', async () => {
+      const result = document.getElementById('result');
+      result.textContent = 'Sending...';
+
+      try {
+        const response = await fetch('https://admin.solutionargentrapide.ca/api/telemetry/track-event', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-sar-visit-id': visitId,
+          },
+          body: JSON.stringify({
+            event_name: 'test_event',
+            page_path: '/test',
+            referrer: 'https://test.com',
+            utm: {
+              source: 'test',
+              medium: 'test',
+              campaign: 'test'
+            },
+            device: {
+              viewport: { width: 1920, height: 1080 },
+              screen: { width: 1920, height: 1080 },
+              devicePixelRatio: 1
+            },
+            properties: { test: true },
+            timestamp: new Date().toISOString()
+          })
+        });
+
+        const data = await response.json();
+        result.textContent = JSON.stringify({
+          status: response.status,
+          statusText: response.statusText,
+          data
+        }, null, 2);
+      } catch (err) {
+        result.textContent = 'Error: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
