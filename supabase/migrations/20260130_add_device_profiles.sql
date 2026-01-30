@@ -220,34 +220,5 @@ WHERE te.visit_id IS NOT NULL
 
 ORDER BY visit_id, timestamp ASC;
 
--- 6. Create client_device_history view (All devices used by a client)
-CREATE OR REPLACE VIEW client_device_history AS
-SELECT
-  c.id as client_id,
-  c.name as client_name,
-  c.email as client_email,
-
-  dp.visit_id,
-  dp.ip,
-  dp.device_label,
-  dp.browser_label,
-  dp.os,
-  dp.screen_width,
-  dp.screen_height,
-
-  dp.first_seen,
-  dp.last_seen,
-  dp.total_requests,
-  dp.page_views,
-  dp.form_submits,
-
-  dp.fraud_score,
-  dp.classification
-
-FROM device_profiles dp
-INNER JOIN clients c ON c.id = dp.client_id
-ORDER BY c.name, dp.first_seen DESC;
-
-COMMENT ON VIEW device_profiles IS 'Profil complet par device: iPhone d''Anthony, MacBook de Marie, etc.';
-COMMENT ON VIEW visit_timeline IS 'Historique chronologique complet par visite (requests + events)';
-COMMENT ON VIEW client_device_history IS 'Tous les devices utilisés par chaque client nommé';
+COMMENT ON VIEW device_profiles IS 'Profil complet par device: iPhone, MacBook, etc. avec specs complètes';
+COMMENT ON VIEW visit_timeline IS 'Historique chronologique complet par visite (requests + events mélangés)';
