@@ -160,8 +160,8 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       badge: null
     },
     {
-      name: 'SEO',
-      href: '/admin/seo',
+      name: 'SEO Hub',
+      href: '/admin/seo-hub',
       icon: TrendingUp,
       badge: null
     }
