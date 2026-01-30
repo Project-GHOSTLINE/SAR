@@ -18,17 +18,43 @@ CREATE INDEX IF NOT EXISTS idx_telemetry_session_id ON telemetry_requests(sessio
 CREATE INDEX IF NOT EXISTS idx_telemetry_user_id ON telemetry_requests(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_telemetry_client_id ON telemetry_requests(client_id, created_at DESC);
 
--- 3. Add foreign key for user_id (if auth.users exists)
+-- 3. Create telemetry_events table (client-side events tracking)
+CREATE TABLE IF NOT EXISTS telemetry_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  visit_id UUID, -- Lié au cookie client
+  session_id UUID,
+  event_name TEXT, -- page_view, click, form_start, form_submit, etc.
+  page_path TEXT,
+  referrer TEXT,
+  utm JSONB, -- {source, medium, campaign, term, content}
+  device JSONB, -- {viewport, screen, devicePixelRatio}
+  properties JSONB, -- Custom event properties
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. Create indexes for telemetry_events
+CREATE INDEX IF NOT EXISTS idx_telemetry_events_visit_id ON telemetry_events(visit_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_telemetry_events_event_name ON telemetry_events(event_name, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_telemetry_events_page_path ON telemetry_events(page_path, created_at DESC);
+
+-- 5. Add foreign key for user_id (if auth.users exists)
 -- Note: Uncomment if you have auth.users table
 -- ALTER TABLE telemetry_requests
 -- ADD CONSTRAINT fk_telemetry_user_id
 -- FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE SET NULL;
 
--- 4. Backfill IP from ip_hash (if possible - this depends on your setup)
+-- 6. Backfill IP from ip_hash (if possible - this depends on your setup)
 -- Note: Since ip_hash is anonymized, we can't reverse it
 -- New requests will populate ip directly from middleware
 
--- 5. Add comment for documentation
+-- 7. Add comments for documentation
+COMMENT ON TABLE telemetry_events IS 'Client-side events tracking (page views, clicks, form interactions)';
+COMMENT ON COLUMN telemetry_events.visit_id IS 'Links to telemetry_requests.visit_id for correlation';
+COMMENT ON COLUMN telemetry_events.utm IS 'UTM parameters: {source, medium, campaign, term, content}';
+COMMENT ON COLUMN telemetry_events.device IS 'Device info: {viewport, screen, devicePixelRatio}';
+COMMENT ON COLUMN telemetry_events.properties IS 'Custom event properties (flexible JSONB)';
+
+-- 8. Add comment for telemetry_requests columns
 COMMENT ON COLUMN telemetry_requests.ip IS 'IP address in clear text (sensitive - admin only access)';
 COMMENT ON COLUMN telemetry_requests.visit_id IS 'UUID generated client-side, persisted in cookie for 30 days';
 COMMENT ON COLUMN telemetry_requests.session_id IS 'SAR session ID (optional)';
@@ -37,7 +63,7 @@ COMMENT ON COLUMN telemetry_requests.client_id IS 'Client dossier ID (if applica
 COMMENT ON COLUMN telemetry_requests.ga4_client_id IS 'GA4 client ID from _ga cookie (if available)';
 COMMENT ON COLUMN telemetry_requests.ga4_session_id IS 'GA4 session ID (if available)';
 
--- 6. Create view: visit_dossier
+-- 9. Create view: visit_dossier
 -- One row per visit_id with aggregated stats
 CREATE OR REPLACE VIEW visit_dossier AS
 SELECT
@@ -72,7 +98,7 @@ WHERE visit_id IS NOT NULL
   AND env = 'production'
 GROUP BY visit_id;
 
--- 7. Create enhanced view: ip_dossier_v2
+-- 10. Create enhanced view: ip_dossier_v2
 -- One row per IP with visit-level insights
 CREATE OR REPLACE VIEW ip_dossier_v2 AS
 SELECT
