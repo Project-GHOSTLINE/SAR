@@ -58,10 +58,10 @@ export async function GET() {
   try {
     console.log("🔄 Starting Speed Insights aggregation...");
 
-    // 1️⃣ Charger raw non traités
+    // 1️⃣ Charger raw non traités (avec extracted fields)
     const { data: raw, error: fetchError } = await supabase
       .from("vercel_speed_insights_raw")
-      .select("id, payload, received_at")
+      .select("id, payload, received_at, extracted_url, extracted_device, extracted_lcp, extracted_inp, extracted_cls, extracted_ttfb, extracted_fcp")
       .eq("processed", false)
       .limit(10000); // Limite pour éviter timeout
 
@@ -81,24 +81,28 @@ export async function GET() {
     const buckets: Record<string, any[]> = {};
 
     for (const r of raw) {
+      // Extraire la date depuis payload.timestamp ou received_at
       const p = r.payload;
-
-      // Extraire la date
       const date = p.timestamp
         ? new Date(p.timestamp).toISOString().slice(0, 10)
         : r.received_at
         ? new Date(r.received_at).toISOString().slice(0, 10)
         : new Date().toISOString().slice(0, 10);
 
-      // Extraire path (route, path, url)
-      const path = p.route || p.path || p.url || "/";
-
-      // Extraire device
-      const device = p.device || "unknown";
+      // Utiliser extracted_url et extracted_device (déjà extraits au moment de l'insertion)
+      const path = r.extracted_url || "/";
+      const device = r.extracted_device || "unknown";
 
       const key = `${date}|${path}|${device}`;
       buckets[key] ||= [];
-      buckets[key].push({ id: r.id, p });
+      buckets[key].push({
+        id: r.id,
+        lcp: r.extracted_lcp,
+        inp: r.extracted_inp,
+        cls: r.extracted_cls,
+        ttfb: r.extracted_ttfb,
+        fcp: r.extracted_fcp,
+      });
     }
 
     console.log(`📦 Created ${Object.keys(buckets).length} buckets`);
@@ -110,12 +114,12 @@ export async function GET() {
       const [date, path, device] = key.split("|");
       const rows = buckets[key];
 
-      // Extraire les valeurs numériques
-      const lcp = rows.map(r => parseFloat(r.p.lcp)).filter(v => !isNaN(v));
-      const inp = rows.map(r => parseFloat(r.p.inp)).filter(v => !isNaN(v));
-      const cls = rows.map(r => parseFloat(r.p.cls)).filter(v => !isNaN(v));
-      const ttfb = rows.map(r => parseFloat(r.p.ttfb)).filter(v => !isNaN(v));
-      const fcp = rows.map(r => parseFloat(r.p.fcp)).filter(v => !isNaN(v));
+      // Extraire les valeurs numériques (déjà extraites)
+      const lcp = rows.map(r => r.lcp).filter(v => v !== null && !isNaN(v));
+      const inp = rows.map(r => r.inp).filter(v => v !== null && !isNaN(v));
+      const cls = rows.map(r => r.cls).filter(v => v !== null && !isNaN(v));
+      const ttfb = rows.map(r => r.ttfb).filter(v => v !== null && !isNaN(v));
+      const fcp = rows.map(r => r.fcp).filter(v => v !== null && !isNaN(v));
 
       // Calculer percentiles
       const lcp_p50 = percentile(lcp, 50);
