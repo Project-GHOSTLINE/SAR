@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { X, Upload, Plus, Trash2, Move, Loader2, Check, FileText, Sparkles } from 'lucide-react'
 import * as pdfjsLib from 'pdfjs-dist'
 
@@ -60,6 +60,8 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
   const [currentPdfPage, setCurrentPdfPage] = useState(1)
   const [totalPdfPages, setTotalPdfPages] = useState(1)
   const [pdfScale, setPdfScale] = useState(1.5)
+  const [pdfPageDimensions, setPdfPageDimensions] = useState<{ width: number; height: number } | null>(null)
+  const [baseImageData, setBaseImageData] = useState<ImageData | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -84,12 +86,25 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
     }
   }, [step, pdfFile])
 
-  // Re-render le canvas quand les champs changent
+  // Re-render seulement les overlays quand les champs changent (optimisé)
   useEffect(() => {
-    if (pdfDoc && step === 3) {
-      renderPdfPage(pdfDoc, currentPdfPage)
+    if (baseImageData && step === 3) {
+      redrawFieldsOnly()
     }
   }, [signatureFields, selectedField])
+
+  // Fonction optimisée pour redessiner seulement les champs
+  const redrawFieldsOnly = useCallback(() => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!canvas || !ctx || !baseImageData) return
+
+    // Restaurer l'image de base
+    ctx.putImageData(baseImageData, 0, 0)
+
+    // Redessiner les champs par-dessus
+    drawFieldsOnCanvas(ctx, currentPdfPage, pdfScale)
+  }, [baseImageData, currentPdfPage, pdfScale, signatureFields, selectedField])
 
   const loadPdfForCanvas = async () => {
     if (!pdfFile) return
@@ -123,6 +138,12 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
       const optimalScale = containerWidth / baseViewport.width
       calculatedScale = Math.min(Math.max(optimalScale, 0.5), 2)
       setPdfScale(calculatedScale)
+
+      // Stocker les dimensions de la page (sans scale pour validation)
+      setPdfPageDimensions({
+        width: baseViewport.width,
+        height: baseViewport.height
+      })
     }
 
     const viewport = page.getViewport({ scale: calculatedScale })
@@ -137,6 +158,10 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
     if (!ctx) return
 
     await page.render({ canvasContext: ctx, viewport }).promise
+
+    // Sauvegarder l'image de base pour optimisation (avant de dessiner les champs)
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    setBaseImageData(imageData)
 
     // Dessiner les champs existants
     drawFieldsOnCanvas(ctx, pageNum, calculatedScale)
@@ -178,6 +203,55 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
       ctx.font = `${12 * scale}px Arial`
       ctx.fillText(field.type === 'signature' ? 'SIGNATURE' : 'INIT', x + 5, y + 15 * scale)
     })
+  }
+
+  const validateFieldPosition = (field: SignatureField): { valid: boolean; error?: string } => {
+    // Dimensions minimales et maximales
+    const MIN_WIDTH = 50
+    const MIN_HEIGHT = 30
+    const MAX_WIDTH = 500
+    const MAX_HEIGHT = 300
+
+    // Vérifier les coordonnées positives
+    if (field.x < 0 || field.y < 0) {
+      return { valid: false, error: 'Les coordonnées doivent être positives' }
+    }
+
+    // Vérifier les dimensions min/max
+    if (field.width < MIN_WIDTH || field.height < MIN_HEIGHT) {
+      return { valid: false, error: `Dimensions minimales: ${MIN_WIDTH}x${MIN_HEIGHT}px` }
+    }
+
+    if (field.width > MAX_WIDTH || field.height > MAX_HEIGHT) {
+      return { valid: false, error: `Dimensions maximales: ${MAX_WIDTH}x${MAX_HEIGHT}px` }
+    }
+
+    // Vérifier les limites de la page si les dimensions sont disponibles
+    if (pdfPageDimensions) {
+      if (field.x + field.width > pdfPageDimensions.width) {
+        return { valid: false, error: 'Le champ dépasse la largeur de la page' }
+      }
+
+      if (field.y + field.height > pdfPageDimensions.height) {
+        return { valid: false, error: 'Le champ dépasse la hauteur de la page' }
+      }
+    }
+
+    // Vérifier les chevauchements avec d'autres champs
+    const overlapping = signatureFields.find(f => {
+      if (f.id === field.id || f.page !== field.page) return false
+
+      const xOverlap = field.x < f.x + f.width && field.x + field.width > f.x
+      const yOverlap = field.y < f.y + f.height && field.y + field.height > f.y
+
+      return xOverlap && yOverlap
+    })
+
+    if (overlapping) {
+      return { valid: false, error: 'Le champ chevauche un autre champ existant' }
+    }
+
+    return { valid: true }
   }
 
   const changePdfPage = async (newPage: number) => {
@@ -223,6 +297,21 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
       return
     }
 
+    // Vérifier la taille du fichier (max 50MB)
+    const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50 MB
+    if (file.size > MAX_FILE_SIZE) {
+      alert(`⚠️ Le fichier est trop volumineux (${(file.size / 1024 / 1024).toFixed(2)} MB).\n\nTaille maximale: 50 MB`)
+      e.target.value = '' // Reset l'input
+      return
+    }
+
+    // Vérifier la taille minimum (1 KB)
+    if (file.size < 1024) {
+      alert('⚠️ Le fichier semble invalide (trop petit)')
+      e.target.value = ''
+      return
+    }
+
     setPdfFile(file)
 
     // Convertir en Base64
@@ -252,9 +341,24 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
   }
 
   const updateField = (id: string, updates: Partial<SignatureField>) => {
-    setSignatureFields(fields =>
-      fields.map(f => f.id === id ? { ...f, ...updates } : f)
-    )
+    setSignatureFields(fields => {
+      const updatedFields = fields.map(f => {
+        if (f.id === id) {
+          const updatedField = { ...f, ...updates }
+
+          // Valider la nouvelle position/dimension
+          const validation = validateFieldPosition(updatedField)
+          if (!validation.valid) {
+            alert(`⚠️ ${validation.error}`)
+            return f // Garder l'ancien champ si invalide
+          }
+
+          return updatedField
+        }
+        return f
+      })
+      return updatedFields
+    })
   }
 
   const deleteField = (id: string) => {
@@ -266,6 +370,15 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
     if (signatureFields.length === 0) {
       alert('Veuillez ajouter au moins un champ de signature')
       return
+    }
+
+    // Valider tous les champs avant soumission
+    for (const field of signatureFields) {
+      const validation = validateFieldPosition(field)
+      if (!validation.valid) {
+        alert(`⚠️ Champ "${field.label}": ${validation.error}`)
+        return
+      }
     }
 
     setLoading(true)
@@ -370,12 +483,16 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Nom du client <span className="text-red-500">*</span>
+                  <span className="text-xs text-gray-500 font-normal ml-2">
+                    ({clientName.length}/100)
+                  </span>
                 </label>
                 <input
                   type="text"
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
                   placeholder="Ex: Jean Tremblay"
+                  maxLength={100}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -383,12 +500,16 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Email du client <span className="text-red-500">*</span>
+                  <span className="text-xs text-gray-500 font-normal ml-2">
+                    ({clientEmail.length}/254)
+                  </span>
                 </label>
                 <input
                   type="email"
                   value={clientEmail}
                   onChange={(e) => setClientEmail(e.target.value)}
                   placeholder="Ex: jean@example.com"
+                  maxLength={254}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -396,12 +517,16 @@ export default function CreateContractModal({ isOpen, onClose, onSuccess }: Crea
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Titre du contrat <span className="text-red-500">*</span>
+                  <span className="text-xs text-gray-500 font-normal ml-2">
+                    ({title.length}/200)
+                  </span>
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Ex: Contrat de prêt 5000$"
+                  maxLength={200}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>

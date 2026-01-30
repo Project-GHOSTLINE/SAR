@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { FileText, Plus, Trash2, Eye, CheckCircle, Clock, Users } from 'lucide-react'
 import AdminNav from '@/components/admin/AdminNav'
+import TemplatePreviewModal from '@/components/admin/TemplatePreviewModal'
 
 interface SignatureField {
   id: string
@@ -33,6 +34,8 @@ export default function ContratsSignaturePage() {
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null)
+  const [showPreview, setShowPreview] = useState(false)
 
   useEffect(() => {
     loadTemplates()
@@ -301,7 +304,10 @@ export default function ContratsSignaturePage() {
                 {/* Actions */}
                 <div className="flex gap-2 pt-4 border-t border-white/10">
                   <button
-                    onClick={() => alert('TODO: Prévisualiser le template')}
+                    onClick={() => {
+                      setPreviewTemplate(template)
+                      setShowPreview(true)
+                    }}
                     className="flex-1 px-3 py-2 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-all flex items-center justify-center gap-2 text-sm font-medium"
                   >
                     <Eye className="w-4 h-4" />
@@ -335,6 +341,16 @@ export default function ContratsSignaturePage() {
           </ol>
         </div>
       </div>
+
+      {/* Preview Modal */}
+      <TemplatePreviewModal
+        isOpen={showPreview}
+        onClose={() => {
+          setShowPreview(false)
+          setPreviewTemplate(null)
+        }}
+        template={previewTemplate}
+      />
     </div>
   )
 }

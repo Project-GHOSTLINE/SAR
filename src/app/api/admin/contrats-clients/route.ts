@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { validateEmail, validateLength, sanitizeString } from '@/lib/validation'
 
 /**
  * GET /api/admin/contrats-clients
- * Liste tous les contrats de signature avec statistiques
+ * Liste tous les contrats de signature avec statistiques et pagination
+ * Query params: page (default 1), limit (default 20)
  */
 export async function GET(req: NextRequest) {
   try {
@@ -14,11 +16,47 @@ export async function GET(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Récupérer tous les contrats
+    // Paramètres de pagination
+    const searchParams = req.nextUrl.searchParams
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '20')
+    const offset = (page - 1) * limit
+
+    // Récupérer le total pour les stats (sans pagination)
+    const { data: allContracts, error: allError } = await supabase
+      .from('signature_documents')
+      .select('status')
+
+    if (allError) {
+      console.error('Erreur Supabase (stats):', allError)
+      return NextResponse.json(
+        { success: false, error: allError.message },
+        { status: 500 }
+      )
+    }
+
+    // Calculer les statistiques sur tous les contrats
+    const stats = {
+      total: allContracts?.length || 0,
+      pending: allContracts?.filter(c => c.status === 'pending').length || 0,
+      viewed: allContracts?.filter(c => c.status === 'viewed').length || 0,
+      signed: allContracts?.filter(c => c.status === 'signed').length || 0,
+      expired: allContracts?.filter(c => c.status === 'expired').length || 0,
+      revoked: allContracts?.filter(c => c.status === 'revoked').length || 0,
+      signatureRate: 0
+    }
+
+    // Calculer le taux de signature
+    if (stats.total > 0) {
+      stats.signatureRate = (stats.signed / stats.total) * 100
+    }
+
+    // Récupérer les contrats avec pagination
     const { data: contracts, error } = await supabase
       .from('signature_documents')
       .select('*')
       .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
 
     if (error) {
       console.error('Erreur Supabase:', error)
@@ -28,25 +66,16 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // Calculer les statistiques
-    const stats = {
-      total: contracts?.length || 0,
-      pending: contracts?.filter(c => c.status === 'pending').length || 0,
-      viewed: contracts?.filter(c => c.status === 'viewed').length || 0,
-      signed: contracts?.filter(c => c.status === 'signed').length || 0,
-      expired: contracts?.filter(c => c.status === 'expired').length || 0,
-      signatureRate: 0
-    }
-
-    // Calculer le taux de signature
-    if (stats.total > 0) {
-      stats.signatureRate = (stats.signed / stats.total) * 100
-    }
-
     return NextResponse.json({
       success: true,
       contracts: contracts || [],
-      stats
+      stats,
+      pagination: {
+        page,
+        limit,
+        total: stats.total,
+        totalPages: Math.ceil(stats.total / limit)
+      }
     })
 
   } catch (error: any) {
@@ -87,6 +116,35 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Valider et sanitizer les entrées
+    const emailValidation = validateEmail(clientEmail)
+    if (!emailValidation.valid) {
+      return NextResponse.json(
+        { success: false, error: emailValidation.error },
+        { status: 400 }
+      )
+    }
+
+    const nameValidation = validateLength(clientName, 'Nom du client', 2, 100)
+    if (!nameValidation.valid) {
+      return NextResponse.json(
+        { success: false, error: nameValidation.error },
+        { status: 400 }
+      )
+    }
+
+    const titleValidation = validateLength(title || 'Contrat', 'Titre', 3, 200)
+    if (!titleValidation.valid) {
+      return NextResponse.json(
+        { success: false, error: titleValidation.error },
+        { status: 400 }
+      )
+    }
+
+    // Sanitizer les entrées texte
+    const sanitizedClientName = sanitizeString(clientName)
+    const sanitizedTitle = sanitizeString(title || `Contrat - ${clientName}`)
+
     // Générer IDs
     const crypto = require('crypto')
     const documentId = crypto.randomUUID()
@@ -124,14 +182,15 @@ export async function POST(req: NextRequest) {
       .from('signature_documents')
       .insert({
         document_id: documentId,
-        client_name: clientName,
+        client_name: sanitizedClientName,
         client_email: clientEmail,
-        title: title || `Contrat - ${clientName}`,
+        title: sanitizedTitle,
         original_pdf_url: urlData.publicUrl,
         signature_fields: signatureFields || [],
         sign_token: signToken,
         token_expires_at: tokenExpiresAt.toISOString(),
-        status: 'pending'
+        status: 'pending',
+        email_status: 'pending'
       })
       .select()
       .single()
@@ -192,6 +251,15 @@ export async function POST(req: NextRequest) {
       })
       console.log('✅ Email envoyé avec succès')
 
+      // Mettre à jour le statut d'envoi d'email
+      await supabase
+        .from('signature_documents')
+        .update({
+          email_status: 'sent',
+          email_sent_at: new Date().toISOString()
+        })
+        .eq('document_id', documentId)
+
       // Audit log
       await supabase.from('signature_audit_logs').insert({
         document_id: documentId,
@@ -202,6 +270,16 @@ export async function POST(req: NextRequest) {
       })
     } catch (emailError: any) {
       console.error('❌ Erreur envoi email:', emailError)
+
+      // Mettre à jour le statut d'échec d'email
+      await supabase
+        .from('signature_documents')
+        .update({
+          email_status: 'failed',
+          email_error: emailError.message || 'Unknown error'
+        })
+        .eq('document_id', documentId)
+
       // Ne pas bloquer la création du contrat si l'email échoue
     }
 

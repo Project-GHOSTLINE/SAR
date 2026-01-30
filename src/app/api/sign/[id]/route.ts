@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { checkRateLimit, getClientIP, rateLimitResponse } from '@/lib/rate-limit'
 
 /**
  * GET /api/sign/[id]
@@ -10,6 +11,17 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Rate limiting: 10 requêtes par minute par IP
+    const clientIP = getClientIP(req.headers)
+    const rateLimitResult = checkRateLimit(clientIP, {
+      maxRequests: 10,
+      windowMs: 60 * 1000 // 1 minute
+    })
+
+    if (!rateLimitResult.success) {
+      return rateLimitResponse(rateLimitResult)
+    }
+
     // Créer le client Supabase au runtime
     const supabase = createClient(
       process.env.SUPABASE_URL!,

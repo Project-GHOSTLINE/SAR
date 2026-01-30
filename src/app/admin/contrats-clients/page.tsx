@@ -6,7 +6,7 @@ import CreateContractModal from '@/components/admin/CreateContractModal'
 import {
   FileText, Clock, CheckCircle, XCircle, Eye, Download,
   Send, Search, Filter, Calendar, User, Mail, ExternalLink,
-  AlertCircle, TrendingUp, RefreshCw, Plus
+  AlertCircle, TrendingUp, RefreshCw, Plus, Ban
 } from 'lucide-react'
 
 interface Contract {
@@ -15,7 +15,7 @@ interface Contract {
   client_name: string
   client_email: string
   title: string
-  status: 'pending' | 'viewed' | 'signed' | 'expired'
+  status: 'pending' | 'viewed' | 'signed' | 'expired' | 'revoked'
   created_at: string
   viewed_at?: string
   signed_at?: string
@@ -23,6 +23,9 @@ interface Contract {
   original_pdf_url?: string
   signed_pdf_url?: string
   sign_token?: string
+  email_status?: 'pending' | 'sent' | 'failed' | 'not_sent'
+  email_sent_at?: string
+  email_error?: string
 }
 
 interface Stats {
@@ -31,6 +34,7 @@ interface Stats {
   viewed: number
   signed: number
   expired: number
+  revoked: number
   signatureRate: number
 }
 
@@ -42,6 +46,7 @@ export default function ContratsClientsPage() {
     viewed: 0,
     signed: 0,
     expired: 0,
+    revoked: 0,
     signatureRate: 0
   })
   const [loading, setLoading] = useState(true)
@@ -49,20 +54,26 @@ export default function ContratsClientsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [refreshing, setRefreshing] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [itemsPerPage] = useState(20)
 
   useEffect(() => {
     loadContracts()
-  }, [])
+  }, [currentPage])
 
   const loadContracts = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/contrats-clients')
+      const res = await fetch(`/api/admin/contrats-clients?page=${currentPage}&limit=${itemsPerPage}`)
       const data = await res.json()
 
       if (data.success) {
         setContracts(data.contracts || [])
         setStats(data.stats || stats)
+        if (data.pagination) {
+          setTotalPages(data.pagination.totalPages)
+        }
       }
     } catch (error) {
       console.error('Erreur chargement contrats:', error)
@@ -87,6 +98,8 @@ export default function ContratsClientsPage() {
         return 'bg-yellow-100 text-yellow-800 border-yellow-200'
       case 'expired':
         return 'bg-red-100 text-red-800 border-red-200'
+      case 'revoked':
+        return 'bg-gray-100 text-gray-800 border-gray-200'
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200'
     }
@@ -102,6 +115,8 @@ export default function ContratsClientsPage() {
         return <Clock className="w-4 h-4" />
       case 'expired':
         return <XCircle className="w-4 h-4" />
+      case 'revoked':
+        return <Ban className="w-4 h-4" />
       default:
         return <FileText className="w-4 h-4" />
     }
@@ -117,8 +132,34 @@ export default function ContratsClientsPage() {
         return 'En attente'
       case 'expired':
         return 'Expiré'
+      case 'revoked':
+        return 'Révoqué'
       default:
         return status
+    }
+  }
+
+  const handleRevokeContract = async (documentId: string, clientName: string) => {
+    if (!confirm(`⚠️ Révoquer le contrat de ${clientName}?\n\nCette action invalidera le lien de signature et le client ne pourra plus signer ce contrat.`)) {
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/admin/contrats-clients/${documentId}/revoke`, {
+        method: 'PATCH'
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        alert('✅ Contrat révoqué avec succès')
+        await loadContracts() // Recharger la liste
+      } else {
+        alert(`❌ Erreur: ${data.error}`)
+      }
+    } catch (error: any) {
+      console.error('Erreur révocation:', error)
+      alert(`❌ Erreur: ${error.message}`)
     }
   }
 
@@ -326,10 +367,24 @@ export default function ContratsClientsPage() {
                         <div className="text-sm text-gray-500">ID: {contract.document_id.substring(0, 8)}...</div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(contract.status)}`}>
-                          {getStatusIcon(contract.status)}
-                          {getStatusLabel(contract.status)}
-                        </span>
+                        <div className="space-y-2">
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(contract.status)}`}>
+                            {getStatusIcon(contract.status)}
+                            {getStatusLabel(contract.status)}
+                          </span>
+                          {contract.email_status === 'failed' && (
+                            <div className="flex items-center gap-1 text-xs text-red-600" title={contract.email_error || 'Échec envoi email'}>
+                              <AlertCircle className="w-3 h-3" />
+                              <span>Email non envoyé</span>
+                            </div>
+                          )}
+                          {contract.email_status === 'sent' && contract.email_sent_at && (
+                            <div className="flex items-center gap-1 text-xs text-green-600" title={`Envoyé le ${formatDate(contract.email_sent_at)}`}>
+                              <Mail className="w-3 h-3" />
+                              <span>Email envoyé</span>
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         <div className="flex items-center gap-1 mb-1">
@@ -373,18 +428,27 @@ export default function ContratsClientsPage() {
                               <Eye className="w-4 h-4" />
                             </a>
                           )}
-                          {contract.status !== 'signed' && (
-                            <button
-                              onClick={() => {
-                                const signUrl = `${window.location.origin}/sign/${contract.document_id}?token=${contract.sign_token || ''}`
-                                navigator.clipboard.writeText(signUrl)
-                                alert('Lien de signature copié!')
-                              }}
-                              className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition"
-                              title="Copier lien de signature"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                            </button>
+                          {contract.status !== 'signed' && contract.status !== 'revoked' && (
+                            <>
+                              <button
+                                onClick={() => {
+                                  const signUrl = `${window.location.origin}/sign/${contract.document_id}?token=${contract.sign_token || ''}`
+                                  navigator.clipboard.writeText(signUrl)
+                                  alert('Lien de signature copié!')
+                                }}
+                                className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition"
+                                title="Copier lien de signature"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleRevokeContract(contract.document_id, contract.client_name)}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                title="Révoquer ce contrat"
+                              >
+                                <Ban className="w-4 h-4" />
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>
@@ -393,6 +457,61 @@ export default function ContratsClientsPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination */}
+            {!loading && filteredContracts.length > 0 && totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  Page {currentPage} sur {totalPages} ({stats.total} contrat{stats.total > 1 ? 's' : ''} au total)
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Précédent
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                      let pageNum: number
+                      if (totalPages <= 5) {
+                        pageNum = i + 1
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i
+                      } else {
+                        pageNum = currentPage - 2 + i
+                      }
+
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`w-10 h-10 rounded-lg text-sm font-medium transition ${
+                            currentPage === pageNum
+                              ? 'bg-[#10B981] text-white'
+                              : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Suivant
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

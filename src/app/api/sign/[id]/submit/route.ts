@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { PDFDocument } from 'pdf-lib'
 import { Resend } from 'resend'
+import { checkRateLimit, getClientIP, rateLimitResponse } from '@/lib/rate-limit'
 
 /**
  * POST /api/sign/[id]/submit
@@ -12,6 +13,17 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Rate limiting: 5 soumissions par heure par IP
+    const clientIP = getClientIP(req.headers)
+    const rateLimitResult = checkRateLimit(clientIP, {
+      maxRequests: 5,
+      windowMs: 60 * 60 * 1000 // 1 heure
+    })
+
+    if (!rateLimitResult.success) {
+      return rateLimitResponse(rateLimitResult)
+    }
+
     // Créer les clients au runtime
     const supabase = createClient(
       process.env.SUPABASE_URL!,
@@ -66,6 +78,77 @@ export async function POST(
         { success: false, error: 'Document déjà signé' },
         { status: 400 }
       )
+    }
+
+    // Validation des signatures
+    console.log('✅ Validation des signatures...')
+
+    // Vérifier que signatures est un tableau
+    if (!Array.isArray(signatures) || signatures.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Aucune signature fournie' },
+        { status: 400 }
+      )
+    }
+
+    // Vérifier que tous les champs requis sont signés
+    const signatureFieldIds = doc.signature_fields.map((f: any) => f.id)
+    const providedFieldIds = signatures.map((s: any) => s.fieldId)
+    const missingFields = signatureFieldIds.filter((id: string) => !providedFieldIds.includes(id))
+
+    if (missingFields.length > 0) {
+      return NextResponse.json(
+        { success: false, error: `Champs manquants: ${missingFields.length} signature(s) requise(s)` },
+        { status: 400 }
+      )
+    }
+
+    // Valider chaque signature
+    for (const sig of signatures) {
+      // Vérifier que fieldId et data sont présents
+      if (!sig.fieldId || !sig.data) {
+        return NextResponse.json(
+          { success: false, error: 'Données de signature invalides' },
+          { status: 400 }
+        )
+      }
+
+      // Vérifier le format Base64
+      const base64Regex = /^data:image\/(png|jpeg|jpg);base64,[A-Za-z0-9+/]+=*$/
+      if (!base64Regex.test(sig.data)) {
+        return NextResponse.json(
+          { success: false, error: 'Format de signature invalide (PNG Base64 requis)' },
+          { status: 400 }
+        )
+      }
+
+      // Extraire et vérifier la taille de l'image
+      const imgData = sig.data.replace(/^data:image\/(png|jpeg|jpg);base64,/, '')
+      const imgBytes = Buffer.from(imgData, 'base64')
+
+      // Vérifier taille min/max (100 bytes min, 5MB max)
+      if (imgBytes.length < 100) {
+        return NextResponse.json(
+          { success: false, error: 'Signature trop petite ou vide' },
+          { status: 400 }
+        )
+      }
+
+      if (imgBytes.length > 5 * 1024 * 1024) {
+        return NextResponse.json(
+          { success: false, error: 'Signature trop volumineuse (max 5MB)' },
+          { status: 400 }
+        )
+      }
+
+      // Vérifier que le champ existe dans le document
+      const field = doc.signature_fields.find((f: any) => f.id === sig.fieldId)
+      if (!field) {
+        return NextResponse.json(
+          { success: false, error: `Champ de signature inconnu: ${sig.fieldId}` },
+          { status: 400 }
+        )
+      }
     }
 
     console.log('📄 Téléchargement du PDF original...')
@@ -200,7 +283,7 @@ export async function POST(
     }
 
     // Email admin
-    const ADMIN_EMAIL = 'anthony@solutionargentrapide.ca'
+    const ADMIN_EMAIL = process.env.ADMIN_SIGNATURE_EMAIL || 'anthony@solutionargentrapide.ca'
     try {
       await resend.emails.send({
         from: process.env.FROM_EMAIL || 'SAR <noreply@solutionargentrapide.ca>',
