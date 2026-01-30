@@ -99,13 +99,26 @@ export default function FraudDetectionPage() {
       if (filter !== "all") params.set("classification", filter);
 
       const res = await fetch(`/api/fraud/live?${params.toString()}`);
+
+      if (!res.ok) {
+        console.error("Fraud API error:", res.status, res.statusText);
+        const errorText = await res.text();
+        console.error("Error details:", errorText);
+        return;
+      }
+
       const data = await res.json();
 
-      setStats(data.stats);
-      setDetections(data.detections);
-      setIpRisks(data.ip_risks);
-      setPatterns(data.patterns);
-      setSignals(data.signals);
+      if (data.error) {
+        console.error("Fraud API returned error:", data.error);
+        return;
+      }
+
+      setStats(data.stats || null);
+      setDetections(data.detections || []);
+      setIpRisks(data.ip_risks || []);
+      setPatterns(data.patterns || []);
+      setSignals(data.signals || []);
     } catch (err) {
       console.error("Failed to fetch fraud data:", err);
     } finally {
@@ -191,7 +204,7 @@ export default function FraudDetectionPage() {
       </div>
 
       {/* Suspicious Patterns */}
-      {patterns.length > 0 && (
+      {patterns && patterns.length > 0 && (
         <div className="bg-white border rounded p-4">
           <h2 className="text-xl font-bold mb-4">⚠️ Patterns Suspects Détectés</h2>
           <div className="space-y-2">
@@ -355,7 +368,7 @@ export default function FraudDetectionPage() {
       </div>
 
       {/* Unresolved Fraud Signals */}
-      {signals.length > 0 && (
+      {signals && signals.length > 0 && (
         <div className="bg-white border rounded p-4">
           <h2 className="text-xl font-bold mb-4">🚨 Signaux de Fraude Non Résolus</h2>
           <div className="space-y-2">
