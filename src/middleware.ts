@@ -43,6 +43,10 @@ export async function middleware(request: NextRequest) {
   const ipHash = ip !== 'unknown' ? await hashWithSalt(ip) : undefined
   const uaHash = ua !== 'unknown' ? await hashWithSalt(ua) : undefined
 
+  // IDENTITY GRAPH: Read visit_id from client header
+  const visitId = request.headers.get('x-sar-visit-id') || undefined
+  const clientSessionId = request.headers.get('x-sar-session-id') || undefined
+
   // SESSION TRACKING: Generate or retrieve session_id (NO DB write, cookie only)
   let sessionId = request.cookies.get('sar_session_id')?.value
   if (!sessionId || sessionId.length !== 64) {
@@ -165,6 +169,7 @@ export async function middleware(request: NextRequest) {
                 pathname.startsWith('/api/cron') ? 'cron' :
                 pathname.startsWith('/api/') ? 'internal' : 'web',
         env: process.env.VERCEL_ENV || (process.env.NODE_ENV === 'production' ? 'production' : 'development'),
+        ip: ip !== 'unknown' ? ip : undefined, // Clear IP for identity graph
         ip_hash: ipHash,
         ua_hash: uaHash,
         region: vercelRegion,
@@ -172,6 +177,8 @@ export async function middleware(request: NextRequest) {
         role: userRole,
         vercel_id: vercelId,
         vercel_region: vercelRegion,
+        visit_id: visitId, // From client header
+        session_id: clientSessionId, // From client header (optional)
       }
     })
   }).catch(() => {

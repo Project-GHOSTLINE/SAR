@@ -5,6 +5,7 @@ import { Suspense } from 'react'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { TelemetryProvider } from '@/components/TelemetryProvider'
+import { VisitTrackingProvider } from '@/components/VisitTrackingProvider'
 import './globals.css'
 
 const inter = Inter({
@@ -47,9 +48,11 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <Suspense fallback={null}>
-          <TelemetryProvider>
-            {children}
-          </TelemetryProvider>
+          <VisitTrackingProvider>
+            <TelemetryProvider>
+              {children}
+            </TelemetryProvider>
+          </VisitTrackingProvider>
         </Suspense>
         <Analytics />
         <SpeedInsights />
