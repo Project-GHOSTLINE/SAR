@@ -56,18 +56,25 @@ export async function POST(req: NextRequest) {
     }
 
     // 3️⃣ Insert brut dans vercel_speed_insights_raw
-    const rows = payloads.map(p => ({
-      payload: p,
-      processed: false,
-      // Extraction optionnelle pour quick queries
-      extracted_url: p.route || p.path || p.url || null,
-      extracted_device: p.device || null,
-      extracted_lcp: p.lcp ? parseFloat(p.lcp) : null,
-      extracted_inp: p.inp ? parseFloat(p.inp) : null,
-      extracted_cls: p.cls ? parseFloat(p.cls) : null,
-      extracted_ttfb: p.ttfb ? parseFloat(p.ttfb) : null,
-      extracted_fcp: p.fcp ? parseFloat(p.fcp) : null,
-    }));
+    const rows = payloads.map(p => {
+      // Vercel envoie UN événement par métrique
+      // Structure: { metricType: "LCP", value: 1234, deviceType: "mobile", ... }
+      const metricType = p.metricType;
+      const value = p.value ? parseFloat(p.value) : null;
+
+      return {
+        payload: p,
+        processed: false,
+        // Extraction pour quick queries
+        extracted_url: p.route || p.path || p.url || null,
+        extracted_device: p.deviceType || null,
+        extracted_lcp: metricType === 'LCP' ? value : null,
+        extracted_inp: metricType === 'INP' ? value : null,
+        extracted_cls: metricType === 'CLS' ? value : null,
+        extracted_ttfb: metricType === 'TTFB' ? value : null,
+        extracted_fcp: metricType === 'FCP' ? value : null,
+      };
+    });
 
     const { error, data } = await supabase
       .from("vercel_speed_insights_raw")
