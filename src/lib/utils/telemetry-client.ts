@@ -2,19 +2,28 @@
  * Client-Side Telemetry Utilities
  *
  * Captures attribution data (referrer, UTM params) for tracking
+ * Compatible with Identity Graph (visit_id tracking)
  */
 
+import { getVisitHeaders, getOrCreateVisitId } from '@/lib/visit-tracking'
+
 export interface TelemetryEventData {
-  event_type: string
   event_name: string
-  page_url?: string
-  referrer_url?: string | null
-  duration_ms?: number
-  payload?: Record<string, any>
-  // Attribution data (captured from URL/browser)
-  utm_source?: string | null
-  utm_medium?: string | null
-  utm_campaign?: string | null
+  page_path?: string
+  referrer?: string | null
+  utm?: {
+    source?: string | null
+    medium?: string | null
+    campaign?: string | null
+    term?: string | null
+    content?: string | null
+  } | null
+  device?: {
+    viewport?: { width: number; height: number }
+    screen?: { width: number; height: number }
+    devicePixelRatio?: number
+  } | null
+  properties?: Record<string, any>
 }
 
 /**
@@ -22,22 +31,26 @@ export interface TelemetryEventData {
  *
  * Looks for: utm_source, utm_medium, utm_campaign, utm_term, utm_content
  */
-export function extractUTMParams(): {
-  utm_source: string | null
-  utm_medium: string | null
-  utm_campaign: string | null
-} {
+export function extractUTMParams() {
   if (typeof window === 'undefined') {
-    return { utm_source: null, utm_medium: null, utm_campaign: null }
+    return null
   }
 
   const params = new URLSearchParams(window.location.search)
-
-  return {
-    utm_source: params.get('utm_source'),
-    utm_medium: params.get('utm_medium'),
-    utm_campaign: params.get('utm_campaign'),
+  const utm = {
+    source: params.get('utm_source'),
+    medium: params.get('utm_medium'),
+    campaign: params.get('utm_campaign'),
+    term: params.get('utm_term'),
+    content: params.get('utm_content'),
   }
+
+  // Return null if no UTM params
+  if (Object.values(utm).every((v) => v === null)) {
+    return null
+  }
+
+  return utm
 }
 
 /**
@@ -73,6 +86,27 @@ export function getDocumentReferrer(): string | null {
 }
 
 /**
+ * Get device info (non-invasive)
+ */
+function getDeviceInfo() {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  return {
+    viewport: {
+      width: window.innerWidth,
+      height: window.innerHeight,
+    },
+    screen: {
+      width: window.screen.width,
+      height: window.screen.height,
+    },
+    devicePixelRatio: window.devicePixelRatio || 1,
+  }
+}
+
+/**
  * Send telemetry event to server
  *
  * @param eventData - Event data to track
@@ -82,23 +116,30 @@ export async function trackEvent(
   eventData: TelemetryEventData
 ): Promise<string | null> {
   try {
-    // Auto-inject attribution data if not provided
-    const utm = extractUTMParams()
-    const referrer = getDocumentReferrer()
+    // Ensure visit_id exists
+    getOrCreateVisitId()
 
-    const payload: TelemetryEventData = {
-      ...eventData,
-      page_url: eventData.page_url || (typeof window !== 'undefined' ? window.location.pathname : undefined),
-      referrer_url: eventData.referrer_url || referrer,
-      utm_source: eventData.utm_source !== undefined ? eventData.utm_source : utm.utm_source,
-      utm_medium: eventData.utm_medium !== undefined ? eventData.utm_medium : utm.utm_medium,
-      utm_campaign: eventData.utm_campaign !== undefined ? eventData.utm_campaign : utm.utm_campaign,
+    // Auto-inject attribution data if not provided
+    const utm = eventData.utm || extractUTMParams()
+    const referrer = eventData.referrer !== undefined ? eventData.referrer : getDocumentReferrer()
+    const device = eventData.device || getDeviceInfo()
+    const page_path = eventData.page_path || (typeof window !== 'undefined' ? window.location.pathname : undefined)
+
+    const payload = {
+      event_name: eventData.event_name,
+      page_path,
+      referrer,
+      utm,
+      device,
+      properties: eventData.properties || null,
+      timestamp: new Date().toISOString(),
     }
 
     const response = await fetch('/api/telemetry/track-event', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...getVisitHeaders(), // Include visit_id header
       },
       body: JSON.stringify(payload),
     })
@@ -109,7 +150,7 @@ export async function trackEvent(
     }
 
     const result = await response.json()
-    return result.event_id || null
+    return result.id || null
   } catch (error) {
     console.error('[Telemetry] Error tracking event:', error)
     return null
@@ -123,8 +164,8 @@ export async function trackEvent(
  */
 export async function trackPageView(pageName?: string): Promise<void> {
   await trackEvent({
-    event_type: 'page_view',
-    event_name: pageName || (typeof window !== 'undefined' ? window.location.pathname : '/'),
+    event_name: 'page_view',
+    page_path: pageName || (typeof window !== 'undefined' ? window.location.pathname : '/'),
   })
 }
 
@@ -134,12 +175,11 @@ export async function trackPageView(pageName?: string): Promise<void> {
 export async function trackFormInteraction(
   action: 'start' | 'step' | 'abandon' | 'submit',
   formName: string,
-  payload?: Record<string, any>
+  properties?: Record<string, any>
 ): Promise<void> {
   await trackEvent({
-    event_type: `form_${action}`,
-    event_name: formName,
-    payload,
+    event_name: `form_${action}`,
+    properties: { form_name: formName, ...properties },
   })
 }
 
@@ -151,8 +191,7 @@ export async function trackButtonClick(
   buttonLabel?: string
 ): Promise<void> {
   await trackEvent({
-    event_type: 'button_click',
-    event_name: buttonId,
-    payload: buttonLabel ? { label: buttonLabel } : undefined,
+    event_name: 'click',
+    properties: { button_id: buttonId, label: buttonLabel },
   })
 }
