@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MagnifyingGlassIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { IpData } from "./types";
+import TopIpsList from "./TopIpsList";
 
 interface ExplorerIpPanelProps {
   onSearch: (ip: string) => Promise<IpData | null>;
@@ -39,10 +40,13 @@ export default function ExplorerIpPanel({ onSearch }: ExplorerIpPanelProps) {
 
   return (
     <div className="space-y-6">
+      {/* Top IPs List */}
+      <TopIpsList limit={20} />
+
       {/* Search bar */}
       <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Rechercher un IP
+          Rechercher un IP spécifique
         </h2>
         <div className="flex gap-3">
           <input
