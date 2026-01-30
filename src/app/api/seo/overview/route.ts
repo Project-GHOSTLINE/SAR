@@ -44,17 +44,17 @@ export async function GET(req: NextRequest) {
     }
 
     // 2️⃣ Agréger KPIs (dernières données disponibles pour chaque source)
-    // Trouver la dernière date avec données GA4 (pas null)
-    const latestGa4 = timeline.find(d => d.ga4_users !== null) || timeline[0];
-    const previousGa4 = timeline.find(d => d !== latestGa4 && d.ga4_users !== null) || latestGa4;
+    // Trouver la dernière date avec données GA4 (valeur > 0)
+    const latestGa4 = timeline.find(d => d.ga4_users > 0) || timeline[0];
+    const previousGa4 = timeline.find(d => d !== latestGa4 && d.ga4_users > 0) || latestGa4;
 
-    // Trouver la dernière date avec données GSC
-    const latestGsc = timeline.find(d => d.gsc_clicks !== null) || timeline[0];
-    const previousGsc = timeline.find(d => d !== latestGsc && d.gsc_clicks !== null) || latestGsc;
+    // Trouver la dernière date avec données GSC (valeur > 0)
+    const latestGsc = timeline.find(d => d.gsc_clicks > 0) || timeline[0];
+    const previousGsc = timeline.find(d => d !== latestGsc && d.gsc_clicks > 0) || latestGsc;
 
-    // Trouver la dernière date avec données Semrush
-    const latestSemrush = timeline.find(d => d.semrush_keywords !== null) || timeline[0];
-    const previousSemrush = timeline.find(d => d !== latestSemrush && d.semrush_keywords !== null) || latestSemrush;
+    // Trouver la dernière date avec données Semrush (valeur > 0)
+    const latestSemrush = timeline.find(d => d.semrush_keywords > 0) || timeline[0];
+    const previousSemrush = timeline.find(d => d !== latestSemrush && d.semrush_keywords > 0) || latestSemrush;
 
     // Trouver la dernière date avec données Speed Insights
     const latestSpeed = timeline.find(d => d.avg_lcp_p75 !== null) || timeline[0];
