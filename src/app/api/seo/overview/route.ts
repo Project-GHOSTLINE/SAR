@@ -43,63 +43,75 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // 2️⃣ Agréger KPIs (dernière date = données les plus récentes)
-    const latest = timeline[0];
-    const previous = timeline[1] || latest;
+    // 2️⃣ Agréger KPIs (dernières données disponibles pour chaque source)
+    // Trouver la dernière date avec données GA4 (pas null)
+    const latestGa4 = timeline.find(d => d.ga4_users !== null) || timeline[0];
+    const previousGa4 = timeline.find(d => d !== latestGa4 && d.ga4_users !== null) || latestGa4;
+
+    // Trouver la dernière date avec données GSC
+    const latestGsc = timeline.find(d => d.gsc_clicks !== null) || timeline[0];
+    const previousGsc = timeline.find(d => d !== latestGsc && d.gsc_clicks !== null) || latestGsc;
+
+    // Trouver la dernière date avec données Semrush
+    const latestSemrush = timeline.find(d => d.semrush_keywords !== null) || timeline[0];
+    const previousSemrush = timeline.find(d => d !== latestSemrush && d.semrush_keywords !== null) || latestSemrush;
+
+    // Trouver la dernière date avec données Speed Insights
+    const latestSpeed = timeline.find(d => d.avg_lcp_p75 !== null) || timeline[0];
 
     const kpis = {
       ga4: {
-        users: latest.ga4_users || 0,
-        sessions: latest.ga4_sessions || 0,
-        conversions: latest.ga4_conversions || 0,
-        engagement_rate: latest.ga4_engagement_rate || 0,
-        bounce_rate: latest.ga4_bounce_rate || 0,
+        users: latestGa4.ga4_users || 0,
+        sessions: latestGa4.ga4_sessions || 0,
+        conversions: latestGa4.ga4_conversions || 0,
+        engagement_rate: latestGa4.ga4_engagement_rate || 0,
+        bounce_rate: latestGa4.ga4_bounce_rate || 0,
         trend: {
-          users: calculateTrend(latest.ga4_users, previous.ga4_users),
-          sessions: calculateTrend(latest.ga4_sessions, previous.ga4_sessions),
-          conversions: calculateTrend(latest.ga4_conversions, previous.ga4_conversions),
+          users: calculateTrend(latestGa4.ga4_users, previousGa4.ga4_users),
+          sessions: calculateTrend(latestGa4.ga4_sessions, previousGa4.ga4_sessions),
+          conversions: calculateTrend(latestGa4.ga4_conversions, previousGa4.ga4_conversions),
         },
       },
       gsc: {
-        clicks: latest.gsc_clicks || 0,
-        impressions: latest.gsc_impressions || 0,
-        ctr: latest.gsc_ctr || 0,
-        position: latest.gsc_position || 0,
+        clicks: latestGsc.gsc_clicks || 0,
+        impressions: latestGsc.gsc_impressions || 0,
+        ctr: latestGsc.gsc_ctr || 0,
+        position: latestGsc.gsc_position || 0,
         trend: {
-          clicks: calculateTrend(latest.gsc_clicks, previous.gsc_clicks),
-          impressions: calculateTrend(latest.gsc_impressions, previous.gsc_impressions),
+          clicks: calculateTrend(latestGsc.gsc_clicks, previousGsc.gsc_clicks),
+          impressions: calculateTrend(latestGsc.gsc_impressions, previousGsc.gsc_impressions),
         },
       },
       semrush: {
-        keywords: latest.semrush_keywords || 0,
-        traffic: latest.semrush_traffic || 0,
-        rank: latest.semrush_rank || 0,
-        authority: latest.semrush_authority || 0,
-        backlinks: latest.semrush_backlinks || 0,
+        keywords: latestSemrush.semrush_keywords || 0,
+        traffic: latestSemrush.semrush_traffic || 0,
+        rank: latestSemrush.semrush_rank || 0,
+        authority: latestSemrush.semrush_authority || 0,
+        backlinks: latestSemrush.semrush_backlinks || 0,
         trend: {
-          keywords: calculateTrend(latest.semrush_keywords, previous.semrush_keywords),
-          traffic: calculateTrend(latest.semrush_traffic, previous.semrush_traffic),
+          keywords: calculateTrend(latestSemrush.semrush_keywords, previousSemrush.semrush_keywords),
+          traffic: calculateTrend(latestSemrush.semrush_traffic, previousSemrush.semrush_traffic),
         },
       },
       speed: {
-        lcp_p75: latest.avg_lcp_p75 || null,
-        inp_p75: latest.avg_inp_p75 || null,
-        cls_p75: latest.avg_cls_p75 || null,
-        ttfb_p75: latest.avg_ttfb_p75 || null,
-        status: latest.perf_status || null,
-        samples: latest.speed_samples || 0,
-        mobile_lcp: latest.mobile_lcp_p75 || null,
-        desktop_lcp: latest.desktop_lcp_p75 || null,
+        lcp_p75: latestSpeed.avg_lcp_p75 || null,
+        inp_p75: latestSpeed.avg_inp_p75 || null,
+        cls_p75: latestSpeed.avg_cls_p75 || null,
+        ttfb_p75: latestSpeed.avg_ttfb_p75 || null,
+        status: latestSpeed.perf_status || null,
+        samples: latestSpeed.speed_samples || 0,
+        mobile_lcp: latestSpeed.mobile_lcp_p75 || null,
+        desktop_lcp: latestSpeed.desktop_lcp_p75 || null,
       },
     };
 
     // 3️⃣ Top pages (depuis GA4 top_pages JSONB)
     let topPages: any[] = [];
-    if (latest.ga4_top_pages) {
+    if (latestGa4.ga4_top_pages) {
       try {
-        const pages = typeof latest.ga4_top_pages === "string"
-          ? JSON.parse(latest.ga4_top_pages)
-          : latest.ga4_top_pages;
+        const pages = typeof latestGa4.ga4_top_pages === "string"
+          ? JSON.parse(latestGa4.ga4_top_pages)
+          : latestGa4.ga4_top_pages;
         topPages = Array.isArray(pages) ? pages.slice(0, 10) : [];
       } catch (e) {
         console.error("Failed to parse ga4_top_pages:", e);
@@ -127,7 +139,7 @@ export async function GET(req: NextRequest) {
         range,
         days,
         dataPoints: timeline.length,
-        lastUpdated: latest.date,
+        lastUpdated: timeline[0].date, // Date la plus récente
       },
     });
 
