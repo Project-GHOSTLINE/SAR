@@ -164,6 +164,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       href: '/admin/seo-hub',
       icon: TrendingUp,
       badge: null
+    },
+    {
+      name: 'Dataflow',
+      href: '/admin/dataflow',
+      icon: Activity,
+      badge: null
     }
   ]
 
