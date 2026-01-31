@@ -1,0 +1,4866 @@
+{
+  "generated_at": "2026-01-31T01:45:28.210Z",
+  "total_routes": 218,
+  "routes": [
+    {
+      "id": "post_activity_log",
+      "path": "/api/activity/log",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Logger une action réelle de Claude",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "claude_actions"
+      ],
+      "fileRef": {
+        "file": "api/activity/log/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_activity_recent",
+      "path": "/api/activity/recent",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Récupérer l'activité récente réelle",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "claude_actions"
+      ],
+      "fileRef": {
+        "file": "api/activity/recent/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_activity_stats",
+      "path": "/api/activity/stats",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Stats d'activité réelles",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "claude_actions"
+      ],
+      "fileRef": {
+        "file": "api/activity/stats/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_analytics",
+      "path": "/api/admin/analytics",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/admin/analytics",
+      "auth": "api_key",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/admin/analytics/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_client-analysis",
+      "path": "/api/admin/client-analysis",
+      "methods": [
+        "GET"
+      ],
+      "description": "OPTIONS - Handle CORS preflight",
+      "auth": "bearer_token",
+      "output": [
+        400,
+        401,
+        404,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "client_analyses",
+        "analysis_jobs"
+      ],
+      "fileRef": {
+        "file": "api/admin/client-analysis/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_admin_client-analysis",
+      "path": "/api/admin/client-analysis",
+      "methods": [
+        "POST"
+      ],
+      "description": "OPTIONS - Handle CORS preflight",
+      "auth": "bearer_token",
+      "output": [
+        400,
+        401,
+        404,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "client_analyses",
+        "analysis_jobs"
+      ],
+      "fileRef": {
+        "file": "api/admin/client-analysis/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "patch_admin_client-analysis",
+      "path": "/api/admin/client-analysis",
+      "methods": [
+        "PATCH"
+      ],
+      "description": "OPTIONS - Handle CORS preflight",
+      "auth": "bearer_token",
+      "output": [
+        400,
+        401,
+        404,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "client_analyses",
+        "analysis_jobs"
+      ],
+      "fileRef": {
+        "file": "api/admin/client-analysis/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "delete_admin_client-analysis",
+      "path": "/api/admin/client-analysis",
+      "methods": [
+        "DELETE"
+      ],
+      "description": "OPTIONS - Handle CORS preflight",
+      "auth": "bearer_token",
+      "output": [
+        400,
+        401,
+        404,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "client_analyses",
+        "analysis_jobs"
+      ],
+      "fileRef": {
+        "file": "api/admin/client-analysis/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_client_id_dossier",
+      "path": "/api/admin/client/:id/dossier",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: GET /api/admin/client/[id]/dossier",
+      "auth": "none",
+      "output": [
+        200,
+        404,
+        500,
+        503
+      ],
+      "external_calls": [
+        "fetch",
+        "external_api"
+      ],
+      "tables_touched": [
+        "client_external_ids"
+      ],
+      "fileRef": {
+        "file": "api/admin/client/[id]/dossier/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_clients-sar_autres-contrats",
+      "path": "/api/admin/clients-sar/autres-contrats",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "none",
+      "output": [
+        400,
+        404,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "email"
+      ],
+      "tables_touched": [
+        "clients_sar"
+      ],
+      "fileRef": {
+        "file": "api/admin/clients-sar/autres-contrats/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_clients-sar_concordances",
+      "path": "/api/admin/clients-sar/concordances",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "none",
+      "output": [
+        400,
+        404,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "email"
+      ],
+      "tables_touched": [
+        "clients_sar"
+      ],
+      "fileRef": {
+        "file": "api/admin/clients-sar/concordances/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_clients-sar_concordances-stats",
+      "path": "/api/admin/clients-sar/concordances-stats",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "email"
+      ],
+      "tables_touched": [
+        "clients_sar"
+      ],
+      "fileRef": {
+        "file": "api/admin/clients-sar/concordances-stats/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_clients-sar_search",
+      "path": "/api/admin/clients-sar/search",
+      "methods": [
+        "GET"
+      ],
+      "description": "API Endpoint: Recherche de clients SAR avec détection de fraude",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "email"
+      ],
+      "tables_touched": [
+        "clients_sar"
+      ],
+      "fileRef": {
+        "file": "api/admin/clients-sar/search/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_clients-sar_stats",
+      "path": "/api/admin/clients-sar/stats",
+      "methods": [
+        "GET"
+      ],
+      "description": "API Endpoint: Statistiques des clients SAR",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "external_api"
+      ],
+      "tables_touched": [
+        "clients_sar"
+      ],
+      "fileRef": {
+        "file": "api/admin/clients-sar/stats/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_contrats-clients",
+      "path": "/api/admin/contrats-clients",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/admin/contrats-clients",
+      "auth": "api_key",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "signature_documents",
+        "contrats",
+        "signature_audit_logs"
+      ],
+      "fileRef": {
+        "file": "api/admin/contrats-clients/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_admin_contrats-clients",
+      "path": "/api/admin/contrats-clients",
+      "methods": [
+        "POST"
+      ],
+      "description": "GET /api/admin/contrats-clients",
+      "auth": "api_key",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "signature_documents",
+        "contrats",
+        "signature_audit_logs"
+      ],
+      "fileRef": {
+        "file": "api/admin/contrats-clients/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "patch_admin_contrats-clients_id_revoke",
+      "path": "/api/admin/contrats-clients/:id/revoke",
+      "methods": [
+        "PATCH"
+      ],
+      "description": "No description",
+      "auth": "none",
+      "output": [
+        400,
+        404,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "signature_documents",
+        "signature_audit_logs"
+      ],
+      "fileRef": {
+        "file": "api/admin/contrats-clients/[id]/revoke/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_database_explore",
+      "path": "/api/admin/database/explore",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "admin_session",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "rpc:get_all_tables_with_info"
+      ],
+      "fileRef": {
+        "file": "api/admin/database/explore/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_dataflow-health_alerts",
+      "path": "/api/admin/dataflow-health/alerts",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Dataflow Health Alerts",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "telemetry_alerts"
+      ],
+      "fileRef": {
+        "file": "api/admin/dataflow-health/alerts/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_admin_dataflow-health_alerts",
+      "path": "/api/admin/dataflow-health/alerts",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Dataflow Health Alerts",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "telemetry_alerts"
+      ],
+      "fileRef": {
+        "file": "api/admin/dataflow-health/alerts/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_dataflow-health_kpis",
+      "path": "/api/admin/dataflow-health/kpis",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Dataflow Health KPIs",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "webhook"
+      ],
+      "tables_touched": [
+        "telemetry_requests",
+        "telemetry_spans"
+      ],
+      "fileRef": {
+        "file": "api/admin/dataflow-health/kpis/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_dataflow-health_traces",
+      "path": "/api/admin/dataflow-health/traces",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Dataflow Health Traces",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "telemetry_requests",
+        "telemetry_spans"
+      ],
+      "fileRef": {
+        "file": "api/admin/dataflow-health/traces/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_downloads_stats",
+      "path": "/api/admin/downloads/stats",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "admin_session",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "download_stats"
+      ],
+      "fileRef": {
+        "file": "api/admin/downloads/stats/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_ga4_enriched",
+      "path": "/api/admin/ga4/enriched",
+      "methods": [
+        "GET"
+      ],
+      "description": "GA4 ENRICHED DATA API",
+      "auth": "admin_session",
+      "output": [
+        401,
+        500,
+        503
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/admin/ga4/enriched/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_admin_login",
+      "path": "/api/admin/login",
+      "methods": [
+        "POST"
+      ],
+      "description": "No description",
+      "auth": "admin_session",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/admin/login/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_admin_logout",
+      "path": "/api/admin/logout",
+      "methods": [
+        "POST"
+      ],
+      "description": "No description",
+      "auth": "admin_session",
+      "output": [
+        200
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/admin/logout/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_messages_assign",
+      "path": "/api/admin/messages/assign",
+      "methods": [
+        "GET"
+      ],
+      "description": "POST /api/admin/messages/assign",
+      "auth": "admin_session",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "contact_messages",
+        "notes_internes"
+      ],
+      "fileRef": {
+        "file": "api/admin/messages/assign/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_admin_messages_assign",
+      "path": "/api/admin/messages/assign",
+      "methods": [
+        "POST"
+      ],
+      "description": "POST /api/admin/messages/assign",
+      "auth": "admin_session",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "contact_messages",
+        "notes_internes"
+      ],
+      "fileRef": {
+        "file": "api/admin/messages/assign/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_admin_messages_resend",
+      "path": "/api/admin/messages/resend",
+      "methods": [
+        "POST"
+      ],
+      "description": "Vérifier le token JWT",
+      "auth": "api_key",
+      "output": [
+        400,
+        401,
+        404,
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "email"
+      ],
+      "tables_touched": [
+        "contact_messages",
+        "emails_envoyes"
+      ],
+      "fileRef": {
+        "file": "api/admin/messages/resend/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_metrics_inspect",
+      "path": "/api/admin/metrics/inspect",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "admin_session",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "admin_sections",
+        "metric_registry",
+        "client_analyses",
+        "client_transactions",
+        "client_accounts",
+        "fraud_cases",
+        "contact_messages",
+        "support_tickets",
+        "vopay_webhook_logs",
+        "metric_values",
+        "rpc:get_metric_value_stats"
+      ],
+      "fileRef": {
+        "file": "api/admin/metrics/inspect/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_admin_send",
+      "path": "/api/admin/send",
+      "methods": [
+        "POST"
+      ],
+      "description": "Verifier le token JWT",
+      "auth": "admin_session",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "emails_envoyes",
+        "contact_messages",
+        "notes_internes"
+      ],
+      "fileRef": {
+        "file": "api/admin/send/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_signature-templates",
+      "path": "/api/admin/signature-templates",
+      "methods": [
+        "GET"
+      ],
+      "description": "OPTIONS /api/admin/signature-templates",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "signature_templates"
+      ],
+      "fileRef": {
+        "file": "api/admin/signature-templates/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_admin_signature-templates",
+      "path": "/api/admin/signature-templates",
+      "methods": [
+        "POST"
+      ],
+      "description": "OPTIONS /api/admin/signature-templates",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "signature_templates"
+      ],
+      "fileRef": {
+        "file": "api/admin/signature-templates/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_signature-templates_id",
+      "path": "/api/admin/signature-templates/:id",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/admin/signature-templates/[id]",
+      "auth": "none",
+      "output": [
+        400,
+        404,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "signature_templates"
+      ],
+      "fileRef": {
+        "file": "api/admin/signature-templates/[id]/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "patch_admin_signature-templates_id",
+      "path": "/api/admin/signature-templates/:id",
+      "methods": [
+        "PATCH"
+      ],
+      "description": "GET /api/admin/signature-templates/[id]",
+      "auth": "none",
+      "output": [
+        400,
+        404,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "signature_templates"
+      ],
+      "fileRef": {
+        "file": "api/admin/signature-templates/[id]/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "delete_admin_signature-templates_id",
+      "path": "/api/admin/signature-templates/:id",
+      "methods": [
+        "DELETE"
+      ],
+      "description": "GET /api/admin/signature-templates/[id]",
+      "auth": "none",
+      "output": [
+        400,
+        404,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "signature_templates"
+      ],
+      "fileRef": {
+        "file": "api/admin/signature-templates/[id]/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_admin_support_messages",
+      "path": "/api/admin/support/messages",
+      "methods": [
+        "POST"
+      ],
+      "description": "Vérifier l'authentification admin",
+      "auth": "admin_session",
+      "output": [
+        201,
+        400,
+        401,
+        404,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "support_tickets",
+        "support_messages"
+      ],
+      "fileRef": {
+        "file": "api/admin/support/messages/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_support_stats",
+      "path": "/api/admin/support/stats",
+      "methods": [
+        "GET"
+      ],
+      "description": "Vérifier l'authentification admin",
+      "auth": "admin_session",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "support_tickets"
+      ],
+      "fileRef": {
+        "file": "api/admin/support/stats/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_support_tickets",
+      "path": "/api/admin/support/tickets",
+      "methods": [
+        "GET"
+      ],
+      "description": "Vérifier l'authentification admin",
+      "auth": "admin_session",
+      "output": [
+        201,
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "support_tickets",
+        "rpc:generate_ticket_number"
+      ],
+      "fileRef": {
+        "file": "api/admin/support/tickets/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_admin_support_tickets",
+      "path": "/api/admin/support/tickets",
+      "methods": [
+        "POST"
+      ],
+      "description": "Vérifier l'authentification admin",
+      "auth": "admin_session",
+      "output": [
+        201,
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "support_tickets",
+        "rpc:generate_ticket_number"
+      ],
+      "fileRef": {
+        "file": "api/admin/support/tickets/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_support_tickets_id",
+      "path": "/api/admin/support/tickets/:id",
+      "methods": [
+        "GET"
+      ],
+      "description": "Vérifier l'authentification admin",
+      "auth": "admin_session",
+      "output": [
+        401,
+        404,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "support_tickets",
+        "support_messages",
+        "support_attachments"
+      ],
+      "fileRef": {
+        "file": "api/admin/support/tickets/[id]/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "patch_admin_support_tickets_id",
+      "path": "/api/admin/support/tickets/:id",
+      "methods": [
+        "PATCH"
+      ],
+      "description": "Vérifier l'authentification admin",
+      "auth": "admin_session",
+      "output": [
+        401,
+        404,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "support_tickets",
+        "support_messages",
+        "support_attachments"
+      ],
+      "fileRef": {
+        "file": "api/admin/support/tickets/[id]/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_telemetry_command-center",
+      "path": "/api/admin/telemetry/command-center",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: GET /api/admin/telemetry/command-center",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "telemetry_requests",
+        "ga4_enriched_sessions",
+        "telemetry_spans",
+        "telemetry_alerts"
+      ],
+      "fileRef": {
+        "file": "api/admin/telemetry/command-center/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_vopay",
+      "path": "/api/admin/vopay",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/admin/vopay",
+      "auth": "admin_session",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/admin/vopay/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_vopay-debug",
+      "path": "/api/admin/vopay-debug",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "api_key",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "external_api"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/admin/vopay-debug/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_vopay_real-transactions",
+      "path": "/api/admin/vopay/real-transactions",
+      "methods": [
+        "GET"
+      ],
+      "description": "Force dynamic rendering",
+      "auth": "api_key",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "external_api"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/admin/vopay/real-transactions/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_vopay_transactions",
+      "path": "/api/admin/vopay/transactions",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/admin/vopay/transactions",
+      "auth": "admin_session",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/admin/vopay/transactions/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_webhooks_debug",
+      "path": "/api/admin/webhooks/debug",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "admin_session",
+      "output": [
+        401
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "vopay_webhook_logs"
+      ],
+      "fileRef": {
+        "file": "api/admin/webhooks/debug/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_webhooks_export",
+      "path": "/api/admin/webhooks/export",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "admin_session",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs"
+      ],
+      "fileRef": {
+        "file": "api/admin/webhooks/export/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_webhooks_list",
+      "path": "/api/admin/webhooks/list",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "admin_session",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs"
+      ],
+      "fileRef": {
+        "file": "api/admin/webhooks/list/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_admin_webhooks_retry",
+      "path": "/api/admin/webhooks/retry",
+      "methods": [
+        "POST"
+      ],
+      "description": "No description",
+      "auth": "admin_session",
+      "output": [
+        400,
+        401,
+        404,
+        500
+      ],
+      "external_calls": [
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs"
+      ],
+      "fileRef": {
+        "file": "api/admin/webhooks/retry/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_admin_webhooks_send-alert",
+      "path": "/api/admin/webhooks/send-alert",
+      "methods": [
+        "POST"
+      ],
+      "description": "No description",
+      "auth": "api_key",
+      "output": [
+        400,
+        404,
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "external_api",
+        "webhook",
+        "email"
+      ],
+      "tables_touched": [
+        "vopay_webhook_logs"
+      ],
+      "fileRef": {
+        "file": "api/admin/webhooks/send-alert/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_admin_webhooks_stats",
+      "path": "/api/admin/webhooks/stats",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/admin/webhooks/stats",
+      "auth": "admin_session",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "vopay_webhook_logs"
+      ],
+      "fileRef": {
+        "file": "api/admin/webhooks/stats/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_abandons",
+      "path": "/api/analytics/abandons",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/abandons",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "visual_abandon_heatmap"
+      ],
+      "fileRef": {
+        "file": "api/analytics/abandons/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_click-heatmap",
+      "path": "/api/analytics/click-heatmap",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/click-heatmap?page=/",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "client_telemetry_events"
+      ],
+      "fileRef": {
+        "file": "api/analytics/click-heatmap/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_client-unified-metrics",
+      "path": "/api/analytics/client-unified-metrics",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/client-unified-metrics?client_id=uuid",
+      "auth": "none",
+      "output": [
+        400,
+        404,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "email"
+      ],
+      "tables_touched": [
+        "clients",
+        "contact_messages",
+        "loan_applications",
+        "vopay_transactions",
+        "support_tickets",
+        "email_messages",
+        "client_sessions"
+      ],
+      "fileRef": {
+        "file": "api/analytics/client-unified-metrics/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_funnel",
+      "path": "/api/analytics/funnel",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/funnel",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "visual_conversion_funnel"
+      ],
+      "fileRef": {
+        "file": "api/analytics/funnel/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_heatmap",
+      "path": "/api/analytics/heatmap",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/heatmap",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "visual_activity_heatmap"
+      ],
+      "fileRef": {
+        "file": "api/analytics/heatmap/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_ip-details",
+      "path": "/api/analytics/ip-details",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/ip-details",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "client_sessions",
+        "client_telemetry_events"
+      ],
+      "fileRef": {
+        "file": "api/analytics/ip-details/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_journeys",
+      "path": "/api/analytics/journeys",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/journeys",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "analytics_user_journeys"
+      ],
+      "fileRef": {
+        "file": "api/analytics/journeys/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_linked-sessions",
+      "path": "/api/analytics/linked-sessions",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/linked-sessions",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "client_sessions"
+      ],
+      "fileRef": {
+        "file": "api/analytics/linked-sessions/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_page-flow",
+      "path": "/api/analytics/page-flow",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/page-flow",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "visual_page_flow",
+        "client_telemetry_events"
+      ],
+      "fileRef": {
+        "file": "api/analytics/page-flow/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_pages",
+      "path": "/api/analytics/pages",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/pages",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "client_telemetry_events",
+        "rpc:get_page_metrics"
+      ],
+      "fileRef": {
+        "file": "api/analytics/pages/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_referrers",
+      "path": "/api/analytics/referrers",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/referrers",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "client_sessions"
+      ],
+      "fileRef": {
+        "file": "api/analytics/referrers/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_sessions",
+      "path": "/api/analytics/sessions",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/sessions",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "client_sessions",
+        "client_telemetry_events"
+      ],
+      "fileRef": {
+        "file": "api/analytics/sessions/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_sources",
+      "path": "/api/analytics/sources",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/sources",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "visual_conversion_by_source"
+      ],
+      "fileRef": {
+        "file": "api/analytics/sources/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_analytics_timeline",
+      "path": "/api/analytics/timeline",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/analytics/timeline",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "visual_events_timeline"
+      ],
+      "fileRef": {
+        "file": "api/analytics/timeline/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_anonymity_check",
+      "path": "/api/anonymity/check",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Anonymity Check - Verify if you're anonymous",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/anonymity/check/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_applications_submit",
+      "path": "/api/applications/submit",
+      "methods": [
+        "POST"
+      ],
+      "description": "🚀 API Route: Submit Loan Application",
+      "auth": "none",
+      "output": [
+        200,
+        400,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "email"
+      ],
+      "tables_touched": [
+        "loan_applications",
+        "clients",
+        "client_sessions",
+        "security_events"
+      ],
+      "fileRef": {
+        "file": "api/applications/submit/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_audit_clientId",
+      "path": "/api/audit/:clientId",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/audit/[clientId]/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_audit_stats",
+      "path": "/api/audit/stats",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "vw_audit_stats_by_table"
+      ],
+      "fileRef": {
+        "file": "api/audit/stats/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_contact",
+      "path": "/api/contact",
+      "methods": [
+        "POST"
+      ],
+      "description": "Rate limiting pour le formulaire de contact",
+      "auth": "api_key",
+      "output": [
+        400,
+        429,
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "email"
+      ],
+      "tables_touched": [
+        "contact_messages",
+        "emails_envoyes"
+      ],
+      "fileRef": {
+        "file": "api/contact/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_contact-analyse",
+      "path": "/api/contact-analyse",
+      "methods": [
+        "POST"
+      ],
+      "description": "Generer reference unique",
+      "auth": "api_key",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "email"
+      ],
+      "tables_touched": [
+        "contact_messages",
+        "emails_envoyes"
+      ],
+      "fileRef": {
+        "file": "api/contact-analyse/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_cortex_sync-miro",
+      "path": "/api/cortex/sync-miro",
+      "methods": [
+        "GET"
+      ],
+      "description": "API Route: Synchronise SAR Cortex avec Miro",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/cortex/sync-miro/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_cortex_sync-miro",
+      "path": "/api/cortex/sync-miro",
+      "methods": [
+        "POST"
+      ],
+      "description": "API Route: Synchronise SAR Cortex avec Miro",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/cortex/sync-miro/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_cron_aggregate-speed-insights",
+      "path": "/api/cron/aggregate-speed-insights",
+      "methods": [
+        "GET"
+      ],
+      "description": "Calcule le percentile p d'un tableau de valeurs",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "vercel_speed_insights_raw",
+        "vercel_speed_insights_daily"
+      ],
+      "fileRef": {
+        "file": "api/cron/aggregate-speed-insights/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_cron_cleanup-sessions",
+      "path": "/api/cron/cleanup-sessions",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/cron/cleanup-sessions",
+      "auth": "none",
+      "output": [
+        401
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "rpc:cleanup_client_sessions"
+      ],
+      "fileRef": {
+        "file": "api/cron/cleanup-sessions/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_cron_seo-collect",
+      "path": "/api/cron/seo-collect",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/cron/seo-collect",
+      "auth": "api_key",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "seo_collection_jobs"
+      ],
+      "fileRef": {
+        "file": "api/cron/seo-collect/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_device_deep-inspector",
+      "path": "/api/device/deep-inspector",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Deep Device Inspector - Extract ALL device information",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/device/deep-inspector/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_download_filename",
+      "path": "/api/download/:filename",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "admin_session",
+      "output": [
+        200
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "download_logs"
+      ],
+      "fileRef": {
+        "file": "api/download/[filename]/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_download_track",
+      "path": "/api/download/track",
+      "methods": [
+        "POST"
+      ],
+      "description": "No description",
+      "auth": "admin_session",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "download_logs"
+      ],
+      "fileRef": {
+        "file": "api/download/track/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_fingerprint_deep-scan",
+      "path": "/api/fingerprint/deep-scan",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Deep Fingerprint Scan - Extract EVERYTHING trackable",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/fingerprint/deep-scan/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_fraud_device_visit_id",
+      "path": "/api/fraud/device/:visit_id",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/fraud/device/[visit_id]",
+      "auth": "none",
+      "output": [
+        404,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "device_profiles",
+        "visit_timeline",
+        "clients"
+      ],
+      "fileRef": {
+        "file": "api/fraud/device/[visit_id]/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_fraud_live",
+      "path": "/api/fraud/live",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: GET /api/fraud/live",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "telemetry_requests"
+      ],
+      "fileRef": {
+        "file": "api/fraud/live/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_memory_context",
+      "path": "/api/memory/context",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Obtenir le contexte complet d'un projet",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/memory/context/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_memory_doc-read",
+      "path": "/api/memory/doc-read",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Enregistrer qu'un document a été lu",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "claude_docs_read"
+      ],
+      "fileRef": {
+        "file": "api/memory/doc-read/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_memory_doc-read",
+      "path": "/api/memory/doc-read",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Enregistrer qu'un document a été lu",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "claude_docs_read"
+      ],
+      "fileRef": {
+        "file": "api/memory/doc-read/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_memory_recall",
+      "path": "/api/memory/recall",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Récupérer des mémoires",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "claude_memory"
+      ],
+      "fileRef": {
+        "file": "api/memory/recall/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_memory_session",
+      "path": "/api/memory/session",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Enregistrer une session de travail",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "claude_sessions"
+      ],
+      "fileRef": {
+        "file": "api/memory/session/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_memory_session",
+      "path": "/api/memory/session",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Enregistrer une session de travail",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "claude_sessions"
+      ],
+      "fileRef": {
+        "file": "api/memory/session/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_memory_store",
+      "path": "/api/memory/store",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Stocker une nouvelle mémoire",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "claude_memory"
+      ],
+      "fileRef": {
+        "file": "api/memory/store/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_metrics_all",
+      "path": "/api/metrics/all",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "vw_client_timeline",
+        "vw_client_timeline_by_type",
+        "vw_client_summary",
+        "vw_vopay_by_client",
+        "vw_vopay_orphans",
+        "vw_vopay_summary",
+        "vw_audit_recent",
+        "vw_audit_stats_by_table",
+        "vw_performance_cache_hit_ratio",
+        "vw_performance_table_sizes",
+        "vw_performance_index_usage",
+        "vw_performance_bloat_check",
+        "vopay_objects",
+        "communications",
+        "loans",
+        "payment_events"
+      ],
+      "fileRef": {
+        "file": "api/metrics/all/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_network_active-recon",
+      "path": "/api/network/active-recon",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Active Network Reconnaissance - Aggressive Network Scanning",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/network/active-recon/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_network_packet-capture",
+      "path": "/api/network/packet-capture",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Packet Capture - Wireshark-like Network Monitoring",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/network/packet-capture/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_network_trace",
+      "path": "/api/network/trace",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Network Trace - Real Network Analysis",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/network/trace/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_osint_advanced",
+      "path": "/api/osint/advanced",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: OSINT Advanced Scanner - Kung Fu Edition",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/osint/advanced/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_osint_bypass-tests",
+      "path": "/api/osint/bypass-tests",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Bypass Tests - Test all bypass techniques",
+      "auth": "admin_session",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/osint/bypass-tests/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_osint_exploit-chains",
+      "path": "/api/osint/exploit-chains",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Exploit Chain Builder",
+      "auth": "api_key",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "email"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/osint/exploit-chains/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_osint_lab-scan",
+      "path": "/api/osint/lab-scan",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: OSINT Real Network Scanner",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/osint/lab-scan/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_osint_network-scan",
+      "path": "/api/osint/network-scan",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: OSINT Network Scanner",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/osint/network-scan/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_osint_scan",
+      "path": "/api/osint/scan",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: OSINT Real Network Scanner",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/osint/scan/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_osint_vulnerabilities",
+      "path": "/api/osint/vulnerabilities",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Vulnerability Scanner - Find Weaknesses",
+      "auth": "api_key",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/osint/vulnerabilities/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_performance-diagnostic",
+      "path": "/api/performance-diagnostic",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "none",
+      "output": [
+        404
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/performance-diagnostic/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_quickbooks_accounts",
+      "path": "/api/quickbooks/accounts",
+      "methods": [
+        "GET"
+      ],
+      "description": "Get accounts from local database",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "quickbooks_accounts"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/accounts/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_quickbooks_auth_callback",
+      "path": "/api/quickbooks/auth/callback",
+      "methods": [
+        "GET"
+      ],
+      "description": "QuickBooks OAuth 2.0 Callback",
+      "auth": "bearer_token",
+      "output": [
+        200
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/auth/callback/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_quickbooks_auth_connect",
+      "path": "/api/quickbooks/auth/connect",
+      "methods": [
+        "GET"
+      ],
+      "description": "Initiate QuickBooks OAuth 2.0 flow",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/quickbooks/auth/connect/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_quickbooks_auth_refresh",
+      "path": "/api/quickbooks/auth/refresh",
+      "methods": [
+        "GET"
+      ],
+      "description": "Refresh QuickBooks Access Token",
+      "auth": "bearer_token",
+      "output": [
+        404,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/auth/refresh/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_quickbooks_auth_refresh",
+      "path": "/api/quickbooks/auth/refresh",
+      "methods": [
+        "POST"
+      ],
+      "description": "Refresh QuickBooks Access Token",
+      "auth": "bearer_token",
+      "output": [
+        404,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/auth/refresh/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_quickbooks_connection_auto-refresh",
+      "path": "/api/quickbooks/connection/auto-refresh",
+      "methods": [
+        "POST"
+      ],
+      "description": "POST /api/quickbooks/connection/auto-refresh",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/quickbooks/connection/auto-refresh/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_quickbooks_connection_disconnect",
+      "path": "/api/quickbooks/connection/disconnect",
+      "methods": [
+        "POST"
+      ],
+      "description": "POST /api/quickbooks/connection/disconnect",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/quickbooks/connection/disconnect/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_quickbooks_connection_force-reconnect",
+      "path": "/api/quickbooks/connection/force-reconnect",
+      "methods": [
+        "POST"
+      ],
+      "description": "POST /api/quickbooks/connection/force-reconnect",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/connection/force-reconnect/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_quickbooks_connection_force-status",
+      "path": "/api/quickbooks/connection/force-status",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/quickbooks/connection/force-status",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/connection/force-status/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_quickbooks_connection_refresh",
+      "path": "/api/quickbooks/connection/refresh",
+      "methods": [
+        "POST"
+      ],
+      "description": "POST /api/quickbooks/connection/refresh",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/quickbooks/connection/refresh/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_quickbooks_connection_status",
+      "path": "/api/quickbooks/connection/status",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/quickbooks/connection/status",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/quickbooks/connection/status/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_quickbooks_connection_test",
+      "path": "/api/quickbooks/connection/test",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/quickbooks/connection/test",
+      "auth": "none",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/quickbooks/connection/test/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_quickbooks_reports_aged-receivables",
+      "path": "/api/quickbooks/reports/aged-receivables",
+      "methods": [
+        "GET"
+      ],
+      "description": "Get Aged Receivables (Accounts Receivable Aging) report from QuickBooks (real-time)",
+      "auth": "none",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/reports/aged-receivables/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_quickbooks_reports_balance-sheet",
+      "path": "/api/quickbooks/reports/balance-sheet",
+      "methods": [
+        "GET"
+      ],
+      "description": "Get Balance Sheet report from QuickBooks (real-time)",
+      "auth": "none",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/reports/balance-sheet/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_quickbooks_reports_balance-sheet-detailed",
+      "path": "/api/quickbooks/reports/balance-sheet-detailed",
+      "methods": [
+        "GET"
+      ],
+      "description": "Get detailed Balance Sheet with all account balances",
+      "auth": "none",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/reports/balance-sheet-detailed/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_quickbooks_reports_cash-flow",
+      "path": "/api/quickbooks/reports/cash-flow",
+      "methods": [
+        "GET"
+      ],
+      "description": "Get Cash Flow report from QuickBooks (real-time)",
+      "auth": "none",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/reports/cash-flow/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_quickbooks_reports_profit-loss",
+      "path": "/api/quickbooks/reports/profit-loss",
+      "methods": [
+        "GET"
+      ],
+      "description": "Get Profit & Loss report from QuickBooks (real-time)",
+      "auth": "none",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/reports/profit-loss/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_quickbooks_status",
+      "path": "/api/quickbooks/status",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "quickbooks_tokens"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/status/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_quickbooks_sync_accounts",
+      "path": "/api/quickbooks/sync/accounts",
+      "methods": [
+        "POST"
+      ],
+      "description": "Sync chart of accounts from QuickBooks to local database",
+      "auth": "none",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens",
+        "quickbooks_accounts"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/sync/accounts/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_quickbooks_sync_all",
+      "path": "/api/quickbooks/sync/all",
+      "methods": [
+        "POST"
+      ],
+      "description": "Full sync - syncs all data from QuickBooks",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/quickbooks/sync/all/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_quickbooks_sync_customers",
+      "path": "/api/quickbooks/sync/customers",
+      "methods": [
+        "POST"
+      ],
+      "description": "Sync customers from QuickBooks to local database",
+      "auth": "none",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "email"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens",
+        "quickbooks_customers"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/sync/customers/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_quickbooks_sync_invoices",
+      "path": "/api/quickbooks/sync/invoices",
+      "methods": [
+        "POST"
+      ],
+      "description": "Sync invoices from QuickBooks to local database",
+      "auth": "none",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "email"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens",
+        "quickbooks_invoices"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/sync/invoices/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_quickbooks_sync_payments",
+      "path": "/api/quickbooks/sync/payments",
+      "methods": [
+        "POST"
+      ],
+      "description": "Sync payments from QuickBooks to local database",
+      "auth": "none",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens",
+        "quickbooks_payments"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/sync/payments/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_quickbooks_sync_vendors",
+      "path": "/api/quickbooks/sync/vendors",
+      "methods": [
+        "POST"
+      ],
+      "description": "Sync vendors from QuickBooks to local database",
+      "auth": "none",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "email"
+      ],
+      "tables_touched": [
+        "quickbooks_tokens",
+        "quickbooks_vendors"
+      ],
+      "fileRef": {
+        "file": "api/quickbooks/sync/vendors/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_routes_discover",
+      "path": "/api/routes/discover",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Route Discovery & Analysis",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/routes/discover/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_routes_discover",
+      "path": "/api/routes/discover",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Route Discovery & Analysis",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/routes/discover/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "put_routes_discover",
+      "path": "/api/routes/discover",
+      "methods": [
+        "PUT"
+      ],
+      "description": "API: Route Discovery & Analysis",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/routes/discover/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "patch_routes_discover",
+      "path": "/api/routes/discover",
+      "methods": [
+        "PATCH"
+      ],
+      "description": "API: Route Discovery & Analysis",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/routes/discover/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "delete_routes_discover",
+      "path": "/api/routes/discover",
+      "methods": [
+        "DELETE"
+      ],
+      "description": "API: Route Discovery & Analysis",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/routes/discover/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_routes_expand",
+      "path": "/api/routes/expand",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Route Expansion & Generation",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "${spec.database_table}"
+      ],
+      "fileRef": {
+        "file": "api/routes/expand/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_routes_expand",
+      "path": "/api/routes/expand",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Route Expansion & Generation",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "${spec.database_table}"
+      ],
+      "fileRef": {
+        "file": "api/routes/expand/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "put_routes_expand",
+      "path": "/api/routes/expand",
+      "methods": [
+        "PUT"
+      ],
+      "description": "API: Route Expansion & Generation",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "${spec.database_table}"
+      ],
+      "fileRef": {
+        "file": "api/routes/expand/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "delete_routes_expand",
+      "path": "/api/routes/expand",
+      "methods": [
+        "DELETE"
+      ],
+      "description": "API: Route Expansion & Generation",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "${spec.database_table}"
+      ],
+      "fileRef": {
+        "file": "api/routes/expand/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_sentinel_execute",
+      "path": "/api/sentinel/execute",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Sentinel Command Execution",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "claude_memory",
+        "claude_actions"
+      ],
+      "fileRef": {
+        "file": "api/sentinel/execute/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_sentinel_execute-command",
+      "path": "/api/sentinel/execute-command",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Sentinel Command Executor",
+      "auth": "none",
+      "output": [
+        400
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/sentinel/execute-command/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_sentinel_fleet",
+      "path": "/api/sentinel/fleet",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Sentinel Fleet Management",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/sentinel/fleet/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_sentinel_fleet",
+      "path": "/api/sentinel/fleet",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Sentinel Fleet Management",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/sentinel/fleet/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_sentinel_network-monitor",
+      "path": "/api/sentinel/network-monitor",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Sentinel Network Monitor - AI-Powered Threat Detection",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "claude_actions"
+      ],
+      "fileRef": {
+        "file": "api/sentinel/network-monitor/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_sentinel_orchestrator",
+      "path": "/api/sentinel/orchestrator",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Sentinel Orchestrator",
+      "auth": "none",
+      "output": [
+        404,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/sentinel/orchestrator/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_sentinel_scan-project",
+      "path": "/api/sentinel/scan-project",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Sentinel Project Scanner",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/sentinel/scan-project/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_sentinel_scoring",
+      "path": "/api/sentinel/scoring",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Sentinel Scoring System",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "sentinel_scans"
+      ],
+      "fileRef": {
+        "file": "api/sentinel/scoring/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_sentinel_scoring",
+      "path": "/api/sentinel/scoring",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Sentinel Scoring System",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "sentinel_scans"
+      ],
+      "fileRef": {
+        "file": "api/sentinel/scoring/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_analytics_detailed",
+      "path": "/api/seo/analytics/detailed",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: GET /api/seo/analytics/detailed",
+      "auth": "none",
+      "output": [
+        200
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "telemetry_requests"
+      ],
+      "fileRef": {
+        "file": "api/seo/analytics/detailed/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_collect_cloudflare",
+      "path": "/api/seo/collect/cloudflare",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: POST /api/seo/collect/cloudflare",
+      "auth": "api_key",
+      "output": [
+        401,
+        500,
+        503
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "seo_cloudflare_analytics_daily"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/cloudflare/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_seo_collect_cloudflare",
+      "path": "/api/seo/collect/cloudflare",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: POST /api/seo/collect/cloudflare",
+      "auth": "api_key",
+      "output": [
+        401,
+        500,
+        503
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "seo_cloudflare_analytics_daily"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/cloudflare/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_collect_ga4",
+      "path": "/api/seo/collect/ga4",
+      "methods": [
+        "GET"
+      ],
+      "description": "POST /api/seo/collect/ga4",
+      "auth": "api_key",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "seo_ga4_metrics_daily"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/ga4/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_seo_collect_ga4",
+      "path": "/api/seo/collect/ga4",
+      "methods": [
+        "POST"
+      ],
+      "description": "POST /api/seo/collect/ga4",
+      "auth": "api_key",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "seo_ga4_metrics_daily"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/ga4/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_collect_gsc",
+      "path": "/api/seo/collect/gsc",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: POST /api/seo/collect/gsc",
+      "auth": "api_key",
+      "output": [
+        401,
+        500,
+        503
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "seo_gsc_metrics_daily"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/gsc/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_seo_collect_gsc",
+      "path": "/api/seo/collect/gsc",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: POST /api/seo/collect/gsc",
+      "auth": "api_key",
+      "output": [
+        401,
+        500,
+        503
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "seo_gsc_metrics_daily"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/gsc/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_collect_pagespeed",
+      "path": "/api/seo/collect/pagespeed",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: POST /api/seo/collect/pagespeed",
+      "auth": "api_key",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "seo_pagespeed_metrics_daily"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/pagespeed/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_seo_collect_pagespeed",
+      "path": "/api/seo/collect/pagespeed",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: POST /api/seo/collect/pagespeed",
+      "auth": "api_key",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "seo_pagespeed_metrics_daily"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/pagespeed/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_collect_semrush",
+      "path": "/api/seo/collect/semrush",
+      "methods": [
+        "GET"
+      ],
+      "description": "POST /api/seo/collect/semrush",
+      "auth": "api_key",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "seo_semrush_domain_daily"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/semrush/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_seo_collect_semrush",
+      "path": "/api/seo/collect/semrush",
+      "methods": [
+        "POST"
+      ],
+      "description": "POST /api/seo/collect/semrush",
+      "auth": "api_key",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "seo_semrush_domain_daily"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/semrush/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_collect_ssl",
+      "path": "/api/seo/collect/ssl",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: POST /api/seo/collect/ssl",
+      "auth": "api_key",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "seo_ssl_checks"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/ssl/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_seo_collect_ssl",
+      "path": "/api/seo/collect/ssl",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: POST /api/seo/collect/ssl",
+      "auth": "api_key",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "seo_ssl_checks"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/ssl/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_collect_uptime",
+      "path": "/api/seo/collect/uptime",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: POST /api/seo/collect/uptime",
+      "auth": "api_key",
+      "output": [
+        401,
+        500,
+        503
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "seo_uptime_checks"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/uptime/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_seo_collect_uptime",
+      "path": "/api/seo/collect/uptime",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: POST /api/seo/collect/uptime",
+      "auth": "api_key",
+      "output": [
+        401,
+        500,
+        503
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [
+        "seo_uptime_checks"
+      ],
+      "fileRef": {
+        "file": "api/seo/collect/uptime/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_device-intelligence",
+      "path": "/api/seo/device-intelligence",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: GET /api/seo/device-intelligence",
+      "auth": "api_key",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "seo_gsc_metrics_daily",
+        "seo_ga4_metrics_daily",
+        "seo_pagespeed_metrics_daily"
+      ],
+      "fileRef": {
+        "file": "api/seo/device-intelligence/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_seo_exploit-secrets",
+      "path": "/api/seo/exploit-secrets",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: SEO Secret Exploitation - Reveal Hidden SEO Techniques",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/seo/exploit-secrets/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_ga4-status",
+      "path": "/api/seo/ga4-status",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: GET /api/seo/ga4-status",
+      "auth": "none",
+      "output": [
+        200
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "seo_unified_daily_plus"
+      ],
+      "fileRef": {
+        "file": "api/seo/ga4-status/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_gsc",
+      "path": "/api/seo/gsc",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: GET /api/seo/gsc",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "seo_unified_daily_plus"
+      ],
+      "fileRef": {
+        "file": "api/seo/gsc/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_health",
+      "path": "/api/seo/health",
+      "methods": [
+        "GET"
+      ],
+      "description": "Vérifier l'authentification admin",
+      "auth": "api_key",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "seo_ga4_metrics_daily",
+        "seo_semrush_domain_daily"
+      ],
+      "fileRef": {
+        "file": "api/seo/health/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_ip_ip",
+      "path": "/api/seo/ip/:ip",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/seo/ip/[ip]?range=30d",
+      "auth": "none",
+      "output": [
+        404,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "ip_to_seo_segment",
+        "telemetry_requests"
+      ],
+      "fileRef": {
+        "file": "api/seo/ip/[ip]/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_ips_top",
+      "path": "/api/seo/ips/top",
+      "methods": [
+        "GET"
+      ],
+      "description": "Calculate IP score (0-100) - Same logic as IP Dossier",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "ip_to_seo_segment"
+      ],
+      "fileRef": {
+        "file": "api/seo/ips/top/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_keywords",
+      "path": "/api/seo/keywords",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/seo/keywords",
+      "auth": "api_key",
+      "output": [
+        400,
+        401,
+        409,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "seo_keywords_tracking"
+      ],
+      "fileRef": {
+        "file": "api/seo/keywords/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_seo_keywords",
+      "path": "/api/seo/keywords",
+      "methods": [
+        "POST"
+      ],
+      "description": "GET /api/seo/keywords",
+      "auth": "api_key",
+      "output": [
+        400,
+        401,
+        409,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "seo_keywords_tracking"
+      ],
+      "fileRef": {
+        "file": "api/seo/keywords/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "patch_seo_keywords",
+      "path": "/api/seo/keywords",
+      "methods": [
+        "PATCH"
+      ],
+      "description": "GET /api/seo/keywords",
+      "auth": "api_key",
+      "output": [
+        400,
+        401,
+        409,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "seo_keywords_tracking"
+      ],
+      "fileRef": {
+        "file": "api/seo/keywords/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "delete_seo_keywords",
+      "path": "/api/seo/keywords",
+      "methods": [
+        "DELETE"
+      ],
+      "description": "GET /api/seo/keywords",
+      "auth": "api_key",
+      "output": [
+        400,
+        401,
+        409,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "seo_keywords_tracking"
+      ],
+      "fileRef": {
+        "file": "api/seo/keywords/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_metrics",
+      "path": "/api/seo/metrics",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: GET /api/seo/metrics",
+      "auth": "none",
+      "output": [
+        200
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "telemetry_requests"
+      ],
+      "fileRef": {
+        "file": "api/seo/metrics/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_overview",
+      "path": "/api/seo/overview",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/seo/overview?range=30d&device=all",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "seo_unified_daily_plus",
+        "telemetry_requests",
+        "loan_applications"
+      ],
+      "fileRef": {
+        "file": "api/seo/overview/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_overview-telemetry",
+      "path": "/api/seo/overview-telemetry",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: GET /api/seo/overview-telemetry",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "telemetry_requests",
+        "loan_applications"
+      ],
+      "fileRef": {
+        "file": "api/seo/overview-telemetry/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_perf",
+      "path": "/api/seo/perf",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/seo/perf?range=30d&path=/&device=all",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "vercel_speed_insights_daily"
+      ],
+      "fileRef": {
+        "file": "api/seo/perf/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_performance",
+      "path": "/api/seo/performance",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: GET /api/seo/performance",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "telemetry_requests"
+      ],
+      "fileRef": {
+        "file": "api/seo/performance/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_realtime",
+      "path": "/api/seo/realtime",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: GET /api/seo/realtime",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "telemetry_requests",
+        "telemetry_events",
+        "loan_applications"
+      ],
+      "fileRef": {
+        "file": "api/seo/realtime/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_semrush",
+      "path": "/api/seo/semrush",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: GET /api/seo/semrush",
+      "auth": "api_key",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/seo/semrush/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_semrush_backlinks",
+      "path": "/api/seo/semrush/backlinks",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/seo/semrush/backlinks",
+      "auth": "api_key",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/seo/semrush/backlinks/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_semrush_competitors",
+      "path": "/api/seo/semrush/competitors",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/seo/semrush/competitors",
+      "auth": "api_key",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/seo/semrush/competitors/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_semrush_keyword-research",
+      "path": "/api/seo/semrush/keyword-research",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/seo/semrush/keyword-research",
+      "auth": "api_key",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/seo/semrush/keyword-research/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_seo_visitor_visitor_id",
+      "path": "/api/seo/visitor/:visitor_id",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: GET /api/seo/visitor/[visitor_id]",
+      "auth": "none",
+      "output": [
+        400,
+        404,
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "visitor_identity_graph",
+        "loan_applications"
+      ],
+      "fileRef": {
+        "file": "api/seo/visitor/[visitor_id]/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_sign_id",
+      "path": "/api/sign/:id",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/sign/[id]",
+      "auth": "none",
+      "output": [
+        400,
+        403,
+        404,
+        410,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "signature_documents",
+        "signature_audit_logs"
+      ],
+      "fileRef": {
+        "file": "api/sign/[id]/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_sign_id_submit",
+      "path": "/api/sign/:id/submit",
+      "methods": [
+        "POST"
+      ],
+      "description": "POST /api/sign/[id]/submit",
+      "auth": "api_key",
+      "output": [
+        400,
+        403,
+        404,
+        410,
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "email"
+      ],
+      "tables_touched": [
+        "signature_documents",
+        "contrats",
+        "signature_audit_logs"
+      ],
+      "fileRef": {
+        "file": "api/sign/[id]/submit/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_telemetry_debug",
+      "path": "/api/telemetry/debug",
+      "methods": [
+        "GET"
+      ],
+      "description": "DEBUG: Check if telemetry env vars are loaded",
+      "auth": "none",
+      "output": [
+        200
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/telemetry/debug/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_telemetry_health",
+      "path": "/api/telemetry/health",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/telemetry/health",
+      "auth": "none",
+      "output": [
+        200
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "client_sessions"
+      ],
+      "fileRef": {
+        "file": "api/telemetry/health/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_telemetry_test-track",
+      "path": "/api/telemetry/test-track",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/telemetry/test-track",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "fetch"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/telemetry/test-track/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_telemetry_track-event",
+      "path": "/api/telemetry/track-event",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: POST /api/telemetry/track-event",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "telemetry_events"
+      ],
+      "fileRef": {
+        "file": "api/telemetry/track-event/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_telemetry_write",
+      "path": "/api/telemetry/write",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: POST /api/telemetry/write",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/telemetry/write/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_test-db",
+      "path": "/api/test-db",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "loan_applications",
+        "client_events",
+        "email_messages",
+        "rpc:pg_catalog.pg_tables"
+      ],
+      "fileRef": {
+        "file": "api/test-db/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_test-insert",
+      "path": "/api/test-insert",
+      "methods": [
+        "POST"
+      ],
+      "description": "No description",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "email"
+      ],
+      "tables_touched": [
+        "loan_applications",
+        "client_events",
+        "email_accounts"
+      ],
+      "fileRef": {
+        "file": "api/test-insert/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_test-margill_submit",
+      "path": "/api/test-margill/submit",
+      "methods": [
+        "POST"
+      ],
+      "description": "POST /api/test-margill/submit",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "email"
+      ],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/test-margill/submit/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_test-tool",
+      "path": "/api/test-tool",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Test des outils Claude",
+      "auth": "none",
+      "output": [
+        200
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/test-tool/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_test_demo",
+      "path": "/api/test/demo",
+      "methods": [
+        "GET"
+      ],
+      "description": "API: Test route creation",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/test/demo/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_test_demo",
+      "path": "/api/test/demo",
+      "methods": [
+        "POST"
+      ],
+      "description": "API: Test route creation",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/test/demo/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_upload-documents",
+      "path": "/api/upload-documents",
+      "methods": [
+        "POST"
+      ],
+      "description": "POST /api/upload-documents",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [],
+      "fileRef": {
+        "file": "api/upload-documents/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_vercel_drains_speed-insights",
+      "path": "/api/vercel/drains/speed-insights",
+      "methods": [
+        "POST"
+      ],
+      "description": "src/app/api/vercel/drains/speed-insights/route.ts",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "webhook"
+      ],
+      "tables_touched": [
+        "vercel_speed_insights_raw"
+      ],
+      "fileRef": {
+        "file": "api/vercel/drains/speed-insights/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_vopay_stats",
+      "path": "/api/vopay/stats",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "external_api"
+      ],
+      "tables_touched": [
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/vopay/stats/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_vopay_stats_clientId",
+      "path": "/api/vopay/stats/:clientId",
+      "methods": [
+        "GET"
+      ],
+      "description": "No description",
+      "auth": "none",
+      "output": [
+        500
+      ],
+      "external_calls": [
+        "external_api"
+      ],
+      "tables_touched": [
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/vopay/stats/[clientId]/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_webhooks_quickbooks",
+      "path": "/api/webhooks/quickbooks",
+      "methods": [
+        "POST"
+      ],
+      "description": "Verify QuickBooks webhook signature",
+      "auth": "none",
+      "output": [
+        401,
+        500
+      ],
+      "external_calls": [
+        "fetch",
+        "webhook",
+        "email"
+      ],
+      "tables_touched": [
+        "quickbooks_webhooks",
+        "quickbooks_tokens",
+        "quickbooks_customers",
+        "quickbooks_invoices",
+        "quickbooks_payments",
+        "quickbooks_accounts",
+        "quickbooks_vendors"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/quickbooks/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay",
+      "path": "/api/webhooks/vopay",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Webhook Endpoint",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "payment_schedule_versions",
+        "payment_installments",
+        "payment_events"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_account-balance",
+      "path": "/api/webhooks/vopay/account-balance",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Account Balance Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/account-balance/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_account-limit",
+      "path": "/api/webhooks/vopay/account-limit",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Account Limit Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/account-limit/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_account-status",
+      "path": "/api/webhooks/vopay/account-status",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Account Status Webhook",
+      "auth": "api_key",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/account-status/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_account-verification",
+      "path": "/api/webhooks/vopay/account-verification",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Account Verification Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/account-verification/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_bank-account",
+      "path": "/api/webhooks/vopay/bank-account",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Bank Account Creation Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/bank-account/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_batch",
+      "path": "/api/webhooks/vopay/batch",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Batch Request Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/batch/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_batch-detail",
+      "path": "/api/webhooks/vopay/batch-detail",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Batch Detail Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/batch-detail/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_client-account-balance",
+      "path": "/api/webhooks/vopay/client-account-balance",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Client Account Balance Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/client-account-balance/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_credit-card",
+      "path": "/api/webhooks/vopay/credit-card",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Credit Card Connection Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/credit-card/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_debit-card",
+      "path": "/api/webhooks/vopay/debit-card",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Debit Card Connection Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/debit-card/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_elinx",
+      "path": "/api/webhooks/vopay/elinx",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay eLinx Status Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/elinx/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_payment-received",
+      "path": "/api/webhooks/vopay/payment-received",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Payment Received Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/payment-received/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_scheduled",
+      "path": "/api/webhooks/vopay/scheduled",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Scheduled Transaction Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/scheduled/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_transaction-group",
+      "path": "/api/webhooks/vopay/transaction-group",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Transaction Group Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/transaction-group/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_webhooks_vopay_virtual-accounts",
+      "path": "/api/webhooks/vopay/virtual-accounts",
+      "methods": [
+        "GET"
+      ],
+      "description": "VoPay Virtual Accounts Webhook",
+      "auth": "none",
+      "output": [
+        400,
+        401,
+        500
+      ],
+      "external_calls": [
+        "external_api",
+        "webhook"
+      ],
+      "tables_touched": [
+        "webhook_logs",
+        "vopay_objects"
+      ],
+      "fileRef": {
+        "file": "api/webhooks/vopay/virtual-accounts/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "get_worker_process-jobs",
+      "path": "/api/worker/process-jobs",
+      "methods": [
+        "GET"
+      ],
+      "description": "API Route pour traiter les jobs d'analyse en attente",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "analysis_jobs"
+      ],
+      "fileRef": {
+        "file": "api/worker/process-jobs/route.ts",
+        "lines": "1-N"
+      }
+    },
+    {
+      "id": "post_worker_process-jobs",
+      "path": "/api/worker/process-jobs",
+      "methods": [
+        "POST"
+      ],
+      "description": "API Route pour traiter les jobs d'analyse en attente",
+      "auth": "none",
+      "output": [
+        400,
+        500
+      ],
+      "external_calls": [],
+      "tables_touched": [
+        "analysis_jobs"
+      ],
+      "fileRef": {
+        "file": "api/worker/process-jobs/route.ts",
+        "lines": "1-N"
+      }
+    }
+  ]
+}
