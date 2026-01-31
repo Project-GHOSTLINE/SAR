@@ -1,96 +1,201 @@
-// GET /api/fraud/live
-// Retourne les détections de fraude en temps réel
+/**
+ * API: GET /api/fraud/live
+ * Real-time fraud detection from telemetry_requests
+ * Analyzes patterns to detect bots and suspicious behavior
+ */
 
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+export const dynamic = 'force-dynamic';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+interface BotPattern {
+  ip: string;
+  visitor_ids: string[];
+  total_requests: number;
+  zero_duration_count: number;
+  avg_duration: number;
+  unique_pages: number;
+  suspicious_score: number;
+  reasons: string[];
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const limit = parseInt(searchParams.get("limit") || "50");
-    const minScore = parseInt(searchParams.get("min_score") || "50");
-    const classification = searchParams.get("classification"); // BOT, SCRAPER, SUSPICIOUS, etc.
+    const days = parseInt(searchParams.get('days') || '7');
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
-    // Fetch device profiles (includes device info)
-    let query = supabase
-      .from("device_profiles")
-      .select("*")
-      .gte("fraud_score", minScore)
-      .order("fraud_score", { ascending: false })
-      .limit(limit);
+    // Fetch recent telemetry
+    const { data: requests, error } = await supabase
+      .from('telemetry_requests')
+      .select('ip, visitor_id, duration_ms, path, user_agent, created_at, status')
+      .gte('created_at', since)
+      .order('created_at', { ascending: false });
 
-    if (classification) {
-      query = query.eq("classification", classification);
+    if (error) throw error;
+
+    if (!requests || requests.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'No telemetry data available',
+      });
     }
 
-    const { data: detections, error: detectionsError } = await query;
+    // Analyze patterns by IP
+    const ipAnalysis = new Map<string, {
+      visitor_ids: Set<string>;
+      requests: typeof requests;
+      zero_duration: number;
+      total_duration: number;
+      duration_count: number;
+      unique_pages: Set<string>;
+    }>();
 
-    if (detectionsError) throw detectionsError;
+    requests.forEach(req => {
+      if (!ipAnalysis.has(req.ip)) {
+        ipAnalysis.set(req.ip, {
+          visitor_ids: new Set(),
+          requests: [],
+          zero_duration: 0,
+          total_duration: 0,
+          duration_count: 0,
+          unique_pages: new Set(),
+        });
+      }
 
-    // Fetch IP risk profiles
-    const { data: ipRisks, error: risksError } = await supabase
-      .from("ip_risk_profile")
-      .select("*")
-      .order("max_fraud_score", { ascending: false })
-      .limit(20);
+      const analysis = ipAnalysis.get(req.ip)!;
+      if (req.visitor_id) analysis.visitor_ids.add(req.visitor_id);
+      analysis.requests.push(req);
+      if (req.duration_ms === 0) analysis.zero_duration++;
+      if (req.duration_ms !== null) {
+        analysis.total_duration += req.duration_ms;
+        analysis.duration_count++;
+      }
+      analysis.unique_pages.add(req.path);
+    });
 
-    if (risksError) throw risksError;
+    // Detect bots and suspicious IPs
+    const suspiciousIPs: BotPattern[] = [];
+    let totalBotsDetected = 0;
+    let totalCleanSessions = 0;
 
-    // Fetch suspicious patterns
-    const { data: patterns, error: patternsError } = await supabase
-      .from("suspicious_patterns")
-      .select("*")
-      .order("occurrences", { ascending: false });
+    ipAnalysis.forEach((analysis, ip) => {
+      const reasons: string[] = [];
+      let score = 0;
 
-    if (patternsError) throw patternsError;
+      // Multiple visitor IDs from same IP (device switching or scraping)
+      if (analysis.visitor_ids.size > 3) {
+        reasons.push(`${analysis.visitor_ids.size} different visitor IDs`);
+        score += 30;
+      }
 
-    // Fetch unresolved fraud signals
-    const { data: signals, error: signalsError } = await supabase
-      .from("fraud_signals")
-      .select("*")
-      .eq("resolved", false)
-      .order("detected_at", { ascending: false })
-      .limit(100);
+      // High percentage of zero-duration requests (bots don't render)
+      const zeroDurationPct = (analysis.zero_duration / analysis.requests.length) * 100;
+      if (zeroDurationPct > 50) {
+        reasons.push(`${zeroDurationPct.toFixed(0)}% zero-duration requests`);
+        score += 25;
+      }
 
-    if (signalsError) throw signalsError;
+      // Very fast average response (< 10ms suggests no rendering)
+      const avgDuration = analysis.duration_count > 0
+        ? analysis.total_duration / analysis.duration_count
+        : 0;
+      if (avgDuration < 10 && analysis.duration_count > 5) {
+        reasons.push(`Avg ${avgDuration.toFixed(0)}ms (too fast)`);
+        score += 20;
+      }
 
-    // Calculate stats
-    const stats = {
-      total_detections: detections?.length || 0,
-      critical_ips: ipRisks?.filter((r) => r.risk_level === "CRITICAL").length || 0,
-      high_risk_ips: ipRisks?.filter((r) => r.risk_level === "HIGH").length || 0,
-      bots: detections?.filter((d) => d.classification === "BOT").length || 0,
-      scrapers: detections?.filter((d) => d.classification === "SCRAPER").length || 0,
-      suspicious: detections?.filter((d) => d.classification === "SUSPICIOUS").length || 0,
-      converters: detections?.filter((d) => d.classification === "CONVERTER").length || 0,
-      engaged: detections?.filter((d) => d.classification === "ENGAGED").length || 0,
-      unresolved_signals: signals?.length || 0,
-      avg_fraud_score: detections?.length
-        ? Math.round(detections.reduce((acc, d) => acc + (d.fraud_score || 0), 0) / detections.length)
-        : 0,
-    };
+      // High request rate (> 100 requests in period)
+      if (analysis.requests.length > 100) {
+        reasons.push(`${analysis.requests.length} requests in ${days}d`);
+        score += 15;
+      }
+
+      // Single page repeated access (loop/crawler)
+      if (analysis.unique_pages.size === 1 && analysis.requests.length > 20) {
+        reasons.push('Single page loop detected');
+        score += 20;
+      }
+
+      // Suspicious user agents
+      const firstReq = analysis.requests[0];
+      const ua = firstReq?.user_agent?.toLowerCase() || '';
+      if (ua.includes('bot') || ua.includes('crawler') || ua.includes('spider')) {
+        reasons.push('Bot user agent');
+        score += 40;
+      }
+
+      if (score >= 50) {
+        suspiciousIPs.push({
+          ip,
+          visitor_ids: Array.from(analysis.visitor_ids),
+          total_requests: analysis.requests.length,
+          zero_duration_count: analysis.zero_duration,
+          avg_duration: avgDuration,
+          unique_pages: analysis.unique_pages.size,
+          suspicious_score: Math.min(score, 100),
+          reasons,
+        });
+        totalBotsDetected++;
+      } else {
+        totalCleanSessions += analysis.visitor_ids.size;
+      }
+    });
+
+    // Sort by score
+    suspiciousIPs.sort((a, b) => b.suspicious_score - a.suspicious_score);
+
+    // Calculate overall fraud score (accuracy)
+    const totalIPs = ipAnalysis.size;
+    const fraudAccuracy = totalIPs > 0
+      ? ((totalIPs - totalBotsDetected) / totalIPs) * 100
+      : 100;
+
+    // Recent bot activity (last 24h)
+    const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const recentBotActivity = suspiciousIPs.filter(bot =>
+      bot.total_requests > 0 // All recent
+    ).length;
 
     return NextResponse.json({
-      stats,
-      detections: detections || [],
-      ip_risks: ipRisks || [],
-      patterns: patterns || [],
-      signals: signals || [],
+      success: true,
+      overview: {
+        fraud_accuracy: parseFloat(fraudAccuracy.toFixed(1)),
+        bots_detected: totalBotsDetected,
+        clean_sessions: totalCleanSessions,
+        total_ips_analyzed: totalIPs,
+        recent_bot_activity: recentBotActivity,
+      },
+      suspicious_ips: suspiciousIPs.slice(0, 20),
+      detection_criteria: [
+        'Multiple visitor IDs from same IP',
+        'High zero-duration requests (>50%)',
+        'Very fast avg response (<10ms)',
+        'High request volume (>100 in period)',
+        'Single page loop pattern',
+        'Bot/crawler user agent',
+      ],
       meta: {
-        limit,
-        min_score: minScore,
-        classification: classification || "all",
+        period_days: days,
+        total_requests_analyzed: requests.length,
+        data_source: 'telemetry_requests',
       },
     });
-  } catch (err: any) {
-    console.error("Fraud Detection API Error:", err.message);
+
+  } catch (error: any) {
+    console.error('[Fraud Detection] Error:', error);
     return NextResponse.json(
-      { error: "Internal error", details: err.message },
+      {
+        success: false,
+        error: 'Internal error',
+        details: error.message,
+      },
       { status: 500 }
     );
   }
