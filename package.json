@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "api:scan": "tsx scripts/scan-api-routes.ts",
+    "api:explore": "open https://admin.solutionargentrapide.ca/admin/api-explorer",
     "memory:load": "node scripts/auto-load-memory.mjs",
     "memory:init": "node scripts/setup-complete.mjs",
     "test:activity": "node scripts/test-activity-logging.mjs",

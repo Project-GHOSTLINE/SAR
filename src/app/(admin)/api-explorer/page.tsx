@@ -13,8 +13,8 @@ interface Route {
   methods: string[];
   description: string;
   auth: string;
-  external_calls: string[];
-  tables_touched: string[];
+  externalCalls: string[];
+  tablesTouched: string[];
   fileRef: { file: string; lines: string };
   stats?: RouteSummary;
 }
@@ -126,7 +126,7 @@ export default function ApiExplorerPage() {
       const q = searchQuery.toLowerCase();
       const match = route.path.toLowerCase().includes(q) ||
         route.description.toLowerCase().includes(q) ||
-        route.tables_touched.some(t => t.toLowerCase().includes(q));
+        route.tablesTouched.some(t => t.toLowerCase().includes(q));
       if (!match) return false;
     }
 
@@ -323,11 +323,11 @@ export default function ApiExplorerPage() {
                 </div>
 
                 {/* Tables */}
-                {selectedRoute.tables_touched.length > 0 && (
+                {selectedRoute.tablesTouched.length > 0 && (
                   <div className="mb-4">
                     <h3 className="text-sm font-semibold mb-2">Database Tables</h3>
                     <div className="flex flex-wrap gap-2">
-                      {selectedRoute.tables_touched.map(table => (
+                      {selectedRoute.tablesTouched.map(table => (
                         <span key={table} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded font-mono">
                           {table}
                         </span>
@@ -337,11 +337,11 @@ export default function ApiExplorerPage() {
                 )}
 
                 {/* External calls */}
-                {selectedRoute.external_calls.length > 0 && (
+                {selectedRoute.externalCalls.length > 0 && (
                   <div className="mb-4">
                     <h3 className="text-sm font-semibold mb-2">External Calls</h3>
                     <div className="flex flex-wrap gap-2">
-                      {selectedRoute.external_calls.map(call => (
+                      {selectedRoute.externalCalls.map(call => (
                         <span key={call} className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded">
                           {call}
                         </span>

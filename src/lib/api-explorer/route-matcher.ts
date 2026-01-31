@@ -105,7 +105,7 @@ export function searchRoutes(query: string) {
   return catalog.routes.filter(r =>
     r.path.toLowerCase().includes(q) ||
     r.description.toLowerCase().includes(q) ||
-    r.tables_touched.some(t => t.toLowerCase().includes(q))
+    (r as any).tablesTouched?.some((t: string) => t.toLowerCase().includes(q))
   );
 }
 
