@@ -1,81 +1,30 @@
-import { NextRequest, NextResponse } from 'next/server'
-
-export const dynamic = 'force-dynamic'
-
-// Vérifier l'authentification admin
-function isAuthenticated(request: NextRequest): boolean {
-  const token = request.cookies.get('admin-session')?.value
-  const apiKey = request.headers.get('x-api-key')
-  return !!token || apiKey === process.env.ADMIN_PASSWORD
-}
-
 /**
- * GET /api/seo/ga4-status
- *
- * Diagnostic des credentials GA4
+ * API: GET /api/seo/ga4-status
+ * GA4 metrics from seo_unified_daily_plus
  */
-export async function GET(request: NextRequest) {
-  try {
-    if (!isAuthenticated(request)) {
-      return NextResponse.json(
-        { success: false, error: 'Non autorisé' },
-        { status: 401 }
-      )
-    }
 
-    const status = {
-      GA_SERVICE_ACCOUNT_JSON: {
-        exists: !!process.env.GA_SERVICE_ACCOUNT_JSON,
-        length: process.env.GA_SERVICE_ACCOUNT_JSON?.length || 0,
-        canParse: false,
-        projectId: null,
-        clientEmail: null
-      },
-      GA_PROPERTY_ID: {
-        exists: !!process.env.GA_PROPERTY_ID,
-        value: process.env.GA_PROPERTY_ID || null
-      },
-      NEXT_PUBLIC_GA_MEASUREMENT_ID: {
-        exists: !!process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
-        value: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || null
-      }
-    }
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-    // Essayer de parser le JSON
-    if (process.env.GA_SERVICE_ACCOUNT_JSON) {
-      try {
-        const credentials = JSON.parse(process.env.GA_SERVICE_ACCOUNT_JSON)
-        status.GA_SERVICE_ACCOUNT_JSON.canParse = true
-        status.GA_SERVICE_ACCOUNT_JSON.projectId = credentials.project_id || null
-        status.GA_SERVICE_ACCOUNT_JSON.clientEmail = credentials.client_email || null
-      } catch (error: any) {
-        status.GA_SERVICE_ACCOUNT_JSON.canParse = false
-      }
-    }
+export const dynamic = 'force-dynamic';
 
-    // Déterminer le mode
-    const mode = status.GA_SERVICE_ACCOUNT_JSON.exists && status.GA_SERVICE_ACCOUNT_JSON.canParse
-      ? 'REAL DATA'
-      : 'MOCK MODE'
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
-    return NextResponse.json({
-      success: true,
-      mode,
-      status,
-      recommendation: mode === 'MOCK MODE'
-        ? 'GA_SERVICE_ACCOUNT_JSON manquant ou invalide. Ajouter la variable dans Vercel.'
-        : 'Tout est configuré correctement!'
-    })
+export async function GET() {
+  const { data } = await supabase
+    .from('seo_unified_daily_plus')
+    .select('ga4_users, ga4_sessions, ga4_conversions, ga4_engagement_rate')
+    .order('date', { ascending: false })
+    .limit(1)
+    .single();
 
-  } catch (error: any) {
-    console.error('❌ Erreur diagnostic GA4:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: error.message || 'Erreur lors du diagnostic',
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      },
-      { status: 500 }
-    )
-  }
+  return NextResponse.json({
+    success: true,
+    status: 'operational',
+    metrics: data || {},
+    meta: { data_source: 'seo_unified_daily_plus' },
+  });
 }
