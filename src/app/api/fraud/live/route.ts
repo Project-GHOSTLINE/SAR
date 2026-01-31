@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     // Fetch recent telemetry
     const { data: requests, error } = await supabase
       .from('telemetry_requests')
-      .select('ip, visitor_id, duration_ms, path, user_agent, created_at, status')
+      .select('ip, visitor_id, duration_ms, path, created_at, status')
       .gte('created_at', since)
       .order('created_at', { ascending: false });
 
@@ -123,13 +123,8 @@ export async function GET(req: NextRequest) {
         score += 20;
       }
 
-      // Suspicious user agents
-      const firstReq = analysis.requests[0];
-      const ua = firstReq?.user_agent?.toLowerCase() || '';
-      if (ua.includes('bot') || ua.includes('crawler') || ua.includes('spider')) {
-        reasons.push('Bot user agent');
-        score += 40;
-      }
+      // Note: user_agent column not available in telemetry_requests
+      // Bot detection relies on behavioral patterns instead
 
       if (score >= 50) {
         suspiciousIPs.push({
