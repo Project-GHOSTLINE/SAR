@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Search, Activity, AlertTriangle, Database, Zap, Globe,
   Clock, TrendingUp, RefreshCw, ExternalLink, Code, FileCode
@@ -52,6 +52,7 @@ export default function ApiExplorerPage() {
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'errors' | 'slow' | 'db-heavy'>('all');
+  const [activeTab, setActiveTab] = useState<'routes' | 'db-impact'>('routes');
   const [loading, setLoading] = useState(true);
 
   // Load catalog
@@ -118,6 +119,44 @@ export default function ApiExplorerPage() {
     );
     return { ...route, stats };
   });
+
+  // Calculate DB stats
+  const dbStats = React.useMemo(() => {
+    const tableUsage = new Map<string, number>();
+
+    catalog.forEach(route => {
+      route.tablesTouched.forEach(table => {
+        tableUsage.set(table, (tableUsage.get(table) || 0) + 1);
+      });
+    });
+
+    const topTables = Array.from(tableUsage.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20)
+      .map(([table, count]) => ({ table, count }));
+
+    const heavyApis = catalog.reduce((acc: any, route) => {
+      const baseApi = route.path.split('/').slice(0, 3).join('/');
+      if (!acc[baseApi]) {
+        acc[baseApi] = { tables: new Set(), routes: 0 };
+      }
+      route.tablesTouched.forEach(t => acc[baseApi].tables.add(t));
+      acc[baseApi].routes++;
+      return acc;
+    }, {});
+
+    const apiGroups = Object.entries(heavyApis)
+      .map(([api, data]: any) => ({
+        api,
+        tables: data.tables.size,
+        routes: data.routes
+      }))
+      .filter(g => g.tables > 0)
+      .sort((a, b) => b.tables - a.tables)
+      .slice(0, 10);
+
+    return { topTables, apiGroups, totalTables: tableUsage.size };
+  }, [catalog]);
 
   // Filter routes
   const filteredRoutes = routesWithStats.filter(route => {
@@ -221,9 +260,35 @@ export default function ApiExplorerPage() {
               </div>
             </div>
           </div>
+
+          {/* Tabs */}
+          <div className="flex gap-2 mt-6">
+            <button
+              onClick={() => setActiveTab('routes')}
+              className={`px-4 py-2 rounded-lg font-medium transition ${
+                activeTab === 'routes'
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              Routes Explorer
+            </button>
+            <button
+              onClick={() => setActiveTab('db-impact')}
+              className={`px-4 py-2 rounded-lg font-medium transition ${
+                activeTab === 'db-impact'
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <Database className="w-4 h-4 inline mr-2" />
+              DB Impact
+            </button>
+          </div>
         </div>
 
-        {/* Main Layout: 3 columns */}
+        {/* Routes Tab */}
+        {activeTab === 'routes' && (
         <div className="grid grid-cols-12 gap-6">
           {/* LEFT: Routes List */}
           <div className="col-span-4 bg-white rounded-lg border">
@@ -431,6 +496,89 @@ export default function ApiExplorerPage() {
             </div>
           </div>
         </div>
+        )}
+
+        {/* DB Impact Tab */}
+        {activeTab === 'db-impact' && (
+          <div className="space-y-6">
+            {/* Top Tables */}
+            <div className="bg-white rounded-lg border">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold text-lg">🏆 Top 20 Tables les Plus Utilisées</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {dbStats.totalTables} tables uniques • {catalog.length} routes
+                </p>
+              </div>
+              <div className="p-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {dbStats.topTables.map((item, i) => (
+                    <div key={item.table} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="text-2xl font-bold text-gray-400">#{i + 1}</div>
+                      <div className="flex-1">
+                        <div className="font-mono text-sm font-semibold text-gray-900">{item.table}</div>
+                        <div className="text-xs text-gray-600">{item.count} routes</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-purple-600">{item.count}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Heavy APIs */}
+            <div className="bg-white rounded-lg border">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold text-lg">🔴 APIs Heavy (Impact DB Élevé)</h3>
+                <p className="text-sm text-gray-600 mt-1">Groupes API avec le plus de tables touchées</p>
+              </div>
+              <div className="p-4">
+                <div className="space-y-3">
+                  {dbStats.apiGroups.map((group, i) => (
+                    <div key={group.api} className="flex items-center gap-4 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
+                      <div className="text-3xl font-bold text-red-600">#{i + 1}</div>
+                      <div className="flex-1">
+                        <div className="font-mono text-sm font-bold text-gray-900">{group.api}</div>
+                        <div className="text-xs text-gray-600 mt-1">
+                          {group.routes} routes • {group.tables} tables touchées
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-gray-600">Tables</div>
+                        <div className="text-2xl font-bold text-red-600">{group.tables}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-gray-600">Routes</div>
+                        <div className="text-xl font-bold text-orange-600">{group.routes}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* DB Stats Summary */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-white rounded-lg border p-6">
+                <div className="text-sm text-gray-600 mb-2">Tables Uniques</div>
+                <div className="text-4xl font-bold text-purple-600">{dbStats.totalTables}</div>
+              </div>
+              <div className="bg-white rounded-lg border p-6">
+                <div className="text-sm text-gray-600 mb-2">Routes avec DB</div>
+                <div className="text-4xl font-bold text-blue-600">
+                  {catalog.filter(r => r.tablesTouched.length > 0).length}
+                </div>
+              </div>
+              <div className="bg-white rounded-lg border p-6">
+                <div className="text-sm text-gray-600 mb-2">Avg Tables/Route</div>
+                <div className="text-4xl font-bold text-green-600">
+                  {(catalog.reduce((sum, r) => sum + r.tablesTouched.length, 0) / catalog.length).toFixed(1)}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
