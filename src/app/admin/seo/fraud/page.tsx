@@ -57,7 +57,7 @@ export default function FraudDetectionPage() {
     );
   }
 
-  if (!data || !data.success) return null;
+  if (!data || !data.success || !data.overview) return null;
 
   const { overview, suspicious_ips } = data;
 
@@ -104,8 +104,8 @@ export default function FraudDetectionPage() {
             <h3 className="font-semibold text-gray-700">Fraud Accuracy</h3>
             <CheckCircle className="w-5 h-5 text-green-500" />
           </div>
-          <div className="text-3xl font-bold text-green-600">{overview.fraud_accuracy}%</div>
-          <p className="text-sm text-gray-500 mt-2">{overview.total_ips_analyzed} IPs analyzed</p>
+          <div className="text-3xl font-bold text-green-600">{overview.fraud_accuracy || 0}%</div>
+          <p className="text-sm text-gray-500 mt-2">{(overview.total_ips_analyzed || 0).toLocaleString()} IPs analyzed</p>
         </div>
 
         <div className="bg-white rounded-lg border p-6">
@@ -113,7 +113,7 @@ export default function FraudDetectionPage() {
             <h3 className="font-semibold text-gray-700">Bots Detected</h3>
             <Shield className="w-5 h-5 text-red-500" />
           </div>
-          <div className="text-3xl font-bold text-red-600">{overview.bots_detected}</div>
+          <div className="text-3xl font-bold text-red-600">{(overview.bots_detected || 0).toLocaleString()}</div>
           <p className="text-sm text-gray-500 mt-2">Last {days} days</p>
         </div>
 
@@ -122,7 +122,7 @@ export default function FraudDetectionPage() {
             <h3 className="font-semibold text-gray-700">Clean Sessions</h3>
             <CheckCircle className="w-5 h-5 text-green-500" />
           </div>
-          <div className="text-3xl font-bold text-green-600">{overview.clean_sessions}</div>
+          <div className="text-3xl font-bold text-green-600">{(overview.clean_sessions || 0).toLocaleString()}</div>
           <p className="text-sm text-gray-500 mt-2">Verified legitimate</p>
         </div>
       </div>
@@ -144,7 +144,7 @@ export default function FraudDetectionPage() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {suspicious_ips.map((ip, i) => (
+              {(suspicious_ips || []).map((ip, i) => (
                 <tr key={i} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm font-mono">{ip.ip}</td>
                   <td className="px-4 py-3 text-sm text-right">

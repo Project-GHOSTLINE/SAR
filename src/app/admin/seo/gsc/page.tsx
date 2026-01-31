@@ -62,9 +62,11 @@ export default function GoogleSearchConsolePage() {
     );
   }
 
-  if (!data || !data.success) return null;
+  if (!data || !data.success || !data.data) return null;
 
   const { overview, topQueries, topPages } = data.data;
+
+  if (!overview) return null;
 
   return (
     <div className="p-8">
@@ -104,25 +106,25 @@ export default function GoogleSearchConsolePage() {
       <div className="grid grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg border p-6">
           <h3 className="text-sm text-gray-600 mb-2">Total Impressions</h3>
-          <div className="text-3xl font-bold text-teal-600">{overview.total_impressions.toLocaleString()}</div>
+          <div className="text-3xl font-bold text-teal-600">{(overview.total_impressions || 0).toLocaleString()}</div>
           <p className="text-sm text-gray-500 mt-2">Last {days} days</p>
         </div>
 
         <div className="bg-white rounded-lg border p-6">
           <h3 className="text-sm text-gray-600 mb-2">Total Clicks</h3>
-          <div className="text-3xl font-bold text-blue-600">{overview.total_clicks.toLocaleString()}</div>
+          <div className="text-3xl font-bold text-blue-600">{(overview.total_clicks || 0).toLocaleString()}</div>
           <p className="text-sm text-gray-500 mt-2">Last {days} days</p>
         </div>
 
         <div className="bg-white rounded-lg border p-6">
           <h3 className="text-sm text-gray-600 mb-2">CTR Moyen</h3>
-          <div className="text-3xl font-bold text-purple-600">{(overview.avg_ctr * 100).toFixed(2)}%</div>
+          <div className="text-3xl font-bold text-purple-600">{((overview.avg_ctr || 0) * 100).toFixed(2)}%</div>
           <p className="text-sm text-gray-500 mt-2">Click-through rate</p>
         </div>
 
         <div className="bg-white rounded-lg border p-6">
           <h3 className="text-sm text-gray-600 mb-2">Position Moyenne</h3>
-          <div className="text-3xl font-bold text-orange-600">{overview.avg_position.toFixed(1)}</div>
+          <div className="text-3xl font-bold text-orange-600">{(overview.avg_position || 0).toFixed(1)}</div>
           <p className="text-sm text-gray-500 mt-2">Average position</p>
         </div>
       </div>
@@ -145,7 +147,7 @@ export default function GoogleSearchConsolePage() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {topQueries.slice(0, 20).map((q, i) => (
+                {(topQueries || []).slice(0, 20).map((q, i) => (
                   <tr key={i} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm">{q.query}</td>
                     <td className="px-4 py-3 text-sm text-right">{q.clicks}</td>
@@ -176,7 +178,7 @@ export default function GoogleSearchConsolePage() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {topPages.slice(0, 20).map((p, i) => (
+                {(topPages || []).slice(0, 20).map((p, i) => (
                   <tr key={i} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm font-mono truncate max-w-xs">{p.page}</td>
                     <td className="px-4 py-3 text-sm text-right">{p.clicks}</td>

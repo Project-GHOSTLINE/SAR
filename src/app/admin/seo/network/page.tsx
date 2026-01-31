@@ -41,15 +41,15 @@ export default function NetworkGraphPage() {
     );
   }
 
-  if (!data || !data.success) return null;
+  if (!data || !data.success || !data.nodes || !data.edges) return null;
 
   // Calculate stats
-  const totalNodes = data.nodes.length;
-  const totalEdges = data.edges.length;
+  const totalNodes = (data.nodes || []).length;
+  const totalEdges = (data.edges || []).length;
 
   // Count IPs (nodes that look like IPs)
-  const ipNodes = data.nodes.filter(n => /^\d+\.\d+\.\d+\.\d+$/.test(n.id));
-  const pageNodes = data.nodes.filter(n => n.id.startsWith('/'));
+  const ipNodes = (data.nodes || []).filter(n => /^\d+\.\d+\.\d+\.\d+$/.test(n.id));
+  const pageNodes = (data.nodes || []).filter(n => n.id.startsWith('/'));
 
   // Simple clustering: count unique IPs
   const uniqueIPs = new Set(ipNodes.map(n => n.id)).size;
@@ -109,7 +109,7 @@ export default function NetworkGraphPage() {
         </div>
         <div className="p-4">
           <div className="space-y-2">
-            {data.edges.slice(0, 20).map((edge, i) => (
+            {(data.edges || []).slice(0, 20).map((edge, i) => (
               <div key={i} className="flex items-center gap-4 p-3 bg-gray-50 rounded">
                 <span className="font-mono text-sm text-blue-600">{edge.source}</span>
                 <span className="text-gray-400">→</span>
