@@ -195,7 +195,7 @@ async function main() {
   const catalog = await scanApiRoutes();
 
   // Créer le dossier si nécessaire
-  const outputDir = path.join(process.cwd(), 'src/app/(admin)/api-explorer');
+  const outputDir = path.join(process.cwd(), 'src/data');
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }

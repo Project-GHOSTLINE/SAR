@@ -3,7 +3,7 @@
  * Ex: /api/clients/uuid123 -> /api/clients/:id
  */
 
-import catalog from '@/app/(admin)/api-explorer/api-catalog.generated.json';
+import { catalog } from '@/data/catalog-export';
 
 export interface RouteMatch {
   id: string;
