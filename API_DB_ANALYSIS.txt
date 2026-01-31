@@ -1,0 +1,872 @@
+📊 ANALYSE DES TABLES BD PAR API
+
+====================================================================================================
+
+1. 📡 /api/admin
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 45
+   Tables BD: 28
+   Services externes: 3
+
+   🗄️  Tables utilisées:
+      • telemetry_requests                  (5 routes)
+      • telemetry_spans                     (4 routes)
+      • webhook_logs                        (4 routes)
+      • client_analyses                     (2 routes)
+      • analysis_jobs                       (1 route)
+      • client_external_ids                 (1 route)
+      • clients_sar                         (5 routes)
+      • signature_documents                 (2 routes)
+      • contrats                            (1 route)
+      • signature_audit_logs                (2 routes)
+      • telemetry_alerts                    (2 routes)
+      • download_stats                      (1 route)
+      • emails_envoyes                      (3 routes)
+      • notes                               (1 route)
+      • contact_messages                    (5 routes)
+      • notes_internes                      (2 routes)
+      • admin_sections                      (1 route)
+      • metric_registry                     (1 route)
+      • client_transactions                 (1 route)
+      • client_accounts                     (1 route)
+      • fraud_cases                         (1 route)
+      • support_tickets                     (5 routes)
+      • vopay_webhook_logs                  (4 routes)
+      • metric_values                       (1 route)
+      • signature_templates                 (2 routes)
+      • support_messages                    (2 routes)
+      • support_attachments                 (1 route)
+      • ga4_enriched_sessions               (1 route)
+
+   🌐 Services externes:
+      • inverite.com
+      • api.resend.com
+      • quickbooks.intuit.com
+
+   📋 Routes détaillées:
+      GET                  /api/admin/analytics
+      GET                  /api/admin/analytics/dashboard
+      GET                  /api/admin/api-explorer/catalog
+      GET                  /api/admin/api-explorer/route
+                           └─ Tables: telemetry_requests
+      GET                  /api/admin/api-explorer/summary
+      GET                  /api/admin/api-explorer/trace
+                           └─ Tables: telemetry_requests, telemetry_spans, webhook_logs
+      GET, POST, PATCH, DELETE, OPTIONS /api/admin/client-analysis
+                           └─ Tables: client_analyses, analysis_jobs
+      GET                  /api/admin/client/:id/dossier
+                           └─ Tables: client_external_ids
+      GET                  /api/admin/clients-sar/autres-contrats
+                           └─ Tables: clients_sar
+      GET                  /api/admin/clients-sar/concordances
+                           └─ Tables: clients_sar
+      GET                  /api/admin/clients-sar/concordances-stats
+                           └─ Tables: clients_sar
+      GET                  /api/admin/clients-sar/search
+                           └─ Tables: clients_sar
+      GET                  /api/admin/clients-sar/stats
+                           └─ Tables: clients_sar
+      GET, POST            /api/admin/contrats-clients
+                           └─ Tables: signature_documents, contrats, signature_audit_logs
+      PATCH                /api/admin/contrats-clients/:id/revoke
+                           └─ Tables: signature_documents, signature_audit_logs
+      GET                  /api/admin/database/explore
+      GET, POST            /api/admin/dataflow-health/alerts
+                           └─ Tables: telemetry_alerts
+      GET                  /api/admin/dataflow-health/kpis
+                           └─ Tables: telemetry_requests, telemetry_spans
+      GET                  /api/admin/dataflow-health/traces
+                           └─ Tables: telemetry_requests, telemetry_spans
+      GET                  /api/admin/downloads/stats
+                           └─ Tables: download_stats
+      GET                  /api/admin/ga4/enriched
+      POST                 /api/admin/login
+      POST                 /api/admin/logout
+      GET, POST, PATCH, DELETE /api/admin/messages
+                           └─ Tables: emails_envoyes, notes, contact_messages
+      GET, POST            /api/admin/messages/assign
+                           └─ Tables: contact_messages, notes_internes
+      POST                 /api/admin/messages/resend
+                           └─ Tables: contact_messages, emails_envoyes
+      GET                  /api/admin/metrics/inspect
+                           └─ Tables: admin_sections, metric_registry, client_analyses, client_transactions, client_accounts, fraud_cases, contact_messages, support_tickets, vopay_webhook_logs, metric_values
+      POST                 /api/admin/send
+                           └─ Tables: emails_envoyes, contact_messages, notes_internes
+      GET, POST, OPTIONS   /api/admin/signature-templates
+                           └─ Tables: signature_templates
+      GET, PATCH, DELETE   /api/admin/signature-templates/:id
+                           └─ Tables: signature_templates
+      POST                 /api/admin/support/messages
+                           └─ Tables: support_tickets, support_messages
+      GET                  /api/admin/support/stats
+                           └─ Tables: support_tickets
+      GET, POST            /api/admin/support/tickets
+                           └─ Tables: support_tickets
+      GET, PATCH           /api/admin/support/tickets/:id
+                           └─ Tables: support_tickets, support_messages, support_attachments
+      GET                  /api/admin/telemetry/command-center
+                           └─ Tables: telemetry_requests, ga4_enriched_sessions, telemetry_spans, telemetry_alerts
+      GET                  /api/admin/vopay
+      GET                  /api/admin/vopay-debug
+      GET                  /api/admin/vopay/real-transactions
+      GET                  /api/admin/vopay/transactions
+      GET                  /api/admin/webhooks/debug
+                           └─ Tables: vopay_webhook_logs
+      GET                  /api/admin/webhooks/export
+                           └─ Tables: webhook_logs
+      GET                  /api/admin/webhooks/list
+                           └─ Tables: webhook_logs
+      POST                 /api/admin/webhooks/retry
+                           └─ Tables: webhook_logs
+      POST                 /api/admin/webhooks/send-alert
+                           └─ Tables: vopay_webhook_logs
+      GET                  /api/admin/webhooks/stats
+                           └─ Tables: vopay_webhook_logs
+
+2. 📡 /api/metrics
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 16
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • vw_client_timeline                  (1 route)
+      • vw_client_timeline_by_type          (1 route)
+      • vw_client_summary                   (1 route)
+      • vw_vopay_by_client                  (1 route)
+      • vw_vopay_orphans                    (1 route)
+      • vw_vopay_summary                    (1 route)
+      • vw_audit_recent                     (1 route)
+      • vw_audit_stats_by_table             (1 route)
+      • vw_performance_cache_hit_ratio      (1 route)
+      • vw_performance_table_sizes          (1 route)
+      • vw_performance_index_usage          (1 route)
+      • vw_performance_bloat_check          (1 route)
+      • vopay_objects                       (1 route)
+      • communications                      (1 route)
+      • loans                               (1 route)
+      • payment_events                      (1 route)
+
+   📋 Routes détaillées:
+      GET                  /api/metrics/all
+                           └─ Tables: vw_client_timeline, vw_client_timeline_by_type, vw_client_summary, vw_vopay_by_client, vw_vopay_orphans, vw_vopay_summary, vw_audit_recent, vw_audit_stats_by_table, vw_performance_cache_hit_ratio, vw_performance_table_sizes, vw_performance_index_usage, vw_performance_bloat_check, vopay_objects, communications, loans, payment_events
+
+3. 📡 /api/analytics
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 14
+   Tables BD: 15
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • visual_abandon_heatmap              (1 route)
+      • client_telemetry_events             (5 routes)
+      • clients                             (1 route)
+      • contact_messages                    (1 route)
+      • loan_applications                   (1 route)
+      • vopay_transactions                  (1 route)
+      • support_tickets                     (1 route)
+      • email_messages                      (1 route)
+      • client_sessions                     (5 routes)
+      • visual_conversion_funnel            (1 route)
+      • visual_activity_heatmap             (1 route)
+      • analytics_user_journeys             (1 route)
+      • visual_page_flow                    (1 route)
+      • visual_conversion_by_source         (1 route)
+      • visual_events_timeline              (1 route)
+
+   📋 Routes détaillées:
+      GET                  /api/analytics/abandons
+                           └─ Tables: visual_abandon_heatmap
+      GET                  /api/analytics/click-heatmap
+                           └─ Tables: client_telemetry_events
+      GET                  /api/analytics/client-unified-metrics
+                           └─ Tables: clients, contact_messages, loan_applications, vopay_transactions, support_tickets, email_messages, client_sessions
+      GET                  /api/analytics/funnel
+                           └─ Tables: visual_conversion_funnel
+      GET                  /api/analytics/heatmap
+                           └─ Tables: visual_activity_heatmap
+      GET                  /api/analytics/ip-details
+                           └─ Tables: client_sessions, client_telemetry_events
+      GET                  /api/analytics/journeys
+                           └─ Tables: analytics_user_journeys
+      GET                  /api/analytics/linked-sessions
+                           └─ Tables: client_sessions
+      GET                  /api/analytics/page-flow
+                           └─ Tables: visual_page_flow, client_telemetry_events
+      GET                  /api/analytics/pages
+                           └─ Tables: client_telemetry_events
+      GET                  /api/analytics/referrers
+                           └─ Tables: client_sessions
+      GET                  /api/analytics/sessions
+                           └─ Tables: client_sessions, client_telemetry_events
+      GET                  /api/analytics/sources
+                           └─ Tables: visual_conversion_by_source
+      GET                  /api/analytics/timeline
+                           └─ Tables: visual_events_timeline
+
+4. 📡 /api/seo
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 27
+   Tables BD: 15
+   Services externes: 2
+
+   🗄️  Tables utilisées:
+      • telemetry_requests                  (7 routes)
+      • seo_cloudflare_analytics_daily      (1 route)
+      • seo_ga4_metrics_daily               (3 routes)
+      • seo_gsc_metrics_daily               (2 routes)
+      • seo_pagespeed_metrics_daily         (2 routes)
+      • seo_semrush_domain_daily            (2 routes)
+      • seo_ssl_checks                      (1 route)
+      • seo_uptime_checks                   (1 route)
+      • seo_unified_daily_plus              (3 routes)
+      • ip_to_seo_segment                   (2 routes)
+      • seo_keywords_tracking               (1 route)
+      • loan_applications                   (4 routes)
+      • vercel_speed_insights_daily         (1 route)
+      • telemetry_events                    (1 route)
+      • visitor_identity_graph              (1 route)
+
+   🌐 Services externes:
+      • api.cloudflare.com
+      • api.uptimerobot.com
+
+   📋 Routes détaillées:
+      GET                  /api/seo/analytics/detailed
+                           └─ Tables: telemetry_requests
+      GET, POST            /api/seo/collect/cloudflare
+                           └─ Tables: seo_cloudflare_analytics_daily
+      GET, POST            /api/seo/collect/ga4
+                           └─ Tables: seo_ga4_metrics_daily
+      GET, POST            /api/seo/collect/gsc
+                           └─ Tables: seo_gsc_metrics_daily
+      GET, POST            /api/seo/collect/pagespeed
+                           └─ Tables: seo_pagespeed_metrics_daily
+      GET, POST            /api/seo/collect/semrush
+                           └─ Tables: seo_semrush_domain_daily
+      GET, POST            /api/seo/collect/ssl
+                           └─ Tables: seo_ssl_checks
+      GET, POST            /api/seo/collect/uptime
+                           └─ Tables: seo_uptime_checks
+      GET                  /api/seo/device-intelligence
+                           └─ Tables: seo_gsc_metrics_daily, seo_ga4_metrics_daily, seo_pagespeed_metrics_daily
+      POST                 /api/seo/exploit-secrets
+      GET                  /api/seo/ga4-status
+                           └─ Tables: seo_unified_daily_plus
+      GET                  /api/seo/gsc
+                           └─ Tables: seo_unified_daily_plus
+      GET                  /api/seo/health
+                           └─ Tables: seo_ga4_metrics_daily, seo_semrush_domain_daily
+      GET                  /api/seo/ip/:ip
+                           └─ Tables: ip_to_seo_segment, telemetry_requests
+      GET                  /api/seo/ips/top
+                           └─ Tables: ip_to_seo_segment
+      GET, POST, PATCH, DELETE /api/seo/keywords
+                           └─ Tables: seo_keywords_tracking
+      GET                  /api/seo/metrics
+                           └─ Tables: telemetry_requests
+      GET                  /api/seo/overview
+                           └─ Tables: seo_unified_daily_plus, telemetry_requests, loan_applications
+      GET                  /api/seo/overview-telemetry
+                           └─ Tables: telemetry_requests, loan_applications
+      GET                  /api/seo/perf
+                           └─ Tables: vercel_speed_insights_daily
+      GET                  /api/seo/performance
+                           └─ Tables: telemetry_requests
+      GET                  /api/seo/realtime
+                           └─ Tables: telemetry_requests, telemetry_events, loan_applications
+      GET                  /api/seo/semrush
+      GET                  /api/seo/semrush/backlinks
+      GET                  /api/seo/semrush/competitors
+      GET                  /api/seo/semrush/keyword-research
+      GET                  /api/seo/visitor/:visitor_id
+                           └─ Tables: visitor_identity_graph, loan_applications
+
+5. 📡 /api/webhooks
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 17
+   Tables BD: 12
+   Services externes: 1
+
+   🗄️  Tables utilisées:
+      • quickbooks_webhooks                 (1 route)
+      • quickbooks_tokens                   (1 route)
+      • quickbooks_customers                (1 route)
+      • quickbooks_invoices                 (1 route)
+      • quickbooks_payments                 (1 route)
+      • quickbooks_accounts                 (1 route)
+      • quickbooks_vendors                  (1 route)
+      • payment_schedule_versions           (1 route)
+      • payment_installments                (1 route)
+      • payment_events                      (1 route)
+      • webhook_logs                        (15 routes)
+      • vopay_objects                       (15 routes)
+
+   🌐 Services externes:
+      • quickbooks.intuit.com
+
+   📋 Routes détaillées:
+      POST                 /api/webhooks/quickbooks
+                           └─ Tables: quickbooks_webhooks, quickbooks_tokens, quickbooks_customers, quickbooks_invoices, quickbooks_payments, quickbooks_accounts, quickbooks_vendors
+      GET, POST            /api/webhooks/vopay
+                           └─ Tables: payment_schedule_versions, payment_installments, payment_events
+      GET, POST            /api/webhooks/vopay/account-balance
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/account-limit
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/account-status
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/account-verification
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/bank-account
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/batch
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/batch-detail
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/client-account-balance
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/credit-card
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/debit-card
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/elinx
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/payment-received
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/scheduled
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/transaction-group
+                           └─ Tables: webhook_logs, vopay_objects
+      GET, POST            /api/webhooks/vopay/virtual-accounts
+                           └─ Tables: webhook_logs, vopay_objects
+
+6. 📡 /api/quickbooks
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 23
+   Tables BD: 6
+   Services externes: 1
+
+   🗄️  Tables utilisées:
+      • quickbooks_accounts                 (2 routes)
+      • quickbooks_tokens                   (15 routes)
+      • quickbooks_customers                (1 route)
+      • quickbooks_invoices                 (1 route)
+      • quickbooks_payments                 (1 route)
+      • quickbooks_vendors                  (1 route)
+
+   🌐 Services externes:
+      • quickbooks.intuit.com
+
+   📋 Routes détaillées:
+      GET                  /api/quickbooks/accounts
+                           └─ Tables: quickbooks_accounts
+      GET                  /api/quickbooks/auth/callback
+                           └─ Tables: quickbooks_tokens
+      GET                  /api/quickbooks/auth/connect
+      GET, POST            /api/quickbooks/auth/refresh
+                           └─ Tables: quickbooks_tokens
+      POST                 /api/quickbooks/connection/auto-refresh
+      POST                 /api/quickbooks/connection/disconnect
+      POST                 /api/quickbooks/connection/force-reconnect
+                           └─ Tables: quickbooks_tokens
+      GET                  /api/quickbooks/connection/force-status
+                           └─ Tables: quickbooks_tokens
+      POST                 /api/quickbooks/connection/refresh
+      GET                  /api/quickbooks/connection/status
+      GET                  /api/quickbooks/connection/test
+      GET                  /api/quickbooks/reports/aged-receivables
+                           └─ Tables: quickbooks_tokens
+      GET                  /api/quickbooks/reports/balance-sheet
+                           └─ Tables: quickbooks_tokens
+      GET                  /api/quickbooks/reports/balance-sheet-detailed
+                           └─ Tables: quickbooks_tokens
+      GET                  /api/quickbooks/reports/cash-flow
+                           └─ Tables: quickbooks_tokens
+      GET                  /api/quickbooks/reports/profit-loss
+                           └─ Tables: quickbooks_tokens
+      GET                  /api/quickbooks/status
+                           └─ Tables: quickbooks_tokens
+      POST                 /api/quickbooks/sync/accounts
+                           └─ Tables: quickbooks_tokens, quickbooks_accounts
+      POST                 /api/quickbooks/sync/all
+      POST                 /api/quickbooks/sync/customers
+                           └─ Tables: quickbooks_tokens, quickbooks_customers
+      POST                 /api/quickbooks/sync/invoices
+                           └─ Tables: quickbooks_tokens, quickbooks_invoices
+      POST                 /api/quickbooks/sync/payments
+                           └─ Tables: quickbooks_tokens, quickbooks_payments
+      POST                 /api/quickbooks/sync/vendors
+                           └─ Tables: quickbooks_tokens, quickbooks_vendors
+
+7. 📡 /api/applications
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 4
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • loan_applications                   (1 route)
+      • clients                             (1 route)
+      • client_sessions                     (1 route)
+      • security_events                     (1 route)
+
+   📋 Routes détaillées:
+      POST                 /api/applications/submit
+                           └─ Tables: loan_applications, clients, client_sessions, security_events
+
+8. 📡 /api/fraud
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 2
+   Tables BD: 4
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • device_profiles                     (1 route)
+      • visit_timeline                      (1 route)
+      • clients                             (1 route)
+      • telemetry_requests                  (1 route)
+
+   📋 Routes détaillées:
+      GET                  /api/fraud/device/:visit_id
+                           └─ Tables: device_profiles, visit_timeline, clients
+      GET                  /api/fraud/live
+                           └─ Tables: telemetry_requests
+
+9. 📡 /api/cron
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 3
+   Tables BD: 3
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • vercel_speed_insights_raw           (1 route)
+      • vercel_speed_insights_daily         (1 route)
+      • seo_collection_jobs                 (1 route)
+
+   📋 Routes détaillées:
+      GET                  /api/cron/aggregate-speed-insights
+                           └─ Tables: vercel_speed_insights_raw, vercel_speed_insights_daily
+      GET                  /api/cron/cleanup-sessions
+      GET                  /api/cron/seo-collect
+                           └─ Tables: seo_collection_jobs
+
+10. 📡 /api/memory
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 5
+   Tables BD: 3
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • claude_docs_read                    (1 route)
+      • claude_memory                       (2 routes)
+      • claude_sessions                     (1 route)
+
+   📋 Routes détaillées:
+      GET                  /api/memory/context
+      GET, POST            /api/memory/doc-read
+                           └─ Tables: claude_docs_read
+      GET                  /api/memory/recall
+                           └─ Tables: claude_memory
+      GET, POST            /api/memory/session
+                           └─ Tables: claude_sessions
+      POST                 /api/memory/store
+                           └─ Tables: claude_memory
+
+11. 📡 /api/sentinel
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 7
+   Tables BD: 3
+   Services externes: 1
+
+   🗄️  Tables utilisées:
+      • claude_memory                       (1 route)
+      • claude_actions                      (2 routes)
+      • sentinel_scans                      (1 route)
+
+   🌐 Services externes:
+      • localhost
+
+   📋 Routes détaillées:
+      POST                 /api/sentinel/execute
+                           └─ Tables: claude_memory, claude_actions
+      POST                 /api/sentinel/execute-command
+      GET, POST            /api/sentinel/fleet
+      POST                 /api/sentinel/network-monitor
+                           └─ Tables: claude_actions
+      POST                 /api/sentinel/orchestrator
+      POST                 /api/sentinel/scan-project
+      GET, POST            /api/sentinel/scoring
+                           └─ Tables: sentinel_scans
+
+12. 📡 /api/sign
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 2
+   Tables BD: 3
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • signature_documents                 (2 routes)
+      • signature_audit_logs                (2 routes)
+      • contrats                            (1 route)
+
+   📋 Routes détaillées:
+      GET                  /api/sign/:id
+                           └─ Tables: signature_documents, signature_audit_logs
+      POST                 /api/sign/:id/submit
+                           └─ Tables: signature_documents, contrats, signature_audit_logs
+
+13. 📡 /api/test-db
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 3
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • loan_applications                   (1 route)
+      • client_events                       (1 route)
+      • email_messages                      (1 route)
+
+   📋 Routes détaillées:
+      GET                  /api/test-db
+                           └─ Tables: loan_applications, client_events, email_messages
+
+14. 📡 /api/test-insert
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 3
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • loan_applications                   (1 route)
+      • client_events                       (1 route)
+      • email_accounts                      (1 route)
+
+   📋 Routes détaillées:
+      POST                 /api/test-insert
+                           └─ Tables: loan_applications, client_events, email_accounts
+
+15. 📡 /api/contact
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 2
+   Services externes: 1
+
+   🗄️  Tables utilisées:
+      • contact_messages                    (1 route)
+      • emails_envoyes                      (1 route)
+
+   🌐 Services externes:
+      • api.resend.com
+
+   📋 Routes détaillées:
+      POST                 /api/contact
+                           └─ Tables: contact_messages, emails_envoyes
+
+16. 📡 /api/contact-analyse
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 2
+   Services externes: 1
+
+   🗄️  Tables utilisées:
+      • contact_messages                    (1 route)
+      • emails_envoyes                      (1 route)
+
+   🌐 Services externes:
+      • api.resend.com
+
+   📋 Routes détaillées:
+      POST                 /api/contact-analyse
+                           └─ Tables: contact_messages, emails_envoyes
+
+17. 📡 /api/telemetry
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 5
+   Tables BD: 2
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • client_sessions                     (1 route)
+      • telemetry_events                    (1 route)
+
+   📋 Routes détaillées:
+      GET                  /api/telemetry/debug
+      GET                  /api/telemetry/health
+                           └─ Tables: client_sessions
+      GET                  /api/telemetry/test-track
+      POST, OPTIONS        /api/telemetry/track-event
+                           └─ Tables: telemetry_events
+      POST                 /api/telemetry/write
+
+18. 📡 /api/activity
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 3
+   Tables BD: 1
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • claude_actions                      (3 routes)
+
+   📋 Routes détaillées:
+      POST                 /api/activity/log
+                           └─ Tables: claude_actions
+      GET                  /api/activity/recent
+                           └─ Tables: claude_actions
+      GET                  /api/activity/stats
+                           └─ Tables: claude_actions
+
+19. 📡 /api/audit
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 2
+   Tables BD: 1
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • vw_audit_stats_by_table             (1 route)
+
+   📋 Routes détaillées:
+      GET                  /api/audit/:clientId
+      GET                  /api/audit/stats
+                           └─ Tables: vw_audit_stats_by_table
+
+20. 📡 /api/download
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 2
+   Tables BD: 1
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • download_logs                       (2 routes)
+
+   📋 Routes détaillées:
+      GET                  /api/download/:filename
+                           └─ Tables: download_logs
+      POST                 /api/download/track
+                           └─ Tables: download_logs
+
+21. 📡 /api/routes
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 2
+   Tables BD: 1
+   Services externes: 1
+
+   🗄️  Tables utilisées:
+      • ${spec.database_table}              (1 route)
+
+   🌐 Services externes:
+      • localhost
+
+   📋 Routes détaillées:
+      GET, POST            /api/routes/discover
+      GET, POST, PUT, DELETE /api/routes/expand
+                           └─ Tables: ${spec.database_table}
+
+22. 📡 /api/vercel
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 1
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • vercel_speed_insights_raw           (1 route)
+
+   📋 Routes détaillées:
+      POST                 /api/vercel/drains/speed-insights
+                           └─ Tables: vercel_speed_insights_raw
+
+23. 📡 /api/vopay
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 2
+   Tables BD: 1
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • vopay_objects                       (2 routes)
+
+   📋 Routes détaillées:
+      GET                  /api/vopay/stats
+                           └─ Tables: vopay_objects
+      GET                  /api/vopay/stats/:clientId
+                           └─ Tables: vopay_objects
+
+24. 📡 /api/worker
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 1
+   Services externes: 0
+
+   🗄️  Tables utilisées:
+      • analysis_jobs                       (1 route)
+
+   📋 Routes détaillées:
+      GET, POST            /api/worker/process-jobs
+                           └─ Tables: analysis_jobs
+
+25. 📡 /api/anonymity
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 0
+   Services externes: 0
+
+   📋 Routes détaillées:
+      GET                  /api/anonymity/check
+
+26. 📡 /api/cortex
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 0
+   Services externes: 0
+
+   📋 Routes détaillées:
+      GET, POST            /api/cortex/sync-miro
+
+27. 📡 /api/device
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 0
+   Services externes: 0
+
+   📋 Routes détaillées:
+      GET                  /api/device/deep-inspector
+
+28. 📡 /api/fingerprint
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 0
+   Services externes: 0
+
+   📋 Routes détaillées:
+      POST                 /api/fingerprint/deep-scan
+
+29. 📡 /api/network
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 3
+   Tables BD: 0
+   Services externes: 0
+
+   📋 Routes détaillées:
+      POST                 /api/network/active-recon
+      POST                 /api/network/packet-capture
+      GET                  /api/network/trace
+
+30. 📡 /api/osint
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 7
+   Tables BD: 0
+   Services externes: 1
+
+   🌐 Services externes:
+      • attacker.com
+
+   📋 Routes détaillées:
+      POST                 /api/osint/advanced
+      POST                 /api/osint/bypass-tests
+      POST                 /api/osint/exploit-chains
+      GET                  /api/osint/lab-scan
+      GET                  /api/osint/network-scan
+      GET                  /api/osint/scan
+      POST                 /api/osint/vulnerabilities
+
+31. 📡 /api/performance-diagnostic
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 0
+   Services externes: 0
+
+   📋 Routes détaillées:
+      GET                  /api/performance-diagnostic
+
+32. 📡 /api/test-margill
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 0
+   Services externes: 0
+
+   📋 Routes détaillées:
+      POST                 /api/test-margill/submit
+
+33. 📡 /api/test-tool
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 0
+   Services externes: 0
+
+   📋 Routes détaillées:
+      POST                 /api/test-tool
+
+34. 📡 /api/test
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 0
+   Services externes: 0
+
+   📋 Routes détaillées:
+      GET, POST            /api/test/demo
+
+35. 📡 /api/upload-documents
+────────────────────────────────────────────────────────────────────────────────────────────────────
+   Routes: 1
+   Tables BD: 0
+   Services externes: 0
+
+   📋 Routes détaillées:
+      POST                 /api/upload-documents
+
+
+====================================================================================================
+📈 RÉSUMÉ GLOBAL
+
+🏆 TOP 15 TABLES LES PLUS UTILISÉES:
+
+ 1. webhook_logs                         19 routes ██████████
+ 2. vopay_objects                        18 routes █████████
+ 3. quickbooks_tokens                    16 routes ████████
+ 4. telemetry_requests                   13 routes ███████
+ 5. contact_messages                      8 routes ████
+ 6. loan_applications                     8 routes ████
+ 7. client_sessions                       7 routes ████
+ 8. support_tickets                       6 routes ███
+ 9. claude_actions                        5 routes ███
+10. clients_sar                           5 routes ███
+11. emails_envoyes                        5 routes ███
+12. client_telemetry_events               5 routes ███
+13. telemetry_spans                       4 routes ██
+14. signature_documents                   4 routes ██
+15. signature_audit_logs                  4 routes ██
+
+
+🎯 GROUPES D'API PAR INTENSITÉ BD:
+
+🔴 Heavy (5+ tables):   6 groupes
+   • /api/admin (28 tables, 45 routes)
+   • /api/metrics (16 tables, 1 routes)
+   • /api/analytics (15 tables, 14 routes)
+   • /api/seo (15 tables, 27 routes)
+   • /api/webhooks (12 tables, 17 routes)
+
+🟡 Medium (2-4 tables): 11 groupes
+   • /api/applications (4 tables, 1 routes)
+   • /api/fraud (4 tables, 2 routes)
+   • /api/cron (3 tables, 3 routes)
+   • /api/memory (3 tables, 5 routes)
+   • /api/sentinel (3 tables, 7 routes)
+
+🟢 Light (1 table):     7 groupes
+⚪ No DB (0 tables):    11 groupes
+
+
+🌐 SERVICES EXTERNES:
+
+   • quickbooks.intuit.com          25 routes
+   • api.resend.com                 4 routes
+   • localhost                      4 routes
+   • inverite.com                   1 routes
+   • attacker.com                   1 routes
+   • api.cloudflare.com             1 routes
+   • api.uptimerobot.com            1 routes
+
+====================================================================================================
+
+✅ Analyse terminée: 188 routes, 93 tables uniques
+
