@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-01-31T01:45:28.210Z",
-  "total_routes": 218,
+  "totalRoutes": 188,
+  "scannedAt": "2026-01-31T01:50:43.031Z",
   "routes": [
     {
       "id": "post_activity_log",
@@ -8,20 +8,24 @@
       "methods": [
         "POST"
       ],
-      "description": "API: Logger une action réelle de Claude",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "claude_actions"
       ],
       "fileRef": {
-        "file": "api/activity/log/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/activity/log/route.ts",
+        "lines": "1-76"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_activity_recent",
@@ -29,19 +33,25 @@
       "methods": [
         "GET"
       ],
-      "description": "API: Récupérer l'activité récente réelle",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "claude_actions"
       ],
       "fileRef": {
-        "file": "api/activity/recent/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/activity/recent/route.ts",
+        "lines": "1-65"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_activity_stats",
@@ -49,19 +59,25 @@
       "methods": [
         "GET"
       ],
-      "description": "API: Stats d'activité réelles",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "claude_actions"
       ],
       "fileRef": {
-        "file": "api/activity/stats/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/activity/stats/route.ts",
+        "lines": "1-102"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_analytics",
@@ -70,121 +86,184 @@
         "GET"
       ],
       "description": "GET /api/admin/analytics",
-      "auth": "api_key",
-      "output": [
+      "auth": "API Key Header",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/admin/analytics/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/analytics/route.ts",
+        "lines": "1-433"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_client-analysis",
-      "path": "/api/admin/client-analysis",
+      "id": "get_admin_analytics_dashboard",
+      "path": "/api/admin/analytics/dashboard",
       "methods": [
         "GET"
       ],
-      "description": "OPTIONS - Handle CORS preflight",
-      "auth": "bearer_token",
-      "output": [
-        400,
+      "description": "GET /api/admin/analytics/dashboard",
+      "auth": "API Key Header",
+      "inputSchema": null,
+      "outputCodes": [
         401,
-        404,
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
-        "client_analyses",
-        "analysis_jobs"
-      ],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/admin/client-analysis/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/analytics/dashboard/route.ts",
+        "lines": "1-214"
+      },
+      "middleware": [
+        "Performance Tracking",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_admin_client-analysis",
-      "path": "/api/admin/client-analysis",
+      "id": "get_admin_api_explorer_catalog",
+      "path": "/api/admin/api-explorer/catalog",
       "methods": [
-        "POST"
+        "GET"
       ],
-      "description": "OPTIONS - Handle CORS preflight",
-      "auth": "bearer_token",
-      "output": [
-        400,
-        401,
-        404,
+      "description": "GET /api/admin/api-explorer/catalog",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
-        "client_analyses",
-        "analysis_jobs"
-      ],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/admin/client-analysis/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/api-explorer/catalog/route.ts",
+        "lines": "1-24"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "patch_admin_client-analysis",
-      "path": "/api/admin/client-analysis",
+      "id": "get_admin_api_explorer_route",
+      "path": "/api/admin/api-explorer/route",
       "methods": [
-        "PATCH"
+        "GET"
       ],
-      "description": "OPTIONS - Handle CORS preflight",
-      "auth": "bearer_token",
-      "output": [
+      "description": "GET /api/admin/api-explorer/route?routeId=xxx",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
-        401,
         404,
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
-        "client_analyses",
-        "analysis_jobs"
+      "externalCalls": [],
+      "tablesTouched": [
+        "telemetry_requests"
       ],
       "fileRef": {
-        "file": "api/admin/client-analysis/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/api-explorer/route/route.ts",
+        "lines": "1-103"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "delete_admin_client-analysis",
+      "id": "get_admin_api_explorer_summary",
+      "path": "/api/admin/api-explorer/summary",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/admin/api-explorer/summary?days=30",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
+        500
+      ],
+      "externalCalls": [],
+      "tablesTouched": [],
+      "fileRef": {
+        "file": "src/app/api/admin/api-explorer/summary/route.ts",
+        "lines": "1-87"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
+    },
+    {
+      "id": "get_admin_api_explorer_trace",
+      "path": "/api/admin/api-explorer/trace",
+      "methods": [
+        "GET"
+      ],
+      "description": "GET /api/admin/api-explorer/trace?traceId=xxx",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
+        400,
+        500
+      ],
+      "externalCalls": [],
+      "tablesTouched": [
+        "telemetry_requests",
+        "telemetry_spans",
+        "webhook_logs"
+      ],
+      "fileRef": {
+        "file": "src/app/api/admin/api-explorer/trace/route.ts",
+        "lines": "1-103"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
+    },
+    {
+      "id": "get_admin_client_analysis",
       "path": "/api/admin/client-analysis",
       "methods": [
-        "DELETE"
+        "GET",
+        "POST",
+        "PATCH",
+        "DELETE",
+        "OPTIONS"
       ],
       "description": "OPTIONS - Handle CORS preflight",
-      "auth": "bearer_token",
-      "output": [
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
+        200,
         400,
         401,
         404,
         500
       ],
-      "external_calls": [
-        "email"
+      "externalCalls": [
+        "inverite.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "client_analyses",
         "analysis_jobs"
       ],
       "fileRef": {
-        "file": "api/admin/client-analysis/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/client-analysis/route.ts",
+        "lines": "1-631"
+      },
+      "middleware": [
+        "Runtime: nodejs",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": true
     },
     {
       "id": "get_admin_client_id_dossier",
@@ -192,216 +271,209 @@
       "methods": [
         "GET"
       ],
-      "description": "API: GET /api/admin/client/[id]/dossier",
-      "auth": "none",
-      "output": [
+      "description": "Unified client dossier endpoint",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         200,
         404,
         500,
         503
       ],
-      "external_calls": [
-        "fetch",
-        "external_api"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "client_external_ids"
       ],
       "fileRef": {
-        "file": "api/admin/client/[id]/dossier/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/client/[id]/dossier/route.ts",
+        "lines": "1-165"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_clients-sar_autres-contrats",
+      "id": "get_admin_clients_sar_autres_contrats",
       "path": "/api/admin/clients-sar/autres-contrats",
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         404,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "clients_sar"
       ],
       "fileRef": {
-        "file": "api/admin/clients-sar/autres-contrats/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/clients-sar/autres-contrats/route.ts",
+        "lines": "1-111"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_clients-sar_concordances",
+      "id": "get_admin_clients_sar_concordances",
       "path": "/api/admin/clients-sar/concordances",
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         404,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "clients_sar"
       ],
       "fileRef": {
-        "file": "api/admin/clients-sar/concordances/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/clients-sar/concordances/route.ts",
+        "lines": "1-253"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_clients-sar_concordances-stats",
+      "id": "get_admin_clients_sar_concordances_stats",
       "path": "/api/admin/clients-sar/concordances-stats",
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "external_api",
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "clients_sar"
       ],
       "fileRef": {
-        "file": "api/admin/clients-sar/concordances-stats/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/clients-sar/concordances-stats/route.ts",
+        "lines": "1-116"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_clients-sar_search",
+      "id": "get_admin_clients_sar_search",
       "path": "/api/admin/clients-sar/search",
       "methods": [
         "GET"
       ],
       "description": "API Endpoint: Recherche de clients SAR avec détection de fraude",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "external_api",
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "clients_sar"
       ],
       "fileRef": {
-        "file": "api/admin/clients-sar/search/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/clients-sar/search/route.ts",
+        "lines": "1-146"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_clients-sar_stats",
+      "id": "get_admin_clients_sar_stats",
       "path": "/api/admin/clients-sar/stats",
       "methods": [
         "GET"
       ],
       "description": "API Endpoint: Statistiques des clients SAR",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "external_api"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "clients_sar"
       ],
       "fileRef": {
-        "file": "api/admin/clients-sar/stats/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/clients-sar/stats/route.ts",
+        "lines": "1-96"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_contrats-clients",
+      "id": "get_admin_contrats_clients",
       "path": "/api/admin/contrats-clients",
       "methods": [
-        "GET"
-      ],
-      "description": "GET /api/admin/contrats-clients",
-      "auth": "api_key",
-      "output": [
-        400,
-        500
-      ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
-        "signature_documents",
-        "contrats",
-        "signature_audit_logs"
-      ],
-      "fileRef": {
-        "file": "api/admin/contrats-clients/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_admin_contrats-clients",
-      "path": "/api/admin/contrats-clients",
-      "methods": [
+        "GET",
         "POST"
       ],
       "description": "GET /api/admin/contrats-clients",
-      "auth": "api_key",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "signature_documents",
         "contrats",
         "signature_audit_logs"
       ],
       "fileRef": {
-        "file": "api/admin/contrats-clients/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/contrats-clients/route.ts",
+        "lines": "1-301"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "patch_admin_contrats-clients_id_revoke",
+      "id": "patch_admin_contrats_clients_id_revoke",
       "path": "/api/admin/contrats-clients/:id/revoke",
       "methods": [
         "PATCH"
       ],
-      "description": "No description",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         404,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "signature_documents",
         "signature_audit_logs"
       ],
       "fileRef": {
-        "file": "api/admin/contrats-clients/[id]/revoke/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/contrats-clients/[id]/revoke/route.ts",
+        "lines": "1-90"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_database_explore",
@@ -409,106 +481,106 @@
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
-        "rpc:get_all_tables_with_info"
-      ],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/admin/database/explore/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/database/explore/route.ts",
+        "lines": "1-76"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_dataflow-health_alerts",
+      "id": "get_admin_dataflow_health_alerts",
       "path": "/api/admin/dataflow-health/alerts",
       "methods": [
-        "GET"
-      ],
-      "description": "API: Dataflow Health Alerts",
-      "auth": "none",
-      "output": [
-        400,
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [
-        "telemetry_alerts"
-      ],
-      "fileRef": {
-        "file": "api/admin/dataflow-health/alerts/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_admin_dataflow-health_alerts",
-      "path": "/api/admin/dataflow-health/alerts",
-      "methods": [
+        "GET",
         "POST"
       ],
-      "description": "API: Dataflow Health Alerts",
-      "auth": "none",
-      "output": [
+      "description": "GET /api/admin/dataflow-health/alerts",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "telemetry_alerts"
       ],
       "fileRef": {
-        "file": "api/admin/dataflow-health/alerts/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/dataflow-health/alerts/route.ts",
+        "lines": "1-114"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_dataflow-health_kpis",
+      "id": "get_admin_dataflow_health_kpis",
       "path": "/api/admin/dataflow-health/kpis",
       "methods": [
         "GET"
       ],
-      "description": "API: Dataflow Health KPIs",
-      "auth": "none",
-      "output": [
+      "description": "GET /api/admin/dataflow-health/kpis",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "telemetry_requests",
         "telemetry_spans"
       ],
       "fileRef": {
-        "file": "api/admin/dataflow-health/kpis/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/dataflow-health/kpis/route.ts",
+        "lines": "1-126"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_dataflow-health_traces",
+      "id": "get_admin_dataflow_health_traces",
       "path": "/api/admin/dataflow-health/traces",
       "methods": [
         "GET"
       ],
-      "description": "API: Dataflow Health Traces",
-      "auth": "none",
-      "output": [
+      "description": "GET /api/admin/dataflow-health/traces",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "telemetry_requests",
         "telemetry_spans"
       ],
       "fileRef": {
-        "file": "api/admin/dataflow-health/traces/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/dataflow-health/traces/route.ts",
+        "lines": "1-120"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_downloads_stats",
@@ -516,20 +588,26 @@
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "download_stats"
       ],
       "fileRef": {
-        "file": "api/admin/downloads/stats/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/downloads/stats/route.ts",
+        "lines": "1-106"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_ga4_enriched",
@@ -538,18 +616,24 @@
         "GET"
       ],
       "description": "GA4 ENRICHED DATA API",
-      "auth": "admin_session",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500,
         503
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/admin/ga4/enriched/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/ga4/enriched/route.ts",
+        "lines": "1-311"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_admin_login",
@@ -557,19 +641,23 @@
       "methods": [
         "POST"
       ],
-      "description": "No description",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/admin/login/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/login/route.ts",
+        "lines": "1-42"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_admin_logout",
@@ -577,67 +665,82 @@
       "methods": [
         "POST"
       ],
-      "description": "No description",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         200
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/admin/logout/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/logout/route.ts",
+        "lines": "1-8"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
+    },
+    {
+      "id": "get_admin_messages",
+      "path": "/api/admin/messages",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH",
+        "DELETE"
+      ],
+      "description": "No description available",
+      "auth": "JWT Cookie (admin-session)",
+      "inputSchema": null,
+      "outputCodes": [
+        400,
+        401,
+        500
+      ],
+      "externalCalls": [],
+      "tablesTouched": [
+        "emails_envoyes",
+        "notes",
+        "contact_messages"
+      ],
+      "fileRef": {
+        "file": "src/app/api/admin/messages/route.ts",
+        "lines": "1-357"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_messages_assign",
       "path": "/api/admin/messages/assign",
       "methods": [
-        "GET"
-      ],
-      "description": "POST /api/admin/messages/assign",
-      "auth": "admin_session",
-      "output": [
-        400,
-        401,
-        500
-      ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
-        "contact_messages",
-        "notes_internes"
-      ],
-      "fileRef": {
-        "file": "api/admin/messages/assign/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_admin_messages_assign",
-      "path": "/api/admin/messages/assign",
-      "methods": [
+        "GET",
         "POST"
       ],
       "description": "POST /api/admin/messages/assign",
-      "auth": "admin_session",
-      "output": [
+      "auth": "JWT Cookie (admin-session)",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "contact_messages",
         "notes_internes"
       ],
       "fileRef": {
-        "file": "api/admin/messages/assign/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/messages/assign/route.ts",
+        "lines": "1-230"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_admin_messages_resend",
@@ -645,26 +748,29 @@
       "methods": [
         "POST"
       ],
-      "description": "Vérifier le token JWT",
-      "auth": "api_key",
-      "output": [
+      "description": "No description available",
+      "auth": "JWT Cookie (admin-session)",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         404,
         500
       ],
-      "external_calls": [
-        "fetch",
-        "email"
+      "externalCalls": [
+        "api.resend.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "contact_messages",
         "emails_envoyes"
       ],
       "fileRef": {
-        "file": "api/admin/messages/resend/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/messages/resend/route.ts",
+        "lines": "1-178"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_metrics_inspect",
@@ -672,17 +778,15 @@
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "JWT Cookie (admin-session)",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "admin_sections",
         "metric_registry",
         "client_analyses",
@@ -692,13 +796,17 @@
         "contact_messages",
         "support_tickets",
         "vopay_webhook_logs",
-        "metric_values",
-        "rpc:get_metric_value_stats"
+        "metric_values"
       ],
       "fileRef": {
-        "file": "api/admin/metrics/inspect/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/metrics/inspect/route.ts",
+        "lines": "1-207"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_admin_send",
@@ -706,133 +814,82 @@
       "methods": [
         "POST"
       ],
-      "description": "Verifier le token JWT",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "JWT Cookie (admin-session)",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "emails_envoyes",
         "contact_messages",
         "notes_internes"
       ],
       "fileRef": {
-        "file": "api/admin/send/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/send/route.ts",
+        "lines": "1-130"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_signature-templates",
+      "id": "get_admin_signature_templates",
       "path": "/api/admin/signature-templates",
       "methods": [
-        "GET"
+        "GET",
+        "POST",
+        "OPTIONS"
       ],
       "description": "OPTIONS /api/admin/signature-templates",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "signature_templates"
       ],
       "fileRef": {
-        "file": "api/admin/signature-templates/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/signature-templates/route.ts",
+        "lines": "1-158"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": true
     },
     {
-      "id": "post_admin_signature-templates",
-      "path": "/api/admin/signature-templates",
-      "methods": [
-        "POST"
-      ],
-      "description": "OPTIONS /api/admin/signature-templates",
-      "auth": "none",
-      "output": [
-        400,
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [
-        "signature_templates"
-      ],
-      "fileRef": {
-        "file": "api/admin/signature-templates/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "get_admin_signature-templates_id",
+      "id": "get_admin_signature_templates_id",
       "path": "/api/admin/signature-templates/:id",
       "methods": [
-        "GET"
-      ],
-      "description": "GET /api/admin/signature-templates/[id]",
-      "auth": "none",
-      "output": [
-        400,
-        404,
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [
-        "signature_templates"
-      ],
-      "fileRef": {
-        "file": "api/admin/signature-templates/[id]/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "patch_admin_signature-templates_id",
-      "path": "/api/admin/signature-templates/:id",
-      "methods": [
-        "PATCH"
-      ],
-      "description": "GET /api/admin/signature-templates/[id]",
-      "auth": "none",
-      "output": [
-        400,
-        404,
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [
-        "signature_templates"
-      ],
-      "fileRef": {
-        "file": "api/admin/signature-templates/[id]/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "delete_admin_signature-templates_id",
-      "path": "/api/admin/signature-templates/:id",
-      "methods": [
+        "GET",
+        "PATCH",
         "DELETE"
       ],
       "description": "GET /api/admin/signature-templates/[id]",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         404,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "signature_templates"
       ],
       "fileRef": {
-        "file": "api/admin/signature-templates/[id]/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/signature-templates/[id]/route.ts",
+        "lines": "1-165"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_admin_support_messages",
@@ -840,26 +897,28 @@
       "methods": [
         "POST"
       ],
-      "description": "Vérifier l'authentification admin",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         201,
         400,
         401,
         404,
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "support_tickets",
         "support_messages"
       ],
       "fileRef": {
-        "file": "api/admin/support/messages/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/support/messages/route.ts",
+        "lines": "1-116"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_support_stats",
@@ -867,147 +926,111 @@
       "methods": [
         "GET"
       ],
-      "description": "Vérifier l'authentification admin",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "support_tickets"
       ],
       "fileRef": {
-        "file": "api/admin/support/stats/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/support/stats/route.ts",
+        "lines": "1-133"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_support_tickets",
       "path": "/api/admin/support/tickets",
       "methods": [
-        "GET"
-      ],
-      "description": "Vérifier l'authentification admin",
-      "auth": "admin_session",
-      "output": [
-        201,
-        400,
-        401,
-        500
-      ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
-        "support_tickets",
-        "rpc:generate_ticket_number"
-      ],
-      "fileRef": {
-        "file": "api/admin/support/tickets/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_admin_support_tickets",
-      "path": "/api/admin/support/tickets",
-      "methods": [
+        "GET",
         "POST"
       ],
-      "description": "Vérifier l'authentification admin",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         201,
         400,
         401,
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
-        "support_tickets",
-        "rpc:generate_ticket_number"
+      "externalCalls": [],
+      "tablesTouched": [
+        "support_tickets"
       ],
       "fileRef": {
-        "file": "api/admin/support/tickets/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/support/tickets/route.ts",
+        "lines": "1-231"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_support_tickets_id",
       "path": "/api/admin/support/tickets/:id",
       "methods": [
-        "GET"
-      ],
-      "description": "Vérifier l'authentification admin",
-      "auth": "admin_session",
-      "output": [
-        401,
-        404,
-        500
-      ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
-        "support_tickets",
-        "support_messages",
-        "support_attachments"
-      ],
-      "fileRef": {
-        "file": "api/admin/support/tickets/[id]/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "patch_admin_support_tickets_id",
-      "path": "/api/admin/support/tickets/:id",
-      "methods": [
+        "GET",
         "PATCH"
       ],
-      "description": "Vérifier l'authentification admin",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         404,
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "support_tickets",
         "support_messages",
         "support_attachments"
       ],
       "fileRef": {
-        "file": "api/admin/support/tickets/[id]/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/support/tickets/[id]/route.ts",
+        "lines": "1-190"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_telemetry_command-center",
+      "id": "get_admin_telemetry_command_center",
       "path": "/api/admin/telemetry/command-center",
       "methods": [
         "GET"
       ],
-      "description": "API: GET /api/admin/telemetry/command-center",
-      "auth": "none",
-      "output": [
+      "description": "Provide REAL telemetry data for NSA-style command center",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
+        200,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "telemetry_requests",
         "ga4_enriched_sessions",
         "telemetry_spans",
         "telemetry_alerts"
       ],
       "fileRef": {
-        "file": "api/admin/telemetry/command-center/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/telemetry/command-center/route.ts",
+        "lines": "1-338"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_vopay",
@@ -1016,62 +1039,74 @@
         "GET"
       ],
       "description": "GET /api/admin/vopay",
-      "auth": "admin_session",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "external_api"
-      ],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/admin/vopay/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/vopay/route.ts",
+        "lines": "1-52"
+      },
+      "middleware": [
+        "Runtime: nodejs",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_vopay-debug",
+      "id": "get_admin_vopay_debug",
       "path": "/api/admin/vopay-debug",
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "api_key",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch",
-        "external_api"
-      ],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/admin/vopay-debug/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/vopay-debug/route.ts",
+        "lines": "1-59"
+      },
+      "middleware": [
+        "Runtime: nodejs",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_admin_vopay_real-transactions",
+      "id": "get_admin_vopay_real_transactions",
       "path": "/api/admin/vopay/real-transactions",
       "methods": [
         "GET"
       ],
-      "description": "Force dynamic rendering",
-      "auth": "api_key",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "fetch",
-        "external_api"
-      ],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/admin/vopay/real-transactions/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/vopay/real-transactions/route.ts",
+        "lines": "1-107"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_vopay_transactions",
@@ -1080,19 +1115,24 @@
         "GET"
       ],
       "description": "GET /api/admin/vopay/transactions",
-      "auth": "admin_session",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "external_api"
-      ],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/admin/vopay/transactions/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/vopay/transactions/route.ts",
+        "lines": "1-56"
+      },
+      "middleware": [
+        "Runtime: nodejs",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_webhooks_debug",
@@ -1100,22 +1140,25 @@
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         401
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "vopay_webhook_logs"
       ],
       "fileRef": {
-        "file": "api/admin/webhooks/debug/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/webhooks/debug/route.ts",
+        "lines": "1-100"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_webhooks_export",
@@ -1123,22 +1166,26 @@
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs"
       ],
       "fileRef": {
-        "file": "api/admin/webhooks/export/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/webhooks/export/route.ts",
+        "lines": "1-109"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_webhooks_list",
@@ -1146,23 +1193,28 @@
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "webhook_logs"
       ],
       "fileRef": {
-        "file": "api/admin/webhooks/list/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/webhooks/list/route.ts",
+        "lines": "1-234"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_admin_webhooks_retry",
@@ -1170,51 +1222,56 @@
       "methods": [
         "POST"
       ],
-      "description": "No description",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         404,
         500
       ],
-      "external_calls": [
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs"
       ],
       "fileRef": {
-        "file": "api/admin/webhooks/retry/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/webhooks/retry/route.ts",
+        "lines": "1-84"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_admin_webhooks_send-alert",
+      "id": "post_admin_webhooks_send_alert",
       "path": "/api/admin/webhooks/send-alert",
       "methods": [
         "POST"
       ],
-      "description": "No description",
-      "auth": "api_key",
-      "output": [
+      "description": "No description available",
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         404,
         500
       ],
-      "external_calls": [
-        "fetch",
-        "external_api",
-        "webhook",
-        "email"
+      "externalCalls": [
+        "api.resend.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "vopay_webhook_logs"
       ],
       "fileRef": {
-        "file": "api/admin/webhooks/send-alert/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/webhooks/send-alert/route.ts",
+        "lines": "1-183"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_admin_webhooks_stats",
@@ -1223,22 +1280,26 @@
         "GET"
       ],
       "description": "GET /api/admin/webhooks/stats",
-      "auth": "admin_session",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "vopay_webhook_logs"
       ],
       "fileRef": {
-        "file": "api/admin/webhooks/stats/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/admin/webhooks/stats/route.ts",
+        "lines": "1-235"
+      },
+      "middleware": [
+        "Runtime: nodejs",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_analytics_abandons",
@@ -1247,57 +1308,66 @@
         "GET"
       ],
       "description": "GET /api/analytics/abandons",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "visual_abandon_heatmap"
       ],
       "fileRef": {
-        "file": "api/analytics/abandons/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/abandons/route.ts",
+        "lines": "1-43"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_analytics_click-heatmap",
+      "id": "get_analytics_click_heatmap",
       "path": "/api/analytics/click-heatmap",
       "methods": [
         "GET"
       ],
       "description": "GET /api/analytics/click-heatmap?page=/",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "client_telemetry_events"
       ],
       "fileRef": {
-        "file": "api/analytics/click-heatmap/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/click-heatmap/route.ts",
+        "lines": "1-171"
+      },
+      "middleware": [
+        "Runtime: nodejs",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_analytics_client-unified-metrics",
+      "id": "get_analytics_client_unified_metrics",
       "path": "/api/analytics/client-unified-metrics",
       "methods": [
         "GET"
       ],
       "description": "GET /api/analytics/client-unified-metrics?client_id=uuid",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         404,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "clients",
         "contact_messages",
         "loan_applications",
@@ -1307,9 +1377,14 @@
         "client_sessions"
       ],
       "fileRef": {
-        "file": "api/analytics/client-unified-metrics/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/client-unified-metrics/route.ts",
+        "lines": "1-415"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_analytics_funnel",
@@ -1318,18 +1393,22 @@
         "GET"
       ],
       "description": "GET /api/analytics/funnel",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "visual_conversion_funnel"
       ],
       "fileRef": {
-        "file": "api/analytics/funnel/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/funnel/route.ts",
+        "lines": "1-42"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_analytics_heatmap",
@@ -1338,39 +1417,47 @@
         "GET"
       ],
       "description": "GET /api/analytics/heatmap",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "visual_activity_heatmap"
       ],
       "fileRef": {
-        "file": "api/analytics/heatmap/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/heatmap/route.ts",
+        "lines": "1-43"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_analytics_ip-details",
+      "id": "get_analytics_ip_details",
       "path": "/api/analytics/ip-details",
       "methods": [
         "GET"
       ],
       "description": "GET /api/analytics/ip-details",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "client_sessions",
         "client_telemetry_events"
       ],
       "fileRef": {
-        "file": "api/analytics/ip-details/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/ip-details/route.ts",
+        "lines": "1-183"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_analytics_journeys",
@@ -1379,61 +1466,71 @@
         "GET"
       ],
       "description": "GET /api/analytics/journeys",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "analytics_user_journeys"
       ],
       "fileRef": {
-        "file": "api/analytics/journeys/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/journeys/route.ts",
+        "lines": "1-71"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_analytics_linked-sessions",
+      "id": "get_analytics_linked_sessions",
       "path": "/api/analytics/linked-sessions",
       "methods": [
         "GET"
       ],
       "description": "GET /api/analytics/linked-sessions",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "client_sessions"
       ],
       "fileRef": {
-        "file": "api/analytics/linked-sessions/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/linked-sessions/route.ts",
+        "lines": "1-168"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_analytics_page-flow",
+      "id": "get_analytics_page_flow",
       "path": "/api/analytics/page-flow",
       "methods": [
         "GET"
       ],
       "description": "GET /api/analytics/page-flow",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "visual_page_flow",
         "client_telemetry_events"
       ],
       "fileRef": {
-        "file": "api/analytics/page-flow/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/page-flow/route.ts",
+        "lines": "1-95"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_analytics_pages",
@@ -1442,19 +1539,22 @@
         "GET"
       ],
       "description": "GET /api/analytics/pages",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
-        "client_telemetry_events",
-        "rpc:get_page_metrics"
+      "externalCalls": [],
+      "tablesTouched": [
+        "client_telemetry_events"
       ],
       "fileRef": {
-        "file": "api/analytics/pages/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/pages/route.ts",
+        "lines": "1-94"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_analytics_referrers",
@@ -1463,18 +1563,22 @@
         "GET"
       ],
       "description": "GET /api/analytics/referrers",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "client_sessions"
       ],
       "fileRef": {
-        "file": "api/analytics/referrers/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/referrers/route.ts",
+        "lines": "1-90"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_analytics_sessions",
@@ -1483,19 +1587,23 @@
         "GET"
       ],
       "description": "GET /api/analytics/sessions",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "client_sessions",
         "client_telemetry_events"
       ],
       "fileRef": {
-        "file": "api/analytics/sessions/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/sessions/route.ts",
+        "lines": "1-149"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_analytics_sources",
@@ -1504,18 +1612,22 @@
         "GET"
       ],
       "description": "GET /api/analytics/sources",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "visual_conversion_by_source"
       ],
       "fileRef": {
-        "file": "api/analytics/sources/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/sources/route.ts",
+        "lines": "1-43"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_analytics_timeline",
@@ -1524,18 +1636,22 @@
         "GET"
       ],
       "description": "GET /api/analytics/timeline",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "visual_events_timeline"
       ],
       "fileRef": {
-        "file": "api/analytics/timeline/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/analytics/timeline/route.ts",
+        "lines": "1-43"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_anonymity_check",
@@ -1543,17 +1659,21 @@
       "methods": [
         "GET"
       ],
-      "description": "API: Anonymity Check - Verify if you're anonymous",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/anonymity/check/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/anonymity/check/route.ts",
+        "lines": "1-347"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_applications_submit",
@@ -1562,26 +1682,30 @@
         "POST"
       ],
       "description": "🚀 API Route: Submit Loan Application",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         200,
         400,
+        429,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "loan_applications",
         "clients",
         "client_sessions",
         "security_events"
       ],
       "fileRef": {
-        "file": "api/applications/submit/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/applications/submit/route.ts",
+        "lines": "1-589"
+      },
+      "middleware": [
+        "Runtime: nodejs"
+      ],
+      "rateLimit": true,
+      "cors": false
     },
     {
       "id": "get_audit_clientId",
@@ -1589,17 +1713,21 @@
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/audit/[clientId]/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/audit/[clientId]/route.ts",
+        "lines": "1-30"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_audit_stats",
@@ -1607,19 +1735,23 @@
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "vw_audit_stats_by_table"
       ],
       "fileRef": {
-        "file": "api/audit/stats/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/audit/stats/route.ts",
+        "lines": "1-42"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_contact",
@@ -1627,172 +1759,178 @@
       "methods": [
         "POST"
       ],
-      "description": "Rate limiting pour le formulaire de contact",
-      "auth": "api_key",
-      "output": [
+      "description": "No description available",
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         429,
         500
       ],
-      "external_calls": [
-        "fetch",
-        "email"
+      "externalCalls": [
+        "api.resend.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "contact_messages",
         "emails_envoyes"
       ],
       "fileRef": {
-        "file": "api/contact/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/contact/route.ts",
+        "lines": "1-612"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_contact-analyse",
+      "id": "post_contact_analyse",
       "path": "/api/contact-analyse",
       "methods": [
         "POST"
       ],
-      "description": "Generer reference unique",
-      "auth": "api_key",
-      "output": [
+      "description": "No description available",
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [
-        "fetch",
-        "email"
+      "externalCalls": [
+        "api.resend.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "contact_messages",
         "emails_envoyes"
       ],
       "fileRef": {
-        "file": "api/contact-analyse/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/contact-analyse/route.ts",
+        "lines": "1-561"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_cortex_sync-miro",
+      "id": "get_cortex_sync_miro",
       "path": "/api/cortex/sync-miro",
       "methods": [
-        "GET"
-      ],
-      "description": "API Route: Synchronise SAR Cortex avec Miro",
-      "auth": "none",
-      "output": [
-        400,
-        401,
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [],
-      "fileRef": {
-        "file": "api/cortex/sync-miro/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_cortex_sync-miro",
-      "path": "/api/cortex/sync-miro",
-      "methods": [
+        "GET",
         "POST"
       ],
       "description": "API Route: Synchronise SAR Cortex avec Miro",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/cortex/sync-miro/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/cortex/sync-miro/route.ts",
+        "lines": "1-110"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_cron_aggregate-speed-insights",
+      "id": "get_cron_aggregate_speed_insights",
       "path": "/api/cron/aggregate-speed-insights",
       "methods": [
         "GET"
       ],
       "description": "Calcule le percentile p d'un tableau de valeurs",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "vercel_speed_insights_raw",
         "vercel_speed_insights_daily"
       ],
       "fileRef": {
-        "file": "api/cron/aggregate-speed-insights/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/cron/aggregate-speed-insights/route.ts",
+        "lines": "1-222"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_cron_cleanup-sessions",
+      "id": "get_cron_cleanup_sessions",
       "path": "/api/cron/cleanup-sessions",
       "methods": [
         "GET"
       ],
       "description": "GET /api/cron/cleanup-sessions",
-      "auth": "none",
-      "output": [
-        401
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
+        401,
+        500
       ],
-      "external_calls": [],
-      "tables_touched": [
-        "rpc:cleanup_client_sessions"
-      ],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/cron/cleanup-sessions/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/cron/cleanup-sessions/route.ts",
+        "lines": "1-73"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_cron_seo-collect",
+      "id": "get_cron_seo_collect",
       "path": "/api/cron/seo-collect",
       "methods": [
         "GET"
       ],
       "description": "GET /api/cron/seo-collect",
-      "auth": "api_key",
-      "output": [
+      "auth": "API Key Header",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "seo_collection_jobs"
       ],
       "fileRef": {
-        "file": "api/cron/seo-collect/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/cron/seo-collect/route.ts",
+        "lines": "1-204"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_device_deep-inspector",
+      "id": "get_device_deep_inspector",
       "path": "/api/device/deep-inspector",
       "methods": [
         "GET"
       ],
-      "description": "API: Deep Device Inspector - Extract ALL device information",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/device/deep-inspector/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/device/deep-inspector/route.ts",
+        "lines": "1-494"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_download_filename",
@@ -1800,21 +1938,25 @@
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         200
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "download_logs"
       ],
       "fileRef": {
-        "file": "api/download/[filename]/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/download/[filename]/route.ts",
+        "lines": "1-105"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_download_track",
@@ -1822,40 +1964,48 @@
       "methods": [
         "POST"
       ],
-      "description": "No description",
-      "auth": "admin_session",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "download_logs"
       ],
       "fileRef": {
-        "file": "api/download/track/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/download/track/route.ts",
+        "lines": "1-115"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_fingerprint_deep-scan",
+      "id": "post_fingerprint_deep_scan",
       "path": "/api/fingerprint/deep-scan",
       "methods": [
         "POST"
       ],
-      "description": "API: Deep Fingerprint Scan - Extract EVERYTHING trackable",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/fingerprint/deep-scan/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/fingerprint/deep-scan/route.ts",
+        "lines": "1-451"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_fraud_device_visit_id",
@@ -1863,24 +2013,28 @@
       "methods": [
         "GET"
       ],
-      "description": "GET /api/fraud/device/[visit_id]",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         404,
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "device_profiles",
         "visit_timeline",
         "clients"
       ],
       "fileRef": {
-        "file": "api/fraud/device/[visit_id]/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/fraud/device/[visit_id]/route.ts",
+        "lines": "1-71"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_fraud_live",
@@ -1888,19 +2042,25 @@
       "methods": [
         "GET"
       ],
-      "description": "API: GET /api/fraud/live",
-      "auth": "none",
-      "output": [
+      "description": "Real-time fraud detection from telemetry_requests",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "telemetry_requests"
       ],
       "fileRef": {
-        "file": "api/fraud/live/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/fraud/live/route.ts",
+        "lines": "1-198"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_memory_context",
@@ -1908,60 +2068,48 @@
       "methods": [
         "GET"
       ],
-      "description": "API: Obtenir le contexte complet d'un projet",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/memory/context/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/memory/context/route.ts",
+        "lines": "1-54"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_memory_doc-read",
+      "id": "get_memory_doc_read",
       "path": "/api/memory/doc-read",
       "methods": [
-        "GET"
-      ],
-      "description": "API: Enregistrer qu'un document a été lu",
-      "auth": "none",
-      "output": [
-        400,
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [
-        "claude_docs_read"
-      ],
-      "fileRef": {
-        "file": "api/memory/doc-read/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_memory_doc-read",
-      "path": "/api/memory/doc-read",
-      "methods": [
+        "GET",
         "POST"
       ],
-      "description": "API: Enregistrer qu'un document a été lu",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "claude_docs_read"
       ],
       "fileRef": {
-        "file": "api/memory/doc-read/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/memory/doc-read/route.ts",
+        "lines": "1-133"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_memory_recall",
@@ -1969,62 +2117,50 @@
       "methods": [
         "GET"
       ],
-      "description": "API: Récupérer des mémoires",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "claude_memory"
       ],
       "fileRef": {
-        "file": "api/memory/recall/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/memory/recall/route.ts",
+        "lines": "1-73"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_memory_session",
       "path": "/api/memory/session",
       "methods": [
-        "GET"
-      ],
-      "description": "API: Enregistrer une session de travail",
-      "auth": "none",
-      "output": [
-        400,
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [
-        "claude_sessions"
-      ],
-      "fileRef": {
-        "file": "api/memory/session/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_memory_session",
-      "path": "/api/memory/session",
-      "methods": [
+        "GET",
         "POST"
       ],
-      "description": "API: Enregistrer une session de travail",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "claude_sessions"
       ],
       "fileRef": {
-        "file": "api/memory/session/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/memory/session/route.ts",
+        "lines": "1-116"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_memory_store",
@@ -2032,20 +2168,24 @@
       "methods": [
         "POST"
       ],
-      "description": "API: Stocker une nouvelle mémoire",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "claude_memory"
       ],
       "fileRef": {
-        "file": "api/memory/store/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/memory/store/route.ts",
+        "lines": "1-74"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_metrics_all",
@@ -2053,16 +2193,14 @@
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "vw_client_timeline",
         "vw_client_timeline_by_type",
         "vw_client_summary",
@@ -2081,45 +2219,56 @@
         "payment_events"
       ],
       "fileRef": {
-        "file": "api/metrics/all/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/metrics/all/route.ts",
+        "lines": "1-156"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_network_active-recon",
+      "id": "post_network_active_recon",
       "path": "/api/network/active-recon",
       "methods": [
         "POST"
       ],
-      "description": "API: Active Network Reconnaissance - Aggressive Network Scanning",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/network/active-recon/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/network/active-recon/route.ts",
+        "lines": "1-478"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_network_packet-capture",
+      "id": "post_network_packet_capture",
       "path": "/api/network/packet-capture",
       "methods": [
         "POST"
       ],
-      "description": "API: Packet Capture - Wireshark-like Network Monitoring",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/network/packet-capture/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/network/packet-capture/route.ts",
+        "lines": "1-316"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_network_trace",
@@ -2127,17 +2276,21 @@
       "methods": [
         "GET"
       ],
-      "description": "API: Network Trace - Real Network Analysis",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/network/trace/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/network/trace/route.ts",
+        "lines": "1-205"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_osint_advanced",
@@ -2145,93 +2298,112 @@
       "methods": [
         "POST"
       ],
-      "description": "API: OSINT Advanced Scanner - Kung Fu Edition",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/osint/advanced/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/osint/advanced/route.ts",
+        "lines": "1-377"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_osint_bypass-tests",
+      "id": "post_osint_bypass_tests",
       "path": "/api/osint/bypass-tests",
       "methods": [
         "POST"
       ],
-      "description": "API: Bypass Tests - Test all bypass techniques",
-      "auth": "admin_session",
-      "output": [
+      "description": "/1=1--\", param: 'id' },",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/osint/bypass-tests/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/osint/bypass-tests/route.ts",
+        "lines": "1-502"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_osint_exploit-chains",
+      "id": "post_osint_exploit_chains",
       "path": "/api/osint/exploit-chains",
       "methods": [
         "POST"
       ],
-      "description": "API: Exploit Chain Builder",
-      "auth": "api_key",
-      "output": [
+      "description": "No description available",
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "fetch",
-        "email"
+      "externalCalls": [
+        "attacker.com"
       ],
-      "tables_touched": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/osint/exploit-chains/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/osint/exploit-chains/route.ts",
+        "lines": "1-879"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_osint_lab-scan",
+      "id": "get_osint_lab_scan",
       "path": "/api/osint/lab-scan",
       "methods": [
         "GET"
       ],
-      "description": "API: OSINT Real Network Scanner",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/osint/lab-scan/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/osint/lab-scan/route.ts",
+        "lines": "1-218"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_osint_network-scan",
+      "id": "get_osint_network_scan",
       "path": "/api/osint/network-scan",
       "methods": [
         "GET"
       ],
-      "description": "API: OSINT Network Scanner",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/osint/network-scan/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/osint/network-scan/route.ts",
+        "lines": "1-277"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_osint_scan",
@@ -2239,17 +2411,21 @@
       "methods": [
         "GET"
       ],
-      "description": "API: OSINT Real Network Scanner",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/osint/scan/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/osint/scan/route.ts",
+        "lines": "1-223"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_osint_vulnerabilities",
@@ -2257,35 +2433,44 @@
       "methods": [
         "POST"
       ],
-      "description": "API: Vulnerability Scanner - Find Weaknesses",
-      "auth": "api_key",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/osint/vulnerabilities/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/osint/vulnerabilities/route.ts",
+        "lines": "1-545"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_performance-diagnostic",
+      "id": "get_performance_diagnostic",
       "path": "/api/performance-diagnostic",
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
+        200,
         404
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/performance-diagnostic/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/performance-diagnostic/route.ts",
+        "lines": "1-25"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_quickbooks_accounts",
@@ -2294,18 +2479,26 @@
         "GET"
       ],
       "description": "Get accounts from local database",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [
+        "quickbooks.intuit.com"
+      ],
+      "tablesTouched": [
         "quickbooks_accounts"
       ],
       "fileRef": {
-        "file": "api/quickbooks/accounts/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/accounts/route.ts",
+        "lines": "1-80"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_quickbooks_auth_callback",
@@ -2314,20 +2507,26 @@
         "GET"
       ],
       "description": "QuickBooks OAuth 2.0 Callback",
-      "auth": "bearer_token",
-      "output": [
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         200
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens"
       ],
       "fileRef": {
-        "file": "api/quickbooks/auth/callback/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/auth/callback/route.ts",
+        "lines": "1-209"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_quickbooks_auth_connect",
@@ -2336,83 +2535,81 @@
         "GET"
       ],
       "description": "Initiate QuickBooks OAuth 2.0 flow",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "email"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/quickbooks/auth/connect/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/auth/connect/route.ts",
+        "lines": "1-71"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_quickbooks_auth_refresh",
       "path": "/api/quickbooks/auth/refresh",
       "methods": [
-        "GET"
-      ],
-      "description": "Refresh QuickBooks Access Token",
-      "auth": "bearer_token",
-      "output": [
-        404,
-        500
-      ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [
-        "quickbooks_tokens"
-      ],
-      "fileRef": {
-        "file": "api/quickbooks/auth/refresh/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_quickbooks_auth_refresh",
-      "path": "/api/quickbooks/auth/refresh",
-      "methods": [
+        "GET",
         "POST"
       ],
       "description": "Refresh QuickBooks Access Token",
-      "auth": "bearer_token",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         404,
         500
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens"
       ],
       "fileRef": {
-        "file": "api/quickbooks/auth/refresh/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/auth/refresh/route.ts",
+        "lines": "1-133"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_quickbooks_connection_auto-refresh",
+      "id": "post_quickbooks_connection_auto_refresh",
       "path": "/api/quickbooks/connection/auto-refresh",
       "methods": [
         "POST"
       ],
       "description": "POST /api/quickbooks/connection/auto-refresh",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [
+        "quickbooks.intuit.com"
+      ],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/quickbooks/connection/auto-refresh/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/connection/auto-refresh/route.ts",
+        "lines": "1-46"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_quickbooks_connection_disconnect",
@@ -2421,60 +2618,80 @@
         "POST"
       ],
       "description": "POST /api/quickbooks/connection/disconnect",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [
+        "quickbooks.intuit.com"
+      ],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/quickbooks/connection/disconnect/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/connection/disconnect/route.ts",
+        "lines": "1-37"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_quickbooks_connection_force-reconnect",
+      "id": "post_quickbooks_connection_force_reconnect",
       "path": "/api/quickbooks/connection/force-reconnect",
       "methods": [
         "POST"
       ],
       "description": "POST /api/quickbooks/connection/force-reconnect",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "email"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens"
       ],
       "fileRef": {
-        "file": "api/quickbooks/connection/force-reconnect/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/connection/force-reconnect/route.ts",
+        "lines": "1-93"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_quickbooks_connection_force-status",
+      "id": "get_quickbooks_connection_force_status",
       "path": "/api/quickbooks/connection/force-status",
       "methods": [
         "GET"
       ],
       "description": "GET /api/quickbooks/connection/force-status",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "email"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens"
       ],
       "fileRef": {
-        "file": "api/quickbooks/connection/force-status/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/connection/force-status/route.ts",
+        "lines": "1-98"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_quickbooks_connection_refresh",
@@ -2483,16 +2700,24 @@
         "POST"
       ],
       "description": "POST /api/quickbooks/connection/refresh",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [
+        "quickbooks.intuit.com"
+      ],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/quickbooks/connection/refresh/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/connection/refresh/route.ts",
+        "lines": "1-39"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_quickbooks_connection_status",
@@ -2501,18 +2726,24 @@
         "GET"
       ],
       "description": "GET /api/quickbooks/connection/status",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "email"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/quickbooks/connection/status/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/connection/status/route.ts",
+        "lines": "1-36"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_quickbooks_connection_test",
@@ -2521,132 +2752,170 @@
         "GET"
       ],
       "description": "GET /api/quickbooks/connection/test",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [
+        "quickbooks.intuit.com"
+      ],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/quickbooks/connection/test/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/connection/test/route.ts",
+        "lines": "1-39"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_quickbooks_reports_aged-receivables",
+      "id": "get_quickbooks_reports_aged_receivables",
       "path": "/api/quickbooks/reports/aged-receivables",
       "methods": [
         "GET"
       ],
       "description": "Get Aged Receivables (Accounts Receivable Aging) report from QuickBooks (real-time)",
-      "auth": "none",
-      "output": [
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens"
       ],
       "fileRef": {
-        "file": "api/quickbooks/reports/aged-receivables/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/reports/aged-receivables/route.ts",
+        "lines": "1-108"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_quickbooks_reports_balance-sheet",
+      "id": "get_quickbooks_reports_balance_sheet",
       "path": "/api/quickbooks/reports/balance-sheet",
       "methods": [
         "GET"
       ],
       "description": "Get Balance Sheet report from QuickBooks (real-time)",
-      "auth": "none",
-      "output": [
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens"
       ],
       "fileRef": {
-        "file": "api/quickbooks/reports/balance-sheet/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/reports/balance-sheet/route.ts",
+        "lines": "1-100"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_quickbooks_reports_balance-sheet-detailed",
+      "id": "get_quickbooks_reports_balance_sheet_detailed",
       "path": "/api/quickbooks/reports/balance-sheet-detailed",
       "methods": [
         "GET"
       ],
       "description": "Get detailed Balance Sheet with all account balances",
-      "auth": "none",
-      "output": [
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens"
       ],
       "fileRef": {
-        "file": "api/quickbooks/reports/balance-sheet-detailed/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/reports/balance-sheet-detailed/route.ts",
+        "lines": "1-194"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_quickbooks_reports_cash-flow",
+      "id": "get_quickbooks_reports_cash_flow",
       "path": "/api/quickbooks/reports/cash-flow",
       "methods": [
         "GET"
       ],
       "description": "Get Cash Flow report from QuickBooks (real-time)",
-      "auth": "none",
-      "output": [
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens"
       ],
       "fileRef": {
-        "file": "api/quickbooks/reports/cash-flow/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/reports/cash-flow/route.ts",
+        "lines": "1-104"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_quickbooks_reports_profit-loss",
+      "id": "get_quickbooks_reports_profit_loss",
       "path": "/api/quickbooks/reports/profit-loss",
       "methods": [
         "GET"
       ],
       "description": "Get Profit & Loss report from QuickBooks (real-time)",
-      "auth": "none",
-      "output": [
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens"
       ],
       "fileRef": {
-        "file": "api/quickbooks/reports/profit-loss/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/reports/profit-loss/route.ts",
+        "lines": "1-104"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_quickbooks_status",
@@ -2654,19 +2923,27 @@
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [
+        "quickbooks.intuit.com"
+      ],
+      "tablesTouched": [
         "quickbooks_tokens"
       ],
       "fileRef": {
-        "file": "api/quickbooks/status/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/status/route.ts",
+        "lines": "1-52"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_quickbooks_sync_accounts",
@@ -2675,22 +2952,28 @@
         "POST"
       ],
       "description": "Sync chart of accounts from QuickBooks to local database",
-      "auth": "none",
-      "output": [
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens",
         "quickbooks_accounts"
       ],
       "fileRef": {
-        "file": "api/quickbooks/sync/accounts/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/sync/accounts/route.ts",
+        "lines": "1-125"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_quickbooks_sync_all",
@@ -2699,18 +2982,24 @@
         "POST"
       ],
       "description": "Full sync - syncs all data from QuickBooks",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/quickbooks/sync/all/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/sync/all/route.ts",
+        "lines": "1-130"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_quickbooks_sync_customers",
@@ -2719,23 +3008,28 @@
         "POST"
       ],
       "description": "Sync customers from QuickBooks to local database",
-      "auth": "none",
-      "output": [
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch",
-        "email"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens",
         "quickbooks_customers"
       ],
       "fileRef": {
-        "file": "api/quickbooks/sync/customers/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/sync/customers/route.ts",
+        "lines": "1-130"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_quickbooks_sync_invoices",
@@ -2744,23 +3038,28 @@
         "POST"
       ],
       "description": "Sync invoices from QuickBooks to local database",
-      "auth": "none",
-      "output": [
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch",
-        "email"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens",
         "quickbooks_invoices"
       ],
       "fileRef": {
-        "file": "api/quickbooks/sync/invoices/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/sync/invoices/route.ts",
+        "lines": "1-128"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_quickbooks_sync_payments",
@@ -2769,22 +3068,28 @@
         "POST"
       ],
       "description": "Sync payments from QuickBooks to local database",
-      "auth": "none",
-      "output": [
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens",
         "quickbooks_payments"
       ],
       "fileRef": {
-        "file": "api/quickbooks/sync/payments/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/sync/payments/route.ts",
+        "lines": "1-126"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_quickbooks_sync_vendors",
@@ -2793,225 +3098,81 @@
         "POST"
       ],
       "description": "Sync vendors from QuickBooks to local database",
-      "auth": "none",
-      "output": [
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch",
-        "email"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_tokens",
         "quickbooks_vendors"
       ],
       "fileRef": {
-        "file": "api/quickbooks/sync/vendors/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/quickbooks/sync/vendors/route.ts",
+        "lines": "1-127"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_routes_discover",
       "path": "/api/routes/discover",
       "methods": [
-        "GET"
-      ],
-      "description": "API: Route Discovery & Analysis",
-      "auth": "none",
-      "output": [
-        500
-      ],
-      "external_calls": [
-        "fetch",
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [],
-      "fileRef": {
-        "file": "api/routes/discover/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_routes_discover",
-      "path": "/api/routes/discover",
-      "methods": [
+        "GET",
         "POST"
       ],
-      "description": "API: Route Discovery & Analysis",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "fetch",
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/routes/discover/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "put_routes_discover",
-      "path": "/api/routes/discover",
-      "methods": [
-        "PUT"
-      ],
-      "description": "API: Route Discovery & Analysis",
-      "auth": "none",
-      "output": [
-        500
-      ],
-      "external_calls": [
-        "fetch",
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [],
-      "fileRef": {
-        "file": "api/routes/discover/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "patch_routes_discover",
-      "path": "/api/routes/discover",
-      "methods": [
-        "PATCH"
-      ],
-      "description": "API: Route Discovery & Analysis",
-      "auth": "none",
-      "output": [
-        500
-      ],
-      "external_calls": [
-        "fetch",
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [],
-      "fileRef": {
-        "file": "api/routes/discover/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "delete_routes_discover",
-      "path": "/api/routes/discover",
-      "methods": [
-        "DELETE"
-      ],
-      "description": "API: Route Discovery & Analysis",
-      "auth": "none",
-      "output": [
-        500
-      ],
-      "external_calls": [
-        "fetch",
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [],
-      "fileRef": {
-        "file": "api/routes/discover/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/routes/discover/route.ts",
+        "lines": "1-185"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_routes_expand",
       "path": "/api/routes/expand",
       "methods": [
-        "GET"
-      ],
-      "description": "API: Route Expansion & Generation",
-      "auth": "none",
-      "output": [
-        400,
-        500
-      ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [
-        "${spec.database_table}"
-      ],
-      "fileRef": {
-        "file": "api/routes/expand/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_routes_expand",
-      "path": "/api/routes/expand",
-      "methods": [
-        "POST"
-      ],
-      "description": "API: Route Expansion & Generation",
-      "auth": "none",
-      "output": [
-        400,
-        500
-      ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [
-        "${spec.database_table}"
-      ],
-      "fileRef": {
-        "file": "api/routes/expand/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "put_routes_expand",
-      "path": "/api/routes/expand",
-      "methods": [
-        "PUT"
-      ],
-      "description": "API: Route Expansion & Generation",
-      "auth": "none",
-      "output": [
-        400,
-        500
-      ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [
-        "${spec.database_table}"
-      ],
-      "fileRef": {
-        "file": "api/routes/expand/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "delete_routes_expand",
-      "path": "/api/routes/expand",
-      "methods": [
+        "GET",
+        "POST",
+        "PUT",
         "DELETE"
       ],
-      "description": "API: Route Expansion & Generation",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "localhost"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "${spec.database_table}"
       ],
       "fileRef": {
-        "file": "api/routes/expand/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/routes/expand/route.ts",
+        "lines": "1-377"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_sentinel_execute",
@@ -3019,97 +3180,97 @@
       "methods": [
         "POST"
       ],
-      "description": "API: Sentinel Command Execution",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "claude_memory",
         "claude_actions"
       ],
       "fileRef": {
-        "file": "api/sentinel/execute/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/sentinel/execute/route.ts",
+        "lines": "1-189"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_sentinel_execute-command",
+      "id": "post_sentinel_execute_command",
       "path": "/api/sentinel/execute-command",
       "methods": [
         "POST"
       ],
-      "description": "API: Sentinel Command Executor",
-      "auth": "none",
-      "output": [
-        400
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
+        400,
+        500
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "localhost"
       ],
-      "tables_touched": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/sentinel/execute-command/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/sentinel/execute-command/route.ts",
+        "lines": "1-417"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_sentinel_fleet",
       "path": "/api/sentinel/fleet",
       "methods": [
-        "GET"
-      ],
-      "description": "API: Sentinel Fleet Management",
-      "auth": "none",
-      "output": [
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [],
-      "fileRef": {
-        "file": "api/sentinel/fleet/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_sentinel_fleet",
-      "path": "/api/sentinel/fleet",
-      "methods": [
+        "GET",
         "POST"
       ],
-      "description": "API: Sentinel Fleet Management",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/sentinel/fleet/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/sentinel/fleet/route.ts",
+        "lines": "1-237"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_sentinel_network-monitor",
+      "id": "post_sentinel_network_monitor",
       "path": "/api/sentinel/network-monitor",
       "methods": [
         "POST"
       ],
-      "description": "API: Sentinel Network Monitor - AI-Powered Threat Detection",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "claude_actions"
       ],
       "fileRef": {
-        "file": "api/sentinel/network-monitor/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/sentinel/network-monitor/route.ts",
+        "lines": "1-439"
+      },
+      "middleware": [],
+      "rateLimit": true,
+      "cors": false
     },
     {
       "id": "post_sentinel_orchestrator",
@@ -3117,80 +3278,73 @@
       "methods": [
         "POST"
       ],
-      "description": "API: Sentinel Orchestrator",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         404,
         500
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "localhost"
       ],
-      "tables_touched": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/sentinel/orchestrator/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/sentinel/orchestrator/route.ts",
+        "lines": "1-275"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_sentinel_scan-project",
+      "id": "post_sentinel_scan_project",
       "path": "/api/sentinel/scan-project",
       "methods": [
         "POST"
       ],
-      "description": "API: Sentinel Project Scanner",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "localhost"
       ],
-      "tables_touched": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/sentinel/scan-project/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/sentinel/scan-project/route.ts",
+        "lines": "1-251"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_sentinel_scoring",
       "path": "/api/sentinel/scoring",
       "methods": [
-        "GET"
-      ],
-      "description": "API: Sentinel Scoring System",
-      "auth": "none",
-      "output": [
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [
-        "sentinel_scans"
-      ],
-      "fileRef": {
-        "file": "api/sentinel/scoring/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_sentinel_scoring",
-      "path": "/api/sentinel/scoring",
-      "methods": [
+        "GET",
         "POST"
       ],
-      "description": "API: Sentinel Scoring System",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "sentinel_scans"
       ],
       "fileRef": {
-        "file": "api/sentinel/scoring/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/sentinel/scoring/route.ts",
+        "lines": "1-258"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_analytics_detailed",
@@ -3198,404 +3352,305 @@
       "methods": [
         "GET"
       ],
-      "description": "API: GET /api/seo/analytics/detailed",
-      "auth": "none",
-      "output": [
+      "description": "Advanced analytics with segments from telemetry",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         200
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "telemetry_requests"
       ],
       "fileRef": {
-        "file": "api/seo/analytics/detailed/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/analytics/detailed/route.ts",
+        "lines": "1-36"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_collect_cloudflare",
       "path": "/api/seo/collect/cloudflare",
       "methods": [
-        "GET"
-      ],
-      "description": "API: POST /api/seo/collect/cloudflare",
-      "auth": "api_key",
-      "output": [
-        401,
-        500,
-        503
-      ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [
-        "seo_cloudflare_analytics_daily"
-      ],
-      "fileRef": {
-        "file": "api/seo/collect/cloudflare/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_seo_collect_cloudflare",
-      "path": "/api/seo/collect/cloudflare",
-      "methods": [
+        "GET",
         "POST"
       ],
-      "description": "API: POST /api/seo/collect/cloudflare",
-      "auth": "api_key",
-      "output": [
+      "description": "Collecte les métriques Cloudflare Analytics",
+      "auth": "API Key Header",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500,
         503
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "api.cloudflare.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "seo_cloudflare_analytics_daily"
       ],
       "fileRef": {
-        "file": "api/seo/collect/cloudflare/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/collect/cloudflare/route.ts",
+        "lines": "1-403"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_collect_ga4",
       "path": "/api/seo/collect/ga4",
       "methods": [
-        "GET"
-      ],
-      "description": "POST /api/seo/collect/ga4",
-      "auth": "api_key",
-      "output": [
-        401,
-        500
-      ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
-        "seo_ga4_metrics_daily"
-      ],
-      "fileRef": {
-        "file": "api/seo/collect/ga4/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_seo_collect_ga4",
-      "path": "/api/seo/collect/ga4",
-      "methods": [
+        "GET",
         "POST"
       ],
       "description": "POST /api/seo/collect/ga4",
-      "auth": "api_key",
-      "output": [
+      "auth": "API Key Header",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "seo_ga4_metrics_daily"
       ],
       "fileRef": {
-        "file": "api/seo/collect/ga4/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/collect/ga4/route.ts",
+        "lines": "1-375"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_collect_gsc",
       "path": "/api/seo/collect/gsc",
       "methods": [
-        "GET"
-      ],
-      "description": "API: POST /api/seo/collect/gsc",
-      "auth": "api_key",
-      "output": [
-        401,
-        500,
-        503
-      ],
-      "external_calls": [],
-      "tables_touched": [
-        "seo_gsc_metrics_daily"
-      ],
-      "fileRef": {
-        "file": "api/seo/collect/gsc/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_seo_collect_gsc",
-      "path": "/api/seo/collect/gsc",
-      "methods": [
+        "GET",
         "POST"
       ],
-      "description": "API: POST /api/seo/collect/gsc",
-      "auth": "api_key",
-      "output": [
+      "description": "Collecte les métriques Google Search Console et les stocke dans Supabase",
+      "auth": "API Key Header",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500,
         503
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "seo_gsc_metrics_daily"
       ],
       "fileRef": {
-        "file": "api/seo/collect/gsc/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/collect/gsc/route.ts",
+        "lines": "1-317"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_collect_pagespeed",
       "path": "/api/seo/collect/pagespeed",
       "methods": [
-        "GET"
-      ],
-      "description": "API: POST /api/seo/collect/pagespeed",
-      "auth": "api_key",
-      "output": [
-        401,
-        500
-      ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [
-        "seo_pagespeed_metrics_daily"
-      ],
-      "fileRef": {
-        "file": "api/seo/collect/pagespeed/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_seo_collect_pagespeed",
-      "path": "/api/seo/collect/pagespeed",
-      "methods": [
+        "GET",
         "POST"
       ],
-      "description": "API: POST /api/seo/collect/pagespeed",
-      "auth": "api_key",
-      "output": [
+      "description": "Collecte les métriques Google PageSpeed Insights et Core Web Vitals",
+      "auth": "API Key Header",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "seo_pagespeed_metrics_daily"
       ],
       "fileRef": {
-        "file": "api/seo/collect/pagespeed/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/collect/pagespeed/route.ts",
+        "lines": "1-303"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_collect_semrush",
       "path": "/api/seo/collect/semrush",
       "methods": [
-        "GET"
-      ],
-      "description": "POST /api/seo/collect/semrush",
-      "auth": "api_key",
-      "output": [
-        401,
-        500
-      ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [
-        "seo_semrush_domain_daily"
-      ],
-      "fileRef": {
-        "file": "api/seo/collect/semrush/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_seo_collect_semrush",
-      "path": "/api/seo/collect/semrush",
-      "methods": [
+        "GET",
         "POST"
       ],
       "description": "POST /api/seo/collect/semrush",
-      "auth": "api_key",
-      "output": [
+      "auth": "API Key Header",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "seo_semrush_domain_daily"
       ],
       "fileRef": {
-        "file": "api/seo/collect/semrush/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/collect/semrush/route.ts",
+        "lines": "1-405"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_collect_ssl",
       "path": "/api/seo/collect/ssl",
       "methods": [
-        "GET"
-      ],
-      "description": "API: POST /api/seo/collect/ssl",
-      "auth": "api_key",
-      "output": [
-        401,
-        500
-      ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [
-        "seo_ssl_checks"
-      ],
-      "fileRef": {
-        "file": "api/seo/collect/ssl/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_seo_collect_ssl",
-      "path": "/api/seo/collect/ssl",
-      "methods": [
+        "GET",
         "POST"
       ],
-      "description": "API: POST /api/seo/collect/ssl",
-      "auth": "api_key",
-      "output": [
+      "description": "Collecte les métriques SSL/TLS depuis SSL Labs API",
+      "auth": "API Key Header",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "seo_ssl_checks"
       ],
       "fileRef": {
-        "file": "api/seo/collect/ssl/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/collect/ssl/route.ts",
+        "lines": "1-353"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_collect_uptime",
       "path": "/api/seo/collect/uptime",
       "methods": [
-        "GET"
-      ],
-      "description": "API: POST /api/seo/collect/uptime",
-      "auth": "api_key",
-      "output": [
-        401,
-        500,
-        503
-      ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [
-        "seo_uptime_checks"
-      ],
-      "fileRef": {
-        "file": "api/seo/collect/uptime/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_seo_collect_uptime",
-      "path": "/api/seo/collect/uptime",
-      "methods": [
+        "GET",
         "POST"
       ],
-      "description": "API: POST /api/seo/collect/uptime",
-      "auth": "api_key",
-      "output": [
+      "description": "Collecte les métriques uptime monitoring depuis UptimeRobot",
+      "auth": "API Key Header",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500,
         503
       ],
-      "external_calls": [
-        "fetch"
+      "externalCalls": [
+        "api.uptimerobot.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "seo_uptime_checks"
       ],
       "fileRef": {
-        "file": "api/seo/collect/uptime/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/collect/uptime/route.ts",
+        "lines": "1-258"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_seo_device-intelligence",
+      "id": "get_seo_device_intelligence",
       "path": "/api/seo/device-intelligence",
       "methods": [
         "GET"
       ],
-      "description": "API: GET /api/seo/device-intelligence",
-      "auth": "api_key",
-      "output": [
+      "description": "Calcule les métriques croisées device (Mobile/Desktop/Tablet)",
+      "auth": "API Key Header",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "seo_gsc_metrics_daily",
         "seo_ga4_metrics_daily",
         "seo_pagespeed_metrics_daily"
       ],
       "fileRef": {
-        "file": "api/seo/device-intelligence/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/device-intelligence/route.ts",
+        "lines": "1-461"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_seo_exploit-secrets",
+      "id": "post_seo_exploit_secrets",
       "path": "/api/seo/exploit-secrets",
       "methods": [
         "POST"
       ],
-      "description": "API: SEO Secret Exploitation - Reveal Hidden SEO Techniques",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/seo/exploit-secrets/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/exploit-secrets/route.ts",
+        "lines": "1-585"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_seo_ga4-status",
+      "id": "get_seo_ga4_status",
       "path": "/api/seo/ga4-status",
       "methods": [
         "GET"
       ],
-      "description": "API: GET /api/seo/ga4-status",
-      "auth": "none",
-      "output": [
+      "description": "GA4 metrics from seo_unified_daily_plus",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         200
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "seo_unified_daily_plus"
       ],
       "fileRef": {
-        "file": "api/seo/ga4-status/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/ga4-status/route.ts",
+        "lines": "1-31"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_gsc",
@@ -3603,19 +3658,25 @@
       "methods": [
         "GET"
       ],
-      "description": "API: GET /api/seo/gsc",
-      "auth": "none",
-      "output": [
+      "description": "Google Search Console Data",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "seo_unified_daily_plus"
       ],
       "fileRef": {
-        "file": "api/seo/gsc/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/gsc/route.ts",
+        "lines": "1-157"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_health",
@@ -3624,22 +3685,26 @@
         "GET"
       ],
       "description": "Vérifier l'authentification admin",
-      "auth": "api_key",
-      "output": [
+      "auth": "API Key Header",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "seo_ga4_metrics_daily",
         "seo_semrush_domain_daily"
       ],
       "fileRef": {
-        "file": "api/seo/health/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/health/route.ts",
+        "lines": "1-356"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_ip_ip",
@@ -3648,20 +3713,26 @@
         "GET"
       ],
       "description": "GET /api/seo/ip/[ip]?range=30d",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         404,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "ip_to_seo_segment",
         "telemetry_requests"
       ],
       "fileRef": {
-        "file": "api/seo/ip/[ip]/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/ip/[ip]/route.ts",
+        "lines": "1-391"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_ips_top",
@@ -3670,110 +3741,54 @@
         "GET"
       ],
       "description": "Calculate IP score (0-100) - Same logic as IP Dossier",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "ip_to_seo_segment"
       ],
       "fileRef": {
-        "file": "api/seo/ips/top/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/ips/top/route.ts",
+        "lines": "1-119"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_keywords",
       "path": "/api/seo/keywords",
       "methods": [
-        "GET"
-      ],
-      "description": "GET /api/seo/keywords",
-      "auth": "api_key",
-      "output": [
-        400,
-        401,
-        409,
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [
-        "seo_keywords_tracking"
-      ],
-      "fileRef": {
-        "file": "api/seo/keywords/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_seo_keywords",
-      "path": "/api/seo/keywords",
-      "methods": [
-        "POST"
-      ],
-      "description": "GET /api/seo/keywords",
-      "auth": "api_key",
-      "output": [
-        400,
-        401,
-        409,
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [
-        "seo_keywords_tracking"
-      ],
-      "fileRef": {
-        "file": "api/seo/keywords/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "patch_seo_keywords",
-      "path": "/api/seo/keywords",
-      "methods": [
-        "PATCH"
-      ],
-      "description": "GET /api/seo/keywords",
-      "auth": "api_key",
-      "output": [
-        400,
-        401,
-        409,
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [
-        "seo_keywords_tracking"
-      ],
-      "fileRef": {
-        "file": "api/seo/keywords/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "delete_seo_keywords",
-      "path": "/api/seo/keywords",
-      "methods": [
+        "GET",
+        "POST",
+        "PATCH",
         "DELETE"
       ],
       "description": "GET /api/seo/keywords",
-      "auth": "api_key",
-      "output": [
+      "auth": "API Key Header",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         409,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "seo_keywords_tracking"
       ],
       "fileRef": {
-        "file": "api/seo/keywords/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/keywords/route.ts",
+        "lines": "1-287"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_metrics",
@@ -3781,19 +3796,25 @@
       "methods": [
         "GET"
       ],
-      "description": "API: GET /api/seo/metrics",
-      "auth": "none",
-      "output": [
+      "description": "Network graph from telemetry",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         200
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "telemetry_requests"
       ],
       "fileRef": {
-        "file": "api/seo/metrics/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/metrics/route.ts",
+        "lines": "1-38"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_overview",
@@ -3802,41 +3823,54 @@
         "GET"
       ],
       "description": "GET /api/seo/overview?range=30d&device=all",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "seo_unified_daily_plus",
         "telemetry_requests",
         "loan_applications"
       ],
       "fileRef": {
-        "file": "api/seo/overview/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/overview/route.ts",
+        "lines": "1-335"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_seo_overview-telemetry",
+      "id": "get_seo_overview_telemetry",
       "path": "/api/seo/overview-telemetry",
       "methods": [
         "GET"
       ],
-      "description": "API: GET /api/seo/overview-telemetry",
-      "auth": "none",
-      "output": [
+      "description": "Returns consolidated SEO overview from REAL telemetry data",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "telemetry_requests",
         "loan_applications"
       ],
       "fileRef": {
-        "file": "api/seo/overview-telemetry/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/overview-telemetry/route.ts",
+        "lines": "1-207"
+      },
+      "middleware": [
+        "Runtime: nodejs",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_perf",
@@ -3844,19 +3878,25 @@
       "methods": [
         "GET"
       ],
-      "description": "GET /api/seo/perf?range=30d&path=/&device=all",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "vercel_speed_insights_daily"
       ],
       "fileRef": {
-        "file": "api/seo/perf/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/perf/route.ts",
+        "lines": "1-219"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_performance",
@@ -3864,19 +3904,26 @@
       "methods": [
         "GET"
       ],
-      "description": "API: GET /api/seo/performance",
-      "auth": "none",
-      "output": [
+      "description": "Returns performance metrics from telemetry_requests",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "telemetry_requests"
       ],
       "fileRef": {
-        "file": "api/seo/performance/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/performance/route.ts",
+        "lines": "1-108"
+      },
+      "middleware": [
+        "Runtime: nodejs",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_realtime",
@@ -3884,21 +3931,28 @@
       "methods": [
         "GET"
       ],
-      "description": "API: GET /api/seo/realtime",
-      "auth": "none",
-      "output": [
+      "description": "Returns real-time activity from last 5 minutes",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "telemetry_requests",
         "telemetry_events",
         "loan_applications"
       ],
       "fileRef": {
-        "file": "api/seo/realtime/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/realtime/route.ts",
+        "lines": "1-89"
+      },
+      "middleware": [
+        "Runtime: nodejs",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_semrush",
@@ -3906,19 +3960,24 @@
       "methods": [
         "GET"
       ],
-      "description": "API: GET /api/seo/semrush",
-      "auth": "api_key",
-      "output": [
+      "description": "Returns SEO data from Semrush API",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/seo/semrush/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/semrush/route.ts",
+        "lines": "1-105"
+      },
+      "middleware": [
+        "Runtime: nodejs",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_semrush_backlinks",
@@ -3927,19 +3986,23 @@
         "GET"
       ],
       "description": "GET /api/seo/semrush/backlinks",
-      "auth": "api_key",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/seo/semrush/backlinks/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/semrush/backlinks/route.ts",
+        "lines": "1-222"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_semrush_competitors",
@@ -3948,40 +4011,48 @@
         "GET"
       ],
       "description": "GET /api/seo/semrush/competitors",
-      "auth": "api_key",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/seo/semrush/competitors/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/semrush/competitors/route.ts",
+        "lines": "1-271"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_seo_semrush_keyword-research",
+      "id": "get_seo_semrush_keyword_research",
       "path": "/api/seo/semrush/keyword-research",
       "methods": [
         "GET"
       ],
       "description": "GET /api/seo/semrush/keyword-research",
-      "auth": "api_key",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/seo/semrush/keyword-research/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/semrush/keyword-research/route.ts",
+        "lines": "1-141"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_seo_visitor_visitor_id",
@@ -3989,24 +4060,29 @@
       "methods": [
         "GET"
       ],
-      "description": "API: GET /api/seo/visitor/[visitor_id]",
-      "auth": "none",
-      "output": [
+      "description": "Returns complete visitor identity graph with:",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         404,
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "visitor_identity_graph",
         "loan_applications"
       ],
       "fileRef": {
-        "file": "api/seo/visitor/[visitor_id]/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/seo/visitor/[visitor_id]/route.ts",
+        "lines": "1-163"
+      },
+      "middleware": [
+        "Runtime: nodejs",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_sign_id",
@@ -4015,23 +4091,27 @@
         "GET"
       ],
       "description": "GET /api/sign/[id]",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         403,
         404,
         410,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "signature_documents",
         "signature_audit_logs"
       ],
       "fileRef": {
-        "file": "api/sign/[id]/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/sign/[id]/route.ts",
+        "lines": "1-117"
+      },
+      "middleware": [],
+      "rateLimit": true,
+      "cors": false
     },
     {
       "id": "post_sign_id_submit",
@@ -4040,27 +4120,28 @@
         "POST"
       ],
       "description": "POST /api/sign/[id]/submit",
-      "auth": "api_key",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         403,
         404,
         410,
         500
       ],
-      "external_calls": [
-        "fetch",
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "signature_documents",
         "contrats",
         "signature_audit_logs"
       ],
       "fileRef": {
-        "file": "api/sign/[id]/submit/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/sign/[id]/submit/route.ts",
+        "lines": "1-344"
+      },
+      "middleware": [],
+      "rateLimit": true,
+      "cors": false
     },
     {
       "id": "get_telemetry_debug",
@@ -4069,16 +4150,20 @@
         "GET"
       ],
       "description": "DEBUG: Check if telemetry env vars are loaded",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         200
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/telemetry/debug/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/telemetry/debug/route.ts",
+        "lines": "1-22"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_telemetry_health",
@@ -4087,59 +4172,73 @@
         "GET"
       ],
       "description": "GET /api/telemetry/health",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         200
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "client_sessions"
       ],
       "fileRef": {
-        "file": "api/telemetry/health/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/telemetry/health/route.ts",
+        "lines": "1-129"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_telemetry_test-track",
+      "id": "get_telemetry_test_track",
       "path": "/api/telemetry/test-track",
       "methods": [
         "GET"
       ],
       "description": "GET /api/telemetry/test-track",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "fetch"
-      ],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/telemetry/test-track/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/telemetry/test-track/route.ts",
+        "lines": "1-128"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_telemetry_track-event",
+      "id": "post_telemetry_track_event",
       "path": "/api/telemetry/track-event",
       "methods": [
-        "POST"
+        "POST",
+        "OPTIONS"
       ],
-      "description": "API: POST /api/telemetry/track-event",
-      "auth": "none",
-      "output": [
+      "description": "Track client-side events (page views, clicks, etc.)",
+      "auth": "Public (no auth)",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "telemetry_events"
       ],
       "fileRef": {
-        "file": "api/telemetry/track-event/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/telemetry/track-event/route.ts",
+        "lines": "1-119"
+      },
+      "middleware": [
+        "Runtime: nodejs",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": true
     },
     {
       "id": "post_telemetry_write",
@@ -4147,186 +4246,195 @@
       "methods": [
         "POST"
       ],
-      "description": "API: POST /api/telemetry/write",
-      "auth": "none",
-      "output": [
+      "description": "Write telemetry data to Supabase",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/telemetry/write/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/telemetry/write/route.ts",
+        "lines": "1-61"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_test-db",
+      "id": "get_test_db",
       "path": "/api/test-db",
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "loan_applications",
         "client_events",
-        "email_messages",
-        "rpc:pg_catalog.pg_tables"
+        "email_messages"
       ],
       "fileRef": {
-        "file": "api/test-db/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/test-db/route.ts",
+        "lines": "1-65"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_test-insert",
+      "id": "post_test_insert",
       "path": "/api/test-insert",
       "methods": [
         "POST"
       ],
-      "description": "No description",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "email"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "loan_applications",
         "client_events",
         "email_accounts"
       ],
       "fileRef": {
-        "file": "api/test-insert/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/test-insert/route.ts",
+        "lines": "1-79"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_test-margill_submit",
+      "id": "post_test_margill_submit",
       "path": "/api/test-margill/submit",
       "methods": [
         "POST"
       ],
       "description": "POST /api/test-margill/submit",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "external_api",
-        "email"
-      ],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/test-margill/submit/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/test-margill/submit/route.ts",
+        "lines": "1-288"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_test-tool",
+      "id": "post_test_tool",
       "path": "/api/test-tool",
       "methods": [
         "POST"
       ],
-      "description": "API: Test des outils Claude",
-      "auth": "none",
-      "output": [
-        200
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
+        500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/test-tool/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/test-tool/route.ts",
+        "lines": "1-121"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_test_demo",
       "path": "/api/test/demo",
       "methods": [
-        "GET"
-      ],
-      "description": "API: Test route creation",
-      "auth": "none",
-      "output": [
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [],
-      "fileRef": {
-        "file": "api/test/demo/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_test_demo",
-      "path": "/api/test/demo",
-      "methods": [
+        "GET",
         "POST"
       ],
-      "description": "API: Test route creation",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/test/demo/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/test/demo/route.ts",
+        "lines": "1-52"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_upload-documents",
+      "id": "post_upload_documents",
       "path": "/api/upload-documents",
       "methods": [
         "POST"
       ],
       "description": "POST /api/upload-documents",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [],
+      "externalCalls": [],
+      "tablesTouched": [],
       "fileRef": {
-        "file": "api/upload-documents/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/upload-documents/route.ts",
+        "lines": "1-74"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "post_vercel_drains_speed-insights",
+      "id": "post_vercel_drains_speed_insights",
       "path": "/api/vercel/drains/speed-insights",
       "methods": [
         "POST"
       ],
-      "description": "src/app/api/vercel/drains/speed-insights/route.ts",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "vercel_speed_insights_raw"
       ],
       "fileRef": {
-        "file": "api/vercel/drains/speed-insights/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/vercel/drains/speed-insights/route.ts",
+        "lines": "1-105"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_vopay_stats",
@@ -4334,21 +4442,23 @@
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "external_api"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/vopay/stats/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/vopay/stats/route.ts",
+        "lines": "1-52"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_vopay_stats_clientId",
@@ -4356,21 +4466,23 @@
       "methods": [
         "GET"
       ],
-      "description": "No description",
-      "auth": "none",
-      "output": [
+      "description": "No description available",
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         500
       ],
-      "external_calls": [
-        "external_api"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/vopay/stats/[clientId]/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/vopay/stats/[clientId]/route.ts",
+        "lines": "1-54"
+      },
+      "middleware": [],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "post_webhooks_quickbooks",
@@ -4379,17 +4491,16 @@
         "POST"
       ],
       "description": "Verify QuickBooks webhook signature",
-      "auth": "none",
-      "output": [
+      "auth": "Bearer Token",
+      "inputSchema": null,
+      "outputCodes": [
         401,
         500
       ],
-      "external_calls": [
-        "fetch",
-        "webhook",
-        "email"
+      "externalCalls": [
+        "quickbooks.intuit.com"
       ],
-      "tables_touched": [
+      "tablesTouched": [
         "quickbooks_webhooks",
         "quickbooks_tokens",
         "quickbooks_customers",
@@ -4399,468 +4510,524 @@
         "quickbooks_vendors"
       ],
       "fileRef": {
-        "file": "api/webhooks/quickbooks/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/quickbooks/route.ts",
+        "lines": "1-407"
+      },
+      "middleware": [
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_webhooks_vopay",
       "path": "/api/webhooks/vopay",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Webhook Endpoint",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "payment_schedule_versions",
         "payment_installments",
         "payment_events"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/route.ts",
+        "lines": "1-277"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_webhooks_vopay_account-balance",
+      "id": "get_webhooks_vopay_account_balance",
       "path": "/api/webhooks/vopay/account-balance",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Account Balance Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/account-balance/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/account-balance/route.ts",
+        "lines": "1-122"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_webhooks_vopay_account-limit",
+      "id": "get_webhooks_vopay_account_limit",
       "path": "/api/webhooks/vopay/account-limit",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Account Limit Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/account-limit/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/account-limit/route.ts",
+        "lines": "1-122"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_webhooks_vopay_account-status",
+      "id": "get_webhooks_vopay_account_status",
       "path": "/api/webhooks/vopay/account-status",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Account Status Webhook",
-      "auth": "api_key",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/account-status/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/account-status/route.ts",
+        "lines": "1-122"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_webhooks_vopay_account-verification",
+      "id": "get_webhooks_vopay_account_verification",
       "path": "/api/webhooks/vopay/account-verification",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Account Verification Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/account-verification/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/account-verification/route.ts",
+        "lines": "1-129"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_webhooks_vopay_bank-account",
+      "id": "get_webhooks_vopay_bank_account",
       "path": "/api/webhooks/vopay/bank-account",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Bank Account Creation Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/bank-account/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/bank-account/route.ts",
+        "lines": "1-120"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_webhooks_vopay_batch",
       "path": "/api/webhooks/vopay/batch",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Batch Request Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/batch/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/batch/route.ts",
+        "lines": "1-117"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_webhooks_vopay_batch-detail",
+      "id": "get_webhooks_vopay_batch_detail",
       "path": "/api/webhooks/vopay/batch-detail",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Batch Detail Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/batch-detail/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/batch-detail/route.ts",
+        "lines": "1-112"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_webhooks_vopay_client-account-balance",
+      "id": "get_webhooks_vopay_client_account_balance",
       "path": "/api/webhooks/vopay/client-account-balance",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Client Account Balance Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/client-account-balance/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/client-account-balance/route.ts",
+        "lines": "1-114"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_webhooks_vopay_credit-card",
+      "id": "get_webhooks_vopay_credit_card",
       "path": "/api/webhooks/vopay/credit-card",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Credit Card Connection Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/credit-card/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/credit-card/route.ts",
+        "lines": "1-117"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_webhooks_vopay_debit-card",
+      "id": "get_webhooks_vopay_debit_card",
       "path": "/api/webhooks/vopay/debit-card",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Debit Card Connection Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/debit-card/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/debit-card/route.ts",
+        "lines": "1-117"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_webhooks_vopay_elinx",
       "path": "/api/webhooks/vopay/elinx",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay eLinx Status Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/elinx/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/elinx/route.ts",
+        "lines": "1-128"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_webhooks_vopay_payment-received",
+      "id": "get_webhooks_vopay_payment_received",
       "path": "/api/webhooks/vopay/payment-received",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Payment Received Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/payment-received/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/payment-received/route.ts",
+        "lines": "1-115"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
       "id": "get_webhooks_vopay_scheduled",
       "path": "/api/webhooks/vopay/scheduled",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Scheduled Transaction Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/scheduled/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/scheduled/route.ts",
+        "lines": "1-116"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_webhooks_vopay_transaction-group",
+      "id": "get_webhooks_vopay_transaction_group",
       "path": "/api/webhooks/vopay/transaction-group",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Transaction Group Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/transaction-group/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/transaction-group/route.ts",
+        "lines": "1-113"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_webhooks_vopay_virtual-accounts",
+      "id": "get_webhooks_vopay_virtual_accounts",
       "path": "/api/webhooks/vopay/virtual-accounts",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "description": "VoPay Virtual Accounts Webhook",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         401,
         500
       ],
-      "external_calls": [
-        "external_api",
-        "webhook"
-      ],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "webhook_logs",
         "vopay_objects"
       ],
       "fileRef": {
-        "file": "api/webhooks/vopay/virtual-accounts/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/webhooks/vopay/virtual-accounts/route.ts",
+        "lines": "1-115"
+      },
+      "middleware": [
+        "Performance Tracking"
+      ],
+      "rateLimit": false,
+      "cors": false
     },
     {
-      "id": "get_worker_process-jobs",
+      "id": "get_worker_process_jobs",
       "path": "/api/worker/process-jobs",
       "methods": [
-        "GET"
-      ],
-      "description": "API Route pour traiter les jobs d'analyse en attente",
-      "auth": "none",
-      "output": [
-        400,
-        500
-      ],
-      "external_calls": [],
-      "tables_touched": [
-        "analysis_jobs"
-      ],
-      "fileRef": {
-        "file": "api/worker/process-jobs/route.ts",
-        "lines": "1-N"
-      }
-    },
-    {
-      "id": "post_worker_process-jobs",
-      "path": "/api/worker/process-jobs",
-      "methods": [
+        "GET",
         "POST"
       ],
       "description": "API Route pour traiter les jobs d'analyse en attente",
-      "auth": "none",
-      "output": [
+      "auth": "Unknown / To be verified",
+      "inputSchema": null,
+      "outputCodes": [
         400,
         500
       ],
-      "external_calls": [],
-      "tables_touched": [
+      "externalCalls": [],
+      "tablesTouched": [
         "analysis_jobs"
       ],
       "fileRef": {
-        "file": "api/worker/process-jobs/route.ts",
-        "lines": "1-N"
-      }
+        "file": "src/app/api/worker/process-jobs/route.ts",
+        "lines": "1-147"
+      },
+      "middleware": [
+        "Runtime: nodejs",
+        "Dynamic: force-dynamic"
+      ],
+      "rateLimit": false,
+      "cors": false
     }
   ]
 }
