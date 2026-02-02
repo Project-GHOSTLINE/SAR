@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import {
   LayoutDashboard, MessageSquare, DollarSign, FileText,
   Wrench, Webhook, BarChart3, LogOut, Menu, X,
-  ChevronDown, User, Clock, Bell, Shield, Database, Download, Zap, TrendingUp, Activity, Code
+  ChevronDown, User, Clock, Bell, Shield, Database, Download, Zap, TrendingUp, Activity, Code, Rocket
 } from 'lucide-react'
 
 interface AdminNavProps {
@@ -175,6 +175,12 @@ export default function AdminNav({ currentPage }: AdminNavProps) {
       name: 'API Explorer',
       href: '/admin/api-explorer',
       icon: Code,
+      badge: null
+    },
+    {
+      name: 'DevOps',
+      href: '/admin/dashboard?tab=devops',
+      icon: Rocket,
       badge: null
     }
   ]

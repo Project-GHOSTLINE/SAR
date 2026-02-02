@@ -17,6 +17,7 @@ import AdminNav from '@/components/admin/AdminNav'
 import SupportView from '@/components/admin/SupportView'
 import AnalysesView from '@/components/admin/AnalysesView'
 import VoPayMetricsTab from '@/components/admin/VoPayMetricsTab'
+import DevOpsView from '@/components/admin/DevOpsView'
 
 interface Message {
   id: string
@@ -300,7 +301,7 @@ function getOptionButtonColor(option: string, isSelected: boolean): string {
 function AdminDashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const selectedView = (searchParams.get('tab') || 'dashboard') as 'dashboard' | 'messages' | 'vopay' | 'margill' | 'support' | 'analyses'
+  const selectedView = (searchParams.get('tab') || 'dashboard') as 'dashboard' | 'messages' | 'vopay' | 'margill' | 'support' | 'analyses' | 'devops'
 
   const [loading, setLoading] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
@@ -3539,6 +3540,11 @@ function AdminDashboardContent() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* DevOps View */}
+        {selectedView === 'devops' && (
+          <DevOpsView />
         )}
       </main>
 
