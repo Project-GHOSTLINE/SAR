@@ -224,6 +224,28 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // ============================================
+  // PARTNERS AUTH PROTECTION
+  // ============================================
+  // Protect ALL partners pages except login page and API routes
+  const isPartnersLogin = (hostname.startsWith('partners.') && pathname === '/') ||
+                          pathname === '/partners'
+  const isPartnersRoute = pathname.startsWith('/partners') && pathname !== '/partners'
+  const isPartnersSubdomainRoute = hostname.startsWith('partners.') &&
+                                    pathname !== '/' &&
+                                    !pathname.startsWith('/_next') &&
+                                    !isApiRoute
+
+  if ((isPartnersRoute || isPartnersSubdomainRoute) && !isPartnersLogin) {
+    const session = request.cookies.get('partners-dev-session')?.value
+
+    if (session !== 'authenticated') {
+      // Not authenticated - redirect to partners login
+      const loginUrl = hostname.startsWith('partners.') ? '/' : '/partners'
+      return NextResponse.redirect(new URL(loginUrl, request.url))
+    }
+  }
+
   // Handle client subdomain
   if (hostname.startsWith('client.')) {
     if (pathname === '/') {
