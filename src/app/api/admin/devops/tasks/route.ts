@@ -92,9 +92,13 @@ export async function GET(request: NextRequest) {
       offset
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erreur API GET /devops/tasks:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({
+      error: 'Erreur serveur',
+      details: error.message,
+      stack: error.stack
+    }, { status: 500 })
   }
 }
 
