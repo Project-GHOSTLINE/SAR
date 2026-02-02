@@ -110,21 +110,32 @@ export async function middleware(request: NextRequest) {
   }
 
   // Rewrite subdomain requests to /partners/* routes
-  if (isPartnersSubdomain && !pathname.startsWith('/partners') && !pathname.startsWith('/_next') && !pathname.startsWith('/api/partners')) {
+  if (isPartnersSubdomain && !pathname.startsWith('/partners') && !pathname.startsWith('/_next')) {
     const url = request.nextUrl.clone()
 
     // Map subdomain root to /partners
     if (pathname === '/' || pathname === '') {
       url.pathname = '/partners'
+      return NextResponse.rewrite(url)
     }
-    // Map subdomain paths to /partners/* paths
-    else if (pathname.startsWith('/api/')) {
+    // Map partner-specific API calls to /api/partners/*
+    else if (pathname.startsWith('/api/partners/')) {
+      // Already correct, no rewrite needed
+    }
+    // Map legacy partner API calls (without /partners prefix) to /api/partners/*
+    else if (pathname.match(/^\/api\/(me|activate|credit-engine|event|feedback)/)) {
       url.pathname = `/api/partners${pathname.replace('/api/', '/')}`
-    } else {
-      url.pathname = `/partners${pathname}`
+      return NextResponse.rewrite(url)
     }
-
-    return NextResponse.rewrite(url)
+    // Keep all other API calls unchanged (telemetry, admin, webhooks, etc.)
+    else if (pathname.startsWith('/api/')) {
+      // Continue without rewriting - these are shared APIs
+    }
+    // Map page routes to /partners/* paths
+    else if (!pathname.startsWith('/api/')) {
+      url.pathname = `/partners${pathname}`
+      return NextResponse.rewrite(url)
+    }
   }
 
   // TELEMETRY: Generate trace_id for request tracing
