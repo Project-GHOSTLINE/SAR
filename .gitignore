@@ -46,6 +46,7 @@ next-env.d.ts
 .env*.local
 .env.production
 .env.vercel-prod
+.env.vercel
 .env.test
 temp/
 
@@ -55,6 +56,14 @@ public/deep-recon-report.json
 .env.local.backup
 .env.local.test
 .env*.bak*
+
+# Backup files (all variants)
+*.backup
+*-backup-*
+*.old
+*.bak
+*.bak[0-9]
+*.bak[0-9][0-9]
 
 # Docker volumes
 n8n_data/
