@@ -230,11 +230,12 @@ export async function POST(request: NextRequest) {
       .eq('id', invite.id)
 
     // ============================================
-    // 7. Créer session Supabase
+    // 7. Créer session Supabase (via signIn)
     // ============================================
 
-    const { data: sessionData, error: sessionError } = await supabase.auth.admin.createSession({
-      user_id: userId
+    const { data: sessionData, error: sessionError } = await supabase.auth.signInWithPassword({
+      email: partnerEmail,
+      password: randomPassword
     })
 
     if (sessionError || !sessionData.session) {
@@ -247,6 +248,9 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    const accessToken = sessionData.session.access_token
+    const refreshToken = sessionData.session.refresh_token
 
     // ============================================
     // 8. Retourner response avec cookie httpOnly
@@ -263,7 +267,7 @@ export async function POST(request: NextRequest) {
 
     // Cookie httpOnly sécurisé (Domain=.solutionargentrapide.ca)
     // Permet partage session entre solutionargentrapide.ca et partners.solutionargentrapide.ca
-    res.cookies.set('sb-access-token', sessionData.session.access_token, {
+    res.cookies.set('sb-access-token', accessToken, {
       httpOnly: true,
       secure: true, // HTTPS uniquement
       sameSite: 'lax', // Protection CSRF (lax pour allow navigation depuis emails/liens)
@@ -272,7 +276,7 @@ export async function POST(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 7 // 7 jours
     })
 
-    res.cookies.set('sb-refresh-token', sessionData.session.refresh_token, {
+    res.cookies.set('sb-refresh-token', refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
