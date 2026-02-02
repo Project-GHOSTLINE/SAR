@@ -12,7 +12,7 @@ import { z } from 'zod'
 import { getClientIP } from '@/lib/rate-limit'
 
 const FeedbackSchema = z.object({
-  answers: z.record(z.any()),
+  answers: z.record(z.string(), z.any()),
   submitted_from: z.string().optional().default('web')
 })
 
