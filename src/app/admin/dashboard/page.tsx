@@ -13,7 +13,7 @@ import {
   Monitor, Smartphone, Globe, Chrome, MapPin, Languages,
   Maximize2, Link2, TrendingUp as Campaign, Target, Download, Trash2
 } from 'lucide-react'
-import AdminNav from '@/components/admin/AdminNav'
+import AdminSidebar from '@/components/admin/AdminSidebar'
 import SupportView from '@/components/admin/SupportView'
 import AnalysesView from '@/components/admin/AnalysesView'
 import VoPayMetricsTab from '@/components/admin/VoPayMetricsTab'
@@ -622,11 +622,12 @@ function AdminDashboardContent() {
     : `/admin/dashboard?tab=${selectedView}`
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-emerald-50 flex flex-col">
-      <AdminNav currentPage={currentPage} />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-emerald-50">
+      <AdminSidebar currentPage={currentPage} />
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+      {/* Main Content - Adjusted for sidebar */}
+      <main className="lg:pl-64 pt-16 lg:pt-0 min-h-screen">
+        <div className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
         {selectedView === 'dashboard' && (
           <>
             {/* Welcome Section */}
@@ -3546,6 +3547,7 @@ function AdminDashboardContent() {
         {selectedView === 'devops' && (
           <DevOpsView />
         )}
+        </div>
       </main>
 
       {/* Email Preview Modal */}
