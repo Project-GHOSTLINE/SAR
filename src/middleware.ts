@@ -186,15 +186,11 @@ export async function middleware(request: NextRequest) {
 
   // Handle partners subdomain (MVP Partners program)
   if (hostname.startsWith('partners.')) {
-    // Rewrite root to /invite (landing page)
     if (pathname === '/') {
-      return NextResponse.rewrite(new URL('/invite', request.url))
+      return NextResponse.rewrite(new URL('/partners', request.url))
     }
-    // Rewrite all partners routes to /(partners) group (no auth check here, handled in pages)
-    if (!isApiRoute && !pathname.startsWith('/_next')) {
-      // Allow direct access to /(partners) routes: /invite, /onboarding, /dashboard, etc.
-      // Routes are already defined in app/(partners)/*
-      return NextResponse.next()
+    if (!pathname.startsWith('/partners') && !isApiRoute && !pathname.startsWith('/_next')) {
+      return NextResponse.rewrite(new URL('/partners' + pathname, request.url))
     }
   }
 

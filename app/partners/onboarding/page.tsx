@@ -38,7 +38,7 @@ export default function OnboardingPage() {
   const handleComplete = async () => {
     // Note: Preferences are optional, just redirect to dashboard
     // Si on voulait sauvegarder, on ferait un PATCH /api/partners/me (à implémenter si besoin)
-    router.push('/dashboard')
+    router.push('/partners/dashboard')
   }
 
   if (step === 1) {
@@ -81,7 +81,7 @@ export default function OnboardingPage() {
           </button>
 
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/partners/dashboard')}
             className="w-full mt-3 text-gray-600 hover:text-gray-900 text-sm"
           >
             Passer cette étape
@@ -137,7 +137,7 @@ export default function OnboardingPage() {
         </div>
 
         <button
-          onClick={() => router.push('/dashboard')}
+          onClick={() => router.push('/partners/dashboard')}
           className="w-full mt-3 text-gray-600 hover:text-gray-900 text-sm"
         >
           Passer cette étape

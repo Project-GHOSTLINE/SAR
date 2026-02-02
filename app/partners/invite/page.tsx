@@ -45,7 +45,7 @@ export default function InvitePage() {
       }
 
       // Activation réussie, redirect vers onboarding
-      router.push('/onboarding')
+      router.push('/partners/onboarding')
     } catch (err: any) {
       setError(err.message || 'Erreur serveur')
       setIsLoading(false)

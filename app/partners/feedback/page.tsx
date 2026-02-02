@@ -68,7 +68,7 @@ export default function FeedbackPage() {
             Votre feedback nous aide à améliorer le projet.
           </p>
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/partners/dashboard')}
             className="bg-blue-600 text-white font-medium py-3 px-6 rounded-lg hover:bg-blue-700 transition"
           >
             Retour au tableau de bord
@@ -197,7 +197,7 @@ export default function FeedbackPage() {
           <div className="flex gap-4 pt-4">
             <button
               type="button"
-              onClick={() => router.push('/dashboard')}
+              onClick={() => router.push('/partners/dashboard')}
               className="flex-1 bg-gray-100 text-gray-700 font-medium py-3 px-4 rounded-lg hover:bg-gray-200 transition"
             >
               Passer

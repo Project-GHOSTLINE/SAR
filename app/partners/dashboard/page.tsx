@@ -164,7 +164,7 @@ export default function DashboardPage() {
 
           <div className="border-t border-gray-200 pt-4">
             <Link
-              href="/credits"
+              href="/partners/credits"
               className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
               Voir le détail des crédits →
@@ -184,7 +184,7 @@ export default function DashboardPage() {
             pourraient bénéficier de nos services.
           </p>
           <Link
-            href="/contribute"
+            href="/partners/contribute"
             className="inline-block bg-blue-600 text-white font-medium py-3 px-6 rounded-lg hover:bg-blue-700 transition"
           >
             Partager une information
@@ -226,7 +226,7 @@ export default function DashboardPage() {
         <p className="text-center text-sm text-gray-600">
           Questions sur le projet ?{' '}
           <Link
-            href="/project"
+            href="/partners/project"
             className="text-blue-600 hover:text-blue-700 font-medium"
           >
             Voir pourquoi ce projet existe

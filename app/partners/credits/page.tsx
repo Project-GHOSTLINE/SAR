@@ -187,7 +187,7 @@ export default function CreditsPage() {
         {/* Link retour dashboard */}
         <div className="mt-8 text-center">
           <Link
-            href="/dashboard"
+            href="/partners/dashboard"
             className="text-blue-600 hover:text-blue-700 text-sm font-medium"
           >
             ← Retour au tableau de bord

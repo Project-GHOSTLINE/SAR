@@ -30,13 +30,13 @@ export default function PartnersLayout({ children }: { children: ReactNode }) {
             </div>
             <nav className="flex gap-4 text-sm">
               <Link
-                href="/project"
+                href="/partners/project"
                 className="text-gray-600 hover:text-gray-900 transition"
               >
                 Le projet
               </Link>
               <Link
-                href="/dashboard"
+                href="/partners/dashboard"
                 className="text-gray-600 hover:text-gray-900 transition"
               >
                 Tableau de bord
