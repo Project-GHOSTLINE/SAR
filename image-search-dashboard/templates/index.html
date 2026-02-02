@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👤 Image Search Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-btn.active { background-color: #3b82f6; color: white; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 mb-8">
+            <h1 class="text-3xl font-bold mb-2">👤 Image Search Dashboard</h1>
+            <p class="text-blue-100">Reconnaissance faciale locale - Recherche dans vos images</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Images Indexées</div>
+                <div class="text-3xl font-bold text-blue-400" id="statImages">0</div>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Visages Détectés</div>
+                <div class="text-3xl font-bold text-purple-400" id="statFaces">0</div>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Statut</div>
+                <div class="text-xl font-bold text-green-400" id="statStatus">Prêt</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex space-x-2 mb-6 border-b border-gray-700">
+            <button class="tab-btn active px-6 py-3 rounded-t-lg font-medium transition" onclick="switchTab('scan')">
+                📁 Scanner
+            </button>
+            <button class="tab-btn px-6 py-3 rounded-t-lg font-medium transition" onclick="switchTab('search')">
+                🔍 Rechercher
+            </button>
+            <button class="tab-btn px-6 py-3 rounded-t-lg font-medium transition" onclick="switchTab('gallery')">
+                🖼️ Galerie
+            </button>
+            <button class="tab-btn px-6 py-3 rounded-t-lg font-medium transition" onclick="switchTab('settings')">
+                ⚙️ Paramètres
+            </button>
+        </div>
+
+        <!-- Tab: Scanner -->
+        <div id="tab-scan" class="tab-content active">
+            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <h2 class="text-xl font-bold mb-4">Scanner un Dossier d'Images</h2>
+                <p class="text-gray-400 mb-4">Indexer toutes les images d'un dossier et détecter les visages automatiquement.</p>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Chemin du Dossier</label>
+                    <input type="text" id="scanPath"
+                           class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white"
+                           placeholder="/Users/xunit/Desktop/photos">
+                </div>
+
+                <button onclick="startScan()"
+                        class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-medium transition">
+                    🚀 Commencer le Scan
+                </button>
+
+                <div id="scanResults" class="mt-6 hidden">
+                    <h3 class="text-lg font-bold mb-2">Résultats</h3>
+                    <div id="scanProgress" class="bg-gray-700 rounded-lg p-4 font-mono text-sm"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Search -->
+        <div id="tab-search" class="tab-content">
+            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <h2 class="text-xl font-bold mb-4">Rechercher une Personne</h2>
+                <p class="text-gray-400 mb-4">Uploader une photo pour trouver toutes les images contenant cette personne.</p>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Choisir une Photo</label>
+                    <input type="file" id="searchImage" accept="image/*"
+                           class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
+                </div>
+
+                <button onclick="searchFace()"
+                        class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-medium transition">
+                    🔍 Rechercher
+                </button>
+
+                <div id="searchResults" class="mt-6"></div>
+            </div>
+        </div>
+
+        <!-- Tab: Gallery -->
+        <div id="tab-gallery" class="tab-content">
+            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <h2 class="text-xl font-bold mb-4">Galerie d'Images Indexées</h2>
+                <button onclick="loadGallery()"
+                        class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg mb-4 text-sm">
+                    🔄 Recharger
+                </button>
+                <div id="galleryGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+            </div>
+        </div>
+
+        <!-- Tab: Settings -->
+        <div id="tab-settings" class="tab-content">
+            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <h2 class="text-xl font-bold mb-4">Paramètres</h2>
+
+                <div class="space-y-4">
+                    <div class="border-b border-gray-700 pb-4">
+                        <h3 class="font-medium mb-2">Base de Données</h3>
+                        <p class="text-sm text-gray-400 mb-3">Toutes les données sont stockées localement dans faces.db</p>
+                        <button onclick="clearDatabase()"
+                                class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm">
+                            🗑️ Effacer Toutes les Données
+                        </button>
+                    </div>
+
+                    <div class="border-b border-gray-700 pb-4">
+                        <h3 class="font-medium mb-2">Reconnaissance Faciale</h3>
+                        <p class="text-sm text-gray-400">Utilise face_recognition (dlib) pour détecter et comparer les visages</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-medium mb-2">Formats Supportés</h3>
+                        <p class="text-sm text-gray-400">JPG, JPEG, PNG, GIF, BMP</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load stats on page load
+        loadStats();
+        setInterval(loadStats, 5000); // Refresh every 5 seconds
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Load gallery if gallery tab
+            if (tabName === 'gallery') {
+                loadGallery();
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                document.getElementById('statImages').textContent = data.total_images;
+                document.getElementById('statFaces').textContent = data.total_faces;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function startScan() {
+            const path = document.getElementById('scanPath').value;
+            if (!path) {
+                alert('Veuillez entrer un chemin de dossier');
+                return;
+            }
+
+            document.getElementById('scanResults').classList.remove('hidden');
+            document.getElementById('scanProgress').innerHTML = '⏳ Scan en cours...';
+            document.getElementById('statStatus').textContent = 'Scanning...';
+
+            try {
+                const response = await fetch('/api/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ directory: path })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    document.getElementById('scanProgress').innerHTML = `❌ Erreur: ${data.error}`;
+                } else {
+                    document.getElementById('scanProgress').innerHTML = `
+                        ✅ Scan terminé!<br>
+                        📊 Images traitées: ${data.processed}<br>
+                        👤 Visages trouvés: ${data.faces_found}<br>
+                        ${data.errors.length > 0 ? `⚠️ Erreurs: ${data.errors.length}` : ''}
+                    `;
+                    loadStats();
+                }
+            } catch (error) {
+                document.getElementById('scanProgress').innerHTML = `❌ Erreur: ${error.message}`;
+            }
+
+            document.getElementById('statStatus').textContent = 'Prêt';
+        }
+
+        async function searchFace() {
+            const fileInput = document.getElementById('searchImage');
+            if (!fileInput.files.length) {
+                alert('Veuillez choisir une image');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+
+            document.getElementById('searchResults').innerHTML = '⏳ Recherche en cours...';
+            document.getElementById('statStatus').textContent = 'Searching...';
+
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    document.getElementById('searchResults').innerHTML = `❌ ${data.error}`;
+                } else if (data.matches_found === 0) {
+                    document.getElementById('searchResults').innerHTML = '😕 Aucun match trouvé';
+                } else {
+                    let html = `<h3 class="text-lg font-bold mb-4">✅ ${data.matches_found} match(s) trouvé(s)</h3>`;
+                    html += '<div class="grid grid-cols-2 md:grid-cols-3 gap-4">';
+
+                    data.matches.forEach(match => {
+                        html += `
+                            <div class="bg-gray-700 rounded-lg p-3">
+                                <img src="/api/image/${encodeURIComponent(match.path)}"
+                                     class="w-full h-40 object-cover rounded mb-2"
+                                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23333%22 width=%22200%22 height=%22200%22/%3E%3Ctext fill=%22%23666%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22%3EImage%3C/text%3E%3C/svg%3E'">
+                                <div class="text-xs text-gray-400 truncate">${match.filename}</div>
+                                <div class="text-sm font-bold text-green-400">${match.similarity.toFixed(1)}% match</div>
+                            </div>
+                        `;
+                    });
+
+                    html += '</div>';
+                    document.getElementById('searchResults').innerHTML = html;
+                }
+            } catch (error) {
+                document.getElementById('searchResults').innerHTML = `❌ Erreur: ${error.message}`;
+            }
+
+            document.getElementById('statStatus').textContent = 'Prêt';
+        }
+
+        async function loadGallery() {
+            document.getElementById('galleryGrid').innerHTML = '⏳ Chargement...';
+
+            try {
+                const response = await fetch('/api/gallery');
+                const data = await response.json();
+
+                if (data.images.length === 0) {
+                    document.getElementById('galleryGrid').innerHTML = '📭 Aucune image indexée';
+                    return;
+                }
+
+                let html = '';
+                data.images.forEach(img => {
+                    html += `
+                        <div class="bg-gray-700 rounded-lg p-2">
+                            <img src="/api/image/${encodeURIComponent(img.path)}"
+                                 class="w-full h-32 object-cover rounded mb-2"
+                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23333%22 width=%22200%22 height=%22200%22/%3E%3Ctext fill=%22%23666%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22%3EImage%3C/text%3E%3C/svg%3E'">
+                            <div class="text-xs text-gray-400 truncate">${img.filename}</div>
+                            <div class="text-xs text-purple-400">${img.faces_count} visage(s)</div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('galleryGrid').innerHTML = html;
+            } catch (error) {
+                document.getElementById('galleryGrid').innerHTML = `❌ Erreur: ${error.message}`;
+            }
+        }
+
+        async function clearDatabase() {
+            if (!confirm('Êtes-vous sûr de vouloir effacer toutes les données?')) {
+                return;
+            }
+
+            try {
+                await fetch('/api/clear', { method: 'POST' });
+                alert('✅ Base de données effacée');
+                loadStats();
+                loadGallery();
+            } catch (error) {
+                alert('❌ Erreur: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

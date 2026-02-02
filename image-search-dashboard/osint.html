@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 OSINT Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; margin-right: 0.5rem; }
+        .badge-success { background: #10b981; color: white; }
+        .badge-warning { background: #f59e0b; color: white; }
+        .badge-danger { background: #ef4444; color: white; }
+        .badge-info { background: #3b82f6; color: white; }
+        .progress { background: #334155; height: 8px; border-radius: 9999px; overflow: hidden; }
+        .progress-bar { background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; transition: width 0.3s; }
+        .btn { padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4); }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .metric { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #334155; }
+        .metric:last-child { border-bottom: none; }
+    </style>
+</head>
+<body class="text-white">
+    <div style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 1rem; padding: 2rem; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;">🔍 OSINT Analysis</h1>
+                    <p style="opacity: 0.9;" id="imageId">Chargement...</p>
+                </div>
+                <button onclick="window.close()" class="btn-primary btn">✕ Fermer</button>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+            <!-- Left: Image Preview -->
+            <div>
+                <div class="card">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">📸 Image</h3>
+                    <img id="previewImage" src="" alt="Preview" style="width: 100%; border-radius: 0.5rem; margin-bottom: 1rem;">
+                    <div id="quickStats" style="font-size: 0.875rem; color: #94a3b8;"></div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">🎯 Actions Rapides</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <button class="btn btn-primary" onclick="reverseImageSearch('google')">
+                            🔍 Google Images
+                        </button>
+                        <button class="btn btn-primary" onclick="reverseImageSearch('yandex')">
+                            🔍 Yandex Images
+                        </button>
+                        <button class="btn btn-primary" onclick="reverseImageSearch('tineye')">
+                            🔍 TinEye
+                        </button>
+                        <button class="btn btn-primary" onclick="downloadReport()">
+                            📥 Télécharger Rapport
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: OSINT Data -->
+            <div>
+                <!-- Metadata -->
+                <div class="card">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">📊 Métadonnées Techniques</h3>
+                    <div id="technicalMeta" style="font-size: 0.875rem;"></div>
+                </div>
+
+                <!-- EXIF Data -->
+                <div class="card">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">📷 Données EXIF</h3>
+                    <div id="exifData" style="font-size: 0.875rem;"></div>
+                </div>
+
+                <!-- GPS -->
+                <div class="card" id="gpsCard" style="display: none;">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">📍 Géolocalisation</h3>
+                    <div id="gpsData"></div>
+                    <div id="mapContainer" style="margin-top: 1rem; height: 300px; background: #334155; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
+                        <a id="googleMapsLink" target="_blank" class="btn btn-primary">Voir sur Google Maps</a>
+                    </div>
+                </div>
+
+                <!-- Source & Links -->
+                <div class="card">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">🔗 Sources & Liens</h3>
+                    <div id="sourceLinks" style="font-size: 0.875rem;"></div>
+                </div>
+
+                <!-- User Data -->
+                <div class="card">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">👤 Données Utilisateur</h3>
+                    <div id="userData" style="font-size: 0.875rem;">
+                        <div class="metric">
+                            <span>Tags:</span>
+                            <input type="text" id="userTags" placeholder="Ajouter tags..." style="background: #0f172a; border: 1px solid #334155; border-radius: 0.25rem; padding: 0.25rem 0.5rem; color: white; width: 60%;">
+                        </div>
+                        <div class="metric">
+                            <span>Commentaire:</span>
+                            <input type="text" id="userComment" placeholder="Ajouter commentaire..." style="background: #0f172a; border: 1px solid #334155; border-radius: 0.25rem; padding: 0.25rem 0.5rem; color: white; width: 60%;">
+                        </div>
+                        <div class="metric">
+                            <span>Note:</span>
+                            <div id="ratingStars" style="font-size: 1.5rem; cursor: pointer;">
+                                <span onclick="setRating(1)">☆</span>
+                                <span onclick="setRating(2)">☆</span>
+                                <span onclick="setRating(3)">☆</span>
+                                <span onclick="setRating(4)">☆</span>
+                                <span onclick="setRating(5)">☆</span>
+                            </div>
+                        </div>
+                        <div class="metric">
+                            <span>Catégorie:</span>
+                            <select id="userCategory" style="background: #0f172a; border: 1px solid #334155; border-radius: 0.25rem; padding: 0.25rem 0.5rem; color: white;">
+                                <option value="">Aucune</option>
+                                <option value="portrait">Portrait</option>
+                                <option value="landscape">Paysage</option>
+                                <option value="document">Document</option>
+                                <option value="screenshot">Screenshot</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveUserData()" style="margin-top: 1rem; width: 100%;">
+                            💾 Sauvegarder
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Face Recognition Results -->
+                <div class="card" id="faceCard" style="display: none;">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">👤 Reconnaissance Faciale</h3>
+                    <div id="faceData"></div>
+                </div>
+
+                <!-- Similar Images -->
+                <div class="card">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">🔄 Images Similaires</h3>
+                    <button class="btn btn-primary" onclick="findSimilar()">Rechercher Images Similaires</button>
+                    <div id="similarImages" style="margin-top: 1rem;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const imageId = urlParams.get('id');
+        const imageSrc = urlParams.get('src');
+
+        let currentRating = 0;
+        let metadata = {};
+
+        async function loadOSINT() {
+            if (!imageId || !imageSrc) {
+                alert('Image ID ou source manquante');
+                return;
+            }
+
+            document.getElementById('imageId').textContent = `Image ID: ${imageId}`;
+            document.getElementById('previewImage').src = decodeURIComponent(imageSrc);
+
+            // Load metadata
+            try {
+                const response = await fetch(`http://localhost:8000/api/get-metadata/${imageId}`);
+                if (response.ok) {
+                    metadata = await response.json();
+                    displayMetadata();
+                }
+            } catch (error) {
+                console.error('Error loading metadata:', error);
+            }
+
+            // Load face recognition data
+            loadFaceData();
+        }
+
+        function displayMetadata() {
+            // Quick stats
+            document.getElementById('quickStats').innerHTML = `
+                <div><strong>Fichier:</strong> ${metadata.original_filename || imageId}</div>
+                <div><strong>Taille:</strong> ${(metadata.file_size / 1024).toFixed(1)} KB</div>
+                <div><strong>Format:</strong> ${metadata.format}</div>
+            `;
+
+            // Technical metadata
+            document.getElementById('technicalMeta').innerHTML = `
+                <div class="metric"><span>Dimensions:</span><span>${metadata.width} × ${metadata.height} px</span></div>
+                <div class="metric"><span>Format:</span><span>${metadata.format}</span></div>
+                <div class="metric"><span>Taille:</span><span>${(metadata.file_size / 1024).toFixed(2)} KB</span></div>
+                <div class="metric"><span>Téléchargé:</span><span>${new Date(metadata.downloaded_at).toLocaleString()}</span></div>
+                ${metadata.source_site ? `<div class="metric"><span>Site source:</span><span>${metadata.source_site}</span></div>` : ''}
+            `;
+
+            // EXIF data
+            if (metadata.has_exif) {
+                let exifHtml = '';
+                if (metadata.camera_make) exifHtml += `<div class="metric"><span>Caméra:</span><span>${metadata.camera_make} ${metadata.camera_model || ''}</span></div>`;
+                if (metadata.taken_at) exifHtml += `<div class="metric"><span>Prise le:</span><span>${metadata.taken_at}</span></div>`;
+                document.getElementById('exifData').innerHTML = exifHtml || '<div style="color: #94a3b8;">Aucune donnée EXIF</div>';
+            } else {
+                document.getElementById('exifData').innerHTML = '<div style="color: #94a3b8;">Aucune donnée EXIF disponible</div>';
+            }
+
+            // GPS
+            if (metadata.gps_latitude && metadata.gps_longitude) {
+                document.getElementById('gpsCard').style.display = 'block';
+                document.getElementById('gpsData').innerHTML = `
+                    <div class="metric"><span>Latitude:</span><span>${metadata.gps_latitude.toFixed(6)}</span></div>
+                    <div class="metric"><span>Longitude:</span><span>${metadata.gps_longitude.toFixed(6)}</span></div>
+                    <div class="metric"><span>Localisation:</span><span>${metadata.gps_location}</span></div>
+                `;
+                document.getElementById('googleMapsLink').href = `https://www.google.com/maps?q=${metadata.gps_latitude},${metadata.gps_longitude}`;
+            }
+
+            // Source links with enhanced information
+            let linksHtml = '';
+
+            // Username
+            if (metadata.username) {
+                linksHtml += `<div class="metric"><span>👤 Username:</span><span style="color: #38ef7d; font-weight: 600;">${metadata.username}</span></div>`;
+            }
+
+            // Page URL (where the image was found)
+            if (metadata.page_url) {
+                linksHtml += `<div class="metric"><span>📄 Page Source:</span><a href="${metadata.page_url}" target="_blank" style="color: #3b82f6;">Ouvrir la Page</a></div>`;
+            }
+
+            // Original image URL
+            if (metadata.original_url && metadata.original_url !== 'unknown') {
+                linksHtml += `<div class="metric"><span>🖼️ URL Image:</span><a href="${metadata.original_url}" target="_blank" style="color: #3b82f6;">Voir Image Originale</a></div>`;
+            }
+
+            // Profile URL
+            if (metadata.profile_url) {
+                linksHtml += `<div class="metric"><span>🔗 Profil:</span><a href="${metadata.profile_url}" target="_blank" style="color: #3b82f6; font-weight: 600;">Voir le Profil</a></div>`;
+            }
+
+            // Page Title
+            if (metadata.page_title) {
+                linksHtml += `<div class="metric"><span>📌 Titre:</span><span style="color: #94a3b8;">${metadata.page_title}</span></div>`;
+            }
+
+            // Page Description
+            if (metadata.page_description) {
+                linksHtml += `<div class="metric" style="flex-direction: column; align-items: flex-start;"><span style="margin-bottom: 0.5rem;">📝 Description:</span><span style="color: #94a3b8; font-size: 0.8rem; line-height: 1.4;">${metadata.page_description}</span></div>`;
+            }
+
+            document.getElementById('sourceLinks').innerHTML = linksHtml || '<div style="color: #94a3b8;">Aucune information de source disponible</div>';
+
+            // User data
+            if (metadata.user_tags) document.getElementById('userTags').value = metadata.user_tags;
+            if (metadata.user_comment) document.getElementById('userComment').value = metadata.user_comment;
+            if (metadata.rating) {
+                currentRating = metadata.rating;
+                updateRatingDisplay();
+            }
+            if (metadata.category) document.getElementById('userCategory').value = metadata.category;
+        }
+
+        async function loadFaceData() {
+            // Check if faces were detected
+            try {
+                const response = await fetch('http://localhost:8000/api/stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.total_faces > 0) {
+                        document.getElementById('faceCard').style.display = 'block';
+                        document.getElementById('faceData').innerHTML = `
+                            <div style="color: #94a3b8;">
+                                ${data.total_faces} visages indexés dans la base de données.<br>
+                                Utilisez la fonction de recherche pour trouver des correspondances.
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading face data:', error);
+            }
+        }
+
+        function reverseImageSearch(engine) {
+            const encodedSrc = encodeURIComponent(imageSrc);
+
+            let url;
+            switch(engine) {
+                case 'google':
+                    url = `https://www.google.com/searchbyimage?image_url=${encodedSrc}`;
+                    break;
+                case 'yandex':
+                    url = `https://yandex.com/images/search?rpt=imageview&url=${encodedSrc}`;
+                    break;
+                case 'tineye':
+                    url = `https://tineye.com/search?url=${encodedSrc}`;
+                    break;
+            }
+
+            window.open(url, '_blank');
+        }
+
+        function setRating(rating) {
+            currentRating = rating;
+            updateRatingDisplay();
+        }
+
+        function updateRatingDisplay() {
+            const stars = document.querySelectorAll('#ratingStars span');
+            stars.forEach((star, index) => {
+                star.textContent = index < currentRating ? '★' : '☆';
+                star.style.color = index < currentRating ? '#fbbf24' : '#94a3b8';
+            });
+        }
+
+        async function saveUserData() {
+            const userData = {
+                user_tags: document.getElementById('userTags').value,
+                user_comment: document.getElementById('userComment').value,
+                rating: currentRating,
+                category: document.getElementById('userCategory').value
+            };
+
+            try {
+                const response = await fetch(`http://localhost:8000/api/update-metadata/${imageId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+
+                if (response.ok) {
+                    alert('✅ Données sauvegardées!');
+                } else {
+                    alert('❌ Erreur lors de la sauvegarde');
+                }
+            } catch (error) {
+                alert('❌ Erreur: ' + error.message);
+            }
+        }
+
+        async function findSimilar() {
+            document.getElementById('similarImages').innerHTML = '<div style="color: #94a3b8; padding: 1rem;">🔍 Recherche en cours...</div>';
+
+            // This would use the face search API to find similar images
+            alert('Fonctionnalité en développement');
+        }
+
+        function downloadReport() {
+            const report = {
+                image_id: imageId,
+                metadata: metadata,
+                generated_at: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `osint_${imageId}.json`;
+            a.click();
+        }
+
+        // Initialize
+        loadOSINT();
+    </script>
+</body>
+</html>

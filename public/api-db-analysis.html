@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analyse BD par API - SAR</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50">
+  <div class="container mx-auto p-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-2">🗄️ Analyse Tables BD par API</h1>
+      <p class="text-gray-600">188 routes • 93 tables uniques</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="text-sm text-gray-600 mb-1">Groupes API</div>
+        <div class="text-3xl font-bold text-blue-600">35</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="text-sm text-gray-600 mb-1">Tables Uniques</div>
+        <div class="text-3xl font-bold text-green-600">93</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="text-sm text-gray-600 mb-1">Heavy (5+ tables)</div>
+        <div class="text-3xl font-bold text-red-600">6</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="text-sm text-gray-600 mb-1">Sans DB</div>
+        <div class="text-3xl font-bold text-gray-600">11</div>
+      </div>
+    </div>
+
+    <!-- Top Tables Chart -->
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+      <h2 class="text-2xl font-bold mb-4">🏆 Top 20 Tables les Plus Utilisées</h2>
+      <div class="h-96">
+        <canvas id="tablesChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Intensity Groups -->
+    <div class="grid grid-cols-3 gap-4 mb-8">
+      <div class="bg-red-50 border-2 border-red-200 rounded-lg p-6">
+        <h3 class="text-lg font-bold text-red-700 mb-2">🔴 Heavy (5+ tables)</h3>
+        <div class="text-3xl font-bold text-red-600 mb-4">6</div>
+        
+          <div class="text-sm mb-1">
+            <span class="font-mono">/api/admin</span>
+            <span class="text-gray-600"> (28 tables)</span>
+          </div>
+        
+          <div class="text-sm mb-1">
+            <span class="font-mono">/api/metrics</span>
+            <span class="text-gray-600"> (16 tables)</span>
+          </div>
+        
+          <div class="text-sm mb-1">
+            <span class="font-mono">/api/analytics</span>
+            <span class="text-gray-600"> (15 tables)</span>
+          </div>
+        
+          <div class="text-sm mb-1">
+            <span class="font-mono">/api/seo</span>
+            <span class="text-gray-600"> (15 tables)</span>
+          </div>
+        
+          <div class="text-sm mb-1">
+            <span class="font-mono">/api/webhooks</span>
+            <span class="text-gray-600"> (12 tables)</span>
+          </div>
+        
+      </div>
+
+      <div class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6">
+        <h3 class="text-lg font-bold text-yellow-700 mb-2">🟡 Medium (2-4 tables)</h3>
+        <div class="text-3xl font-bold text-yellow-600 mb-4">11</div>
+        
+          <div class="text-sm mb-1">
+            <span class="font-mono">/api/applications</span>
+            <span class="text-gray-600"> (4 tables)</span>
+          </div>
+        
+          <div class="text-sm mb-1">
+            <span class="font-mono">/api/fraud</span>
+            <span class="text-gray-600"> (4 tables)</span>
+          </div>
+        
+          <div class="text-sm mb-1">
+            <span class="font-mono">/api/cron</span>
+            <span class="text-gray-600"> (3 tables)</span>
+          </div>
+        
+          <div class="text-sm mb-1">
+            <span class="font-mono">/api/memory</span>
+            <span class="text-gray-600"> (3 tables)</span>
+          </div>
+        
+          <div class="text-sm mb-1">
+            <span class="font-mono">/api/sentinel</span>
+            <span class="text-gray-600"> (3 tables)</span>
+          </div>
+        
+      </div>
+
+      <div class="bg-green-50 border-2 border-green-200 rounded-lg p-6">
+        <h3 class="text-lg font-bold text-green-700 mb-2">🟢 Light (0-1 table)</h3>
+        <div class="text-3xl font-bold text-green-600 mb-4">18</div>
+        <div class="text-sm text-gray-600">
+          7 avec 1 table<br>
+          11 sans DB
+        </div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="bg-white rounded-lg shadow p-4 mb-4">
+      <input
+        type="text"
+        id="search"
+        placeholder="🔍 Rechercher par API, table, ou service..."
+        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+      />
+    </div>
+
+    <!-- API Groups List -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="p-4 border-b bg-gray-50">
+        <h2 class="text-xl font-bold">📋 Détails par Groupe API</h2>
+        <div id="count" class="text-sm text-gray-600 mt-1"></div>
+      </div>
+      <div id="groups" class="divide-y"></div>
+    </div>
+  </div>
+
+  <script>
+    const apiGroups = [{"path":"/api/admin","routes":45,"tables":["telemetry_requests","telemetry_spans","webhook_logs","client_analyses","analysis_jobs","client_external_ids","clients_sar","signature_documents","contrats","signature_audit_logs","telemetry_alerts","download_stats","emails_envoyes","notes","contact_messages","notes_internes","admin_sections","metric_registry","client_transactions","client_accounts","fraud_cases","support_tickets","vopay_webhook_logs","metric_values","signature_templates","support_messages","support_attachments","ga4_enriched_sessions"],"services":["inverite.com","api.resend.com","quickbooks.intuit.com"]},{"path":"/api/metrics","routes":1,"tables":["vw_client_timeline","vw_client_timeline_by_type","vw_client_summary","vw_vopay_by_client","vw_vopay_orphans","vw_vopay_summary","vw_audit_recent","vw_audit_stats_by_table","vw_performance_cache_hit_ratio","vw_performance_table_sizes","vw_performance_index_usage","vw_performance_bloat_check","vopay_objects","communications","loans","payment_events"],"services":[]},{"path":"/api/analytics","routes":14,"tables":["visual_abandon_heatmap","client_telemetry_events","clients","contact_messages","loan_applications","vopay_transactions","support_tickets","email_messages","client_sessions","visual_conversion_funnel","visual_activity_heatmap","analytics_user_journeys","visual_page_flow","visual_conversion_by_source","visual_events_timeline"],"services":[]},{"path":"/api/seo","routes":27,"tables":["telemetry_requests","seo_cloudflare_analytics_daily","seo_ga4_metrics_daily","seo_gsc_metrics_daily","seo_pagespeed_metrics_daily","seo_semrush_domain_daily","seo_ssl_checks","seo_uptime_checks","seo_unified_daily_plus","ip_to_seo_segment","seo_keywords_tracking","loan_applications","vercel_speed_insights_daily","telemetry_events","visitor_identity_graph"],"services":["api.cloudflare.com","api.uptimerobot.com"]},{"path":"/api/webhooks","routes":17,"tables":["quickbooks_webhooks","quickbooks_tokens","quickbooks_customers","quickbooks_invoices","quickbooks_payments","quickbooks_accounts","quickbooks_vendors","payment_schedule_versions","payment_installments","payment_events","webhook_logs","vopay_objects"],"services":["quickbooks.intuit.com"]},{"path":"/api/quickbooks","routes":23,"tables":["quickbooks_accounts","quickbooks_tokens","quickbooks_customers","quickbooks_invoices","quickbooks_payments","quickbooks_vendors"],"services":["quickbooks.intuit.com"]},{"path":"/api/applications","routes":1,"tables":["loan_applications","clients","client_sessions","security_events"],"services":[]},{"path":"/api/fraud","routes":2,"tables":["device_profiles","visit_timeline","clients","telemetry_requests"],"services":[]},{"path":"/api/cron","routes":3,"tables":["vercel_speed_insights_raw","vercel_speed_insights_daily","seo_collection_jobs"],"services":[]},{"path":"/api/memory","routes":5,"tables":["claude_docs_read","claude_memory","claude_sessions"],"services":[]},{"path":"/api/sentinel","routes":7,"tables":["claude_memory","claude_actions","sentinel_scans"],"services":["localhost"]},{"path":"/api/sign","routes":2,"tables":["signature_documents","signature_audit_logs","contrats"],"services":[]},{"path":"/api/test-db","routes":1,"tables":["loan_applications","client_events","email_messages"],"services":[]},{"path":"/api/test-insert","routes":1,"tables":["loan_applications","client_events","email_accounts"],"services":[]},{"path":"/api/contact","routes":1,"tables":["contact_messages","emails_envoyes"],"services":["api.resend.com"]},{"path":"/api/contact-analyse","routes":1,"tables":["contact_messages","emails_envoyes"],"services":["api.resend.com"]},{"path":"/api/telemetry","routes":5,"tables":["client_sessions","telemetry_events"],"services":[]},{"path":"/api/activity","routes":3,"tables":["claude_actions"],"services":[]},{"path":"/api/audit","routes":2,"tables":["vw_audit_stats_by_table"],"services":[]},{"path":"/api/download","routes":2,"tables":["download_logs"],"services":[]},{"path":"/api/routes","routes":2,"tables":["${spec.database_table}"],"services":["localhost"]},{"path":"/api/vercel","routes":1,"tables":["vercel_speed_insights_raw"],"services":[]},{"path":"/api/vopay","routes":2,"tables":["vopay_objects"],"services":[]},{"path":"/api/worker","routes":1,"tables":["analysis_jobs"],"services":[]},{"path":"/api/anonymity","routes":1,"tables":[],"services":[]},{"path":"/api/cortex","routes":1,"tables":[],"services":[]},{"path":"/api/device","routes":1,"tables":[],"services":[]},{"path":"/api/fingerprint","routes":1,"tables":[],"services":[]},{"path":"/api/network","routes":3,"tables":[],"services":[]},{"path":"/api/osint","routes":7,"tables":[],"services":["attacker.com"]},{"path":"/api/performance-diagnostic","routes":1,"tables":[],"services":[]},{"path":"/api/test-margill","routes":1,"tables":[],"services":[]},{"path":"/api/test-tool","routes":1,"tables":[],"services":[]},{"path":"/api/test","routes":1,"tables":[],"services":[]},{"path":"/api/upload-documents","routes":1,"tables":[],"services":[]}];
+
+    const topTables = [["webhook_logs",19],["vopay_objects",18],["quickbooks_tokens",16],["telemetry_requests",13],["contact_messages",8],["loan_applications",8],["client_sessions",7],["support_tickets",6],["claude_actions",5],["clients_sar",5],["emails_envoyes",5],["client_telemetry_events",5],["telemetry_spans",4],["signature_documents",4],["signature_audit_logs",4],["vopay_webhook_logs",4],["clients",3],["claude_memory",3],["quickbooks_accounts",3],["seo_ga4_metrics_daily",3]];
+
+    // Chart
+    new Chart(document.getElementById('tablesChart'), {
+      type: 'bar',
+      data: {
+        labels: topTables.map(([name]) => name),
+        datasets: [{
+          label: 'Nombre de routes',
+          data: topTables.map(([_, count]) => count),
+          backgroundColor: 'rgba(59, 130, 246, 0.5)',
+          borderColor: 'rgb(59, 130, 246)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    // Render groups
+    function renderGroups(groups) {
+      const groupsDiv = document.getElementById('groups');
+      const countDiv = document.getElementById('count');
+      countDiv.textContent = groups.length + ' groupes affichés';
+
+      groupsDiv.innerHTML = groups.map((group, i) => {
+        const intensity = group.tables.length >= 5 ? 'red' :
+                         group.tables.length >= 2 ? 'yellow' : 'green';
+        const intensityColors = {
+          red: 'bg-red-50 border-red-200 text-red-700',
+          yellow: 'bg-yellow-50 border-yellow-200 text-yellow-700',
+          green: 'bg-green-50 border-green-200 text-green-700'
+        };
+
+        return `
+          <div class="p-6 hover:bg-gray-50">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="text-2xl font-bold text-gray-700">${i + 1}.</span>
+                  <code class="text-lg font-bold text-blue-600">${group.path}</code>
+                  <span class="px-3 py-1 text-xs font-bold rounded border-2 ${intensityColors[intensity]}">
+                    ${group.tables.length} tables
+                  </span>
+                </div>
+                <div class="text-sm text-gray-600">
+                  ${group.routes} routes • ${group.services.length} services externes
+                </div>
+              </div>
+            </div>
+
+            ${group.tables.length > 0 ? `
+              <div class="mb-4">
+                <h4 class="text-sm font-semibold text-gray-700 mb-2">🗄️ Tables BD (${group.tables.length}):</h4>
+                <div class="flex flex-wrap gap-2">
+                  ${group.tables.map(table => `
+                    <span class="px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded font-mono">
+                      ${table}
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            ${group.services.length > 0 ? `
+              <div>
+                <h4 class="text-sm font-semibold text-gray-700 mb-2">🌐 Services Externes:</h4>
+                <div class="flex flex-wrap gap-2">
+                  ${group.services.map(service => `
+                    <span class="px-3 py-1 bg-orange-50 text-orange-700 text-sm rounded">
+                      ${service}
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Initial render
+    renderGroups(apiGroups);
+
+    // Search
+    document.getElementById('search').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      if (!query) {
+        renderGroups(apiGroups);
+        return;
+      }
+
+      const filtered = apiGroups.filter(group =>
+        group.path.toLowerCase().includes(query) ||
+        group.tables.some(t => t.toLowerCase().includes(query)) ||
+        group.services.some(s => s.toLowerCase().includes(query))
+      );
+
+      renderGroups(filtered);
+    });
+  </script>
+</body>
+</html>

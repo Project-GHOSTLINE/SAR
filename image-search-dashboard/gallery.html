@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🖼️ Galerie d'Images Scrapées</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .image-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .image-card:hover {
+            transform: scale(1.05);
+        }
+        .image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-6 mb-8">
+            <h1 class="text-3xl font-bold mb-2">🖼️ Galerie d'Images Scrapées</h1>
+            <p class="text-purple-100">Parcourir toutes les images téléchargées</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Total Images</div>
+                <div class="text-2xl font-bold text-purple-400" id="totalImages">0</div>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Taille Totale</div>
+                <div class="text-2xl font-bold text-pink-400" id="totalSize">0 MB</div>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Images Chargées</div>
+                <div class="text-2xl font-bold text-blue-400" id="loadedImages">0</div>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Dossier</div>
+                <div class="text-sm font-bold text-green-400">scraped_images/</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex gap-4 mb-6">
+            <button onclick="loadGallery()"
+                    class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-medium transition">
+                🔄 Recharger
+            </button>
+            <button onclick="openFolder()"
+                    class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-medium transition">
+                📁 Ouvrir le Dossier
+            </button>
+            <button onclick="window.location.href='http://localhost:5001'"
+                    class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-medium transition">
+                👤 Scanner les Visages
+            </button>
+        </div>
+
+        <!-- Gallery -->
+        <div id="gallery" class="image-grid">
+            <div class="col-span-full text-center py-12 text-gray-400">
+                Cliquez sur "🔄 Recharger" pour charger les images
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="hidden text-center py-12">
+            <div class="text-purple-400 text-xl">⏳ Chargement des images...</div>
+        </div>
+    </div>
+
+    <!-- Modal for fullscreen -->
+    <div id="modal" class="modal" onclick="closeModal()">
+        <img id="modalImage" src="" alt="Full size">
+        <button onclick="closeModal()"
+                class="absolute top-4 right-4 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg">
+            ✕ Fermer
+        </button>
+    </div>
+
+    <script>
+        let allImages = [];
+
+        async function loadStats() {
+            try {
+                const response = await fetch('http://localhost:5002/api/stats');
+                const data = await response.json();
+                document.getElementById('totalImages').textContent = data.images_count;
+                document.getElementById('totalSize').textContent = data.folder_size_mb + ' MB';
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadGallery() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('gallery').innerHTML = '';
+
+            try {
+                // Get list of images from server
+                const response = await fetch('http://localhost:5002/api/list-images');
+
+                if (!response.ok) {
+                    // Fallback: load from scraped_images directory
+                    await loadFromDirectory();
+                    return;
+                }
+
+                const data = await response.json();
+                allImages = data.images;
+
+                displayImages(allImages);
+                document.getElementById('loadedImages').textContent = allImages.length;
+
+            } catch (error) {
+                console.error('Error loading gallery:', error);
+                document.getElementById('gallery').innerHTML = `
+                    <div class="col-span-full text-center py-12 text-red-400">
+                        ❌ Erreur de chargement. Assurez-vous que le serveur scraper est actif.
+                    </div>
+                `;
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        async function loadFromDirectory() {
+            // Generate image URLs from scraped_images folder
+            const imageCount = parseInt(document.getElementById('totalImages').textContent);
+
+            document.getElementById('gallery').innerHTML = `
+                <div class="col-span-full text-center py-12 text-yellow-400">
+                    📁 ${imageCount} images dans le dossier scraped_images/
+                    <br><br>
+                    Ouvrez le dossier pour voir les images ou ajoutez un endpoint /api/list-images au serveur.
+                </div>
+            `;
+        }
+
+        function displayImages(images) {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+
+            if (images.length === 0) {
+                gallery.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-400">
+                        📭 Aucune image trouvée. Lancez un scraping d'abord!
+                    </div>
+                `;
+                return;
+            }
+
+            images.forEach((img, index) => {
+                const card = document.createElement('div');
+                card.className = 'image-card bg-gray-800';
+                card.innerHTML = `
+                    <img src="scraped_images/${img}"
+                         alt="Image ${index + 1}"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23333%22 width=%22200%22 height=%22200%22/%3E%3Ctext fill=%22%23666%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22%3E${img}%3C/text%3E%3C/svg%3E'">
+                `;
+                card.onclick = () => openModal(`scraped_images/${img}`);
+                gallery.appendChild(card);
+            });
+        }
+
+        function openModal(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        function openFolder() {
+            // This will work if you add an endpoint to the scraper
+            window.open('file:///Users/xunit/Desktop/📁%20Projets/sar/image-search-dashboard/scraped_images/', '_blank');
+        }
+
+        // Load stats on page load
+        loadStats();
+        setInterval(loadStats, 10000); // Update every 10 seconds
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>

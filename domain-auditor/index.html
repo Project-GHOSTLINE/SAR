@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔍 Domain Auditor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .card {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.95);
+    }
+    .loading {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="gradient-bg min-h-screen p-8">
+  <div class="max-w-6xl mx-auto">
+
+    <!-- Header -->
+    <div class="card rounded-2xl shadow-2xl p-8 mb-8">
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">🔍 Domain Auditor</h1>
+      <p class="text-gray-600">Analyse complète de domaines en temps réel</p>
+    </div>
+
+    <!-- Input Form -->
+    <div class="card rounded-2xl shadow-2xl p-8 mb-8">
+      <div class="flex gap-4">
+        <input
+          type="text"
+          id="domainInput"
+          placeholder="Entrer un domaine (ex: google.com, semrush.com)"
+          class="flex-1 px-6 py-4 text-lg border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:outline-none"
+          onkeypress="if(event.key === 'Enter') auditDomain()"
+        />
+        <button
+          onclick="auditDomain()"
+          id="auditBtn"
+          class="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg"
+        >
+          Analyser
+        </button>
+      </div>
+
+      <!-- Quick Examples -->
+      <div class="mt-4 flex gap-2 flex-wrap">
+        <span class="text-sm text-gray-600">Exemples rapides:</span>
+        <button onclick="setDomain('google.com')" class="text-sm px-3 py-1 bg-gray-100 rounded-lg hover:bg-gray-200">google.com</button>
+        <button onclick="setDomain('github.com')" class="text-sm px-3 py-1 bg-gray-100 rounded-lg hover:bg-gray-200">github.com</button>
+        <button onclick="setDomain('solutionargentrapide.ca')" class="text-sm px-3 py-1 bg-gray-100 rounded-lg hover:bg-gray-200">solutionargentrapide.ca</button>
+        <button onclick="setDomain('semrush.com')" class="text-sm px-3 py-1 bg-gray-100 rounded-lg hover:bg-gray-200">semrush.com</button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="hidden card rounded-2xl shadow-2xl p-12 text-center">
+      <div class="loading w-16 h-16 mx-auto mb-4 border-4 border-purple-500 border-t-transparent rounded-full"></div>
+      <p class="text-xl text-gray-700">Analyse en cours...</p>
+      <p class="text-sm text-gray-500 mt-2">curl + dig + whois + subdomains</p>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="hidden">
+
+      <!-- Overview Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="card rounded-xl shadow-lg p-6">
+          <div class="text-sm text-gray-600 mb-1">Response Time</div>
+          <div id="perfTime" class="text-3xl font-bold text-purple-600">--</div>
+          <div id="perfGrade" class="text-sm text-gray-500 mt-1">Grade: --</div>
+        </div>
+        <div class="card rounded-xl shadow-lg p-6">
+          <div class="text-sm text-gray-600 mb-1">SSL/TLS</div>
+          <div id="sslVersion" class="text-2xl font-bold text-green-600">--</div>
+          <div id="sslGrade" class="text-sm text-gray-500 mt-1">Grade: --</div>
+        </div>
+        <div class="card rounded-xl shadow-lg p-6">
+          <div class="text-sm text-gray-600 mb-1">HTTP Status</div>
+          <div id="httpStatus" class="text-3xl font-bold text-blue-600">--</div>
+          <div id="httpVersion" class="text-sm text-gray-500 mt-1">--</div>
+        </div>
+        <div class="card rounded-xl shadow-lg p-6">
+          <div class="text-sm text-gray-600 mb-1">Overall Score</div>
+          <div id="overallScore" class="text-3xl font-bold text-indigo-600">--</div>
+          <div class="text-sm text-gray-500 mt-1">Grade</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="card rounded-2xl shadow-2xl p-8">
+        <div class="flex gap-2 border-b pb-4 mb-6">
+          <button onclick="showTab('performance')" id="tab-performance" class="px-6 py-3 font-semibold rounded-lg bg-purple-600 text-white">⚡ Performance</button>
+          <button onclick="showTab('ssl')" id="tab-ssl" class="px-6 py-3 font-semibold rounded-lg hover:bg-gray-100">🔒 SSL/TLS</button>
+          <button onclick="showTab('dns')" id="tab-dns" class="px-6 py-3 font-semibold rounded-lg hover:bg-gray-100">🌐 DNS</button>
+          <button onclick="showTab('whois')" id="tab-whois" class="px-6 py-3 font-semibold rounded-lg hover:bg-gray-100">📋 WHOIS</button>
+          <button onclick="showTab('subdomains')" id="tab-subdomains" class="px-6 py-3 font-semibold rounded-lg hover:bg-gray-100">🔍 Subdomains</button>
+          <button onclick="showTab('geo')" id="tab-geo" class="px-6 py-3 font-semibold rounded-lg hover:bg-gray-100">📍 Geo</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="tab-content-performance" class="tab-content">
+          <h3 class="text-2xl font-bold mb-4">⚡ Performance Breakdown</h3>
+          <div class="h-64 mb-6">
+            <canvas id="perfChart"></canvas>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="p-4 bg-gray-50 rounded-lg">
+              <div class="text-sm text-gray-600">DNS Lookup</div>
+              <div id="dns-time" class="text-2xl font-bold text-purple-600">--</div>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+              <div class="text-sm text-gray-600">TCP Connect</div>
+              <div id="tcp-time" class="text-2xl font-bold text-blue-600">--</div>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+              <div class="text-sm text-gray-600">TLS Handshake</div>
+              <div id="tls-time" class="text-2xl font-bold text-green-600">--</div>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+              <div class="text-sm text-gray-600">Server Process</div>
+              <div id="server-time" class="text-2xl font-bold text-orange-600">--</div>
+            </div>
+          </div>
+          <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm text-gray-600">Download Speed</div>
+                <div id="download-speed" class="text-xl font-bold">--</div>
+              </div>
+              <div>
+                <div class="text-sm text-gray-600">Size Downloaded</div>
+                <div id="download-size" class="text-xl font-bold">--</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-content-ssl" class="tab-content hidden">
+          <h3 class="text-2xl font-bold mb-4">🔒 SSL/TLS Certificate</h3>
+          <div id="ssl-details" class="space-y-3">
+            <!-- Will be populated by JS -->
+          </div>
+        </div>
+
+        <div id="tab-content-dns" class="tab-content hidden">
+          <h3 class="text-2xl font-bold mb-4">🌐 DNS Records</h3>
+          <div id="dns-details" class="space-y-4">
+            <!-- Will be populated by JS -->
+          </div>
+        </div>
+
+        <div id="tab-content-whois" class="tab-content hidden">
+          <h3 class="text-2xl font-bold mb-4">📋 WHOIS Information</h3>
+          <div id="whois-details" class="space-y-3">
+            <!-- Will be populated by JS -->
+          </div>
+        </div>
+
+        <div id="tab-content-subdomains" class="tab-content hidden">
+          <h3 class="text-2xl font-bold mb-4">🔍 Discovered Subdomains</h3>
+          <div id="subdomains-list" class="space-y-2">
+            <!-- Will be populated by JS -->
+          </div>
+        </div>
+
+        <div id="tab-content-geo" class="tab-content hidden">
+          <h3 class="text-2xl font-bold mb-4">📍 Geolocation & Network</h3>
+          <div id="geo-details" class="space-y-3">
+            <!-- Will be populated by JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Raw JSON -->
+      <div class="card rounded-2xl shadow-2xl p-8 mt-8">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold">📄 Raw JSON Data</h3>
+          <button onclick="copyJSON()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm">
+            📋 Copy
+          </button>
+        </div>
+        <pre id="rawJSON" class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-auto max-h-96 text-sm"></pre>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    let currentData = null;
+    let perfChart = null;
+
+    function setDomain(domain) {
+      document.getElementById('domainInput').value = domain;
+    }
+
+    function showTab(tab) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('[id^="tab-"]').forEach(el => {
+        el.classList.remove('bg-purple-600', 'text-white');
+        el.classList.add('hover:bg-gray-100');
+      });
+
+      // Show selected tab
+      document.getElementById('tab-content-' + tab).classList.remove('hidden');
+      document.getElementById('tab-' + tab).classList.add('bg-purple-600', 'text-white');
+      document.getElementById('tab-' + tab).classList.remove('hover:bg-gray-100');
+    }
+
+    async function auditDomain() {
+      const domain = document.getElementById('domainInput').value.trim();
+      if (!domain) {
+        alert('Please enter a domain');
+        return;
+      }
+
+      // Show loading
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('results').classList.add('hidden');
+      document.getElementById('auditBtn').disabled = true;
+      document.getElementById('auditBtn').textContent = 'Analyse...';
+
+      try {
+        const response = await fetch('/api/audit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain })
+        });
+
+        const data = await response.json();
+        currentData = data;
+
+        // Hide loading, show results
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('results').classList.remove('hidden');
+
+        displayResults(data);
+      } catch (error) {
+        alert('Error: ' + error.message);
+      } finally {
+        document.getElementById('auditBtn').disabled = false;
+        document.getElementById('auditBtn').textContent = 'Analyser';
+      }
+    }
+
+    function displayResults(data) {
+      // Overview cards
+      document.getElementById('perfTime').textContent = data.curl.performance.total_ms.toFixed(0) + 'ms';
+      document.getElementById('perfGrade').textContent = 'Grade: ' + data.scores.performance;
+      document.getElementById('sslVersion').textContent = data.curl.ssl_version.split('/')[0] || 'Unknown';
+      document.getElementById('sslGrade').textContent = 'Grade: ' + data.scores.ssl;
+      document.getElementById('httpStatus').textContent = data.curl.status_code;
+      document.getElementById('httpVersion').textContent = data.curl.http_version;
+      document.getElementById('overallScore').textContent = data.scores.overall;
+
+      // Performance tab
+      const perf = data.curl.performance;
+      document.getElementById('dns-time').textContent = perf.dns_ms.toFixed(2) + ' ms';
+      document.getElementById('tcp-time').textContent = perf.tcp_ms.toFixed(2) + ' ms';
+      document.getElementById('tls-time').textContent = perf.tls_ms.toFixed(2) + ' ms';
+      document.getElementById('server-time').textContent = perf.server_ms.toFixed(2) + ' ms';
+      document.getElementById('download-speed').textContent = (perf.speed_bps / 1024).toFixed(0) + ' KB/s';
+      document.getElementById('download-size').textContent = (perf.size_bytes / 1024).toFixed(1) + ' KB';
+
+      // Performance chart
+      const ctx = document.getElementById('perfChart').getContext('2d');
+      if (perfChart) perfChart.destroy();
+      perfChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['DNS', 'TCP', 'TLS', 'Server'],
+          datasets: [{
+            label: 'Time (ms)',
+            data: [perf.dns_ms, perf.tcp_ms, perf.tls_ms, perf.server_ms],
+            backgroundColor: ['#a855f7', '#3b82f6', '#10b981', '#f97316']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      // SSL tab
+      document.getElementById('ssl-details').innerHTML = `
+        <div class="p-4 bg-gray-50 rounded-lg"><strong>SSL Version:</strong> ${data.curl.ssl_version}</div>
+        <div class="p-4 bg-gray-50 rounded-lg"><strong>Issuer:</strong> ${data.curl.issuer}</div>
+        <div class="p-4 bg-gray-50 rounded-lg"><strong>Subject:</strong> ${data.curl.subject}</div>
+        <div class="p-4 bg-gray-50 rounded-lg"><strong>Expires:</strong> ${data.curl.expire_date}</div>
+        <div class="p-4 bg-gray-50 rounded-lg"><strong>Server:</strong> ${data.curl.server}</div>
+      `;
+
+      // DNS tab
+      document.getElementById('dns-details').innerHTML = `
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <strong class="block mb-2">A Records:</strong>
+          ${data.dns.a_records.map(r => `<div class="font-mono text-sm">${r}</div>`).join('')}
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <strong class="block mb-2">MX Records:</strong>
+          ${data.dns.mx_records.map(r => `<div class="font-mono text-sm">${r}</div>`).join('') || 'None'}
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <strong class="block mb-2">Nameservers:</strong>
+          ${data.dns.nameservers.map(r => `<div class="font-mono text-sm">${r}</div>`).join('')}
+        </div>
+      `;
+
+      // WHOIS tab
+      document.getElementById('whois-details').innerHTML = `
+        <div class="p-4 bg-gray-50 rounded-lg"><strong>Registrar:</strong> ${data.whois.registrar}</div>
+        <div class="p-4 bg-gray-50 rounded-lg"><strong>Created:</strong> ${data.whois.created}</div>
+        <div class="p-4 bg-gray-50 rounded-lg"><strong>Expires:</strong> ${data.whois.expires}</div>
+      `;
+
+      // Subdomains tab
+      if (data.subdomains.length > 0) {
+        document.getElementById('subdomains-list').innerHTML = data.subdomains.map(sub => `
+          <div class="p-4 bg-gray-50 rounded-lg flex justify-between items-center">
+            <span class="font-mono">${sub.subdomain}</span>
+            <span class="text-sm text-gray-600">${sub.value}</span>
+          </div>
+        `).join('');
+      } else {
+        document.getElementById('subdomains-list').innerHTML = '<p class="text-gray-500">No subdomains discovered</p>';
+      }
+
+      // Geo tab
+      if (data.geolocation && !data.geolocation.error) {
+        document.getElementById('geo-details').innerHTML = `
+          <div class="p-4 bg-gray-50 rounded-lg"><strong>IP:</strong> ${data.curl.ip}</div>
+          <div class="p-4 bg-gray-50 rounded-lg"><strong>Location:</strong> ${data.geolocation.city}, ${data.geolocation.region}, ${data.geolocation.country}</div>
+          <div class="p-4 bg-gray-50 rounded-lg"><strong>ASN:</strong> ${data.geolocation.asn}</div>
+          <div class="p-4 bg-gray-50 rounded-lg"><strong>Organization:</strong> ${data.geolocation.org}</div>
+        `;
+      } else {
+        document.getElementById('geo-details').innerHTML = `
+          <div class="p-4 bg-gray-50 rounded-lg"><strong>IP:</strong> ${data.curl.ip}</div>
+          <div class="p-4 bg-yellow-50 rounded-lg">Geolocation data unavailable (API rate limited)</div>
+        `;
+      }
+
+      // Raw JSON
+      document.getElementById('rawJSON').textContent = JSON.stringify(data, null, 2);
+    }
+
+    function copyJSON() {
+      const json = document.getElementById('rawJSON').textContent;
+      navigator.clipboard.writeText(json);
+      alert('JSON copied to clipboard!');
+    }
+  </script>
+</body>
+</html>
