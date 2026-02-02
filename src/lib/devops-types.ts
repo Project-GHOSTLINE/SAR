@@ -62,8 +62,13 @@ export const TASK_PRIORITIES = [
 // Assignees
 // ============================================
 export const ASSIGNEES = [
-  { name: 'Frederic', email: 'frederic@solutionargentrapide.ca', role: 'Admin', initials: 'FR', color: 'bg-blue-500' },
-  { name: 'Anthony', email: 'anthony@solutionargentrapide.ca', role: 'DevOps', initials: 'AN', color: 'bg-green-500' }
+  { name: 'Fred Rosa', email: 'fred@solutionargentrapide.ca', role: 'CEO', initials: 'FR', color: 'bg-blue-600' },
+  { name: 'Anthony Rosa', email: 'anthony@solutionargentrapide.ca', role: 'CTO', initials: 'AR', color: 'bg-green-600' },
+  { name: 'Karin Rosa', email: 'karin@solutionargentrapide.ca', role: 'CFO', initials: 'KR', color: 'bg-purple-600' },
+  { name: 'Sandra Liberta', email: 'sandra@solutionargentrapide.ca', role: 'Admin', initials: 'SL', color: 'bg-pink-600' },
+  { name: 'Melissa Paulin', email: 'melissa@solutionargentrapide.ca', role: 'Support', initials: 'MP', color: 'bg-yellow-600' },
+  { name: 'Michel Rosa', email: 'michel@solutionargentrapide.ca', role: 'Dev', initials: 'MR', color: 'bg-indigo-600' },
+  { name: 'Stephanie Gallant', email: 'stephanie@solutionargentrapide.ca', role: 'Marketing', initials: 'SG', color: 'bg-orange-600' }
 ] as const
 
 // ============================================
