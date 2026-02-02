@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Token invalide',
-          details: validation.error.errors
+          details: validation.error.issues
         },
         { status: 400 }
       )
