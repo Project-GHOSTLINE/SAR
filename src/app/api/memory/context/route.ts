@@ -1,4 +1,6 @@
 // API: Obtenir le contexte complet d'un projet
+export const dynamic = 'force-dynamic'
+
 // GET /api/memory/context?project=sar
 
 import { NextRequest, NextResponse } from 'next/server';

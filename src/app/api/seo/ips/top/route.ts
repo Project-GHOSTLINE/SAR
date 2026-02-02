@@ -1,4 +1,6 @@
 // GET /api/seo/ips/top?limit=20&sort=requests|last_seen|score
+export const dynamic = 'force-dynamic'
+
 // Retourne la liste des top IPs avec preview data
 
 import { NextRequest, NextResponse } from "next/server";

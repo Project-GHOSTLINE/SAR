@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic'
+
 import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { normalizePathPattern } from '@/lib/api-explorer/route-matcher';

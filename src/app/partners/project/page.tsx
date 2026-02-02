@@ -9,9 +9,59 @@
  * - Règles crédits
  *
  * Ton: Transparence radicale, vibe "projet en développement"
+ *
+ * PROTECTION: Accessible uniquement aux partenaires authentifiés
  */
 
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
 export default function ProjectPage() {
+  const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    checkAuthentication()
+  }, [])
+
+  const checkAuthentication = async () => {
+    try {
+      // Vérifier l'authentification via l'API /me
+      const response = await fetch('/api/partners/me')
+
+      if (response.ok) {
+        setIsAuthenticated(true)
+      } else {
+        // Non authentifié - rediriger vers /invite
+        router.push('/partners/invite')
+      }
+    } catch (error) {
+      console.error('Erreur vérification auth:', error)
+      router.push('/partners/invite')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Afficher un loader pendant la vérification
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Vérification...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Ne rien afficher si pas authentifié (redirection en cours)
+  if (!isAuthenticated) {
+    return null
+  }
   return (
     <div className="max-w-3xl mx-auto">
       <div className="bg-white rounded-lg border border-gray-200 p-8">

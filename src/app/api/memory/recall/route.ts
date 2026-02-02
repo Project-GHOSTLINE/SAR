@@ -1,4 +1,6 @@
 // API: Récupérer des mémoires
+export const dynamic = 'force-dynamic'
+
 // GET /api/memory/recall?project=sar&category=architecture&search=auth
 
 import { NextRequest, NextResponse } from 'next/server';
