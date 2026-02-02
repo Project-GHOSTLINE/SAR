@@ -95,6 +95,38 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isApiRoute = pathname.startsWith('/api/')
 
+  // ============================================
+  // SUBDOMAIN ROUTING: partners.solutionargentrapide.ca
+  // ============================================
+  const isPartnersSubdomain = hostname === 'partners.solutionargentrapide.ca' || hostname.startsWith('partners.')
+  const isMainDomain = hostname === 'solutionargentrapide.ca' || hostname === 'www.solutionargentrapide.ca' || hostname.startsWith('localhost')
+
+  // Redirect main domain /partners/* to subdomain partners.*/*
+  if (isMainDomain && pathname.startsWith('/partners')) {
+    const url = request.nextUrl.clone()
+    url.hostname = 'partners.solutionargentrapide.ca'
+    url.pathname = pathname.replace(/^\/partners/, '') || '/'
+    return NextResponse.redirect(url, 308) // Permanent redirect
+  }
+
+  // Rewrite subdomain requests to /partners/* routes
+  if (isPartnersSubdomain && !pathname.startsWith('/partners') && !pathname.startsWith('/_next') && !pathname.startsWith('/api/partners')) {
+    const url = request.nextUrl.clone()
+
+    // Map subdomain root to /partners
+    if (pathname === '/' || pathname === '') {
+      url.pathname = '/partners'
+    }
+    // Map subdomain paths to /partners/* paths
+    else if (pathname.startsWith('/api/')) {
+      url.pathname = `/api/partners${pathname.replace('/api/', '/')}`
+    } else {
+      url.pathname = `/partners${pathname}`
+    }
+
+    return NextResponse.rewrite(url)
+  }
+
   // TELEMETRY: Generate trace_id for request tracing
   const traceId = generateUUID()
 

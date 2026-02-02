@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['solutionargentrapide.ca'],
+    domains: ['solutionargentrapide.ca', 'partners.solutionargentrapide.ca'],
   },
   webpack: (config, { isServer }) => {
     // Ignorer le module 'canvas' pour PDF.js
