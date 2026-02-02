@@ -1,35 +1,47 @@
 /**
- * Dashboard Partners - Parcours guidé pour public 40-60 ans
- * Principe : Accompagnement humain, une action à la fois, zéro stress
+ * Dashboard Partners - Design UX optimisé 40-60 ans
+ *
+ * Philosophie: Reconnaissance + Orientation + Motivation douce
+ * Pas un dashboard fintech, pas de pression, pas de comparaison
+ *
+ * PROTECTION: Accessible uniquement aux partenaires authentifiés
  */
 
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import type { PartnerDashboard } from '@/types/partners'
 
 export default function DashboardPage() {
-  const [dashboard, setDashboard] = useState<PartnerDashboard | null>(null)
+  const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [dashboard, setDashboard] = useState<PartnerDashboard | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [showDetails, setShowDetails] = useState(false)
-  const [linkCopied, setLinkCopied] = useState(false)
 
   useEffect(() => {
-    loadDashboard()
+    checkAuthAndLoadDashboard()
   }, [])
 
-  const loadDashboard = async () => {
-    setIsLoading(true)
-    setError(null)
-
+  const checkAuthAndLoadDashboard = async () => {
     try {
+      // Vérifier session de développement FIRST
+      const devSession = await fetch('/api/partners/check-session')
+      if (!devSession.ok) {
+        // Pas authentifié - rediriger vers login
+        router.push('/partners')
+        return
+      }
+
+      setIsAuthenticated(true)
+
+      // Charger les données du dashboard
       const response = await fetch('/api/partners/me')
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erreur chargement')
+        throw new Error(data.error || 'Erreur chargement dashboard')
       }
 
       setDashboard(data)
@@ -40,35 +52,38 @@ export default function DashboardPage() {
     }
   }
 
-  const copyLink = () => {
-    const message = `Bonjour,\n\nJe participe à un test avec Solution Argent Rapide.\n\nSi jamais vous êtes serré financièrement, voici l'information pour faire une demande de prêt.\n\nAucune obligation, c'est juste une option que je voulais partager.\n\nMon code de référence : ${dashboard?.partner.ref_code}\nLien : https://solutionargentrapide.ca/apply?ref=${dashboard?.partner.ref_code}`
-
-    navigator.clipboard.writeText(message)
-    setLinkCopied(true)
-    setTimeout(() => setLinkCopied(false), 3000)
+  const handlePartage = () => {
+    // TODO: Rediriger vers /partners/contribute ou afficher modal partage
+    alert('Fonctionnalité de partage en développement.\n\nDans la version finale:\n• Message pré-écrit à copier\n• Boutons WhatsApp, SMS, Email\n• Génération de lien unique')
   }
 
+  const handleVoirDetail = () => {
+    // TODO: Rediriger vers /partners/credits ou afficher modal détails
+    alert('Détails des crédits en développement.\n\nDans la version finale:\n• Historique complet des crédits\n• Explication du calcul\n• Dates et événements')
+  }
+
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-6"></div>
+          <p className="text-gray-600 text-xl font-medium">Chargement...</p>
         </div>
       </div>
     )
   }
 
+  // Error state
   if (error) {
     return (
-      <div className="max-w-lg mx-auto mt-8 bg-white rounded-2xl border-2 border-red-200 p-8 text-center">
-        <p className="text-lg font-semibold text-gray-900 mb-4">
-          Une erreur est survenue
-        </p>
-        <p className="text-gray-600 mb-6">{error}</p>
+      <div className="bg-red-50 border-2 border-red-200 rounded-3xl p-10 text-center max-w-2xl mx-auto mt-8 shadow-xl">
+        <span className="text-5xl mb-4 block">⚠️</span>
+        <p className="text-red-900 font-bold text-2xl mb-3">Erreur</p>
+        <p className="text-red-700 text-lg mb-6">{error}</p>
         <button
-          onClick={loadDashboard}
-          className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition font-medium"
+          onClick={checkAuthAndLoadDashboard}
+          className="bg-red-600 text-white text-xl font-bold px-8 py-4 rounded-2xl hover:bg-red-700 transition shadow-lg border-4 border-red-700"
         >
           Réessayer
         </button>
@@ -76,265 +91,164 @@ export default function DashboardPage() {
     )
   }
 
-  if (!dashboard) {
+  // Not authenticated (redirection en cours)
+  if (!isAuthenticated || !dashboard) {
     return null
   }
 
-  const hasShared = dashboard.impact_cards.shares > 0
-  const hasResults = dashboard.impact_cards.applications > 0
-
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="space-y-10 pb-12" style={{ fontSize: '18px', lineHeight: '1.6' }}>
 
-      {/* ACCUEIL RASSURANT */}
-      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-3">
-          👋 Bonjour
-        </h1>
-        <p className="text-gray-700 text-lg leading-relaxed mb-6">
-          Vous avez accès au projet Partners SAR.
+      {/* BLOC 1 — RECONNAISSANCE (LE PLUS IMPORTANT, AVANT LES CHIFFRES) */}
+      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-10 md:p-12 shadow-xl border-2 border-green-200">
+        <div className="flex items-start gap-4 mb-6">
+          <div className="w-20 h-20 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0 border-4 border-green-300">
+            <span className="text-5xl">🤝</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+            Merci pour votre participation
+          </h2>
+        </div>
+
+        <div className="space-y-4 text-lg md:text-xl text-gray-800 ml-0 md:ml-24">
+          <p>Ce que vous faites <strong>aide de vraies personnes</strong></p>
+          <p>et contribue à <strong>améliorer nos services</strong>.</p>
+          <p className="pt-2 text-green-800 font-bold">Vous pouvez participer à votre rythme.</p>
+        </div>
+      </div>
+
+      {/* BLOC 2 — IMPACT SIMPLE (RÉSULTATS COMPRÉHENSIBLES) */}
+      <div className="bg-white rounded-3xl p-10 md:p-12 shadow-xl border-2 border-gray-200">
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-10 flex items-center gap-4 flex-wrap">
+          <span className="text-5xl">📊</span>
+          <span>Votre impact jusqu'à maintenant</span>
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {/* Card 1 - Personnes ont vu */}
+          <div className="bg-blue-50 rounded-2xl p-8 text-center border-2 border-blue-200 shadow-md">
+            <div className="text-6xl font-black text-blue-600 mb-3">
+              {dashboard.impact_cards.clicks}
+            </div>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="text-4xl">👀</span>
+              <p className="text-xl font-bold text-gray-900">Personnes</p>
+            </div>
+            <p className="text-gray-700 text-lg">ont vu</p>
+          </div>
+
+          {/* Card 2 - Demandes reçues */}
+          <div className="bg-green-50 rounded-2xl p-8 text-center border-2 border-green-200 shadow-md">
+            <div className="text-6xl font-black text-green-600 mb-3">
+              {dashboard.impact_cards.applications}
+            </div>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="text-4xl">📝</span>
+              <p className="text-xl font-bold text-gray-900">Demandes</p>
+            </div>
+            <p className="text-gray-700 text-lg">reçues</p>
+          </div>
+
+          {/* Card 3 - Prêt financé */}
+          <div className="bg-purple-50 rounded-2xl p-8 text-center border-2 border-purple-200 shadow-md">
+            <div className="text-6xl font-black text-purple-600 mb-3">
+              {dashboard.impact_cards.funded}
+            </div>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="text-4xl">💳</span>
+              <p className="text-xl font-bold text-gray-900">Prêt</p>
+            </div>
+            <p className="text-gray-700 text-lg">financé</p>
+          </div>
+        </div>
+
+        <p className="text-center text-gray-600 text-lg">
+          Ces chiffres sont mis à jour automatiquement.
         </p>
+      </div>
 
-        <div className="bg-blue-50 rounded-xl p-6 text-left space-y-3 mb-6">
-          <p className="text-gray-700">
-            ✓ Ce projet est <strong>volontaire</strong>
-          </p>
-          <p className="text-gray-700">
-            ✓ Vous pouvez <strong>arrêter quand vous voulez</strong>
-          </p>
-          <p className="text-gray-700">
-            ✓ Il n'y a <strong>aucune obligation</strong>
+      {/* BLOC 3 — CE QUE ÇA T'APPORTE (ARGENT, BIEN DIT) */}
+      <div className="bg-white rounded-3xl p-10 md:p-12 shadow-xl border-2 border-gray-200">
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-10 flex items-center gap-4 flex-wrap">
+          <span className="text-5xl">💰</span>
+          <span>Crédits liés à votre participation</span>
+        </h2>
+
+        <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-3xl p-10 md:p-12 border-4 border-green-300 text-center mb-8 shadow-lg">
+          <p className="text-gray-700 text-lg mb-4">Crédits accumulés</p>
+          <div className="text-7xl md:text-8xl font-black text-green-700 mb-6">
+            {dashboard.credits.available.toFixed(0)} $
+          </div>
+          <p className="text-xl text-gray-800 leading-relaxed">
+            Ces crédits peuvent être appliqués<br />
+            à votre solde chez SAR, si applicable.
           </p>
         </div>
 
-        <p className="text-gray-600 text-sm">
-          Nous allons vous guider étape par étape.
+        <p className="text-center text-gray-700 font-bold text-lg">
+          Aucun paiement direct. Aucun engagement.
         </p>
       </div>
 
-      {/* CE QUE ÇA FAIT (simple) */}
-      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">
-          Ce que ce projet vous permet de faire
+      {/* BLOC 4 — ACTION GUIDÉE (MAX 2 ACTIONS) */}
+      <div className="bg-white rounded-3xl p-10 md:p-12 shadow-xl border-2 border-gray-200">
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-10 flex items-center gap-4 flex-wrap">
+          <span className="text-5xl">👉</span>
+          <span>Que pouvez-vous faire maintenant?</span>
         </h2>
 
-        <div className="space-y-4 mb-8">
-          <div className="flex items-start gap-3 bg-green-50 rounded-xl p-4">
-            <span className="text-2xl">✔</span>
-            <div>
-              <p className="font-semibold text-gray-900 mb-1">
-                Aider des personnes autour de vous
-              </p>
-              <p className="text-sm text-gray-600">
-                Partager une information utile
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 bg-blue-50 rounded-xl p-4">
-            <span className="text-2xl">✔</span>
-            <div>
-              <p className="font-semibold text-gray-900 mb-1">
-                Contribuer à améliorer nos services
-              </p>
-              <p className="text-sm text-gray-600">
-                Votre participation nous aide à mieux servir
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 bg-purple-50 rounded-xl p-4">
-            <span className="text-2xl">✔</span>
-            <div>
-              <p className="font-semibold text-gray-900 mb-1">
-                Réduire votre solde chez SAR
-              </p>
-              <p className="text-sm text-gray-600">
-                Si vous avez un prêt actif avec nous
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gray-50 rounded-xl p-4 text-center">
-          <p className="text-sm text-gray-600">
-            <strong>Important :</strong> Vous n'avez rien à vendre.<br />
-            Vous ne promettez rien à personne.
-          </p>
-        </div>
-      </div>
-
-      {/* ACTION PRINCIPALE (une seule) */}
-      <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
-        <h2 className="text-xl font-bold mb-4 text-center">
-          Aujourd'hui, vous pouvez simplement :
-        </h2>
-
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6">
-          <p className="text-lg text-center font-medium">
-            👉 Partager une information à quelqu'un<br />
-            qui pourrait en avoir besoin
-          </p>
-        </div>
-
-        {!hasShared ? (
-          <>
-            <p className="text-blue-100 text-sm text-center mb-6">
-              Si vous ne connaissez personne maintenant,<br />
-              ce n'est pas grave. Vous pourrez revenir plus tard.
-            </p>
-
-            <Link
-              href="/partners/contribute"
-              className="block w-full bg-white text-blue-600 font-bold py-4 px-6 rounded-xl hover:bg-blue-50 transition text-center shadow-lg text-lg"
-            >
-              Partager une information →
-            </Link>
-          </>
-        ) : (
-          <div className="text-center">
-            <div className="bg-white/10 rounded-xl p-4 mb-4">
-              <p className="text-white font-medium">
-                ✓ Vous avez déjà partagé
-              </p>
-              <p className="text-blue-100 text-sm mt-2">
-                Merci pour votre contribution !
-              </p>
-            </div>
-            <Link
-              href="/partners/contribute"
-              className="inline-block bg-white text-blue-600 font-medium py-3 px-6 rounded-xl hover:bg-blue-50 transition"
-            >
-              Partager à nouveau
-            </Link>
-          </div>
-        )}
-      </div>
-
-      {/* VOTRE PARTICIPATION (simple) */}
-      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">
-          Votre participation
-        </h2>
-
-        <div className="space-y-4 mb-6">
-          {hasShared ? (
-            <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl">
-              <span className="text-2xl">✔</span>
-              <div>
-                <p className="font-medium text-gray-900">
-                  Vous avez partagé une information
-                </p>
-                <p className="text-sm text-gray-600">
-                  Dernière activité : aujourd'hui
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-              <span className="text-2xl">ℹ️</span>
-              <div>
-                <p className="font-medium text-gray-700">
-                  Aucune action pour le moment
-                </p>
-                <p className="text-sm text-gray-600">
-                  Partagez quand vous serez prêt
-                </p>
-              </div>
-            </div>
-          )}
-
-          {hasResults ? (
-            <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl">
-              <span className="text-2xl">💰</span>
-              <div>
-                <p className="font-medium text-gray-900">
-                  {dashboard.credits.total.toFixed(0)} crédits gagnés
-                </p>
-                <p className="text-sm text-gray-600">
-                  Grâce à vos références validées
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-              <span className="text-2xl">⏳</span>
-              <div>
-                <p className="font-medium text-gray-700">
-                  Crédits : En attente de validation
-                </p>
-                <p className="text-sm text-gray-600">
-                  Ils seront comptabilisés automatiquement
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Bouton détails (discret) */}
-        {hasResults && (
+        <div className="space-y-6">
+          {/* Action 1 - Partager */}
           <button
-            onClick={() => setShowDetails(!showDetails)}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            onClick={handlePartage}
+            className="w-full bg-blue-50 hover:bg-blue-100 rounded-2xl p-8 border-4 border-blue-300 transition text-left shadow-lg group"
           >
-            {showDetails ? '△ Masquer les détails' : '▽ Voir le détail'}
-          </button>
-        )}
-
-        {/* Détails (si demandé) */}
-        {showDetails && hasResults && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-xl text-sm">
-            <div className="grid grid-cols-2 gap-3 text-center">
+            <div className="flex items-start gap-5">
+              <span className="text-5xl flex-shrink-0 group-hover:scale-110 transition-transform">📤</span>
               <div>
-                <p className="text-gray-600 mb-1">Demandes</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {dashboard.impact_cards.applications}
+                <p className="text-2xl font-bold text-gray-900 mb-3">
+                  Partager une information
                 </p>
-              </div>
-              <div>
-                <p className="text-gray-600 mb-1">Financés</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {dashboard.impact_cards.funded}
+                <p className="text-gray-700 text-lg leading-relaxed">
+                  Aider une autre personne et continuer à accumuler des crédits.
                 </p>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          </button>
 
-      {/* BESOIN D'AIDE (visible) */}
-      <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-6 text-center">
-        <p className="text-lg font-semibold text-gray-900 mb-4">
-          Besoin d'aide ou de clarifications ?
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <a
-            href="tel:+15148001234"
-            className="bg-blue-600 text-white font-medium py-3 px-6 rounded-xl hover:bg-blue-700 transition inline-flex items-center justify-center gap-2"
+          {/* Action 2 - Voir détails */}
+          <button
+            onClick={handleVoirDetail}
+            className="w-full bg-gray-50 hover:bg-gray-100 rounded-2xl p-8 border-4 border-gray-300 transition text-left shadow-lg group"
           >
-            📞 Parler à quelqu'un
-          </a>
-          <a
-            href="mailto:support@solutionargentrapide.ca"
-            className="bg-white text-gray-700 font-medium py-3 px-6 rounded-xl hover:bg-gray-50 transition border-2 border-gray-200"
-          >
-            ✉️ Envoyer un message
-          </a>
+            <div className="flex items-start gap-5">
+              <span className="text-5xl flex-shrink-0 group-hover:scale-110 transition-transform">📜</span>
+              <div>
+                <p className="text-2xl font-bold text-gray-900 mb-3">
+                  Voir le détail de vos crédits
+                </p>
+                <p className="text-gray-700 text-lg leading-relaxed">
+                  Comprendre comment ils ont été calculés.
+                </p>
+              </div>
+            </div>
+          </button>
         </div>
-        <p className="text-xs text-gray-600 mt-4">
-          Nous sommes là pour vous aider, sans jugement
-        </p>
       </div>
 
-      {/* Footer discret */}
-      <div className="text-center">
-        <Link
-          href="/partners/project"
-          className="text-sm text-gray-500 hover:text-gray-700"
-        >
-          En savoir plus sur ce projet
-        </Link>
+      {/* BLOC 5 — TRANSPARENCE / CONFIANCE */}
+      <div className="bg-blue-50 rounded-3xl p-8 md:p-10 border-2 border-blue-200 shadow-lg">
+        <h3 className="text-2xl font-bold text-gray-900 mb-5 flex items-center gap-3">
+          <span className="text-3xl">ℹ️</span>
+          <span>À propos de ce projet</span>
+        </h3>
+        <div className="space-y-3 text-lg text-gray-800">
+          <p>Ce projet est <strong>en phase de test</strong>.</p>
+          <p>Vos commentaires nous aident à l'améliorer.</p>
+          <p className="pt-2 text-blue-900 font-bold">Vous pouvez arrêter à tout moment.</p>
+        </div>
       </div>
+
     </div>
   )
 }
