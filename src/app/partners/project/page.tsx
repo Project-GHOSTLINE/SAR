@@ -29,18 +29,26 @@ export default function ProjectPage() {
 
   const checkAuthentication = async () => {
     try {
-      // Vérifier l'authentification via l'API /me
+      // Vérifier d'abord la session de développement
+      const devSession = await fetch('/api/partners/check-session')
+      if (devSession.ok) {
+        setIsAuthenticated(true)
+        setIsLoading(false)
+        return
+      }
+
+      // Sinon, vérifier l'authentification Supabase via l'API /me
       const response = await fetch('/api/partners/me')
 
       if (response.ok) {
         setIsAuthenticated(true)
       } else {
-        // Non authentifié - rediriger vers /invite
-        router.push('/partners/invite')
+        // Non authentifié - rediriger vers la page de login
+        router.push('/partners')
       }
     } catch (error) {
       console.error('Erreur vérification auth:', error)
-      router.push('/partners/invite')
+      router.push('/partners')
     } finally {
       setIsLoading(false)
     }

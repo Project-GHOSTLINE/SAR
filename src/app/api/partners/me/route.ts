@@ -25,7 +25,52 @@ export async function GET(request: NextRequest) {
 
   try {
     // ============================================
-    // 1. Authentification via cookie
+    // 0. Vérifier session de développement
+    // ============================================
+
+    const devSession = request.cookies.get('partners-dev-session')?.value
+
+    if (devSession === 'authenticated') {
+      // Mode développement - retourner des données factices
+      const dashboard: PartnerDashboard = {
+        partner: {
+          started_at: new Date().toISOString(),
+          status: 'active',
+          ref_code: 'DEV123',
+          preferred_channels: ['whatsapp', 'sms']
+        },
+        project_state: {
+          phase: 'MVP - Phase test (500 partenaires)',
+          updated_at: new Date().toISOString(),
+          participants_active: 0,
+          changelog: [
+            {
+              date: '2026-02-02',
+              change: 'Mode développement activé'
+            }
+          ]
+        },
+        impact_cards: {
+          shares: 0,
+          clicks: 0,
+          applications: 0,
+          ibv: 0,
+          funded: 0
+        },
+        credits: {
+          total: 0,
+          applied: 0,
+          available: 0,
+          next_apply_date: null
+        },
+        timeline: []
+      }
+
+      return NextResponse.json(dashboard, { status: 200 })
+    }
+
+    // ============================================
+    // 1. Authentification via cookie Supabase
     // ============================================
 
     const accessToken = request.cookies.get('sb-access-token')?.value
