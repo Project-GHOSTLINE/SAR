@@ -109,6 +109,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308) // Permanent redirect
   }
 
+  // Strip /partners prefix from subdomain URLs (clean URLs)
+  if (isPartnersSubdomain && pathname.startsWith('/partners/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace(/^\/partners/, '')
+    return NextResponse.redirect(url, 308) // Permanent redirect
+  }
+
   // Rewrite subdomain requests to /partners/* routes
   if (isPartnersSubdomain && !pathname.startsWith('/partners') && !pathname.startsWith('/_next')) {
     const url = request.nextUrl.clone()
